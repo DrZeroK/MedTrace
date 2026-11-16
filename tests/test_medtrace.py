@@ -1,0 +1,350 @@
+"""Regression, protocol and fault-injection tests.  Run:  python -m unittest discover -s tests -v   (or pytest)"""
+import copy
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from medtrace import textutil as T                                    # noqa: E402
+from medtrace import verify as V                                      # noqa: E402
+from medtrace.config import Config                                    # noqa: E402
+from medtrace.inputs import InputError, load_cases, parse_case         # noqa: E402
+from medtrace.ledger import build_ledger                              # noqa: E402
+from medtrace.llm import CallStats, LLMClient, LLMError                # noqa: E402
+from medtrace.mock_llm import MockLLM                                 # noqa: E402
+from medtrace.mock_server import make_server                          # noqa: E402
+from medtrace.note import Note, ParseError, Statement, note_from_model, parse_json_object, schema_errors  # noqa: E402
+from medtrace.pipeline import Pipeline, apply_patches                 # noqa: E402
+from medtrace.update import diff_cases                                # noqa: E402
+
+CASE = {"case_id": "T-1", "record_cutoff": "2026-03-02T18:00:00", "sources": [
+    {"source_id": "S1", "content": "68-year-old man with fever and cough for 3 days. Denies chest pain, hemoptysis. Allergy: penicillin (rash)."},
+    {"source_id": "S2", "content": "Temp 38.6 °C, HR 104 bpm, BP 128/76 mmHg, SpO2 93% on room air. Potassium 4.1 mmol/L."},
+    {"source_id": "S3", "content": "Chest X-ray: right lower lobe consolidation. Blood cultures pending. 2026-03-04 sputum culture grew Streptococcus pneumoniae."}]}
+
+
+def cfg(**kw):
+    c = Config(api_base="mock://", pipeline="A2", max_calls_per_case=2)
+    for k, v in kw.items():
+        setattr(c, k, v)
+    return c
+
+
+def pipe(faults=None, **kw):
+    c = cfg(**kw)
+    m = MockLLM(faults or {}, seed=1)
+    return Pipeline(c, LLMClient(c, mock=m)), m
+
+
+def codes(text, section="case_features", sources=("S2",), case=CASE):
+    c = parse_case(case, 0)
+    return {f.code for f in V.check_statement(section, 0, Statement(text, list(sources)), c, build_ledger(c))}
+
+
+class TextUtil(unittest.TestCase):
+    def test_sentences_keep_decimals(self):
+        self.assertEqual(T.split_sentences("Temp 38.6 °C. HR 104 bpm. 2026-03-04 seen."), ["Temp 38.6 °C.", "HR 104 bpm.", "2026-03-04 seen."])
+        self.assertEqual(len(T.split_sentences("体温38.4℃，脉搏106次/分。神志清楚；皮肤干燥。")), 3)
+
+    def test_dates_and_cutoff(self):
+        d = T.find_dates("seen 2026-03-04 10:20 and on March 5, 2026; 2026年3月6日复查")
+        self.assertEqual([x[0].day for x in d], [4, 5, 6])
+        self.assertTrue(d[0][1])
+        cut, ok = T.parse_cutoff("2026-03-04")
+        self.assertTrue(ok and cut.hour == 23)
+        self.assertFalse(T.is_after(d[0][0], True, cut))
+        self.assertTrue(T.is_after(d[1][0], False, cut))
+        self.assertEqual(T.parse_cutoff("garbage"), (None, False))
+
+    def test_numbers_units(self):
+        n = T.extract_numbers("WBC 15.2 ×10^9/L, SpO2 93%, BP 128/76 mmHg, HbA1c raised")
+        self.assertEqual([(v, u) for v, u, _ in n], [(15.2, "×10^9/l"), (93.0, "%"), (128.0, None), (76.0, "mmhg")])
+        self.assertEqual(T.norm_unit("次/分"), T.norm_unit("bpm"))
+        self.assertEqual(T.norm_unit("μmol/L"), T.norm_unit("umol/L"))
+
+    def test_negation(self):
+        self.assertEqual(T.negated_terms("Denies chest pain, hemoptysis."), ["chest pain", "hemoptysis"])
+        self.assertEqual(T.negated_terms("否认发热、寒战，有咳嗽。"), ["发热", "寒战"])
+        self.assertEqual(T.negated_terms("Kernig sign negative."), ["kernig sign"])
+        self.assertEqual(T.negated_terms("四肢无力，无尿2天。"), [])
+        self.assertTrue(T.term_positive_in("cough", "No fever but has cough"))
+        self.assertFalse(T.term_positive_in("fever", "No fever but has cough"))
+
+
+class Inputs(unittest.TestCase):
+    def test_cutoff_redaction(self):
+        c = parse_case(CASE, 0)
+        self.assertNotIn("Streptococcus", c.text)
+        self.assertIn("Blood cultures pending", c.text)
+        self.assertEqual(len(c.redacted), 1)
+        self.assertIn("Streptococcus", parse_case(CASE, 0, "off").text)
+
+    def test_source_timestamp_cutoff(self):
+        raw = copy.deepcopy(CASE)
+        raw["sources"].append({"source_id": "late", "content": "CT: abscess.", "time": "2026-03-05T09:00:00"})
+        c = parse_case(raw, 0)
+        self.assertEqual(c.excluded_sources, ["late"])
+        self.assertNotIn("late", c.valid_ids)
+
+    def test_malformed_cases(self):
+        self.assertFalse(parse_case("x", 0).usable)
+        self.assertFalse(parse_case({"case_id": 1}, 0).usable)
+        self.assertFalse(parse_case({"case_id": 1, "sources": [{"source_id": "a", "content": "  "}]}, 0).usable)
+        c = parse_case({"case_id": 7, "record_cutoff": "??", "sources": [{"content": "Fever."}, {"source_id": 5, "content": "Cough."},
+                                                                           {"source_id": 5, "content": "Wheeze."}, "junk"]}, 0)
+        self.assertTrue(c.usable)
+        self.assertEqual(sorted(c.valid_ids), ["5", "source_1"])
+        self.assertEqual(c.raw_id("5"), 5)                     # original identifier type preserved
+        self.assertIn("Wheeze", c.text)
+        self.assertGreaterEqual(len(c.warnings), 3)
+
+    def test_envelopes_and_bad_files(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "in.json"
+            for doc, env in (([CASE], "list"), ({"cases": [CASE]}, "cases"), (CASE, "single")):
+                p.write_text(json.dumps(doc), "utf-8")
+                cases, e = load_cases(str(p))
+                self.assertEqual((len(cases), e), (1, env))
+            p.write_bytes(b"\xef\xbb\xbf" + json.dumps([CASE]).encode())      # UTF-8 BOM tolerated
+            self.assertEqual(len(load_cases(str(p))[0]), 1)
+            for bad in ("{not json", '"a string"', "42"):
+                p.write_text(bad, "utf-8")
+                self.assertRaises(InputError, load_cases, str(p))
+            self.assertRaises(InputError, load_cases, str(Path(d) / "missing.json"))
+
+
+class Ledger(unittest.TestCase):
+    def test_contents(self):
+        L = build_ledger(parse_case(CASE, 0))
+        self.assertIn(38.6, L.numbers)
+        self.assertEqual(L.units[4.1], {"mmol/l"})
+        self.assertIn("chest pain", L.neg_only)
+        self.assertEqual([f.text for f in L.by_polarity("missing")], ["Blood cultures pending."])
+        self.assertEqual([u["key"] for u in L.undocumented], ["medication"])
+
+    def test_conflict_detection(self):
+        raw = {"case_id": 1, "sources": [{"source_id": "a", "content": "Denies diabetes. Potassium 4.1 mmol/L."},
+                                        {"source_id": "b", "content": "Known diabetes for 5 years. Potassium 5.9 mmol/L."}]}
+        kinds = {(c["kind"], c["term"]) for c in build_ledger(parse_case(raw, 0)).conflicts}
+        self.assertEqual(kinds, {("polarity", "diabetes"), ("numeric", "potassium")})
+
+
+class Verifier(unittest.TestCase):
+    def test_verbatim_is_clean(self):
+        c = parse_case(CASE, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["case_features"] = [Statement(f.text, [f.sid]) for f in L.facts]
+        self.assertEqual([f for f in V.verify_note(n, c, L) if f.severity != V.LOW and f.code != "empty_section"], [])
+
+    def test_detections(self):
+        self.assertIn("number_not_in_source", codes("Temp 39.6 °C, HR 104 bpm."))
+        self.assertIn("unit_mismatch", codes("Potassium 4.1 mg/dL."))
+        self.assertIn("negation_flip", codes("He reports chest pain and fever.", sources=("S1",)))
+        self.assertIn("negation_flip", codes("No fever or cough.", sources=("S1",)))
+        self.assertIn("undocumented_negative", codes("No history of gout.", sources=("S1",)))
+        self.assertIn("invalid_ref", codes("Fever and cough for 3 days.", sources=("S9",)))
+        self.assertIn("post_cutoff", codes("Sputum culture on 2026-03-04 grew pneumococcus."))
+        self.assertIn("low_support", codes("Long-standing chronic kidney disease on warfarin for a mechanical valve."))
+        self.assertIn("undocumented_normal", codes("Abdominal and neurological examinations are normal."))
+        self.assertIn("unsupported_completed", codes("Bronchoscopy was performed and antibiotics were started.", "treatment_plan"))
+        self.assertIn("overconfident", codes("Pneumonia is confirmed.", "diagnostic_discussion"))
+
+    def test_no_false_alarm_on_faithful_paraphrase(self):
+        self.assertEqual(codes("68-year-old man with 3 days of fever and cough; denies chest pain and hemoptysis.", sources=("S1",)), set())
+        self.assertEqual(codes("Recommend repeat potassium in 6 hours and oxygen to keep SpO2 above 94%.", "treatment_plan"), set())
+        self.assertEqual(codes("The absence of chest pain makes pulmonary embolism less likely.", "diagnostic_discussion"), set())
+
+    def test_safe_repair_only_drops_bad_refs(self):
+        c = parse_case(CASE, 0)
+        n = Note()
+        n.sections["case_features"] = [Statement("Temp 99 °C.", ["S2", "NOPE"])]
+        self.assertEqual(V.safe_repair(n, c), 1)
+        self.assertEqual((n.sections["case_features"][0].text, n.sections["case_features"][0].sources), ("Temp 99 °C.", ["S2"]))
+
+
+class Parsing(unittest.TestCase):
+    def test_tolerant_json(self):
+        self.assertEqual(parse_json_object('<think>hmm</think>```json\n{"a": [1,2,],}\n```')["a"], [1, 2])
+        self.assertEqual(parse_json_object('Sure! {"a": 1} hope it helps'), {"a": 1})
+        for bad in ("", "no json", '{"a": ', "[1,2]"):
+            self.assertRaises(ParseError, parse_json_object, bad)
+
+    def test_note_shapes(self):
+        n = note_from_model({"case_features": "1. Fever. [[S1]]\n2. Cough.", "discussion": ["x"], "诊疗计划": [{"statement": "y", "source_ids": "S1, S2"}],
+                             "review_items": ["check allergy", {"type": "bogus", "text": "t"}]})
+        self.assertEqual([(s.text, s.sources) for s in n.sections["case_features"]], [("Fever.", ["S1"]), ("Cough.", [])])
+        self.assertEqual(n.sections["treatment_plan"][0].sources, ["S1", "S2"])
+        self.assertEqual([r["type"] for r in n.review_items], ["verify", "verify"])
+        self.assertRaises(ParseError, note_from_model, {"foo": 1})
+
+
+class PipelineTests(unittest.TestCase):
+    def test_all_variants_valid(self):
+        c = parse_case(CASE, 0)
+        for v in ("A0", "A1", "A2", "S2", "A3"):
+            p, _ = pipe(max_calls_per_case=3)
+            r = p.run_case(c, variant=v)
+            self.assertEqual(r.status, "ok", v)
+            self.assertEqual(schema_errors(r.record), [], v)
+            self.assertEqual(r.record["case_id"], "T-1")
+            self.assertNotIn("Streptococcus", json.dumps(r.record))
+
+    def test_faults_removed_or_flagged(self):
+        c = parse_case(CASE, 0)
+        for fault in ("wrong_number", "unit_swap", "negation_flip", "fabricate", "undoc_negative", "post_cutoff", "done_plan", "invalid_ref"):
+            p, m = pipe({fault: 1.0})
+            r = p.run_case(c)
+            self.assertTrue(m.fault_log, fault)
+            blob = json.dumps({k: r.record[k] for k in ("case_features", "diagnostic_discussion", "treatment_plan", "evidence")}, ensure_ascii=False)
+            needle = m.fault_log[0]["needle"]
+            flagged = any(needle[:100] in i["description"] for i in r.record["review_items"])
+            self.assertTrue(needle not in blob or flagged, f"{fault} survived unflagged")
+            self.assertEqual(schema_errors(r.record), [])
+
+    def test_single_call_budget_flags_instead_of_repairing(self):
+        p, m = pipe({"wrong_number": 1.0}, max_calls_per_case=1)
+        r = p.run_case(parse_case(CASE, 0))
+        self.assertEqual((r.status, r.log["calls"]), ("ok", 1))
+        self.assertTrue(any(m.fault_log[0]["needle"][:60] in i["description"] for i in r.record["review_items"]))
+
+    def test_bad_json_retry_then_fallback(self):
+        c = parse_case(CASE, 0)
+        p, _ = pipe({"bad_json": 1.0})
+        r = p.run_case(c)
+        self.assertEqual((r.status, r.log["calls"]), ("fallback", 2))
+        self.assertEqual(schema_errors(r.record), [])
+        self.assertIn("Temp 38.6", r.record["case_features"])            # verbatim extracts only
+        self.assertNotIn("Streptococcus", r.record["case_features"])     # cutoff still respected
+        self.assertTrue(r.record["review_items"])
+
+    def test_guard_rejects_hallucinating_reviewer(self):
+        p, m = pipe({"bad_patch": 1.0}, pipeline="A3")
+        r = p.run_case(parse_case(CASE, 0))
+        self.assertNotIn("9.9", r.record["case_features"])
+        self.assertGreaterEqual(r.log["patches"]["rejected"], 1)
+
+    def test_patch_guards(self):
+        c = parse_case(CASE, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["case_features"] = [Statement("Temp 38.6 °C.", ["S2"]), Statement("Temp 55 °C.", ["S2"])]
+        n.sections["treatment_plan"] = [Statement("Recommend oxygen.", [])]
+        res = apply_patches(n, [
+            {"section": "case_features", "index": 0, "action": "delete"},                               # unflagged feature: reject
+            {"section": "case_features", "index": 1, "action": "replace", "text": "Temp 77 °C."},        # still wrong: reject
+            {"section": "case_features", "index": 1, "action": "replace", "text": "Temp 38.6 °C, HR 104 bpm."},  # ok
+            {"section": "treatment_plan", "index": 0, "action": "delete"},                               # would empty: reject
+            {"section": "case_features", "index": 99, "action": "replace", "text": "x"}, "junk"],
+            c, L, "repair", {("case_features", 1)})
+        self.assertEqual((res["applied"], res["rejected"]), (1, 5))
+        self.assertEqual([s.text for s in n.sections["case_features"]], ["Temp 38.6 °C.", "Temp 38.6 °C, HR 104 bpm."])
+
+    def test_unusable_case_isolated(self):
+        p, _ = pipe()
+        r = p.run_case(parse_case({"case_id": "bad", "sources": []}, 0))
+        self.assertEqual(r.status, "input_error")
+        self.assertEqual(schema_errors(r.record), [])
+
+    def test_chinese_case(self):
+        raw = {"case_id": "Z", "sources": [{"source_id": "病史", "content": "患者男，45岁，上腹痛3天。否认呕血、黑便。血红蛋白146 g/L。胃镜未做。"}]}
+        p, m = pipe({"negation_flip": 1.0})
+        r = p.run_case(parse_case(raw, 0))
+        self.assertEqual(r.status, "ok")
+        self.assertTrue("自诉有呕血" not in r.record["case_features"] or any("自诉有呕血" in i["description"] for i in r.record["review_items"]))
+        self.assertTrue(any("过敏" in i["description"] for i in r.record["review_items"]))    # undocumented allergy surfaced
+
+    def test_output_contract_options(self):
+        p, _ = pipe(output_field_map={"treatment_plan": "plan"}, output_fields=["case_features", "treatment_plan"], inline_citations=True)
+        rec = p.run_case(parse_case(CASE, 0)).record
+        self.assertEqual(set(rec), {"case_id", "case_features", "plan"})
+        self.assertIn("[S1]", rec["case_features"])
+
+
+class Update(unittest.TestCase):
+    def test_diff(self):
+        new = copy.deepcopy(CASE)
+        new["sources"][2]["content"] = new["sources"][2]["content"].replace("Blood cultures pending.", "Blood cultures: no growth at 48 hours.")
+        d = diff_cases(parse_case(CASE, 0), parse_case(new, 0))
+        self.assertEqual([a["text"] for a in d["added"]], ["Blood cultures: no growth at 48 hours."])
+        self.assertEqual([a["text"] for a in d["removed"]], ["Blood cultures pending."])
+
+
+class Http(unittest.TestCase):
+    def _serve(self, **faults):
+        srv = make_server(0, mock=MockLLM(), http_faults=faults, seed=3)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        self.addCleanup(srv.server_close)
+        self.addCleanup(srv.shutdown)
+        return f"http://127.0.0.1:{srv.server_address[1]}/v1"
+
+    def test_roundtrip_and_retry(self):
+        c = cfg(api_base=self._serve(http500=0.5), max_retries=6, retry_backoff=0.01)
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+
+    def test_persistent_failure_falls_back(self):
+        c = cfg(api_base=self._serve(http500=1.0), max_retries=1, retry_backoff=0.01)
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual((r.status, r.log["retries"]), ("fallback", 1))
+        self.assertEqual(schema_errors(r.record), [])
+
+    def test_timeout_and_garbage(self):
+        os.environ["MOCK_SLOW_SECONDS"] = "3"
+        c = cfg(api_base=self._serve(slow=1.0), max_retries=0, timeout=0.5)
+        self.assertRaises(LLMError, LLMClient(c).chat, "s", "u", CallStats())
+        c = cfg(api_base=self._serve(garbage=1.0), max_retries=0)
+        self.assertRaises(LLMError, LLMClient(c).chat, "s", "u", CallStats())
+        c = cfg(api_base="http://127.0.0.1:9/v1", max_retries=0, timeout=2)          # nothing listening
+        self.assertEqual(Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0)).status, "fallback")
+
+
+class EndToEnd(unittest.TestCase):
+    def _run(self, doc, env=None, raw=None):
+        d = tempfile.mkdtemp()
+        inp, out = Path(d) / "input.json", Path(d) / "output.json"
+        inp.write_text(raw if raw is not None else json.dumps(doc, ensure_ascii=False), "utf-8")
+        e = {**os.environ, "LLM_API_BASE": "mock://", "LOG_DIR": str(Path(d) / "logs"), "INPUT_PATH": str(inp), "OUTPUT_PATH": str(out), **(env or {})}
+        p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=e, capture_output=True, text=True, timeout=120)
+        return p, out, Path(d)
+
+    def test_batch_order_and_isolation(self):
+        cases = [dict(CASE, case_id=f"C{i}") for i in range(5)]
+        cases.insert(2, {"case_id": "broken"})
+        cases.insert(4, "not a case")
+        p, out, d = self._run(cases, {"MOCK_FAULTS": "bad_json:0.4,wrong_number:0.5", "WORKERS": "3"})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        recs = json.loads(out.read_text("utf-8"))
+        self.assertEqual([r["case_id"] for r in recs], ["C0", "C1", "broken", "C2", None, "C3", "C4"])
+        self.assertTrue(all(schema_errors(r) == [] for r in recs))
+        self.assertFalse([f for f in os.listdir(d) if f.startswith(".tmp_")])
+        events = [json.loads(l)["event"] for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
+        self.assertEqual(events.count("case"), 7)
+
+    def test_fatal_inputs_exit_1(self):
+        p, out, _ = self._run(None, raw="{broken")
+        self.assertEqual(p.returncode, 1)
+        self.assertFalse(out.exists())
+        p, _, _ = self._run([CASE], {"LLM_API_BASE": ""})
+        self.assertEqual(p.returncode, 1)
+
+    def test_strict_exit_and_envelope(self):
+        p, out, _ = self._run({"cases": [CASE]}, {"MOCK_FAULTS": "bad_json:1", "STRICT_EXIT": "1"})
+        self.assertEqual(p.returncode, 2)
+        self.assertEqual(list(json.loads(out.read_text("utf-8"))), ["cases"])
+
+    def test_total_timeout_still_writes_complete_output(self):
+        p, out, _ = self._run([dict(CASE, case_id=i) for i in range(4)], {"TOTAL_TIMEOUT": "0.001"})
+        self.assertEqual(p.returncode, 0)
+        self.assertEqual([r["case_id"] for r in json.loads(out.read_text("utf-8"))], [0, 1, 2, 3])
+
+
+if __name__ == "__main__":
+    unittest.main()

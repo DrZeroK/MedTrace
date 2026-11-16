@@ -1,0 +1,39 @@
+[task:a1/v1]
+Write the initial progress note for the patient below, in <<lang>>. Every statement must be traceable to the records.
+
+Record cutoff: <<cutoff>>. Nothing dated after the cutoff may be used or mentioned.
+
+<records>
+<<sources>>
+</records>
+
+<fact_ledger>
+The ledger below was extracted mechanically from the records. It is an aid, not a substitute: the records are authoritative.
+<<ledger>>
+</fact_ledger>
+<<problems>><<changes>>
+HARD RULES (a violation makes the note unusable)
+1. Source fidelity. Case Features contain only what the records state. No finding, history item, value, date or treatment that is not in the records.
+2. Values. Copy every number together with its unit exactly as recorded. Do not convert units, round, or compute derived values. Keep each value attached to its time point; never merge serial results.
+3. Negation. A documented negative stays negative; a documented positive stays positive.
+4. Missing is not normal. If something is not documented, pending, or unavailable, say so ("not documented", "result pending"). Never describe an undocumented item as normal, negative or absent.
+5. Certainty. Use "confirmed" only for diagnoses the records establish. Otherwise grade explicitly: probable / possible / cannot be excluded. Never upgrade a hypothesis into a diagnosis.
+6. Done vs proposed. Interventions already carried out belong in Case Features, stated as done, only if the records say so. Everything in the plan is a proposal and must read as one ("recommend", "plan to", "consider").
+7. Chronology. Preserve the recorded order and timing of events.
+8. Conflicts. If records disagree, do not silently pick one version: report both, with sources, and add a review item.
+
+CLINICAL QUALITY
+- Organise the reasoning by clinical problem, most urgent first. For each problem: the supporting evidence, the evidence against (including relevant documented negatives), your graded assessment, and what is still unknown.
+- Differentials must be specific to this patient: 2-4 alternatives, each with the recorded finding that raises it and the finding (or missing test) that argues against or would settle it. No generic lists.
+- Each plan item must respond to a documented problem or a stated uncertainty, and say what it is for. Cover investigations, treatment and monitoring (what, how often, and what result would change management).
+- Check every proposed treatment against the documented allergies, medications, organ function, pregnancy status and anticoagulation. If one of these is undocumented and matters for the proposal, make the proposal conditional on it and add a review item. Name a drug dose only when it is standard and nothing in the records argues against it.
+- Explicitly flag time-critical or life-threatening conditions suggested by the records.
+
+OUTPUT
+Return exactly one JSON object. Each statement is one self-contained sentence or short group of sentences. "sources" lists the ids of the records that support it (for discussion and plan items: the records containing the findings that motivate it). Use only ids that appear in <records>. Do not put source ids inside "text".
+{
+  "case_features": [{"text": "...", "sources": ["id"]}],
+  "diagnostic_discussion": [{"kind": "assessment|differential|uncertainty", "text": "...", "sources": ["id"]}],
+  "treatment_plan": [{"kind": "investigation|treatment|monitoring", "text": "...", "sources": ["id"]}],
+  "review_items": [{"type": "missing|conflict|verify", "text": "what the clinician must check and why it matters", "sources": ["id"]}]
+}

@@ -1,0 +1,30 @@
+[task:review/v1]
+You are the senior clinician reviewing a draft initial progress note against the admission records before it is signed. Find only problems that matter clinically and propose the smallest correction for each.
+
+Record cutoff: <<cutoff>>
+
+<records>
+<<sources>>
+</records>
+
+<draft>
+<<draft>>
+</draft>
+
+<findings>
+Flags from an automatic checker (may include false alarms; an empty list means none):
+<<findings>>
+</findings>
+
+Review checklist
+1. Unsupported claims: any finding, value, history item or completed treatment not in the records.
+2. Certainty: a diagnosis stated more firmly than the evidence allows.
+3. Differentials: irrelevant to this patient, or an important alternative missing.
+4. Plan: an item that does not address a documented problem; a documented problem with no plan; a proposal that conflicts with a documented allergy, medication, organ function, pregnancy or anticoagulation status; an urgent action that is missing.
+5. Omissions: a clinically important recorded fact (including important negatives and pending results) missing from Case Features.
+Do not rewrite for style. Do not add anything the records do not support. Write in <<lang>>.
+
+Return exactly one JSON object:
+{"patches": [{"section": "case_features|diagnostic_discussion|treatment_plan", "index": 0, "action": "replace|delete|add", "text": "text for replace/add", "sources": ["id"], "severity": "high|medium|low", "reason": "short"}],
+ "review_items": [{"type": "missing|conflict|verify", "text": "...", "sources": ["id"]}]}
+"index" is the statement's index in the draft (ignored for "add"). If the draft is acceptable return {"patches": [], "review_items": []}.

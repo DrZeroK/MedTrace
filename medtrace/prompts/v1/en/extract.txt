@@ -1,0 +1,13 @@
+[task:extract/v1]
+From the admission records below, list the patient's active clinical problems, most urgent first. For each problem quote the evidence verbatim.
+
+Record cutoff: <<cutoff>>
+
+<records>
+<<sources>>
+</records>
+
+Rules: quotes must be copied character-for-character from the records (short spans). Include documented negatives that bear on the problem. Do not diagnose beyond the records; name a problem by what is documented (e.g. "fever with right lower lobe consolidation").
+
+Return exactly one JSON object:
+{"problems": [{"problem": "...", "urgency": "immediate|urgent|routine", "evidence": [{"source": "id", "quote": "verbatim", "polarity": "positive|negative|pending"}]}]}
