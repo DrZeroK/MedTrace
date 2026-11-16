@@ -1,0 +1,30 @@
+[task:review/v1]
+你是上级医师，在签字前对照入院资料审核一份首次病程记录草稿。只指出有临床意义的问题，并为每个问题给出最小幅度的修改。
+
+资料截止时间：<<cutoff>>
+
+<records>
+<<sources>>
+</records>
+
+<draft>
+<<draft>>
+</draft>
+
+<findings>
+自动校验程序的提示（可能有误报；空列表表示无）：
+<<findings>>
+</findings>
+
+审核要点
+1. 无依据的陈述：资料中没有的症状体征、数值、病史或已完成的治疗。
+2. 诊断确定程度：诊断表述超出证据所能支持的程度。
+3. 鉴别诊断：与本例无关，或遗漏重要的鉴别。
+4. 诊疗计划：与已记录问题无关的条目；已记录的问题没有对应计划；建议与已记录的过敏、用药、脏器功能、妊娠或抗凝情况冲突；遗漏应紧急处理的事项。
+5. 遗漏：病例特点中缺少有临床意义的记录内容（包括重要阴性表现和待回报结果）。
+不要做文字润色，不得增加资料不支持的内容。使用<<lang>>书写。
+
+只输出一个JSON对象：
+{"patches": [{"section": "case_features|diagnostic_discussion|treatment_plan", "index": 0, "action": "replace|delete|add", "text": "replace/add的文本", "sources": ["编号"], "severity": "high|medium|low", "reason": "简述"}],
+ "review_items": [{"type": "missing|conflict|verify", "text": "……", "sources": ["编号"]}]}
+"index"为该陈述在草稿中的序号（"add"时忽略）。若草稿可接受，输出 {"patches": [], "review_items": []}。

@@ -1,0 +1,11 @@
+[
+  {
+    "case_id": "DEMO-001",
+    "record_cutoff": "2026-03-02T18:00:00",
+    "sources": [
+      {"source_id": "S1", "content": "Chief complaint: fever and productive cough for 3 days. 68-year-old man. Denies chest pain, hemoptysis. History of hypertension. Allergy: penicillin (rash)."},
+      {"source_id": "S2", "content": "Exam on 2026-03-02: Temp 38.6 °C, HR 104 bpm, BP 128/76 mmHg, RR 22 /min, SpO2 93% on room air. Crackles at the right lung base."},
+      {"source_id": "S3", "content": "Labs: WBC 15.2 ×10^9/L, CRP 126 mg/L, creatinine 88 µmol/L. Chest X-ray: right lower lobe consolidation. Blood cultures pending. 2026-03-04 sputum culture grew Streptococcus pneumoniae."}
+    ]
+  }
+]

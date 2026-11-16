@@ -1,0 +1,25 @@
+[task:repair/v1]
+自动校验程序将一份首次病程记录草稿与入院资料进行了比对，提出了下列问题。只修改问题中指出的陈述。校验可能误报：如果该陈述完全有资料支持，则保持不变。
+
+资料截止时间：<<cutoff>>
+
+<records>
+<<sources>>
+</records>
+
+<draft>
+<<draft>>
+</draft>
+
+<findings>
+<<findings>>
+</findings>
+
+对每个确实存在的问题给出一个补丁：
+- "replace"：改写该陈述，使其只表述资料支持的内容（数值和单位准确、否定正确、诊断确定程度恰当、建议用建议性表述）。
+- "delete"：仅当该陈述完全没有资料支持时删除。
+不得增加新的临床内容。使用<<lang>>书写。
+
+只输出一个JSON对象：
+{"patches": [{"section": "case_features|diagnostic_discussion|treatment_plan", "index": 0, "action": "replace|delete", "text": "replace时的新文本", "sources": ["编号"], "reason": "简述"}]}
+如无需修改，输出 {"patches": []}。

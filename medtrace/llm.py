@@ -1,0 +1,132 @@
+"""Client for the designated model (OpenAI-compatible chat-completions protocol - to be confirmed).
+
+`LLM_API_BASE=mock://` routes to the in-process mock so the whole system runs offline.
+"""
+from __future__ import annotations
+
+import json
+import re
+import time
+from dataclasses import dataclass, field
+
+_THINK = re.compile(r"<think>.*?</think>", re.S | re.I)
+_RETRY_STATUS = {408, 409, 425, 429, 500, 502, 503, 504, 529}
+
+
+class LLMError(Exception):
+    pass
+
+
+class BudgetExceeded(LLMError):
+    pass
+
+
+@dataclass
+class CallStats:
+    calls: int = 0            # logical model calls
+    http_attempts: int = 0    # including retries
+    retries: int = 0
+    latency: float = 0.0
+    errors: list = field(default_factory=list)
+
+
+def _post(url, headers, payload, timeout):
+    """Returns (status, text). Uses requests when available, urllib otherwise."""
+    try:
+        import requests
+    except ImportError:
+        requests = None
+    if requests is not None:
+        try:
+            r = requests.post(url, headers=headers, json=payload, timeout=timeout)
+            return r.status_code, r.text
+        except requests.RequestException as e:
+            raise ConnectionError(f"{type(e).__name__}: {e}") from e
+    import urllib.request, urllib.error
+    req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.status, r.read().decode("utf-8", "replace")
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode("utf-8", "replace")
+    except Exception as e:
+        raise ConnectionError(f"{type(e).__name__}: {e}") from e
+
+
+class LLMClient:
+    def __init__(self, cfg, mock=None):
+        self.cfg = cfg
+        self.mock = mock
+        if self.mock is None and cfg.api_base.lower().startswith("mock"):
+            from .mock_llm import MockLLM
+            self.mock = MockLLM.from_env()
+        if self.mock is None and not cfg.api_base:
+            raise LLMError("LLM_API_BASE is not configured (set it in .env, or use mock:// for offline runs)")
+        base = cfg.api_base.rstrip("/")
+        self.url = base if base.endswith("/chat/completions") else base + "/chat/completions"
+
+    def chat(self, system: str, user: str, stats: CallStats, deadline: float | None = None) -> str:
+        if stats.calls >= self.cfg.max_calls_per_case:
+            raise BudgetExceeded("model-call budget for this case is exhausted")
+        stats.calls += 1
+        t0 = time.monotonic()
+        try:
+            return self._chat(system, user, stats, deadline)
+        finally:
+            stats.latency += time.monotonic() - t0
+
+    def _chat(self, system, user, stats, deadline):
+        messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        if self.mock is not None:
+            stats.http_attempts += 1
+            return self.mock.complete(messages)
+        payload = {"model": self.cfg.model, "messages": messages, "temperature": self.cfg.temperature, "stream": False}
+        if self.cfg.max_tokens > 0:
+            payload["max_tokens"] = self.cfg.max_tokens
+        if self.cfg.json_mode:
+            payload["response_format"] = {"type": "json_object"}
+        headers = {"Content-Type": "application/json"}
+        if self.cfg.api_key:
+            headers["Authorization"] = f"Bearer {self.cfg.api_key}"
+        last = "no attempt made"
+        for attempt in range(self.cfg.max_retries + 1):
+            timeout = self.cfg.timeout
+            if deadline is not None:
+                remaining = deadline - time.monotonic()
+                if remaining <= 1:
+                    raise BudgetExceeded(f"time budget exhausted before model call ({last})")
+                timeout = min(timeout, remaining)
+            stats.http_attempts += 1
+            retryable = True
+            try:
+                status, body = _post(self.url, headers, payload, timeout)
+                if status == 200:
+                    return self._content(body)
+                last = f"HTTP {status}: {body[:200]}"
+                retryable = status in _RETRY_STATUS
+            except ConnectionError as e:
+                last = str(e)
+            except LLMError as e:      # 200 with unusable body
+                last = str(e)
+            stats.errors.append(last)
+            if not retryable or attempt == self.cfg.max_retries:
+                break
+            stats.retries += 1
+            pause = min(self.cfg.retry_backoff * (2 ** attempt), 20.0)
+            if deadline is not None:
+                pause = max(0.0, min(pause, deadline - time.monotonic() - 1))
+            time.sleep(pause)
+        raise LLMError(f"model call failed: {last}")
+
+    @staticmethod
+    def _content(body: str) -> str:
+        try:
+            msg = json.loads(body)["choices"][0]["message"]
+            content = msg.get("content")
+        except (ValueError, KeyError, IndexError, TypeError, AttributeError) as e:
+            raise LLMError(f"unexpected response shape: {body[:200]}") from e
+        if isinstance(content, list):
+            content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
+        if not isinstance(content, str) or not content.strip():
+            raise LLMError("model returned empty content")
+        return _THINK.sub("", content).strip()
