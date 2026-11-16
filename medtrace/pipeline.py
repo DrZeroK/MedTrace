@@ -63,7 +63,8 @@ _MSG_ZH = {
     "undocumented_negative": "资料中未提及，却被表述为无", "undocumented_normal": "资料支持不足的“正常”表述",
     "low_support": "该陈述在资料中支持不足", "unsupported_completed": "计划中将未记录的处置表述为已完成",
     "overconfident": "诊断表述过于肯定", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
-    "empty_section": "该部分为空",
+    "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
+    "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
 }
 _CORE_RX = {"allergy": r"(?i)allerg|过敏", "medication": r"(?i)medication|drug|用药|药物", "vitals": r"(?i)vital|生命体征"}
 
@@ -192,7 +193,7 @@ class Pipeline:
             except (LLMError, ParseError) as e:   # verification call is optional: keep the draft
                 log["revise_error"] = f"{type(e).__name__}: {e}"
             findings = V.verify_note(note, case, L)
-        self._finalise(note, case, L, findings, tr, lang)
+        self._finalise(note, case, L, findings + V.omission_findings(note, L), tr, lang)
         return note, initial, V.verify_note(note, case, L)
 
     def _extract(self, case, system, common, lang, stats, deadline, log) -> str:

@@ -11,7 +11,7 @@ from dataclasses import dataclass, asdict
 
 from . import textutil as T
 from .inputs import Case
-from .ledger import Ledger
+from .ledger import Ledger, numerics
 from .note import Note, Statement, SECTIONS
 
 HIGH, MEDIUM, LOW = "high", "medium", "low"
@@ -64,6 +64,14 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             elif unit and L.units.get(val) and unit not in L.units[val]:
                 add("unit_mismatch", HIGH if sec == "features" else MEDIUM,
                     f"{raw!r}: records give this value with unit(s) {sorted(L.units[val])}")
+
+    # ---- value attached to the wrong measurement (e.g. sodium's value reported as potassium)
+    if sec == "features":
+        for num in numerics(text, year):
+            known = L.label_values.get(num["label"])
+            if known and num["value"] not in known and num["value"] in L.numbers:
+                add("value_label_mismatch", HIGH,
+                    f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
 
     # ---- negation
     if sec in ("features", "discussion"):
@@ -120,6 +128,28 @@ def verify_note(note: Note, case: Case, L: Ledger) -> list[Finding]:
         if bad:
             out.append(Finding("invalid_ref", MEDIUM, "review_items", j, f"review item cites unknown source id(s): {bad}", r["description"]))
     return out
+
+
+def omission_findings(note: Note, L: Ledger) -> list[Finding]:
+    """Safety-critical record content that the note does not reflect anywhere: documented allergies and
+    results recorded as pending / not done. (General completeness is a reviewer judgement, not a rule.)"""
+    note_tokens = T.tokens(note.text() + "\n" + "\n".join(r["description"] for r in note.review_items))
+    out = []
+    for f in L.facts:
+        if f.category != "allergy" and f.polarity != "missing":
+            continue
+        thr = 0.35 if T.detect_lang(f.text) == "zh" else 0.5
+        if T.support(f.text, note_tokens) < thr:
+            what = "allergy information" if f.category == "allergy" else "a pending / not-done item"
+            out.append(Finding("omitted_critical", MEDIUM, "case_features", -1, f"the records state {what} that the note does not mention", f.text))
+    return out[:6]
+
+
+def measurement_coverage(note: Note, L: Ledger) -> tuple[int, int]:
+    """(unit-bearing record measurements whose value appears in the note, total). A proxy metric, not a finding."""
+    vals = {n["value"] for f in L.facts for n in f.numerics}
+    present = T.all_number_values(note.text())
+    return len(vals & present), len(vals)
 
 
 def safe_repair(note: Note, case: Case) -> int:

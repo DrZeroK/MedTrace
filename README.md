@@ -74,8 +74,9 @@ medtrace/inputs.py      A  input + cutoff              medtrace/mock_llm.py     
 medtrace/ledger.py      B  fact ledger                 medtrace/mock_server.py        HTTP mock (500s, timeouts, garbage)
 medtrace/pipeline.py    C–E orchestration, guards      medtrace/update.py             incremental record updates
 medtrace/verify.py      E1 deterministic checks        eval/                          cases, ablation, perturbation, blinded review
-medtrace/llm.py         model client, retries          tests/                         36 regression / fault-injection tests
-medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report
+medtrace/llm.py         model client, retries          tests/                         44 regression / fault-injection tests
+medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report, datasets
+data_pipeline/          dataset audit, acquisition, QC, standardisation        data/standardized/   standardized external cases
 ```
 
 ## Reproduce the experiments
@@ -92,8 +93,21 @@ python -m medtrace.update previous_input.json new_input.json  # regenerate after
 Each run directory stores outputs, per-case metrics, the full configuration (without the key), prompt fingerprint and seed.
 Remote inference is not guaranteed byte-identical even at temperature 0; compare runs by metrics, not by diff.
 
+## External data (Chinese clinical datasets)
+
+```bash
+python -m data_pipeline.acquire --list                 # audited datasets and whether they can be fetched automatically
+python -m data_pipeline.acquire cmb_clin               # download (Apache-2.0), licence check, pinned sha256 -> data/raw/ (git-ignored)
+python -m data_pipeline.cmb_clin                       # standardize + QC -> data/standardized/cmb_clin/
+python main.py --input data/standardized/cmb_clin/cases.json --output out.json   # the standardized cases are valid input
+python -m eval.run_external --dataset cmb_clin --split dev --variants A0,A1,A2  # diagnosis hit, differential recall, coverage
+```
+Audit and ranking: `docs/DATASETS.md`. Labelling rules: `docs/ANNOTATION_GUIDELINES.md`. QC report:
+`data/standardized/cmb_clin/qc_report.md`.
+
 ## Declarations
 
 - Model: only the endpoint configured in `.env`. No other model, external service, retrieval or internet access is used at run time.
 - Data: `eval/cases.json` contains 16 synthetic teaching cases written for this project; no patient data.
+  `data/standardized/cmb_clin/` is derived from CMB-Clin (Apache-2.0, textbook cases; see its `NOTICE.md`) and is used for evaluation only.
 - Method: prompts in `medtrace/prompts/`, rules in `medtrace/verify.py`; no fine-tuning, no hidden reference answers.

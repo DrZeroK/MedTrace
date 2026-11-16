@@ -193,6 +193,87 @@ class Verifier(unittest.TestCase):
         self.assertEqual((n.sections["case_features"][0].text, n.sections["case_features"][0].sources), ("Temp 99 °C.", ["S2"]))
 
 
+class ChineseAndNewChecks(unittest.TestCase):
+    ZH = {"case_id": "Z1", "sources": [
+        {"source_id": "a", "content": "患者男，60岁。否认糖尿病史。无头晕、头痛。青霉素过敏。血常规：WBC 12.5×109／L，N 85％。血钾 3.1 mmol/L，血钠 138 mmol/L。病理结果未回。"},
+        {"source_id": "b", "content": "2型糖尿病病史5年。1周前出现头晕。手术瘢痕：无。"}]}
+
+    def test_fullwidth_and_lost_superscript_units(self):
+        self.assertEqual([(v, u) for v, u, _ in T.extract_numbers("WBC 12.5×109／L，N 85％")], [(12.5, "×10^9/l"), (85.0, "%")])
+        self.assertEqual(T.norm_unit("×109/L"), T.norm_unit("×10^9/L"))
+
+    def test_only_denied_history_counts_as_conflict(self):
+        L = build_ledger(parse_case(self.ZH, 0))
+        self.assertEqual([(c["kind"], c["term"]) for c in L.conflicts], [("polarity", "糖尿病")])   # not 头晕 (time-specific negative)
+        self.assertEqual(T.negated_terms("手术瘢痕：无。"), ["手术瘢痕"])
+
+    def test_value_attached_to_wrong_measurement(self):
+        self.assertIn("value_label_mismatch", codes("血钾 138 mmol/L。", sources=("a",), case=self.ZH))
+        self.assertNotIn("value_label_mismatch", codes("血钾 3.1 mmol/L，血钠 138 mmol/L。", sources=("a",), case=self.ZH))
+
+    def test_critical_omissions_are_surfaced(self):
+        c = parse_case(self.ZH, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["case_features"] = [Statement("患者男，60岁。血钾 3.1 mmol/L。", ["a"])]
+        self.assertEqual(sorted(f.text for f in V.omission_findings(n, L)), ["病理结果未回。", "青霉素过敏。"])
+        n.sections["case_features"].append(Statement("青霉素过敏。病理结果未回。", ["a"]))
+        self.assertEqual(V.omission_findings(n, L), [])
+        self.assertEqual(V.measurement_coverage(n, L), (1, 4))
+
+
+class DataPipeline(unittest.TestCase):
+    def test_pii_scrub(self):
+        from data_pipeline.quality import scrub_pii
+        t, hits = scrub_pii("张三丰，男，45岁，住院号：A123456，联系电话：13812345678。身份证110101199003071234。\n病人，男，3岁。王某，女，20岁。")
+        self.assertNotIn("张三丰", t)
+        self.assertNotIn("13812345678", t)
+        self.assertNotIn("110101199003071234", t)
+        self.assertNotIn("A123456", t)
+        self.assertIn("病人，男，3岁", t)
+        self.assertEqual(hits["possible_name"], 1)
+
+    def test_duplicates_and_group_splits(self):
+        from data_pipeline import quality as Q
+        a = "患者男，49岁，3小时前解大便后出现右下腹疼痛，右下腹可触及一包块，既往体健。" * 3
+        self.assertEqual(Q.text_hash(a), Q.text_hash(a.replace("，", " , ")))
+        self.assertEqual(Q.near_duplicate_groups({"x": a, "y": a + "体温37.8℃。", "z": "完全不同的另一份病历，主诉头痛三天伴发热。" * 3}), [["x", "y"]])
+        s = Q.assign_splits({"c1": "dx:痔", "c2": "dx:痔", "c3": "dx:胃癌"})
+        self.assertEqual(s["c1"], s["c2"])
+        self.assertEqual(s, Q.assign_splits({"c3": "dx:胃癌", "c2": "dx:痔", "c1": "dx:痔"}))     # order-independent, deterministic
+        self.assertIn("too_short", Q.corruption_issues("短"))
+
+    def test_cmb_clin_sectioning_withholds_post_admission_content(self):
+        from data_pipeline.cmb_clin import question_kinds, split_sections
+        kept, withheld = split_sections("现病史\n（1）病史摘要\n病人，男，49岁，3小时前解大便后出现右下腹疼痛。\n\n体格检查\nT 37.8℃，P 101次/分，腹软，右侧腹股沟区可扪及肿块。\n\n"
+                                        "辅助检查\n超声检查\n\n治疗经过\n急诊行疝修补术，术后恢复良好，7天后出院。\n\n辅助检查\n术后病理：肠壁组织缺血坏死。")
+        self.assertEqual([k["slug"] for k in kept], ["hpi", "exam"])
+        self.assertTrue(all("术后" not in k["text"] and "出院" not in k["text"] for k in kept))
+        self.assertEqual([w["reason"][:4] for w in withheld], ["empt", "post", "post"])
+        self.assertEqual(question_kinds("简述该病人的鉴别诊断。"), ["differential"])
+        self.assertEqual(question_kinds("简述本例病人的诊断及诊断依据，鉴别诊断。"), ["differential", "diagnosis"])
+        self.assertEqual(question_kinds("治疗原则是什么？"), ["plan"])
+
+    def test_standardized_dataset_invariants(self):
+        d = ROOT / "data" / "standardized" / "cmb_clin"
+        cases = json.loads((d / "cases.json").read_text("utf-8"))
+        refs = {r["case_id"]: r for r in json.loads((d / "references.json").read_text("utf-8"))}
+        ids = [s["source_id"] for c in cases for s in c["sources"]]
+        self.assertEqual(len(ids), len(set(ids)))                                   # source ids globally unique
+        self.assertEqual(len(cases), len(refs))
+        by_label = {}
+        for c in cases:
+            r = refs[c["case_id"]]
+            self.assertTrue(parse_case(c, 0).usable)
+            text = "\n".join(s["content"] for s in c["sources"])
+            self.assertNotIn("案例分析", text)                                        # the diagnosis-bearing title never leaks
+            self.assertFalse(any(h in text.split("\n") for h in ("治疗经过", "治疗过程", "病情变化")))
+            self.assertIsNone(r["reference"]["case_features"])                       # nothing generated
+            if r["split"] != "excluded_pending_review":
+                by_label.setdefault(r["classification"]["disease_label"], set()).add(r["split"])
+        self.assertTrue(all(len(v) == 1 for v in by_label.values()))                # no disease label spans two splits
+
+
 class Parsing(unittest.TestCase):
     def test_tolerant_json(self):
         self.assertEqual(parse_json_object('<think>hmm</think>```json\n{"a": [1,2,],}\n```')["a"], [1, 2])

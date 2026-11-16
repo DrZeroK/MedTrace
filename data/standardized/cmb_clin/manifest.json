@@ -1,0 +1,70 @@
+{
+ "dataset": "cmb_clin",
+ "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e",
+ "raw_items": 74,
+ "counts": {
+  "kept": 74
+ },
+ "tiers": {
+  "A": 57,
+  "B": 16,
+  "review_required": 1
+ },
+ "splits": {
+  "test": 30,
+  "dev": 26,
+  "validation": 17,
+  "excluded_pending_review": 1
+ },
+ "completeness": {
+  "complete": 68,
+  "partial": 6
+ },
+ "complexity": {
+  "medium": 35,
+  "high": 25,
+  "low": 14
+ },
+ "specialty_chapters": {
+  "未标注": 28,
+  "泌尿、男生殖系统肿瘤": 7,
+  "胆道疾病": 5,
+  "结、直肠与肛管疾病": 3,
+  "胃十二指肠疾病": 3,
+  "食管疾病": 2,
+  "颈部疾病": 2,
+  "腹部损伤": 2,
+  "颅脑损伤": 2,
+  "心脏疾病": 2,
+  "胰腺疾病": 2,
+  "急性化脓性腹膜炎": 2,
+  "乳房疾病": 2,
+  "脾疾病": 1,
+  "颈、腰椎退行性疾病": 1,
+  "原发性纵隔肿瘤": 1,
+  "小肠疾病": 1,
+  "胸壁、胸膜疾病": 1,
+  "外科休克": 1,
+  "下肢骨、关节损伤": 1,
+  "肺部疾病": 1,
+  "肝疾病": 1,
+  "急腹症的诊断与鉴别诊断": 1,
+  "胸主动脉疾病": 1,
+  "烧伤、冻伤、蛇咬伤、犬咬伤、虫蛰伤": 1
+ },
+ "near_duplicate_groups": [],
+ "split_salt": "medtrace-v1",
+ "split_ratios": {
+  "dev": 0.4,
+  "validation": 0.2,
+  "test": 0.4
+ },
+ "pii_hits": {
+  "already_masked_name": 34,
+  "possible_name": 7
+ },
+ "dx_metric_eligible": 61,
+ "with_reference_discussion": 60,
+ "with_reference_plan": 64,
+ "withheld_post_admission_sections": 5
+}

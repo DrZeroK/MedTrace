@@ -17,6 +17,18 @@ def detect_lang(text: str) -> str:
     return "zh" if len(_CJK.findall(text)) / max(1, len(text)) > 0.15 else "en"
 
 
+# Full-width forms common in Chinese records (％ ／ ． ０-９ Ａ-Ｚ) are mapped 1:1 to ASCII for *matching only*;
+# the mapping preserves length, so offsets into the original text stay valid and the text itself is never altered.
+_FW = {0xFF05: "%", 0xFF0F: "/", 0xFF0E: ".", 0xFF0B: "+", 0xFF0D: "-", 0xFF1C: "<", 0xFF1E: ">", 0x3000: " "}
+_FW.update({0xFF10 + i: str(i) for i in range(10)})
+_FW.update({0xFF21 + i: chr(65 + i) for i in range(26)})
+_FW.update({0xFF41 + i: chr(97 + i) for i in range(26)})
+
+
+def fw(text: str) -> str:
+    return (text or "").translate(_FW)
+
+
 # ---------------------------------------------------------------- sentences
 _SPLIT = re.compile(r"(?<=[。！？!?；;])|\n+|(?<=\.)\s+(?=[A-Z0-9\[(])")
 _ENUM = re.compile(r"^\s*(?:\(?\d{1,2}[.)、．]\s*(?!\d)|[-*•]\s+)")
@@ -53,6 +65,7 @@ def _mk(y, mo, d, h, mi):
 def find_dates(text: str, default_year: int | None = None):
     """Return [(datetime, has_time, start, end)] for explicit dates in text."""
     out, taken = [], []
+    text = fw(text)
 
     def add(m, parts):
         if any(s < m.end() and m.start() < e for s, e in taken):
@@ -136,7 +149,7 @@ def is_after(dt: datetime, has_time: bool, cutoff: datetime | None) -> bool:
 _UNITS = ["mmHg", "mmol/L", "µmol/L", "μmol/L", "umol/L", "mg/dL", "g/dL", "g/L", "mg/L", "ng/mL",
           "pg/mL", "ng/L", "µg/L", "μg/L", "ug/L", "mIU/L", "IU/L", "U/L", "mEq/L", "mOsm/kg",
           "×10^9/L", "x10^9/L", "*10^9/L", "10^9/L", "×10^12/L", "x10^12/L", "*10^12/L", "10^12/L",
-          "×10⁹/L", "×10¹²/L", "L/min", "/min", "次/分", "bpm", "kPa", "%", "℃", "°C", "°F",
+          "×10⁹/L", "×10¹²/L", "×109/L", "×1012/L", "X109/L", "X1012/L", "L/min", "/min", "次/分", "bpm", "kPa", "%", "℃", "°C", "°F",
           "cm", "mm", "kg", "mL", "fL", "ms"]
 _UNIT_ALT = "|".join(re.escape(u) for u in sorted(_UNITS, key=len, reverse=True))
 _NUM_STRICT = re.compile(r"(?<![A-Za-z0-9_.\-])(\d+(?:\.\d+)?)(?:\s*(" + _UNIT_ALT + r")(?![A-Za-z]))?", re.I)
@@ -148,6 +161,7 @@ def norm_unit(u: str | None) -> str | None:
         return None
     u = u.lower().replace(" ", "").replace("μ", "u").replace("µ", "u")
     u = u.replace("x10", "×10").replace("*10", "×10").replace("⁹", "^9").replace("¹²", "^12")
+    u = {"×109/l": "×10^9/l", "×1012/l": "×10^12/l"}.get(u, u)      # superscript lost in the source text
     if u.startswith("10^"):
         u = "×" + u
     return {"℃": "°c", "次/分": "/min", "bpm": "/min"}.get(u, u)
@@ -156,12 +170,12 @@ def norm_unit(u: str | None) -> str | None:
 def extract_numbers(text: str) -> list[tuple[float, str | None, str]]:
     """Conservative extraction for *generated* text: (value, normalised unit, raw)."""
     return [(float(m.group(1)), norm_unit(m.group(2)), m.group(0).strip())
-            for m in _NUM_STRICT.finditer(text or "")]
+            for m in _NUM_STRICT.finditer(fw(text))]
 
 
 def all_number_values(text: str) -> set[float]:
     """Permissive extraction for *source* text (superset => fewer false alarms)."""
-    return {float(x) for x in _NUM_ANY.findall(text or "")}
+    return {float(x) for x in _NUM_ANY.findall(fw(text))}
 
 
 # ----------------------------------------------------------------- negation
@@ -169,7 +183,7 @@ _NEG_PRE = re.compile(
     r"(?i)\b(?:no evidence of|no history of|no known|no signs? of|negative for|absence of|free of|"
     r"denies|denied|deny|without|never had|(?:does|did|do|has|have|had|is|was|are|were)\s+not|no|nor)\b"
     r"|否认|未见|未闻及|未触及|未扪及|未及|未发现|未引出|未诉|不伴|没有|无(?!力|尿|菌|创|法|效|关|名|需|论|痛性)")
-_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性|[（(]\s*[-－—]\s*[）)]")
+_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
                      r"reported|has|had|presents?|complains?|with|positive|present)\b")
 _END_ZH = re.compile(r"[，,；;。！？]|但|伴有")
@@ -177,7 +191,8 @@ _CLAUSE_START = re.compile(r"[,，;；。:：]")
 _TERM_SPLIT = re.compile(r"(?i)、|/|及|或|和|与|,|\bor\b|\band\b|\bnor\b")
 _TERM_CUT = re.compile(r"(?i)\s+(?:on|at|in|since|for|during|prior|before|after|to|of the)\b.*$")
 _TERM_LEAD = re.compile(r"(?i)^(?:any|a|an|the|known|prior|previous|recent|history of|明显|既往|其他|其它)\s*")
-_TERM_TAIL = re.compile(r"(?i)(?:\s+history|病史|史|等)$")
+_TERM_TAIL = re.compile(r"(?i)(?:\s+history|史|等)$")
+_TERM_BING = re.compile(r"(?<=[^尿心肝肾肺胃脑肠胆疾脏])病$")   # "高血压病(史)" -> "高血压", but keep 糖尿病 / 冠心病 / 疾病
 
 
 def neg_spans(sentence: str) -> list[tuple[int, int]]:
@@ -203,6 +218,8 @@ def _clean_term(t: str) -> str:
         prev = t
         t = _TERM_LEAD.sub("", t)
         t = _TERM_TAIL.sub("", t).strip()
+    if len(t) >= 4:
+        t = _TERM_BING.sub("", t)
     return t
 
 
@@ -215,6 +232,23 @@ def negated_terms(sentence: str) -> list[str]:
                 continue
             cjk = bool(_CJK.search(t))
             if (cjk and 2 <= len(t) <= 12) or (not cjk and 4 <= len(t) <= 40):
+                out.append(t)
+    return out
+
+
+_DENIAL = re.compile(r"(?i)\b(?:denies|denied|deny|no history of|no known)\b|否认")
+
+
+def denied_terms(sentence: str) -> list[str]:
+    """Terms under an explicit denial of history ("否认糖尿病史", "denies diabetes"). Unlike a site- or time-specific
+    negative finding ("未扪及肿块"), a denied history that is asserted elsewhere is a genuine record conflict."""
+    out = []
+    for m in _DENIAL.finditer(sentence):
+        e = (_END_ZH if _CJK.search(m.group()) else _END_EN).search(sentence, m.end())
+        for raw in _TERM_SPLIT.split(sentence[m.end():e.start() if e else len(sentence)]):
+            t = _clean_term(raw)
+            cjk = bool(_CJK.search(t))
+            if t and ((cjk and 2 <= len(t) <= 12) or (not cjk and 4 <= len(t) <= 40)):
                 out.append(t)
     return out
 
@@ -240,7 +274,7 @@ _STOP_ZH = {"患者", "病人", "目前", "考虑", "予以", "进行", "以及"
 
 
 def tokens(text: str) -> set[str]:
-    text = (text or "").lower()
+    text = fw(text).lower()
     toks = {w[:6] for w in re.findall(r"[a-z]{3,}", text) if w not in _STOP}
     toks |= {("#%g" % float(n)) for n in _NUM_ANY.findall(text)}
     for run in re.findall(r"[一-鿿]+", text):

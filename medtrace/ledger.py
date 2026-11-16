@@ -64,6 +64,7 @@ class Ledger:
     tokens_all: set = field(default_factory=set)
     tokens_by_source: dict = field(default_factory=dict)
     conflicts: list = field(default_factory=list)       # [{kind, detail, sources}]
+    label_values: dict = field(default_factory=dict)    # measurement label -> {values recorded under that label}
     undocumented: list = field(default_factory=list)    # core elements with no mention at all
     lang: str = "en"
 
@@ -86,8 +87,8 @@ def _label(prefix: str) -> str:
     return " ".join(words)[-24:]
 
 
-def _numerics(sent: str, year) -> list[dict]:
-    masked = T.mask_dates(sent, year)
+def numerics(sent: str, year) -> list[dict]:
+    masked = T.fw(T.mask_dates(sent, year))
     out = []
     for m in T._NUM_STRICT.finditer(masked):
         unit = T.norm_unit(m.group(2))
@@ -111,7 +112,7 @@ def build_ledger(case: Case) -> Ledger:
         for sent in T.split_sentences(src.content):
             n += 1
             f = Fact(fid=f"F{n}", sid=src.sid, text=sent, category=_category(sent))
-            f.numerics = _numerics(sent, year)
+            f.numerics = numerics(sent, year)
             f.dates = [d[0] for d in T.find_dates(sent, year)]
             f.neg_terms = T.negated_terms(sent)
             pos = T.positive_text(sent)
@@ -124,6 +125,8 @@ def build_ledger(case: Case) -> Ledger:
                 f.polarity = "uncertain"
             for num in f.numerics:
                 L.units.setdefault(num["value"], set()).add(num["unit"])
+                if len(num["label"]) >= 2:
+                    L.label_values.setdefault(num["label"], set()).add(num["value"])
             for t in f.neg_terms:
                 L.neg_terms.setdefault(t, []).append(f.fid)
             L.facts.append(f)
@@ -141,16 +144,19 @@ def build_ledger(case: Case) -> Ledger:
 def _find_conflicts(L: Ledger) -> None:
     fact = {f.fid: f for f in L.facts}
     seen = set()
-    # (1) a finding negated in one statement and asserted in another
-    for term, fids in L.neg_terms.items():
-        if term in L.neg_only:
-            continue
-        pos = [f for f in L.facts if term in T.positive_text(f.text)]
-        if pos and term not in seen:
-            seen.add(term)
-            L.conflicts.append({"kind": "polarity", "term": term,
-                                "detail": f'"{fact[fids[0]].text}" vs "{pos[0].text}"',
-                                "sources": sorted({fact[fids[0]].sid, pos[0].sid})})
+    # (1) a history the patient explicitly denies in one source but that another source asserts.
+    #     Plain negative findings ("无头晕", "未扪及肿块") are deliberately excluded: on real records they are
+    #     site- or time-specific and "conflict" with other mentions almost always spuriously
+    #     (measured on CMB-Clin: 35 polarity flags in 74 cases, essentially all false).
+    for f in L.facts:
+        for term in T.denied_terms(f.text):
+            if term in seen:
+                continue
+            pos = [g for g in L.facts if g.sid != f.sid and term in T.positive_text(g.text)]
+            if pos:
+                seen.add(term)
+                L.conflicts.append({"kind": "polarity", "term": term, "detail": f'"{f.text}" vs "{pos[0].text}"',
+                                    "sources": sorted({f.sid, pos[0].sid})})
     # (2) same labelled measurement, same unit, different value, different source
     table: dict = {}
     for f in L.facts:

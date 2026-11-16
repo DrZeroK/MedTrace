@@ -5,4 +5,5 @@ logs/
 output.json
 /input.json
 eval/results/
+data/raw/
 .venv/

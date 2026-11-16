@@ -5,7 +5,7 @@
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic
 fact ledger and verifier, an offline mock model with fault injection, an evaluation set of 16 annotated synthetic
 cases (11 development, 5 held out; 12 English, 4 Chinese; two per category), 7 one-fact perturbation tests,
-ablation / perturbation / blinded-review tooling, and 36 automated tests.
+ablation / perturbation / blinded-review tooling, and 44 automated tests.
 
 ## 2. What has been measured — and what has not
 
@@ -61,6 +61,28 @@ Two limits of the deterministic layer showed up and are left to the model/review
 ("neck supple" vs "reports neck stiffness") and a medication-status contradiction ("on apixaban" vs "stopped
 apixaban") are not detected by rule.
 
+### 2.5 External Chinese data: CMB-Clin (added)
+
+Dataset audit and ranking are in `docs/DATASETS.md`. One dataset could be both verified and acquired: CMB-Clin
+(Apache-2.0, 74 textbook inpatient cases with expert answers). Standardisation results
+(`data/standardized/cmb_clin/qc_report.md`): 74 kept, 0 duplicates or near-duplicates, 57 tier A, 16 tier B,
+1 held for clinician review; post-admission course sections withheld in 5 cases; splits dev 26 / validation 17 /
+test 30, grouped by disease label. Reference answers exist for diagnosis/differential (60 cases) and treatment
+(64); no reference Case Features exists and none was generated.
+
+What this real-format Chinese text showed about the deterministic layer (no model involved):
+
+| Check | Result | Consequence |
+|---|---|---|
+| Verifier false alarms on 1,717 verbatim record statements | 0 high, 0 medium | Holds on real-format Chinese, including full-width `％ ／` and `×109/L` (handling added) |
+| Ledger "conflict" flags | 38 before, 3 after | 35 were negative findings tied to a site or time ("无头晕" earlier, "头晕" now) — essentially all false. Conflicts are now raised only for an explicitly denied history that another source asserts. Cost: contradictions phrased as plain negatives are left to the model/reviewer |
+| New check: value reported under the wrong measurement | 86/86 synthetic swaps of two values inside one sentence caught; 0 false alarms on verbatim text | Mechanical test by construction; closes the "right number, wrong analyte" gap for labelled values only |
+| New check: allergy / pending-result content missing from the note | 0 false alarms on verbatim text | Surfaced as review items; general completeness remains a reviewer judgement |
+
+`python -m eval.run_external` reports diagnosis hit (61 eligible cases), differential recall against the expert
+answer, measurement coverage and verifier findings per variant. It has only been run with the mock (mechanics:
+26/26 dev cases completed, schema-valid); the mock does not reason, so there are **no model results yet**.
+
 ## 3. Known limitations
 
 - Verifier is lexical: it cannot tell a correct inference from a wrong one, cannot detect omissions, and checks
@@ -79,7 +101,8 @@ apixaban") are not detected by rule.
 ## 4. Next steps, in order
 
 1. Confirm the 20 items in `docs/REQUIREMENTS.md` against the official instructions.
-2. First real-model run: `python -m eval.run_ablation --name real_v1 --split dev`. Read the raw outputs before the table.
+2. First real-model (Qwen) run: `python -m eval.run_external --dataset cmb_clin --split dev --variants A0,A1,A2`
+   and `python -m eval.run_ablation --name real_v1 --split dev`. Read the raw outputs before the tables.
 3. Clinical Lead reviews cases/annotations and the rubric; blinded two-reviewer scoring of A0 vs A1 vs A2 on dev.
 4. Identify the three highest-impact baseline weaknesses from the error categories; change one thing at a time.
 5. Measure verifier false-alarm rate on real output; tune thresholds on dev only.

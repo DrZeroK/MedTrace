@@ -28,7 +28,8 @@ HERE = Path(__file__).parent
 
 
 def export(run: Path, reviewers: list[str], seed: int) -> None:
-    cases = {c["case"]["case_id"]: c for c in json.loads((HERE / "cases.json").read_text("utf-8"))}
+    src = run / "cases_used.json" if (run / "cases_used.json").exists() else HERE / "cases.json"   # external-dataset runs carry their own cases
+    cases = {c["case"]["case_id"]: c for c in json.loads(src.read_text("utf-8"))}
     items = []
     for f in sorted(run.glob("outputs_*.json")):
         variant = f.stem.split("_", 1)[1]
@@ -43,7 +44,7 @@ def export(run: Path, reviewers: list[str], seed: int) -> None:
         bid = f"N{n:03d}"
         key[bid] = {"variant": variant, "case_id": rec["case_id"]}
         case = cases[rec["case_id"]]["case"]
-        md += [f"## {bid}  (case {rec['case_id']}, cutoff {case['record_cutoff']})", "", "### Records"]
+        md += [f"## {bid}  (case {rec['case_id']}, cutoff {case.get('record_cutoff')})", "", "### Records"]
         md += [f"**[{s['source_id']}]** {s['content']}\n" for s in case["sources"]]
         md += ["### Case Features", rec["case_features"], "", "### Diagnostic Discussion", rec["diagnostic_discussion"], "",
                "### Diagnostic and Treatment Plan", rec["treatment_plan"], "", "### Evidence references"]
