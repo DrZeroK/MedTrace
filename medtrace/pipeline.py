@@ -230,9 +230,8 @@ class Pipeline:
         if self.cfg.on_unresolved == "drop":
             for sec in SECTIONS:
                 drop = {f.index for f in unresolved if f.section == sec and f.severity == V.HIGH}
-                kept = [s for i, s in enumerate(note.sections[sec]) if i not in drop]
-                if kept:
-                    note.sections[sec] = kept
+                # may leave the section empty: run_case then inserts the "clinician input required" placeholder
+                note.sections[sec] = [s for i, s in enumerate(note.sections[sec]) if i not in drop]
         have = " ".join(r["description"] for r in note.review_items)
         add = lambda typ, desc, ids=(): note.review_items.append({"type": typ, "description": desc, "source_ids": list(ids)})
         # one review item per statement; every high-severity finding is always surfaced, medium ones are capped

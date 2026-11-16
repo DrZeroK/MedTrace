@@ -5,7 +5,7 @@
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic
 fact ledger and verifier, an offline mock model with fault injection, an evaluation set of 16 annotated synthetic
 cases (11 development, 5 held out; 12 English, 4 Chinese; two per category), 7 one-fact perturbation tests,
-ablation / perturbation / blinded-review tooling, and 33 automated tests.
+ablation / perturbation / blinded-review tooling, and 36 automated tests.
 
 ## 2. What has been measured — and what has not
 
@@ -25,18 +25,20 @@ done), plus malformed JSON (0.15) and a hallucinating reviewer (0.5). The same e
 
 | Variant | Runs completed by the model | Injected errors still in the note | …of which not flagged for review | Source ids valid | Key-fact coverage (proxy) | Calls / case |
 |---|---|---|---|---|---|---|
-| A0 baseline | 41/48 | 148/178 | 148 | 91.9% | 96.5% | 1.00 |
-| A1 grounded prompt | 41/48 | 148/178 | 148 | 97.9% | 96.5% | 1.00 |
+| A0 baseline | 41/48 | 152/178 | 152 | 91.9% | 96.5% | 1.00 |
+| A1 grounded prompt | 41/48 | 152/178 | 152 | 97.9% | 96.5% | 1.00 |
 | A2 + deterministic verification | 46/48 | 27/224 | **0** | 100% | 91.6% | 1.96 |
 | S2 extraction → A2 | 46/48 | 27/224 | **0** | 100% | 91.6% | 2.96 |
 | A3 + semantic review | 46/48 | 25/224 | **0** | 100% | 91.6% | 2.00 |
 
-With a strict single-call budget (`mock_faults_single_call`, seed 1) A2 cannot repair, so 40/54 injected errors stay
-in the text, but all 40 are listed under `review_items`; coverage 97.3%.
+With a strict single-call budget (`mock_faults_single_call`, seed 1) A2 cannot repair, so 42/54 injected errors stay
+in the text, but all 42 are listed under `review_items`; coverage 97.3%.
 
 How to read this:
 - A0 and A1 are identical here by construction: the mock ignores prompt content, so **the value of the grounded
-  prompt (A1) is untested**. The 30 "removed" errors in A0/A1 are runs that failed on malformed JSON and fell back.
+  prompt (A1) is untested**. The 26 injected errors absent from A0/A1 output all belong to the 7 runs that failed on malformed JSON and fell
+  back to the extract-only note. (An earlier version of this table said 148/178: the mock mis-logged faults that
+  were later mutated by a second fault in the same sentence; fixed, with a regression test.)
 - The injected error types and the verifier were written by the same author, so detection here is an upper bound.
   Real model errors (wrong inference, subtle paraphrase, omitted facts, wrong but source-present numbers attached to
   the wrong analyte or time point) are **not** covered by these checks.
@@ -64,7 +66,10 @@ apixaban") are not detected by rule.
 - Verifier is lexical: it cannot tell a correct inference from a wrong one, cannot detect omissions, and checks
   that a number exists in the records, not that it is attached to the right test or time point.
 - Negation scope is heuristic (clause-level cue lists for English and Chinese).
-- Sentence-level cutoff only sees explicit dates; relative expressions ("next day") are not resolved.
+- Sentence-level cutoff only sees explicit dates; relative expressions ("next day") are not resolved. Dates written
+  inside record text carry no UTC offset and are read in the cutoff's own local clock. Source timestamps with an
+  offset are converted to the cutoff's offset; if only one side has an offset they are compared as written and a
+  warning is logged.
 - `must_not` and key-fact metrics are regex proxies; they will miss and mis-fire. They screen, they do not judge.
 - 16 cases cannot support the stated targets (≥98% coverage, 0 critical errors) with useful confidence: with 0
   critical errors observed in n cases, the one-sided 95% upper bound on the true rate is about 3/n (≈19% for n=16,

@@ -93,6 +93,29 @@ class Inputs(unittest.TestCase):
         self.assertEqual(c.excluded_sources, ["late"])
         self.assertNotIn("late", c.valid_ids)
 
+    def test_timezone_aware_cutoff(self):
+        # cutoff 18:00Z; 17:30-02:00 is 19:30Z (after), 19:30+02:00 is 17:30Z (before)
+        raw = {"case_id": 1, "record_cutoff": "2026-03-02T18:00:00Z", "sources": [
+            {"source_id": "base", "content": "Fever."},
+            {"source_id": "late", "content": "CT: abscess.", "time": "2026-03-02T17:30:00-02:00"},
+            {"source_id": "early", "content": "Cough.", "time": "2026-03-02T19:30:00+02:00"},
+            {"source_id": "epoch_late", "content": "Rash.", "time": 1772478000}]}          # 2026-03-02T19:00:00Z
+        c = parse_case(raw, 0)
+        self.assertEqual(c.excluded_sources, ["late", "epoch_late"])
+        self.assertEqual(sorted(c.valid_ids), ["base", "early"])
+        # the cutoff keeps its own local clock, so in-text dates written in that clock still compare correctly
+        c = parse_case({"case_id": 2, "record_cutoff": "2026-03-02T18:00:00+08:00", "sources": [
+            {"source_id": "a", "content": "2026-03-02 15:00 seen. 2026-03-02 19:00 worse."},
+            {"source_id": "b", "content": "Late.", "time": "2026-03-02T11:00:00Z"}]}, 0)     # 19:00+08:00
+        self.assertEqual((c.cutoff.hour, c.excluded_sources), (18, ["b"]))
+        self.assertIn("15:00 seen", c.text)
+        self.assertNotIn("worse", c.text)
+        # offset on one side only: not comparable -> compared as written, with a warning
+        c = parse_case({"case_id": 3, "record_cutoff": "2026-03-02T18:00:00", "sources": [
+            {"source_id": "a", "content": "x.", "time": "2026-03-02T17:30:00-02:00"}]}, 0)
+        self.assertEqual(c.excluded_sources, [])
+        self.assertTrue(any("UTC offset" in w for w in c.warnings))
+
     def test_malformed_cases(self):
         self.assertFalse(parse_case("x", 0).usable)
         self.assertFalse(parse_case({"case_id": 1}, 0).usable)
@@ -246,6 +269,23 @@ class PipelineTests(unittest.TestCase):
             c, L, "repair", {("case_features", 1)})
         self.assertEqual((res["applied"], res["rejected"]), (1, 5))
         self.assertEqual([s.text for s in n.sections["case_features"]], ["Temp 38.6 °C.", "Temp 38.6 °C, HR 104 bpm."])
+
+    def test_drop_mode_removes_everything_flagged(self):
+        raw = {"case_id": "K", "sources": [{"source_id": "S1", "content": "Potassium 4.1 mmol/L."}]}
+        p, m = pipe({"wrong_number": 1.0}, max_calls_per_case=1, on_unresolved="drop")
+        r = p.run_case(parse_case(raw, 0))
+        self.assertNotIn(m.fault_log[0]["needle"], r.record["case_features"])
+        self.assertIn("clinician input required", r.record["case_features"])
+        self.assertEqual(schema_errors(r.record), [])
+
+    def test_mock_fault_needles_follow_later_mutations(self):
+        raw = {"case_id": "K", "sources": [{"source_id": "S1", "content": "Potassium 4.1 mmol/L."}]}
+        p, m = pipe({"wrong_number": 1.0, "unit_swap": 1.0}, pipeline="A1", max_calls_per_case=1)
+        r = p.run_case(parse_case(raw, 0))
+        self.assertEqual([e["fault"] for e in m.fault_log], ["wrong_number", "unit_swap"])
+        for e in m.fault_log:                       # both faults are still in the unverified A1 output
+            self.assertIn("mg/dL", e["needle"])
+            self.assertIn(e["needle"], r.record["case_features"])
 
     def test_unusable_case_isolated(self):
         p, _ = pipe()

@@ -70,8 +70,17 @@ class MockLLM:
     def _fire(self, name, rng) -> bool:
         return rng.random() < self.faults.get(name, 0.0)
 
-    def _log(self, fault, needle):
-        self.fault_log.append({"fault": fault, "needle": needle})
+    def _log(self, fault, needle, item=None):
+        """`item` is the statement dict the fault lives in; its final text becomes the needle (see _resolve)."""
+        self.fault_log.append({"fault": fault, "needle": needle, "_item": item})
+
+    def _resolve(self):
+        # A later fault may mutate a statement an earlier fault already changed; the logged needle must be the
+        # text that is actually emitted, otherwise the earlier fault is wrongly scored as "removed".
+        for e in self.fault_log:
+            item = e.pop("_item", None)
+            if item is not None:
+                e["needle"] = item["text"]
 
     def _generate(self, task, user, sources, rng, zh) -> str:
         first = sources[0][0]
@@ -100,21 +109,21 @@ class MockLLM:
                         new = round(new + 0.7, 1)
                     numtxt = re.match(r"[\d.]+", raw).group()
                     f["text"] = f["text"].replace(numtxt, f"{new:g}", 1)
-                    self._log("wrong_number", f["text"])
+                    self._log("wrong_number", f["text"], f)
                     break
         if self._fire("unit_swap", rng):
             for f in feats:
                 hit = next(((a, b) for a, b in _UNIT_SWAPS if a in f["text"]), None)
                 if hit:
                     f["text"] = f["text"].replace(hit[0], hit[1], 1)
-                    self._log("unit_swap", f["text"])
+                    self._log("unit_swap", f["text"], f)
                     break
         if self._fire("negation_flip", rng):
             for f in feats:
                 hit = next(((a, b) for a, b in _NEG_SWAPS if re.search(a, f["text"])), None)
                 if hit:
                     f["text"] = re.sub(hit[0], hit[1], f["text"], count=1)
-                    self._log("negation_flip", f["text"])
+                    self._log("negation_flip", f["text"], f)
                     break
         if self._fire("fabricate", rng):
             t = "既往慢性肾脏病4期，因机械瓣置换长期服用华法林。" if zh else "Long-standing chronic kidney disease stage 4, on warfarin for a mechanical mitral valve."
@@ -140,6 +149,7 @@ class MockLLM:
             plan.append({"kind": "treatment", "text": t, "sources": [first]})
             self._log("done_plan", t)
 
+        self._resolve()
         if task == "a0":
             join = lambda items: ("" if zh else " ").join(i["text"] for i in items)
             out = {"case_features": join(feats), "diagnostic_discussion": join(disc), "treatment_plan": join(plan),
@@ -170,4 +180,5 @@ class MockLLM:
             t = "入院时血钾9.9 mmol/L。" if zh else "Serum potassium was 9.9 mmol/L on arrival."
             patches.append({"section": "case_features", "action": "add", "text": t, "sources": [sources[0][0]], "severity": "high"})
             self._log("bad_patch", t)
+        self._resolve()
         return json.dumps({"patches": patches, "review_items": []}, ensure_ascii=False)

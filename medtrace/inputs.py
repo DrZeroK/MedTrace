@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
-from .textutil import detect_lang, find_dates, is_after, parse_cutoff, split_sentences
+from .textutil import detect_lang, find_dates, is_after, parse_instant, split_sentences
 
 _TIME_KEYS = ("time", "timestamp", "datetime", "recorded_at", "record_time", "date", "created_at")
 _LIST_KEYS = ("cases", "data", "records", "items", "inputs")
@@ -30,7 +30,8 @@ class Case:
     index: int
     case_id: Any
     cutoff_raw: Any = None
-    cutoff: datetime | None = None
+    cutoff: datetime | None = None      # naive, in the cutoff's own local clock
+    cutoff_tz: Any = None               # UTC offset of record_cutoff, when it carries one
     sources: list[Source] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)       # fatal for this case
     warnings: list[str] = field(default_factory=list)
@@ -82,14 +83,19 @@ def split_envelope(doc):
     raise InputError("top-level JSON must be a list of cases, an object holding a case list, or a single case")
 
 
-def _source_time(d: dict):
+def _source_time(d: dict, cutoff_tz=None):
+    """Returns (naive datetime in the cutoff's clock, has_time, comparable).
+
+    `comparable` is False when exactly one of (source timestamp, cutoff) carries a UTC offset: the two cannot
+    be placed on a common clock, so the caller compares the written clock values and records a warning.
+    """
     for k in _TIME_KEYS:
         if d.get(k) not in (None, ""):
-            dt, ok = parse_cutoff(d[k])
+            dt, ok, tz = parse_instant(d[k], cutoff_tz)
             if ok and dt:
-                has_time = isinstance(d[k], (int, float)) or len(str(d[k]).strip()) > 10
-                return dt, has_time
-    return None, False
+                has_time = (isinstance(d[k], (int, float)) and not isinstance(d[k], bool)) or len(str(d[k]).strip()) > 10
+                return dt, has_time, (tz is None) == (cutoff_tz is None)
+    return None, False, True
 
 
 def parse_case(raw, index: int, cutoff_mode: str = "redact") -> Case:
@@ -99,7 +105,7 @@ def parse_case(raw, index: int, cutoff_mode: str = "redact") -> Case:
     if c.case_id is None or isinstance(c.case_id, (dict, list)):
         c.warnings.append("missing or non-scalar case_id")
     c.cutoff_raw = raw.get("record_cutoff")
-    c.cutoff, ok = parse_cutoff(c.cutoff_raw)
+    c.cutoff, ok, c.cutoff_tz = parse_instant(c.cutoff_raw)
     if not ok:
         c.warnings.append(f"record_cutoff {c.cutoff_raw!r} could not be parsed; no cutoff filtering applied")
     srcs = raw.get("sources")
@@ -122,7 +128,9 @@ def parse_case(raw, index: int, cutoff_mode: str = "redact") -> Case:
             rid = f"source_{j + 1}"
             c.warnings.append(f"sources[{j}] has no source_id; assigned {rid!r}")
         sid = str(rid).strip()
-        t, t_has_time = _source_time(s)
+        t, t_has_time, comparable = _source_time(s, c.cutoff_tz)
+        if t and c.cutoff and not comparable:
+            c.warnings.append(f"source {sid!r}: only one of source timestamp / record_cutoff has a UTC offset; compared as written")
         if cutoff_mode != "off" and t and is_after(t, t_has_time, c.cutoff):
             c.excluded_sources.append(sid)
             if cutoff_mode == "redact":

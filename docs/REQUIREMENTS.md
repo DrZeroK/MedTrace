@@ -14,7 +14,7 @@ instructions before the submission freeze. Owner: Role C, with Role A for the cl
 | 6 | Output field names | `case_features`, `diagnostic_discussion`, `treatment_plan`, `evidence`, `review_items` | **ASSUMED** | `OUTPUT_FIELD_MAP`, `OUTPUT_FIELDS` |
 | 7 | Are extra fields (`evidence`, `review_items`) allowed? If only three text fields are allowed, should citations be inline? | separate arrays; inline off | **ASSUMED** | `OUTPUT_FIELDS`, `INLINE_CITATIONS=1` |
 | 8 | Output language | follows the records | **ASSUMED** | `OUTPUT_LANG` |
-| 9 | `record_cutoff` format and semantics | ISO / common date formats; date-only = end of day; sources with a timestamp field and sentences with an explicit date after the cutoff are withheld from the model | **ASSUMED** | `CUTOFF_MODE`, `textutil.parse_cutoff` |
+| 9 | `record_cutoff` format and semantics | ISO / common date formats; date-only = end of day; UTC offsets honoured (source timestamps converted to the cutoff's offset); sources with a timestamp field and sentences with an explicit date after the cutoff are withheld from the model | **ASSUMED** | `CUTOFF_MODE`, `textutil.parse_cutoff` |
 | 10 | Model API protocol | OpenAI-compatible `POST {base}/chat/completions`, bearer key | **ASSUMED** | `medtrace/llm.py` |
 | 11 | Env variable names for endpoint/key/model | `LLM_*` plus common aliases | **ASSUMED** | `medtrace/config.py` |
 | 12 | Model-call limit per case; do HTTP retries count? | 2 logical calls, 2 HTTP retries each | **ASSUMED** | `MAX_CALLS_PER_CASE`, `LLM_MAX_RETRIES` |

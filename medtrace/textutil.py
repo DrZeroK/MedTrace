@@ -6,7 +6,7 @@ These are heuristics: they are used to *flag* statements, never to rewrite them.
 from __future__ import annotations
 
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 _CJK = re.compile(r"[一-鿿]")
 
@@ -82,29 +82,48 @@ def mask_dates(text: str, default_year: int | None = 2000) -> str:
     return _TIME.sub(lambda m: " " * len(m.group()), "".join(chars))
 
 
-def parse_cutoff(raw):
-    """Parse record_cutoff. Returns (datetime | None, ok). Date-only => end of that day."""
+def parse_instant(raw, ref_tz=None):
+    """Parse a timestamp. Returns (naive datetime | None, ok, tzinfo | None).
+
+    A timestamp carrying a UTC offset is an absolute instant. It is converted to `ref_tz` (the cutoff's own
+    offset) before the offset is dropped, so that instants with different offsets compare correctly; without a
+    `ref_tz` its own local clock is kept and its tzinfo returned. Date-only values mean the end of that day.
+    """
     if raw is None or raw == "":
-        return None, True
-    if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+        return None, True, None
+    tz = None
+    if isinstance(raw, bool):
+        return None, False, None
+    if isinstance(raw, (int, float)):
         try:
-            v = raw / 1000 if raw > 1e11 else raw
-            return datetime.utcfromtimestamp(v), True
+            dt = datetime.fromtimestamp(raw / 1000 if raw > 1e11 else raw, timezone.utc)
+            has_time = True
         except (ValueError, OverflowError, OSError):
-            return None, False
-    s = str(raw).strip()
-    try:
-        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
-        has_time = len(s) > 10
+            return None, False, None
+    else:
+        s = str(raw).strip()
+        try:
+            dt = datetime.fromisoformat(s.replace("Z", "+00:00").replace("z", "+00:00"))
+            has_time = len(s) > 10
+        except ValueError:
+            found = find_dates(s)
+            if not found:
+                return None, False, None
+            dt, has_time = found[0][0], found[0][1]
+    if dt.tzinfo is not None:
+        if ref_tz is not None:
+            dt = dt.astimezone(ref_tz)
+        tz = dt.tzinfo
         dt = dt.replace(tzinfo=None)
-    except ValueError:
-        found = find_dates(s)
-        if not found:
-            return None, False
-        dt, has_time = found[0][0], found[0][1]
     if not has_time:
         dt = dt.replace(hour=23, minute=59, second=59)
-    return dt, True
+    return dt, True, tz
+
+
+def parse_cutoff(raw):
+    """Parse record_cutoff. Returns (datetime | None, ok), expressed in the cutoff's own local clock."""
+    dt, ok, _ = parse_instant(raw)
+    return dt, ok
 
 
 def is_after(dt: datetime, has_time: bool, cutoff: datetime | None) -> bool:
