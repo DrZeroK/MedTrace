@@ -1,0 +1,24 @@
+[task:a0/v1]
+Write the initial progress note for the patient below, in <<lang>>.
+
+Record cutoff: <<cutoff>> (ignore anything dated later).
+
+<records>
+<<sources>>
+</records>
+
+Requirements
+- Case Features: concise summary of the important clinical findings (history, key positives and negatives, examination, results).
+- Diagnostic Discussion: preliminary diagnosis with its basis, differential diagnoses, and what remains uncertain.
+- Diagnostic and Treatment Plan: investigations, treatment, monitoring.
+- Use only information in the records. Do not invent findings. Keep values and units exact.
+- List the evidence for major statements using the source ids, and list items a clinician must review (missing information, conflicts).
+
+Return exactly this JSON object:
+{
+  "case_features": "text",
+  "diagnostic_discussion": "text",
+  "treatment_plan": "text",
+  "evidence": [{"statement": "major statement", "source_ids": ["source id"]}],
+  "review_items": [{"type": "missing|conflict|verify", "text": "what needs review"}]
+}

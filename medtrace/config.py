@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PIPELINES = ("A0", "A1", "A2", "S2", "A3")  # A2 == strategy S1 (default), A3 == strategy S3
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = os.environ.get("PROMPT_VERSION", "v1")     # v2 = concise variant under evaluation
 
 
 def load_dotenv_files() -> None:

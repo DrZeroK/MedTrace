@@ -17,10 +17,13 @@ from .note import Note, Statement, SECTIONS
 import re
 
 HIGH, MEDIUM, LOW = "high", "medium", "low"
-_CORE_DOC = {"allergy": re.compile(r"(?i)allerg|过敏"), "medication": re.compile(r"(?i)medication|用药"),
-             "vitals": re.compile(r"(?i)vital signs|生命体征")}
+# Only allergy: on real output, "anticoagulant use not recorded" (true) was flagged because *some* medication was
+# documented, and "admission vitals not recorded" (true) because a home temperature was. Sub-item claims cannot be
+# judged by keyword; allergy status is the one core item where a false "not documented" is both checkable and dangerous.
+_CORE_DOC = {"allergy": re.compile(r"(?i)allerg|过敏")}
 _SITE_DEPENDENT = set("扩张 肿大 压痛 增厚 异常 强化 积液 结节 占位 肿物 包块 肿块 水肿 出血 狭窄 梗阻 充血 渗出 增大 缩小 畸形 触痛 叩痛 "
                       "叩击痛 红肿 溃疡 糜烂 杂音 啰音 疼痛 肿胀 破溃 改变 病变 转移 复发 钙化 坏死 swelling tenderness mass lesion".split())
+_GENERIC_LABEL = re.compile(r"(?i)约|大小|直径|范围|长|宽|厚|高|共|为|about|approx|size|measur")   # "大小约 2.5cm" names no analyte
 _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
 _SHORT = {"case_features": "features", "diagnostic_discussion": "discussion", "treatment_plan": "plan"}
 
@@ -77,7 +80,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     if sec == "features":
         for num in numerics(text, year):
             known = L.label_values.get(num["label"])
-            if known and num["value"] not in known and num["value"] in L.numbers:
+            if known and not _GENERIC_LABEL.search(num["label"]) and num["value"] not in known and num["value"] in L.numbers:
                 add("value_label_mismatch", HIGH,
                     f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
 

@@ -188,6 +188,10 @@ class Verifier(unittest.TestCase):
         # ... unless the records do document it
         self.assertIn("false_missing", codes("药物过敏史未记录。", sources=("a",), case=zh))
         self.assertIn("false_missing", codes("Allergy status is not documented.", sources=("S1",)))
+        # sub-item claims are not judged: some vitals / medication being documented does not make these false
+        self.assertEqual(codes("Anticoagulant medication use is not documented.", sources=()) - {"missing_ref"}, set())
+        two = {"case_id": 1, "sources": [{"source_id": "a", "content": "钼靶：肿块大小约2.2cm。超声：肿块大小约2.5cm。"}]}
+        self.assertNotIn("value_label_mismatch", codes("钼靶示肿块，大小约2.5cm。", sources=("a",), case=two))
 
     def test_no_false_alarm_on_faithful_paraphrase(self):
         self.assertEqual(codes("68-year-old man with 3 days of fever and cough; denies chest pain and hemoptysis.", sources=("S1",)), set())
