@@ -4,6 +4,11 @@ Written 2026-11-17 for a coding model taking over implementation. Read this file
 then the code you are about to touch. Do not treat README or report claims as proof; section 2 lists what was
 re-verified against the code on the date above.
 
+> **Reproducibility note (2026-11-17):** generated output used to depend on Python's per-process hash seed (the
+> verifier iterated a `set`, so review-item order changed between identical runs). Fixed; the test
+> `EndToEnd.test_output_independent_of_hash_seed` guards it. When comparing two runs byte for byte, any remaining
+> difference is real. Avoid iterating sets or dicts built from sets where the order reaches the output.
+
 ## 1. Repository state
 
 | Item | Value |

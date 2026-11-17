@@ -133,7 +133,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         checked = text
         pos = "\n".join(T.clearly_positive_text(s) for s in T.split_sentences(text))
     if sec in ("features", "discussion") and checked.strip():
-        for term in L.neg_only:
+        for term in sorted(L.neg_only):      # sorted: set order varies per process (PYTHONHASHSEED)
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS or len(term) < 2:
                 continue
             i = pos.find(term)

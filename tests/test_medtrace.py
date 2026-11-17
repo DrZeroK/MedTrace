@@ -651,6 +651,17 @@ class EndToEnd(unittest.TestCase):
         self.assertGreaterEqual(end["latency_max"], end["latency_p50"])
         self.assertGreaterEqual(end["latency_p50"], 0.0)
 
+    def test_output_independent_of_hash_seed(self):
+        # regression: iterating a set made review-item order differ between runs (Python randomises str hashing)
+        cases = [c["case"] for c in json.loads((ROOT / "eval" / "cases.json").read_text("utf-8"))[:8]]
+        faults = {"MOCK_FAULTS": "negation_flip:0.6,undoc_negative:0.6,wrong_number:0.5"}
+        outs = []
+        for h in ("1", "2", "3"):
+            p, out, _ = self._run(cases, {**faults, "PYTHONHASHSEED": h})
+            self.assertEqual(p.returncode, 0, p.stderr)
+            outs.append(out.read_bytes())
+        self.assertEqual(len(set(outs)), 1)
+
     def test_fatal_inputs_exit_1(self):
         p, out, _ = self._run(None, raw="{broken")
         self.assertEqual(p.returncode, 1)
