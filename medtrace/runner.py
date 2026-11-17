@@ -10,6 +10,7 @@ import argparse
 import json
 import logging
 import os
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -102,10 +103,20 @@ def main(argv=None) -> int:
 
     results: list = [None] * len(cases)
     totals = {k: 0 for k in ("prompt_tokens", "completion_tokens", "total_tokens", "calls", "http_attempts", "retries")}
+    latencies: list = []
     deadline_all = started + cfg.total_timeout if cfg.total_timeout > 0 else None
 
     def write():
-        atomic_write_json(cfg.output_path, wrap([r.record for r in results], envelope, cfg))
+        obj = wrap([r.record for r in results], envelope, cfg)
+        atomic_write_json(cfg.output_path, obj)
+        out_dir = os.path.dirname(os.path.abspath(cfg.output_path))
+        seen = {os.path.basename(cfg.output_path)}
+        for alias in cfg.output_aliases:
+            name = os.path.basename(alias)
+            if not name or name in seen:
+                continue
+            seen.add(name)
+            atomic_write_json(os.path.join(out_dir, name), obj)
 
     try:
         if cfg.checkpoint and cases:
@@ -130,6 +141,7 @@ def main(argv=None) -> int:
             results[c.index] = r
             for k in totals:
                 totals[k] += r.log.get(k, 0)
+            latencies.append(r.log.get("latency", 0.0))
             emit({"event": "case", **r.log})
             log.info("case %s [%d/%d] status=%s calls=%s latency=%ss", c.case_id, c.index + 1, len(cases),
                      r.status, r.log.get("calls"), r.log.get("latency"))
@@ -151,7 +163,9 @@ def main(argv=None) -> int:
         return 1
 
     n_fb = sum(r.status != "ok" for r in results)
-    emit({"event": "run_end", "cases": len(cases), "not_ok": n_fb, "seconds": round(time.monotonic() - started, 2), **totals})
+    emit({"event": "run_end", "cases": len(cases), "not_ok": n_fb, "seconds": round(time.monotonic() - started, 2),
+          "latency_p50": round(statistics.median(latencies), 3) if latencies else 0.0,
+          "latency_max": round(max(latencies), 3) if latencies else 0.0, **totals})
     log.info("wrote %s: %d case(s), %d not ok, %.1fs", cfg.output_path, len(cases), n_fb, time.monotonic() - started)
     if run_log:
         run_log.close()

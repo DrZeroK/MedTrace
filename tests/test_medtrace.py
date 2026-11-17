@@ -6,7 +6,9 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -559,6 +561,26 @@ class Http(unittest.TestCase):
         self.assertEqual(len(srv.requests), 2)
         self.assertEqual(schema_errors(r.record), [])
 
+    def test_reserve_skips_repair(self):
+        p, _ = pipe({"wrong_number": 1.0}, repair_call=True, time_reserve=1.0)
+        r = p.run_case(parse_case(CASE, 0), deadline=time.monotonic() + 0.5)
+        self.assertEqual(r.status, "ok")
+        self.assertIn("repair", r.log.get("time_budget_skipped", []))
+
+    def test_no_deadline_never_skips(self):
+        p, _ = pipe({"wrong_number": 1.0}, repair_call=True)
+        r = p.run_case(parse_case(CASE, 0))
+        self.assertNotIn("time_budget_skipped", r.log)
+
+    def test_case_timeout_falls_back(self):
+        os.environ["MOCK_SLOW_SECONDS"] = "3"
+        srv = self._srv(http_faults={"slow": 1.0})
+        c = cfg(api_base=self._url(srv), max_retries=0)
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0), deadline=time.monotonic() + 2.0)
+        self.assertEqual(r.status, "fallback")
+        self.assertEqual(schema_errors(r.record), [])
+        self.assertEqual(len(srv.requests), 1)
+
 
 class EndToEnd(unittest.TestCase):
     def _run(self, doc, env=None, raw=None):
@@ -582,6 +604,28 @@ class EndToEnd(unittest.TestCase):
         events = [json.loads(l)["event"] for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
         self.assertEqual(events.count("case"), 7)
 
+    def test_output_aliases_byte_identical(self):
+        p, out, d = self._run([CASE, dict(CASE, case_id="C2")], {"OUTPUT_ALIASES": "results.json"})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        alias = d / "results.json"
+        self.assertTrue(alias.exists())
+        self.assertEqual(alias.read_bytes(), out.read_bytes())
+        self.assertEqual(schema_errors(json.loads(alias.read_text("utf-8"))[0]), [])
+        self.assertFalse([f for f in os.listdir(d) if f.startswith(".tmp_")])
+
+    def test_alias_same_dir_and_dedupe(self):
+        p, out, d = self._run([CASE], {"OUTPUT_ALIASES": "sub/results.json,results.json,output.json"})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertTrue((d / "results.json").exists())
+        self.assertEqual((d / "results.json").read_bytes(), out.read_bytes())
+        self.assertFalse((d / "sub").exists())
+
+    def test_no_alias_unchanged(self):
+        p, out, d = self._run([CASE])
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertTrue(out.exists())
+        self.assertFalse((d / "results.json").exists())
+
     def test_run_end_carries_totals(self):
         srv = make_server(0, mock=MockLLM(), seed=3, usage={"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12})
         threading.Thread(target=srv.serve_forever, daemon=True).start()
@@ -596,6 +640,16 @@ class EndToEnd(unittest.TestCase):
         for k in ("prompt_tokens", "completion_tokens", "total_tokens", "calls", "http_attempts", "retries"):
             self.assertEqual(end[k], sum(c.get(k, 0) for c in cases))
         self.assertGreater(end["total_tokens"], 0)
+
+    def test_run_end_latency_summary(self):
+        p, out, d = self._run([CASE, dict(CASE, case_id="C2")])
+        self.assertEqual(p.returncode, 0, p.stderr)
+        events = [json.loads(l) for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
+        end = [e for e in events if e["event"] == "run_end"][-1]
+        self.assertIn("latency_p50", end)
+        self.assertIn("latency_max", end)
+        self.assertGreaterEqual(end["latency_max"], end["latency_p50"])
+        self.assertGreaterEqual(end["latency_p50"], 0.0)
 
     def test_fatal_inputs_exit_1(self):
         p, out, _ = self._run(None, raw="{broken")
@@ -647,6 +701,50 @@ class EndToEnd(unittest.TestCase):
         p, out, _ = self._run([dict(CASE, case_id=i) for i in range(4)], {"TOTAL_TIMEOUT": "0.001"})
         self.assertEqual(p.returncode, 0)
         self.assertEqual([r["case_id"] for r in json.loads(out.read_text("utf-8"))], [0, 1, 2, 3])
+
+
+class Docs(unittest.TestCase):
+    def test_no_commercial_endpoint_example(self):
+        for f in ("README.md", ".env.example", "docs/REQUIREMENTS.md", "docs/REPORT.md"):
+            self.assertNotIn("dashscope", (ROOT / f).read_text("utf-8").lower(), f)
+
+
+class Packaging(unittest.TestCase):
+    def setUp(self):
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import build_submission as B
+        self.B = B
+
+    def test_requirements_in_sync(self):
+        lines = lambda p: [l.strip() for l in (ROOT / p).read_text("utf-8").splitlines() if l.strip()]
+        self.assertEqual(lines("requirements.txt"), lines("requires.txt"))
+
+    def test_zip_whitelist(self):
+        d = Path(tempfile.mkdtemp())
+        names, total = self.B.build_zip(ROOT, d / "sub.zip")
+        for expected in ("main.py", "medtrace/prompts/v2/zh/a1.txt", "docs/RESOURCE_REGISTRATION.md", "input.example.json"):
+            self.assertIn(expected, names)
+        self.assertNotIn(".env", names)
+        for n in names:
+            self.assertFalse(n.startswith(("eval/", "data/", "data_pipeline/", "tests/")))
+            self.assertNotIn("__pycache__", n)
+            self.assertNotIn(".DS_Store", n)
+            self.assertFalse(n.endswith(".pyc"))
+        self.assertGreater(total, 0)
+
+    def test_zip_smoke_run(self):
+        d = Path(tempfile.mkdtemp())
+        self.B.build_zip(ROOT, d / "sub.zip")
+        ext = d / "unzipped"
+        with zipfile.ZipFile(d / "sub.zip") as zf:
+            zf.extractall(ext)
+        env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "OUTPUT_", "PIPELINE", "MOCK_"))}
+        env["LLM_API_BASE"] = "mock://"
+        p = subprocess.run([sys.executable, "main.py", "--input", "input.example.json", "--output", "output.json"],
+                           cwd=ext, env=env, capture_output=True, text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        recs = json.loads((ext / "output.json").read_text("utf-8"))
+        self.assertEqual(schema_errors(recs[0]), [])
 
 
 if __name__ == "__main__":

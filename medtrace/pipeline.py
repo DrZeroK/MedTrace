@@ -163,10 +163,16 @@ class Pipeline:
     # ---------------------------------------------------------------- internals
     def _generate_and_verify(self, case, L, variant, lang, stats, deadline, changes, log):
         tr = _I18N[lang]
+        low_time = lambda: deadline is not None and deadline - time.monotonic() < self.cfg.time_reserve
+        skip = lambda step: log.setdefault("time_budget_skipped", []).append(step)
         common = dict(lang=tr["lang"], cutoff=case.cutoff_raw if case.cutoff_raw not in (None, "") else tr["no_cutoff"],
                       sources=sources_block(case))
         system = load_prompt("system", lang)
-        problems = self._extract(case, system, common, lang, stats, deadline, log) if variant == "S2" else ""
+        if variant == "S2" and low_time():
+            skip("extract")
+            problems = ""
+        else:
+            problems = self._extract(case, system, common, lang, stats, deadline, log) if variant == "S2" else ""
         if variant == "A0":
             user = fill(load_prompt("a0", lang), **common)
         else:
@@ -181,6 +187,9 @@ class Pipeline:
                 log.setdefault("parse_errors", []).append(str(e))
                 if attempt == 2:
                     raise
+                if low_time():
+                    skip("regenerate")
+                    raise
         log["raw_parse_retries"] = len(log.get("parse_errors", []))
         initial = V.verify_note(note, case, L)
         if variant in ("A0", "A1"):
@@ -190,6 +199,9 @@ class Pipeline:
         actionable = [f for f in findings if f.severity in (V.HIGH, V.MEDIUM) and f.section in SECTIONS and f.index >= 0]
         mode = ("review" if variant == "A3" else
                 "repair" if self.cfg.repair_call and any(f.severity == V.HIGH for f in findings) else None)
+        if mode and low_time():
+            skip(mode)
+            mode = None
         if mode:
             try:
                 user = fill(load_prompt(mode, lang), draft=_draft_json(note),

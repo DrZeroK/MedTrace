@@ -12,7 +12,7 @@ re-verified against the code on the date above.
 | Working branch | `medtrace-pipeline` (all current work; **not merged** into `master` beyond PR #1) |
 | State audited | commit `69640e1` (merge of `master` into `medtrace-pipeline`); this file is added in the commit after it |
 | `master` | `149d906`: PR #1 (first pipeline version + 3 review fixes) plus the competition Q&A docs. About 20 later commits on `medtrace-pipeline` are not on `master` |
-| Open pull requests | none (PR #1 merged) |
+| Open pull requests | #2 (`medtrace-pipeline` → `master`); PR #1 merged |
 | `AGENTS.md` / `CLAUDE.md` | none in the repository |
 
 Local-only, git-ignored material that a fresh clone will **not** have:
@@ -28,7 +28,7 @@ Commands were run from the repository root with Python 3.13.
 
 | Check | Command | Result |
 |---|---|---|
-| Unit / integration tests | `env -u LLM_API_BASE python -m unittest discover -s tests` | 50 tests, all pass (about 4 s) |
+| Unit / integration tests | `env -u LLM_API_BASE python -m unittest discover -s tests` | 70 tests, all pass (about 10 s) |
 | End-to-end on mock | `LLM_API_BASE=mock:// python main.py --input input.example.json --output /tmp/out.json` | exit 0, 1 case, schema-valid |
 | Runtime import chain | import `medtrace.runner` and list loaded project modules | only `medtrace.*`; `eval/` and `data_pipeline/` are not imported at run time |
 | Request payload | local HTTP capture of one `LLMClient.chat` call | `POST {base}/chat/completions` with `model, messages, temperature, stream=false`; `response_format` only if `LLM_JSON_MODE=1`; anything in `LLM_EXTRA_BODY` is merged at top level (so `seed` and `chat_template_kwargs` *can* be sent, but only through that generic JSON option) |
@@ -54,9 +54,9 @@ document URL or version). Later official specifications override it.
 | C3 | Local knowledge bases, rule bases, retrieval and multi-stage algorithms are permitted if lawfully sourced, version-pinned, bundled and offline (Q1) | No knowledge base or retrieval exists. The verifier is rule code, not a registered resource |
 | C4 | Resources must be registered (name, source, version, purpose, size, dependencies); teams with none state "None" (Q2). Template pending | No registration document exists (WP-4) |
 | C5 | Complete dependency documentation "such as `requirements.txt`" (Q3) | Only `requires.txt` exists (name taken from the original project brief). No `requirements.txt` (WP-4) |
-| C6 | `seed` may be passed at the top level of the request body; may be omitted with an explanation if unsupported (Q4) | Not a first-class setting; possible via `LLM_EXTRA_BODY` (WP-1) |
-| C7 | Thinking is controlled with `chat_template_kwargs: {"enable_thinking": false}`; omission means the server default, which is not necessarily "off" (Q7) | Not first-class; possible via `LLM_EXTRA_BODY` (WP-1) |
-| C8 | Retries initiated by the participant's algorithm count toward the model-call budget, in principle (Q5) | **Not compliant in accounting:** `MAX_CALLS_PER_CASE` counts logical calls only; up to `LLM_MAX_RETRIES` extra HTTP attempts per call are not counted against it (WP-2) |
+| C6 | `seed` may be passed at the top level of the request body; may be omitted with an explanation if unsupported (Q4) | **Done (WP-1, 0aaad62):** first-class `LLM_SEED`, sent top-level when set, omitted otherwise |
+| C7 | Thinking is controlled with `chat_template_kwargs: {"enable_thinking": false}`; omission means the server default, which is not necessarily "off" (Q7) | **Done (WP-1, 0aaad62):** first-class `LLM_ENABLE_THINKING`, sent as `chat_template_kwargs` when set, omitted otherwise |
+| C8 | Retries initiated by the participant's algorithm count toward the model-call budget, in principle (Q5) | **Done (WP-2, 0aaad62):** `MAX_REQUESTS_PER_CASE` counts every HTTP attempt incl. retries (default 0 = unlimited until the organiser publishes a limit); `MAX_CALLS_PER_CASE` still counts logical calls |
 
 ### 3.2 Permitted in principle, subject to the deployed version / unified API specification
 

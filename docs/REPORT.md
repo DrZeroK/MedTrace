@@ -5,12 +5,12 @@
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic
 fact ledger and verifier, an offline mock model with fault injection, an evaluation set of 16 annotated synthetic
 cases (11 development, 5 held out; 12 English, 4 Chinese; two per category), 7 one-fact perturbation tests,
-ablation / perturbation / blinded-review tooling, and 50 automated tests.
+ablation / perturbation / blinded-review tooling, and 70 automated tests.
 
 ## 2. What has been measured — and what has not
 
-Sections 2.1–2.5 use the mock model or no model at all; section 2.6 has the first results with the designated
-model. In 2.1–2.4 every number comes from the mock model, which copies record sentences and adds template reasoning. The mock results answer two
+Sections 2.1–2.5 use the mock model or no model at all; section 2.6 has the first results with a
+**non-designated commercial model** (qwen4-max) on public data only — nothing has run on the designated competition service. In 2.1–2.4 every number comes from the mock model, which copies record sentences and adds template reasoning. The mock results answer two
 engineering questions only: does the software hold up under failures, and does the deterministic verifier catch
 known error types?
 
@@ -103,7 +103,7 @@ The two systematic errors were "无明显诱因出现咳嗽" (a fixed phrase wro
 answer, measurement coverage and verifier findings per variant. It has only been run with the mock (mechanics:
 26/26 dev cases completed, schema-valid); the mock does not reason, so there are **no model results yet**.
 
-### 2.6 First results with the designated model (qwen4-max)
+### 2.6 First results with a non-designated commercial model (qwen4-max, public data only)
 
 Setting: CMB-Clin dev split, 26 cases (20 eligible for diagnosis scoring), prompts v1, temperature 0, one run per
 variant, model default reasoning on. Run directories `eval/results/qwen4max_dev_v1` (A0) and

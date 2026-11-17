@@ -89,6 +89,8 @@ class Config:
                                     # on real qwen4-max output it fired only on verifier false alarms (docs/REPORT.md 2.6)
     case_timeout: float = 0.0       # 0 => unlimited
     total_timeout: float = 0.0      # 0 => unlimited
+    time_reserve: float = 2.0       # seconds of headroom; only used when a case/total deadline exists. Below it, optional
+                                    # model steps (extract/regenerate/repair/review) are skipped. Our safety margin, not an official limit.
     workers: int = 1
     cutoff_mode: str = "redact"     # redact | flag | off
     output_lang: str = "auto"       # auto | en | zh
@@ -98,6 +100,7 @@ class Config:
     output_envelope: str = "auto"   # auto | list | <key name>
     output_field_map: dict = field(default_factory=dict)
     output_fields: list = field(default_factory=list)   # empty => all
+    output_aliases: list = field(default_factory=list)  # extra filenames written beside the primary after every atomic write (Q9)
     on_unresolved: str = "flag"     # flag | drop
     checkpoint: bool = True
     strict_exit: bool = False
@@ -131,6 +134,7 @@ def load_config(**overrides) -> Config:
         repair_call=_flag("REPAIR_CALL"),
         case_timeout=_num(float, "CASE_TIMEOUT", default=0.0),
         total_timeout=_num(float, "TOTAL_TIMEOUT", default=0.0),
+        time_reserve=_num(float, "TIME_RESERVE_SECONDS", default=2.0),
         workers=max(1, _num(int, "WORKERS", default=1)),
         cutoff_mode=str(_get("CUTOFF_MODE", default="redact")).lower(),
         output_lang=str(_get("OUTPUT_LANG", default="auto")).lower(),
@@ -149,6 +153,7 @@ def load_config(**overrides) -> Config:
             val = {}
         setattr(c, attr, val if isinstance(val, dict) else {})
     c.output_fields = [f.strip() for f in str(_get("OUTPUT_FIELDS", default="")).split(",") if f.strip()]
+    c.output_aliases = [a.strip() for a in str(_get("OUTPUT_ALIASES", default="")).split(",") if a.strip()]
     for k, v in overrides.items():
         if v is not None:
             setattr(c, k, v)

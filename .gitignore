@@ -3,9 +3,11 @@ __pycache__/
 *.pyc
 logs/
 output.json
+results.json
 /input.json
 eval/results/
 data/raw/
 .venv/
+dist/
 data/standardized/typicalcase_dc/cases.json
 data/standardized/typicalcase_dc/references.json
