@@ -196,7 +196,7 @@ _NEG_PRE = re.compile(
     #  - "无尿" alone is anuria (a positive finding) but "无尿频、尿急、尿痛" is a negated list
     r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触)|不伴|没有"
     r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
-_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)")
+_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
                      r"reported|has|had|presents?|complains?|with|positive|present)\b")
 _END_ZH = re.compile(r"[，,；;。！？（(]|但|伴有")
@@ -292,8 +292,8 @@ def clearly_positive_text(sentence: str) -> str:
     sentences often continue a negated list across commas ("未见乳头凹陷，皮肤改变、酒窝征等"), so anything after a
     cue is ambiguous; use this view when a false alarm is worse than a miss."""
     m = _NEG_PRE.search(sentence)
-    head = sentence[:m.start()] if m else sentence
-    return positive_text(head)
+    pos = positive_text(sentence)          # computed on the whole sentence so that "X：无" still negates X
+    return pos[:m.start()] if m else pos
 
 
 def term_positive_in(term: str, sentence: str) -> bool:
@@ -330,7 +330,8 @@ _DONE = re.compile(r"(?i)\b(?:was|were|has been|have been|had been)\s+(?:\w+ly\s
 _CERTAIN = re.compile(r"(?i)\b(?:confirmed|definite(?:ly)?|definitive|diagnostic of|certainly)\b|确诊|明确诊断|诊断明确")
 _MISSING = re.compile(r"(?i)\b(?:pending|not (?:yet )?(?:available|done|performed|obtained|documented|resulted|known|recorded)|"
                       r"unknown|unavailable|awaiting|unable to (?:obtain|recall)|not on file|to be (?:obtained|confirmed))\b"
-                      r"|未查|未做|未提供|不详|未测|待查|结果未回|未回报|待回报|未记录|无法提供|待完善")
+                      r"|未查|未做|未提供|不详|未测|待查|结果未回|未回报|待回报|未记录|未记载|无法提供|待完善|缺少|缺失|尚缺|暂缺"
+                      r"|(?:无|未见|未获得|没有)[^，,。；;]{0,30}(?:记录|资料|结果|报告|信息|描述)")
 _UNCERTAIN = re.compile(r"(?i)\b(?:possibl[ey]|probabl[ey]|suspected|suspicious|likely|cannot (?:be )?exclude[d]?|"
                         r"rule out|r/o|query|questionable|appears?|may (?:be|represent)|\?)\b|\?|？|可能|考虑|疑似|待排|不除外|可疑")
 

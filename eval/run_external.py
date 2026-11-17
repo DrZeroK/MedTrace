@@ -73,10 +73,11 @@ def main(argv=None) -> int:
     ap.add_argument("--name", default=time.strftime("ext_%Y%m%d_%H%M%S"))
     ap.add_argument("--limit", type=int, default=0, help="deterministic pseudo-random subset of this size")
     ap.add_argument("--tier", default="", help="comma list of quality tiers to include, e.g. A or A,B (default: all usable)")
+    ap.add_argument("--mock", action="store_true", help="force the offline mock model even if .env configures a real endpoint")
     ap.add_argument("--workers", type=int, default=1, help="cases in parallel (mind the provider's rate limits)")
     a = ap.parse_args(argv)
     cfg0 = load_config()
-    if not cfg0.api_base:
+    if a.mock or not cfg0.api_base:
         cfg0.api_base = "mock://"
     is_mock = cfg0.api_base.startswith("mock")
     items = load_dataset(a.dataset, a.split, a.tier, a.limit)

@@ -39,9 +39,9 @@ def parse_faults(spec: str) -> dict:
     return {k.strip(): float(v) for k, v in (p.split(":", 1) for p in spec.split(",") if ":" in p)}
 
 
-def run(variants, cases, faults, seed, budget=None, workers=1):
+def run(variants, cases, faults, seed, budget=None, workers=1, mock=False):
     cfg0 = load_config()
-    if not cfg0.api_base:
+    if mock or faults or not cfg0.api_base:      # fault injection only exists in the mock: never send such a run to a real model
         cfg0.api_base = "mock://"
     is_mock = cfg0.api_base.startswith("mock")
     rows, outputs = [], {v: [] for v in variants}
@@ -125,11 +125,12 @@ def main(argv=None) -> int:
     ap.add_argument("--faults", default="", help="mock only: fault:prob,...")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--budget", type=int, default=0, help="override per-variant model-call budget")
+    ap.add_argument("--mock", action="store_true", help="force the offline mock model even if .env configures a real endpoint")
     ap.add_argument("--workers", type=int, default=1, help="cases in parallel (mind the provider's rate limits)")
     a = ap.parse_args(argv)
     variants = [v.strip().upper() for v in a.variants.split(",") if v.strip()]
     cases = load_eval_cases(a.split)
-    rows, outputs, cfg = run(variants, cases, parse_faults(a.faults), a.seed, a.budget or None, a.workers)
+    rows, outputs, cfg = run(variants, cases, parse_faults(a.faults), a.seed, a.budget or None, a.workers, a.mock)
     out = HERE / "results" / a.name
     out.mkdir(parents=True, exist_ok=True)
     with open(out / "per_case.csv", "w", newline="", encoding="utf-8") as f:

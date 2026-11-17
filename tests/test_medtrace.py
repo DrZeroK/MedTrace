@@ -240,6 +240,10 @@ class ChineseAndNewChecks(unittest.TestCase):
         self.assertEqual(codes("未见皮肤改变、酒窝征。", sources=("a",), case=src), set())                 # ambiguous source list: not flagged
         self.assertEqual(codes("肝内胆管远端分支无扩张。", sources=("a",), case=src), set())               # site-dependent finding
         self.assertEqual(codes("资料中未提供体温、血压等生命体征。", sources=("a",), case=src), set())     # 高血压病史 is not a reading
+        self.assertEqual(codes("本次资料中无体格检查记录，亦无血常规等化验结果。", sources=("a",), case=src), set())
+        self.assertEqual(T.negated_terms("重要阴性表现：体温正常"), [])
+        self.assertEqual(codes("骨巨细胞瘤好发于20~40岁，需完善24小时尿检查。", "diagnostic_discussion", sources=("a",), case=src), set())
+        self.assertIn("number_not_in_source", codes("直接胆红素约占总胆红素68%。", "diagnostic_discussion", sources=("a",), case=src))
 
     def test_only_denied_history_counts_as_conflict(self):
         L = build_ledger(parse_case(self.ZH, 0))

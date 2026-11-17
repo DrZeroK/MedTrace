@@ -63,9 +63,10 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     # ---- numbers and units
     if sec in ("features", "discussion"):
         for val, unit, raw in T.extract_numbers(T.mask_dates(text, year or 2000)):
+            if sec == "discussion" and unit is None:
+                continue      # reasoning text legitimately carries knowledge numbers (ages, scores, "24小时尿", "11β-…");
+                              # only unit-bearing values are checked there
             if val not in L.numbers:
-                if sec == "discussion" and unit is None and val <= 10:
-                    continue  # scores / counts in reasoning text
                 add("number_not_in_source", HIGH if sec == "features" else MEDIUM,
                     f"value {raw!r} does not appear in the records")
             elif unit and L.units.get(val) and unit not in L.units[val]:

@@ -5158,7 +5158,7 @@
    "complexity": "medium",
    "n_chars": 615,
    "n_measurements": 14,
-   "n_negative_statements": 5
+   "n_negative_statements": 6
   },
   "quality": {
    "tier": "A",
@@ -5326,6 +5326,10 @@
     {
      "source_id": "cmbclin-032-exam",
      "text": "腹部平坦，未见胃肠型及蠕动波，未见腹壁静脉曲张，全腹软，无压痛、反跳痛及肌紧张，腹部无包块，肝脾肋下未触及，Murphy（-），肾区无叩痛，移动性浊音（-），肠鸣音存，5次/分，未闻及高调肠鸣音。"
+    },
+    {
+     "source_id": "cmbclin-032-aux",
+     "text": "血常规:（-）"
     }
    ],
    "pending": [],
@@ -7677,7 +7681,7 @@
    "complexity": "high",
    "n_chars": 1301,
    "n_measurements": 22,
-   "n_negative_statements": 12
+   "n_negative_statements": 16
   },
   "quality": {
    "tier": "B",
@@ -7885,7 +7889,15 @@
     },
     {
      "source_id": "cmbclin-048-exam",
+     "text": "触诊：语颤：正常        胸膜摩擦感：正常       皮下捻发感：无"
+    },
+    {
+     "source_id": "cmbclin-048-exam",
      "text": "听诊：呼吸音：正常   啰音：无      语音传导：正常       胸膜摩擦音：无"
+    },
+    {
+     "source_id": "cmbclin-048-exam2",
+     "text": "视诊：外形：平坦            胃型：无"
     },
     {
      "source_id": "cmbclin-048-exam2",
@@ -7894,6 +7906,10 @@
     {
      "source_id": "cmbclin-048-exam2",
      "text": "手术瘢痕：无"
+    },
+    {
+     "source_id": "cmbclin-048-exam2",
+     "text": "听诊：肠鸣音：正常        气过水声：无"
     },
     {
      "source_id": "cmbclin-048-exam2",
@@ -7906,6 +7922,10 @@
     {
      "source_id": "cmbclin-048-exam2",
      "text": "叩诊：腹部包块：无"
+    },
+    {
+     "source_id": "cmbclin-048-exam2",
+     "text": "移动性浊音：阴性"
     },
     {
      "source_id": "cmbclin-048-exam2",
@@ -10329,7 +10349,7 @@
    "complexity": "high",
    "n_chars": 567,
    "n_measurements": 16,
-   "n_negative_statements": 6
+   "n_negative_statements": 7
   },
   "quality": {
    "tier": "A",
@@ -10503,6 +10523,10 @@
     {
      "source_id": "cmbclin-062-aux",
      "text": "尿液分析：尿比重 1.030，尿白细胞（-），尿潜血（-）,尿蛋白（-）"
+    },
+    {
+     "source_id": "cmbclin-062-aux",
+     "text": "大便潜血：（+），胃潜血：（-）"
     },
     {
      "source_id": "cmbclin-062-lab",
