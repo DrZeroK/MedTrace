@@ -8,11 +8,21 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, field, asdict
+from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PIPELINES = ("A0", "A1", "A2", "S2", "A3")  # A2 == strategy S1 (default), A3 == strategy S3
-PROMPT_VERSION = "v1"
+DEFAULT_PROMPT_VERSION = "v2"
+
+
+@lru_cache(maxsize=1)
+def prompt_version() -> str:
+    """v2 concise (default) | v1 original long-form. Resolved on first use, after .env is read: evaluating this
+    at import time silently ignored a PROMPT_VERSION that lives only in .env (modules import before load_config).
+    Call .cache_clear() if the environment changes within one process."""
+    load_dotenv_files()
+    return str(_get("PROMPT_VERSION", default=DEFAULT_PROMPT_VERSION)).strip() or DEFAULT_PROMPT_VERSION
 
 
 def load_dotenv_files() -> None:
@@ -33,7 +43,7 @@ def load_dotenv_files() -> None:
 def _get(*names, default=None):
     for n in names:
         v = os.environ.get(n)
-        if v is not None and v != "":
+        if v is not None and v.strip() != "" and not v.lstrip().startswith("#"):
             return v
     return default
 
@@ -57,14 +67,17 @@ class Config:
     api_base: str = ""
     api_key: str = field(default="", repr=False)
     model: str = ""
-    timeout: float = 120.0          # seconds per HTTP request
+    timeout: float = 600.0          # seconds per HTTP request (reasoning models need minutes, see .env.example)
     max_retries: int = 2            # HTTP-level retries per model call (transient errors only)
     retry_backoff: float = 2.0
     temperature: float = 0.0
     max_tokens: int = 0             # 0 => omit, use server default
     json_mode: bool = False         # send response_format=json_object if the endpoint supports it
+    extra_body: dict = field(default_factory=dict)   # merged into every request (provider-specific switches)
     pipeline: str = "A2"
-    max_calls_per_case: int = 2     # logical model calls (generation + optional repair/review)
+    max_calls_per_case: int = 2     # logical model calls (generation, one regeneration on unparseable output, optional repair/review)
+    repair_call: bool = True        # A2: targeted repair call on high-severity findings. load_config() defaults it OFF:
+                                    # on real qwen4-max output it fired only on verifier false alarms (docs/REPORT.md 2.6)
     case_timeout: float = 0.0       # 0 => unlimited
     total_timeout: float = 0.0      # 0 => unlimited
     workers: int = 1
@@ -95,7 +108,7 @@ def load_config(**overrides) -> Config:
         api_base=_get("LLM_API_BASE", "OPENAI_API_BASE", "OPENAI_BASE_URL", "API_BASE", "BASE_URL", default=""),
         api_key=_get("LLM_API_KEY", "OPENAI_API_KEY", "API_KEY", default=""),
         model=_get("LLM_MODEL", "MODEL_NAME", "MODEL", default=""),
-        timeout=_num(float, "LLM_TIMEOUT", default=120.0),
+        timeout=_num(float, "LLM_TIMEOUT", default=600.0),
         max_retries=_num(int, "LLM_MAX_RETRIES", default=2),
         retry_backoff=_num(float, "LLM_RETRY_BACKOFF", default=2.0),
         temperature=_num(float, "LLM_TEMPERATURE", default=0.0),
@@ -103,6 +116,7 @@ def load_config(**overrides) -> Config:
         json_mode=_flag("LLM_JSON_MODE"),
         pipeline=str(_get("PIPELINE", default="A2")).upper(),
         max_calls_per_case=_num(int, "MAX_CALLS_PER_CASE", default=2),
+        repair_call=_flag("REPAIR_CALL"),
         case_timeout=_num(float, "CASE_TIMEOUT", default=0.0),
         total_timeout=_num(float, "TOTAL_TIMEOUT", default=0.0),
         workers=max(1, _num(int, "WORKERS", default=1)),
@@ -116,10 +130,12 @@ def load_config(**overrides) -> Config:
         checkpoint=_flag("CHECKPOINT", default=True),
         strict_exit=_flag("STRICT_EXIT"),
     )
-    try:
-        c.output_field_map = json.loads(_get("OUTPUT_FIELD_MAP", default="{}"))
-    except ValueError:
-        c.output_field_map = {}
+    for attr, var in (("output_field_map", "OUTPUT_FIELD_MAP"), ("extra_body", "LLM_EXTRA_BODY")):
+        try:
+            val = json.loads(_get(var, default="{}"))
+        except ValueError:
+            val = {}
+        setattr(c, attr, val if isinstance(val, dict) else {})
     c.output_fields = [f.strip() for f in str(_get("OUTPUT_FIELDS", default="")).split(",") if f.strip()]
     for k, v in overrides.items():
         if v is not None:

@@ -32,7 +32,8 @@ _CATS = [(n, re.compile(p)) for n, p in _CATS]
 _CORE = [
     ("allergy", r"(?i)allerg|nkda|过敏", "Drug allergy status", "药物过敏史"),
     ("medication", r"(?i)\bmedications?\b|\bmeds\b|\btaking\b|\bon [a-z]+ \d|\bmg\b|用药|服用|口服|服药", "Current medications", "当前用药情况"),
-    ("vitals", r"(?i)\b(?:bp|blood pressure|hr|heart rate|pulse|spo2|temp(?:erature)?)\b|血压|心率|体温|脉搏|血氧", "Vital signs", "生命体征"),
+    # a vital sign counts as documented only with a value next to it ("高血压病史" is not a blood pressure reading)
+    ("vitals", r"(?i)(?:\b(?:bp|blood pressure|hr|heart rate|pulse|spo2|temp(?:erature)?|t|p|r)\b|血压|心率|体温|脉搏|血氧)[^\n，,。；;]{0,10}?\d", "Vital signs", "生命体征"),
 ]
 _LABEL_EN = re.compile(r"([A-Za-z][A-Za-z0-9\-]*(?:\s+[A-Za-z][A-Za-z0-9\-]*)?)\s*(?:[:=(]|is|was|of|at)?\s*$")
 _LABEL_ZH = re.compile(r"([一-鿿A-Za-z0-9]{2,8})\s*[:：为是]?\s*$")
@@ -60,10 +61,12 @@ class Ledger:
     neg_terms: dict = field(default_factory=dict)       # term -> [fid]
     neg_only: set = field(default_factory=set)          # negated and never asserted positively
     pos_text: str = ""                                  # all source text with negated spans blanked
+    clear_pos_text: str = ""                            # only text that is positive beyond doubt (see textutil)
     all_text: str = ""
     tokens_all: set = field(default_factory=set)
     tokens_by_source: dict = field(default_factory=dict)
     conflicts: list = field(default_factory=list)       # [{kind, detail, sources}]
+    label_values: dict = field(default_factory=dict)    # measurement label -> {values recorded under that label}
     undocumented: list = field(default_factory=list)    # core elements with no mention at all
     lang: str = "en"
 
@@ -86,8 +89,8 @@ def _label(prefix: str) -> str:
     return " ".join(words)[-24:]
 
 
-def _numerics(sent: str, year) -> list[dict]:
-    masked = T.mask_dates(sent, year)
+def numerics(sent: str, year) -> list[dict]:
+    masked = T.fw(T.mask_dates(sent, year))
     out = []
     for m in T._NUM_STRICT.finditer(masked):
         unit = T.norm_unit(m.group(2))
@@ -102,20 +105,23 @@ def build_ledger(case: Case) -> Ledger:
     L = Ledger(lang=case.lang)
     year = case.cutoff.year if case.cutoff else None
     n = 0
-    pos_parts = []
+    pos_parts, clear_parts = [], []
     for src in case.sources:
         L.tokens_by_source[src.sid] = T.tokens(src.content)
         L.numbers |= T.all_number_values(src.content)
+        for val, units in T.all_number_units(src.content).items():
+            L.units.setdefault(val, set()).update(units)
         for dt, _, _, _ in T.find_dates(src.content, year):
             L.dates.add(dt.date())
         for sent in T.split_sentences(src.content):
             n += 1
             f = Fact(fid=f"F{n}", sid=src.sid, text=sent, category=_category(sent))
-            f.numerics = _numerics(sent, year)
+            f.numerics = numerics(sent, year)
             f.dates = [d[0] for d in T.find_dates(sent, year)]
             f.neg_terms = T.negated_terms(sent)
             pos = T.positive_text(sent)
             pos_parts.append(pos)
+            clear_parts.append(T.clearly_positive_text(sent))
             if T.has_missing_cue(sent):
                 f.polarity = "missing"
             elif f.neg_terms:
@@ -124,11 +130,14 @@ def build_ledger(case: Case) -> Ledger:
                 f.polarity = "uncertain"
             for num in f.numerics:
                 L.units.setdefault(num["value"], set()).add(num["unit"])
+                if len(num["label"]) >= 2:
+                    L.label_values.setdefault(num["label"], set()).add(num["value"])
             for t in f.neg_terms:
                 L.neg_terms.setdefault(t, []).append(f.fid)
             L.facts.append(f)
     L.all_text = case.text.lower()
     L.pos_text = "\n".join(pos_parts)
+    L.clear_pos_text = "\n".join(clear_parts)
     L.tokens_all = set().union(*L.tokens_by_source.values()) if L.tokens_by_source else set()
     L.neg_only = {t for t in L.neg_terms if t not in L.pos_text}
     _find_conflicts(L)
@@ -138,19 +147,42 @@ def build_ledger(case: Case) -> Ledger:
     return L
 
 
+# A denied history is only contradicted by a statement that asserts the condition. Seen on 2,578 real case reports:
+# most "contradictions" were the term inside a test name ("肝炎标志物…未见异常", "肿瘤指标…无异常", "丙型肝炎病毒抗体 0.12").
+_TEST_SUFFIX = re.compile(r"^(?:病毒)?(?:标志物|抗体|抗原|指标|相关|检测|筛查|系列|全套|谱|dna|rna|病毒|史|家族史)", re.I)
+_NEG_RESULT = re.compile(r"(?i)未见(?:明显)?异常|无异常|阴性|无阳性|正常|排除|除外|待排|negative|normal|unremarkable|ruled out")
+
+
+_GENERIC_TERMS = {"药物", "食物", "其他", "其它", "异常", "不适", "特殊", "家族", "drug", "food", "other"}   # list fragments, not conditions
+
+
+def _asserts(term: str, text: str) -> bool:
+    pos = T.positive_text(text)
+    i = pos.find(term)
+    while i >= 0:
+        after = pos[i + len(term):]
+        if not _TEST_SUFFIX.match(after) and not _NEG_RESULT.search(after[:60]):
+            return True
+        i = pos.find(term, i + 1)
+    return False
+
+
 def _find_conflicts(L: Ledger) -> None:
     fact = {f.fid: f for f in L.facts}
     seen = set()
-    # (1) a finding negated in one statement and asserted in another
-    for term, fids in L.neg_terms.items():
-        if term in L.neg_only:
-            continue
-        pos = [f for f in L.facts if term in T.positive_text(f.text)]
-        if pos and term not in seen:
-            seen.add(term)
-            L.conflicts.append({"kind": "polarity", "term": term,
-                                "detail": f'"{fact[fids[0]].text}" vs "{pos[0].text}"',
-                                "sources": sorted({fact[fids[0]].sid, pos[0].sid})})
+    # (1) a history the patient explicitly denies in one source but that another source asserts.
+    #     Plain negative findings ("无头晕", "未扪及肿块") are deliberately excluded: on real records they are
+    #     site- or time-specific and "conflict" with other mentions almost always spuriously
+    #     (measured on CMB-Clin: 35 polarity flags in 74 cases, essentially all false).
+    for f in L.facts:
+        for term in T.denied_terms(f.text):
+            if term in seen or term in _GENERIC_TERMS:
+                continue
+            pos = [g for g in L.facts if g.sid != f.sid and _asserts(term, g.text)]
+            if pos:
+                seen.add(term)
+                L.conflicts.append({"kind": "polarity", "term": term, "detail": f'"{f.text}" vs "{pos[0].text}"',
+                                    "sources": sorted({f.sid, pos[0].sid})})
     # (2) same labelled measurement, same unit, different value, different source
     table: dict = {}
     for f in L.facts:

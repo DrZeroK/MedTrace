@@ -17,6 +17,18 @@ def detect_lang(text: str) -> str:
     return "zh" if len(_CJK.findall(text)) / max(1, len(text)) > 0.15 else "en"
 
 
+# Full-width forms common in Chinese records (％ ／ ． ０-９ Ａ-Ｚ) are mapped 1:1 to ASCII for *matching only*;
+# the mapping preserves length, so offsets into the original text stay valid and the text itself is never altered.
+_FW = {0xFF05: "%", 0xFF0F: "/", 0xFF0E: ".", 0xFF0B: "+", 0xFF0D: "-", 0xFF1C: "<", 0xFF1E: ">", 0x3000: " "}
+_FW.update({0xFF10 + i: str(i) for i in range(10)})
+_FW.update({0xFF21 + i: chr(65 + i) for i in range(26)})
+_FW.update({0xFF41 + i: chr(97 + i) for i in range(26)})
+
+
+def fw(text: str) -> str:
+    return (text or "").translate(_FW)
+
+
 # ---------------------------------------------------------------- sentences
 _SPLIT = re.compile(r"(?<=[。！？!?；;])|\n+|(?<=\.)\s+(?=[A-Z0-9\[(])")
 _ENUM = re.compile(r"^\s*(?:\(?\d{1,2}[.)、．]\s*(?!\d)|[-*•]\s+)")
@@ -34,7 +46,7 @@ def strip_enum(text: str) -> str:
 _MON = "jan feb mar apr may jun jul aug sep oct nov dec".split()
 _MON_RE = "(" + "|".join(_MON) + ")"
 _HM = r"(?:\s*T?\s*(\d{1,2})\s*[:：时]\s*(\d{2})(?::\d{2})?)?"
-_ISO = re.compile(r"(?<!\d)(\d{4})\s*[-/.年]\s*(\d{1,2})\s*[-/.月]\s*(\d{1,2})\s*日?" + _HM)
+_ISO = re.compile(r"(?<!\d)(\d{4})\s*[-/.年]\s*(\d{1,2})\s*[-/.月]\s*(\d{1,2})(?!\d)\s*日?" + _HM)   # (?!\d): "2023.9-2023.12" is a range, not a date
 _MD_ZH = re.compile(r"(?<![\d年])(\d{1,2})月(\d{1,2})日" + _HM)
 _EN1 = re.compile(r"\b" + _MON_RE + r"[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})"
                   r"(?:[,\s]+(?:at\s+)?(\d{1,2}):(\d{2}))?", re.I)
@@ -53,6 +65,7 @@ def _mk(y, mo, d, h, mi):
 def find_dates(text: str, default_year: int | None = None):
     """Return [(datetime, has_time, start, end)] for explicit dates in text."""
     out, taken = [], []
+    text = fw(text)
 
     def add(m, parts):
         if any(s < m.end() and m.start() < e for s, e in taken):
@@ -136,11 +149,18 @@ def is_after(dt: datetime, has_time: bool, cutoff: datetime | None) -> bool:
 _UNITS = ["mmHg", "mmol/L", "µmol/L", "μmol/L", "umol/L", "mg/dL", "g/dL", "g/L", "mg/L", "ng/mL",
           "pg/mL", "ng/L", "µg/L", "μg/L", "ug/L", "mIU/L", "IU/L", "U/L", "mEq/L", "mOsm/kg",
           "×10^9/L", "x10^9/L", "*10^9/L", "10^9/L", "×10^12/L", "x10^12/L", "*10^12/L", "10^12/L",
-          "×10⁹/L", "×10¹²/L", "L/min", "/min", "次/分", "bpm", "kPa", "%", "℃", "°C", "°F",
-          "cm", "mm", "kg", "mL", "fL", "ms"]
+          "×10⁹/L", "×10¹²/L", "×109/L", "×1012/L", "X109/L", "X1012/L", "L/min", "/min", "次/分", "bpm", "kPa", "%", "℃", "°C", "°F",
+          "cm", "mm", "kg", "mL", "fL", "ms",
+          # added after profiling real Chinese notes (MedCT-clinical-notes): doses, rates, immunoassay and pressure units
+          "mg/kg", "mg/g", "mg/d", "mg", "μg", "µg", "ug", "g", "mL/kg/h", "mL/kg", "mL/min", "m/s", "cm/s", "mm/h",
+          "cmH2O", "/μL", "/µL", "/uL", "mV", "mIU/mL", "IU/mL", "U/mL", "AU/mL", "nmol/L", "pmol/L", "copies/mL",
+          "次/天", "次/日", "h", "min", "s", "IU", "U"]
 _UNIT_ALT = "|".join(re.escape(u) for u in sorted(_UNITS, key=len, reverse=True))
 _NUM_STRICT = re.compile(r"(?<![A-Za-z0-9_.\-])(\d+(?:\.\d+)?)(?:\s*(" + _UNIT_ALT + r")(?![A-Za-z]))?", re.I)
 _NUM_ANY = re.compile(r"\d+(?:\.\d+)?")
+
+
+_ZH_NUM = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
 
 
 def norm_unit(u: str | None) -> str | None:
@@ -148,6 +168,7 @@ def norm_unit(u: str | None) -> str | None:
         return None
     u = u.lower().replace(" ", "").replace("μ", "u").replace("µ", "u")
     u = u.replace("x10", "×10").replace("*10", "×10").replace("⁹", "^9").replace("¹²", "^12")
+    u = {"×109/l": "×10^9/l", "×1012/l": "×10^12/l"}.get(u, u)      # superscript lost in the source text
     if u.startswith("10^"):
         u = "×" + u
     return {"℃": "°c", "次/分": "/min", "bpm": "/min"}.get(u, u)
@@ -156,28 +177,50 @@ def norm_unit(u: str | None) -> str | None:
 def extract_numbers(text: str) -> list[tuple[float, str | None, str]]:
     """Conservative extraction for *generated* text: (value, normalised unit, raw)."""
     return [(float(m.group(1)), norm_unit(m.group(2)), m.group(0).strip())
-            for m in _NUM_STRICT.finditer(text or "")]
+            for m in _NUM_STRICT.finditer(fw(text))]
+
+
+_NUM_UNIT_ANY = re.compile(r"(\d+(?:\.\d+)?)\s*(" + _UNIT_ALT + r")(?![A-Za-z])", re.I)
+
+
+def all_number_units(text: str) -> dict:
+    """Permissive value -> {units} map for *source* text. Records often glue the label to the number ("R20次/分"),
+    which the strict extractor skips; missing that unit made a correct "R 20次/分" look like a unit mismatch."""
+    out: dict = {}
+    for m in _NUM_UNIT_ANY.finditer(fw(text)):
+        out.setdefault(float(m.group(1)), set()).add(norm_unit(m.group(2)))
+    return out
 
 
 def all_number_values(text: str) -> set[float]:
     """Permissive extraction for *source* text (superset => fewer false alarms)."""
-    return {float(x) for x in _NUM_ANY.findall(text or "")}
+    vals = {float(x) for x in _NUM_ANY.findall(fw(text))}
+    vals |= {float(_ZH_NUM[ch]) for ch in set(text or "") if ch in _ZH_NUM}
+    return vals
 
 
 # ----------------------------------------------------------------- negation
 _NEG_PRE = re.compile(
     r"(?i)\b(?:no evidence of|no history of|no known|no signs? of|negative for|absence of|free of|"
     r"denies|denied|deny|without|never had|(?:does|did|do|has|have|had|is|was|are|were)\s+not|no|nor)\b"
-    r"|否认|未见|未闻及|未触及|未扪及|未及|未发现|未引出|未诉|不伴|没有|无(?!力|尿|菌|创|法|效|关|名|需|论|痛性)")
-_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性|[（(]\s*[-－—]\s*[）)]")
+    # Chinese cues, tuned on CHIP-CDEE train (real EMR sentences with polarity labels):
+    #  - "无明显诱因出现咳嗽" is a fixed phrase (no obvious precipitant); it does not negate what follows
+    #  - "无尿" alone is anuria (a positive finding) but "无尿频、尿急、尿痛" is a negated list
+    r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触)|不伴|没有"
+    r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
+_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
                      r"reported|has|had|presents?|complains?|with|positive|present)\b")
-_END_ZH = re.compile(r"[，,；;。！？]|但|伴有")
-_CLAUSE_START = re.compile(r"[,，;；。:：]")
+_END_ZH = re.compile(r"[，,；;。！？（(]|但|伴有")
+# Inside a "、"-list after a Chinese negation cue, an item that is itself a statement ("闭合良好", "肌力5级",
+# "偶有恶心", "腹腔干…为真腔供血") is not part of the negated list. Found on the first real-model run.
+_POS_ITEM = re.compile(r"正常|良好|存在|尚可|欠|增高|升高|降低|减低|阳性|灵敏|对称|通畅|清楚|\d\s*级|供血|偶有|时有|伴|有(?!无)|为|呈|示|可见|可及|可闻")
+_CLAUSE_START = re.compile(r"[,，;；。:：]|\s{2,}|\t")     # runs of spaces separate columns in tabular exam records
 _TERM_SPLIT = re.compile(r"(?i)、|/|及|或|和|与|,|\bor\b|\band\b|\bnor\b")
 _TERM_CUT = re.compile(r"(?i)\s+(?:on|at|in|since|for|during|prior|before|after|to|of the)\b.*$")
 _TERM_LEAD = re.compile(r"(?i)^(?:any|a|an|the|known|prior|previous|recent|history of|明显|既往|其他|其它)\s*")
-_TERM_TAIL = re.compile(r"(?i)(?:\s+history|病史|史|等)$")
+_TERM_TAIL = re.compile(r"(?i)(?:\s+history|史|等)$")
+_TERM_BING = re.compile(r"(?<=[^尿心肝肾肺胃脑肠胆疾脏])病$")   # "高血压病(史)" -> "高血压", but keep 糖尿病 / 冠心病 / 疾病
 
 
 def neg_spans(sentence: str) -> list[tuple[int, int]]:
@@ -186,10 +229,20 @@ def neg_spans(sentence: str) -> list[tuple[int, int]]:
     for m in _NEG_PRE.finditer(sentence):
         ender = _END_ZH if _CJK.search(m.group()) else _END_EN
         e = ender.search(sentence, m.end())
-        spans.append((m.end(), e.start() if e else len(sentence)))
+        end = e.start() if e else len(sentence)
+        if ender is _END_ZH:
+            pos = m.end()
+            for item in sentence[m.end():end].split("、"):
+                if pos > m.end() and (_POS_ITEM.search(item) or len(item) > 14):
+                    end = pos - 1
+                    break
+                pos += len(item) + 1
+        spans.append((m.end(), end))
     for m in _NEG_POST.finditer(sentence):
+        # "移动性浊音：阴性" / "皮下捻发感：无": the label before the colon is what is negated
+        limit = len(sentence[:m.start()].rstrip(" \t:："))
         start = 0
-        for c in _CLAUSE_START.finditer(sentence, 0, m.start()):
+        for c in _CLAUSE_START.finditer(sentence, 0, limit):
             start = c.end()
         spans.append((start, m.start()))
     return spans
@@ -203,6 +256,8 @@ def _clean_term(t: str) -> str:
         prev = t
         t = _TERM_LEAD.sub("", t)
         t = _TERM_TAIL.sub("", t).strip()
+    if len(t) >= 4:
+        t = _TERM_BING.sub("", t)
     return t
 
 
@@ -219,12 +274,38 @@ def negated_terms(sentence: str) -> list[str]:
     return out
 
 
+_DENIAL = re.compile(r"(?i)\b(?:denies|denied|deny|no history of|no known)\b|否认")
+
+
+def denied_terms(sentence: str) -> list[str]:
+    """Terms under an explicit denial of history ("否认糖尿病史", "denies diabetes"). Unlike a site- or time-specific
+    negative finding ("未扪及肿块"), a denied history that is asserted elsewhere is a genuine record conflict."""
+    out = []
+    for m in _DENIAL.finditer(sentence):
+        e = (_END_ZH if _CJK.search(m.group()) else _END_EN).search(sentence, m.end())
+        for raw in _TERM_SPLIT.split(sentence[m.end():e.start() if e else len(sentence)]):
+            t = _clean_term(raw)
+            cjk = bool(_CJK.search(t))
+            if t and ((cjk and 2 <= len(t) <= 12) or (not cjk and 4 <= len(t) <= 40)):
+                out.append(t)
+    return out
+
+
 def positive_text(sentence: str) -> str:
     """Sentence with negated spans blanked out (lower-cased)."""
     chars = list(sentence)
     for s, e in neg_spans(sentence):
         chars[s:e] = " " * (e - s)
     return "".join(chars).lower()
+
+
+def clearly_positive_text(sentence: str) -> str:
+    """Only the part of a sentence before its first negation cue (and outside postfix-negated clauses). Record
+    sentences often continue a negated list across commas ("未见乳头凹陷，皮肤改变、酒窝征等"), so anything after a
+    cue is ambiguous; use this view when a false alarm is worse than a miss."""
+    m = _NEG_PRE.search(sentence)
+    pos = positive_text(sentence)          # computed on the whole sentence so that "X：无" still negates X
+    return pos[:m.start()] if m else pos
 
 
 def term_positive_in(term: str, sentence: str) -> bool:
@@ -240,7 +321,7 @@ _STOP_ZH = {"患者", "病人", "目前", "考虑", "予以", "进行", "以及"
 
 
 def tokens(text: str) -> set[str]:
-    text = (text or "").lower()
+    text = fw(text).lower()
     toks = {w[:6] for w in re.findall(r"[a-z]{3,}", text) if w not in _STOP}
     toks |= {("#%g" % float(n)) for n in _NUM_ANY.findall(text)}
     for run in re.findall(r"[一-鿿]+", text):
@@ -261,7 +342,8 @@ _DONE = re.compile(r"(?i)\b(?:was|were|has been|have been|had been)\s+(?:\w+ly\s
 _CERTAIN = re.compile(r"(?i)\b(?:confirmed|definite(?:ly)?|definitive|diagnostic of|certainly)\b|确诊|明确诊断|诊断明确")
 _MISSING = re.compile(r"(?i)\b(?:pending|not (?:yet )?(?:available|done|performed|obtained|documented|resulted|known|recorded)|"
                       r"unknown|unavailable|awaiting|unable to (?:obtain|recall)|not on file|to be (?:obtained|confirmed))\b"
-                      r"|未查|未做|未提供|不详|未测|待查|结果未回|未回报|待回报|未记录|无法提供|待完善")
+                      r"|未查|未做|未提供|不详|未测|待查|结果未回|未回报|待回报|未记录|未记载|无法提供|待完善|缺少|缺失|尚缺|暂缺"
+                      r"|(?:无|未见|未获得|没有)[^，,。；;]{0,30}(?:记录|资料|结果|报告|信息|描述)")
 _UNCERTAIN = re.compile(r"(?i)\b(?:possibl[ey]|probabl[ey]|suspected|suspicious|likely|cannot (?:be )?exclude[d]?|"
                         r"rule out|r/o|query|questionable|appears?|may (?:be|represent)|\?)\b|\?|？|可能|考虑|疑似|待排|不除外|可疑")
 

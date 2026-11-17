@@ -20,13 +20,16 @@ from functools import lru_cache
 from pathlib import Path
 
 from . import verify as V
-from .config import PROMPT_VERSION
+from .config import prompt_version
 from .inputs import Case
 from .ledger import build_ledger, digest, Ledger
 from .llm import BudgetExceeded, CallStats, LLMError
 from .note import Note, ParseError, Statement, SECTIONS, note_from_model, parse_json_object, to_record
 
-PROMPT_DIR = Path(__file__).parent / "prompts" / PROMPT_VERSION
+
+def prompt_dir() -> Path:
+    return Path(__file__).parent / "prompts" / prompt_version()
+
 
 _I18N = {
     "en": {
@@ -63,21 +66,28 @@ _MSG_ZH = {
     "undocumented_negative": "资料中未提及，却被表述为无", "undocumented_normal": "资料支持不足的“正常”表述",
     "low_support": "该陈述在资料中支持不足", "unsupported_completed": "计划中将未记录的处置表述为已完成",
     "overconfident": "诊断表述过于肯定", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
-    "empty_section": "该部分为空",
+    "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
+    "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
+    "false_missing": "资料中已有记录，却被表述为未记录",
 }
 _CORE_RX = {"allergy": r"(?i)allerg|过敏", "medication": r"(?i)medication|drug|用药|药物", "vitals": r"(?i)vital|生命体征"}
 
 
 @lru_cache(maxsize=None)
+def _load_prompt(version: str, name: str, lang: str) -> str:
+    return (Path(__file__).parent / "prompts" / version / lang / f"{name}.txt").read_text("utf-8")
+
+
 def load_prompt(name: str, lang: str) -> str:
-    return (PROMPT_DIR / lang / f"{name}.txt").read_text("utf-8")
+    return _load_prompt(prompt_version(), name, lang)
 
 
 def prompt_fingerprint() -> str:
+    version = prompt_version()
     h = hashlib.sha256()
-    for p in sorted(PROMPT_DIR.rglob("*.txt")):
+    for p in sorted(prompt_dir().rglob("*.txt")):
         h.update(p.read_bytes())
-    return f"{PROMPT_VERSION}:{h.hexdigest()[:12]}"
+    return f"{version}:{h.hexdigest()[:12]}"
 
 
 def fill(template: str, **kw) -> str:
@@ -175,7 +185,8 @@ class Pipeline:
         log["refs_dropped"] = V.safe_repair(note, case)
         findings = V.verify_note(note, case, L)
         actionable = [f for f in findings if f.severity in (V.HIGH, V.MEDIUM) and f.section in SECTIONS and f.index >= 0]
-        mode = "review" if variant == "A3" else "repair" if any(f.severity == V.HIGH for f in findings) else None
+        mode = ("review" if variant == "A3" else
+                "repair" if self.cfg.repair_call and any(f.severity == V.HIGH for f in findings) else None)
         if mode:
             try:
                 user = fill(load_prompt(mode, lang), draft=_draft_json(note),
@@ -192,7 +203,7 @@ class Pipeline:
             except (LLMError, ParseError) as e:   # verification call is optional: keep the draft
                 log["revise_error"] = f"{type(e).__name__}: {e}"
             findings = V.verify_note(note, case, L)
-        self._finalise(note, case, L, findings, tr, lang)
+        self._finalise(note, case, L, findings + V.omission_findings(note, L), tr, lang)
         return note, initial, V.verify_note(note, case, L)
 
     def _extract(self, case, system, common, lang, stats, deadline, log) -> str:

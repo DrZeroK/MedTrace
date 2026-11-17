@@ -4,9 +4,9 @@ Reads structured admission records (`input.json`), calls the configured (designa
 `output.json` with, per case: **Case Features**, **Diagnostic Discussion**, **Diagnostic and Treatment Plan**,
 **evidence** (statement → source ids) and **review items** (missing / conflicting / to-verify).
 
-> **Status.** The software is complete and tested end to end against a *mock* model. It has **not yet been run
-> against the designated model**, and the I/O contract below is an assumption until checked against the official
-> technical instructions. See `docs/REQUIREMENTS.md` (what must be confirmed) and `docs/REPORT.md` (what has and
+> **Status.** Tested end to end against a mock model and, on 26 development cases, against the designated model
+> (qwen4-max): all cases completed with valid output; see `docs/REPORT.md` §2.6 for what that run does and does not
+> show. The I/O contract below is still an assumption until checked against the official technical instructions. See `docs/REQUIREMENTS.md` (what must be confirmed) and `docs/REPORT.md` (what has and
 > has not been measured). This is a research/competition system, not a medical device; every note requires clinician review.
 
 ## Competition QA
@@ -61,11 +61,12 @@ input.json ─ A input processing ─ B fact ledger ─ D generation (LLM) ─ E
 |---|---|---|
 | `A0` | direct structured prompt (baseline) | 1 |
 | `A1` | fact ledger in the prompt, hard evidence rules, statement-level attribution | 1 |
-| `A2` *(default, strategy S1)* | deterministic verification; drops non-existent source ids; one targeted repair call only if a high-severity finding exists; everything unresolved goes to `review_items` | 1–2 |
+| `A2` *(default, strategy S1)* | deterministic verification; drops non-existent source ids; everything unresolved goes to `review_items`. `REPAIR_CALL=1` adds one targeted repair call when a high-severity finding exists (off by default) | 1 (2 with repair) |
 | `S2` | model problem-list extraction with verbatim-quote check, then A2 | 2–3 |
 | `A3` *(strategy S3)* | semantic review call returning patches; each patch must pass the deterministic verifier or it is rejected | 2 |
 
-`MAX_CALLS_PER_CASE=1` gives a strict single-call run (findings are flagged instead of repaired).
+Prompts: `PROMPT_VERSION=v2` (concise, default) or `v1` (original long form). A second call is otherwise used only to
+regenerate unparseable output; `MAX_CALLS_PER_CASE=1` forbids even that.
 
 Reliability properties (all covered by tests): a complete, valid `output.json` exists from the first second
 (seeded with verbatim-extract notes, replaced case by case, atomic rename); a case can never abort the batch;
@@ -80,8 +81,9 @@ medtrace/inputs.py      A  input + cutoff              medtrace/mock_llm.py     
 medtrace/ledger.py      B  fact ledger                 medtrace/mock_server.py        HTTP mock (500s, timeouts, garbage)
 medtrace/pipeline.py    C–E orchestration, guards      medtrace/update.py             incremental record updates
 medtrace/verify.py      E1 deterministic checks        eval/                          cases, ablation, perturbation, blinded review
-medtrace/llm.py         model client, retries          tests/                         36 regression / fault-injection tests
-medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report
+medtrace/llm.py         model client, retries          tests/                         50 regression / fault-injection tests
+medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report, datasets
+data_pipeline/          dataset audit, acquisition, QC, standardisation        data/standardized/   standardized external cases
 ```
 
 ## Reproduce the experiments
@@ -98,8 +100,26 @@ python -m medtrace.update previous_input.json new_input.json  # regenerate after
 Each run directory stores outputs, per-case metrics, the full configuration (without the key), prompt fingerprint and seed.
 Remote inference is not guaranteed byte-identical even at temperature 0; compare runs by metrics, not by diff.
 
+## External data (Chinese clinical datasets)
+
+```bash
+python -m data_pipeline.acquire --list                 # audited datasets and whether they can be fetched automatically
+python -m data_pipeline.acquire cmb_clin               # download (Apache-2.0), licence check, pinned sha256 -> data/raw/ (git-ignored)
+python -m data_pipeline.cmb_clin                       # standardize + QC -> data/standardized/cmb_clin/
+python main.py --input data/standardized/cmb_clin/cases.json --output out.json   # the standardized cases are valid input
+python -m eval.run_external --dataset cmb_clin --split dev --variants A0,A1,A2  # diagnosis hit, differential recall, coverage
+python -m data_pipeline.acquire medct_clinical_notes && python -m data_pipeline.medct_stress   # real-note stress test (aggregates only)
+```
+TypicalCase-DC (2,591 case reports in admission-record sections with gold diagnoses) is the larger evaluation set
+but cannot be redistributed: place the Tianchi download in `data/raw/cblue/TypicalCase-DC/`, run
+`python -m data_pipeline.typicalcase_dc`, then `python -m eval.run_external --dataset typicalcase_dc --split dev --tier A --limit 40`.
+
+Audit and ranking: `docs/DATASETS.md`. Labelling rules: `docs/ANNOTATION_GUIDELINES.md`. QC report:
+`data/standardized/cmb_clin/qc_report.md`.
+
 ## Declarations
 
 - Model: only the endpoint configured in `.env`. No other model, external service, retrieval or internet access is used at run time.
 - Data: `eval/cases.json` contains 16 synthetic teaching cases written for this project; no patient data.
+  `data/standardized/cmb_clin/` is derived from CMB-Clin (Apache-2.0, textbook cases; see its `NOTICE.md`) and is used for evaluation only.
 - Method: prompts in `medtrace/prompts/`, rules in `medtrace/verify.py`; no fine-tuning, no hidden reference answers.

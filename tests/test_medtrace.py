@@ -180,6 +180,26 @@ class Verifier(unittest.TestCase):
         self.assertIn("unsupported_completed", codes("Bronchoscopy was performed and antibiotics were started.", "treatment_plan"))
         self.assertIn("overconfident", codes("Pneumonia is confirmed.", "diagnostic_discussion"))
 
+    def test_statements_about_missing_information(self):
+        # reporting that something is not documented is not a negative finding ...
+        self.assertEqual(codes("Current medications are not documented and must not be assumed normal.", sources=()) - {"missing_ref"}, set())
+        zh = {"case_id": 1, "sources": [{"source_id": "a", "content": "患者男，50岁，发现肿物3个月。青霉素过敏。"}]}
+        self.assertEqual(codes("资料中未记录生命体征及当前用药情况，不能视为正常。", sources=("a",), case=zh), set())
+        # ... unless the records do document it
+        self.assertIn("false_missing", codes("药物过敏史未记录。", sources=("a",), case=zh))
+        self.assertIn("false_missing", codes("Allergy status is not documented.", sources=("S1",)))
+        # sub-item claims are not judged: some vitals / medication being documented does not make these false
+        self.assertEqual(codes("Anticoagulant medication use is not documented.", sources=()) - {"missing_ref"}, set())
+        two = {"case_id": 1, "sources": [{"source_id": "a", "content": "钼靶：肿块大小约2.2cm。超声：肿块大小约2.5cm。"}]}
+        self.assertNotIn("value_label_mismatch", codes("钼靶示肿块，大小约2.5cm。", sources=("a",), case=two))
+
+    def test_missing_information_clause_does_not_shield_the_rest(self):
+        # regression (review P2): a pending clause used to exempt the whole statement from every check
+        self.assertIn("negation_flip", codes("Chest pain. Blood cultures pending."))
+        self.assertIn("negation_flip", codes("Chest pain, blood cultures pending."))
+        zh = {"case_id": 1, "sources": [{"source_id": "a", "content": "患者否认胸痛。血培养待回报。"}]}
+        self.assertIn("negation_flip", codes("胸痛。血培养待回报。", sources=("a",), case=zh))
+
     def test_no_false_alarm_on_faithful_paraphrase(self):
         self.assertEqual(codes("68-year-old man with 3 days of fever and cough; denies chest pain and hemoptysis.", sources=("S1",)), set())
         self.assertEqual(codes("Recommend repeat potassium in 6 hours and oxygen to keep SpO2 above 94%.", "treatment_plan"), set())
@@ -191,6 +211,138 @@ class Verifier(unittest.TestCase):
         n.sections["case_features"] = [Statement("Temp 99 °C.", ["S2", "NOPE"])]
         self.assertEqual(V.safe_repair(n, c), 1)
         self.assertEqual((n.sections["case_features"][0].text, n.sections["case_features"][0].sources), ("Temp 99 °C.", ["S2"]))
+
+
+class ChineseAndNewChecks(unittest.TestCase):
+    ZH = {"case_id": "Z1", "sources": [
+        {"source_id": "a", "content": "患者男，60岁。否认糖尿病史。无头晕、头痛。青霉素过敏。血常规：WBC 12.5×109／L，N 85％。血钾 3.1 mmol/L，血钠 138 mmol/L。病理结果未回。"},
+        {"source_id": "b", "content": "2型糖尿病病史5年。1周前出现头晕。手术瘢痕：无。"}]}
+
+    def test_fullwidth_and_lost_superscript_units(self):
+        self.assertEqual([(v, u) for v, u, _ in T.extract_numbers("WBC 12.5×109／L，N 85％")], [(12.5, "×10^9/l"), (85.0, "%")])
+        self.assertEqual(T.norm_unit("×109/L"), T.norm_unit("×10^9/L"))
+
+    def test_units_and_date_ranges_seen_in_real_notes(self):
+        got = [(v, u) for v, u, _ in T.extract_numbers("泼尼松25mg 每日一次，PT 12.3s，流速1.2m/s，尿量0.5ml/kg/h，HBV-DNA 500 IU/ml")]
+        self.assertEqual(got, [(25.0, "mg"), (12.3, "s"), (1.2, "m/s"), (0.5, "ml/kg/h"), (500.0, "iu/ml")])
+        self.assertEqual(T.find_dates("2023.9-2023.12住院"), [])                     # a year.month range is not a date
+        self.assertEqual(codes("2023.9-2023.12至外院住院治疗。", sources=("a",),
+                               case={"case_id": 1, "sources": [{"source_id": "a", "content": "2023.9-2023.12至外院住院治疗。"}]}), set())
+
+    def test_negation_rules_tuned_on_chip_cdee(self):
+        s = "入院前5月，患者无明显诱因出现咳嗽、咳痰，无胸闷、胸痛，无尿频、尿急、尿痛，未再出现咯血。"
+        for pos in ("咳嗽", "咳痰"):
+            self.assertTrue(T.term_positive_in(pos, s), pos)          # "无明显诱因" negates nothing
+        for neg in ("胸闷", "胸痛", "尿频", "尿急", "尿痛", "咯血"):
+            self.assertFalse(T.term_positive_in(neg, s), neg)
+        self.assertTrue(T.term_positive_in("无尿", "患者无尿2天，伴乏力。"))   # anuria is a positive finding
+        self.assertEqual(T.negated_terms("患者无尿2天。"), [])
+
+    def test_negation_scope_on_real_model_prose(self):
+        # each of these was a false alarm on the first qwen4-max run
+        self.assertEqual(T.negated_terms("尿道口无明显新生物、闭合良好，无阴道前后壁脱垂"), ["新生物", "阴道前后壁脱垂"])
+        self.assertEqual(T.negated_terms("无明显神经功能障碍（感觉对称、肌力5级、病理征阴性）")[:1], ["神经功能障碍"])
+        self.assertTrue(T.term_positive_in("偶有恶心", "病程中无腹泻、偶有恶心、无呕吐"))
+        self.assertEqual(T.negated_terms("触诊：语颤：正常        胸膜摩擦感：正常       皮下捻发感：无"), ["皮下捻发感"])
+        self.assertEqual(T.negated_terms("移动性浊音：阴性"), ["移动性浊音"])
+        self.assertEqual(T.negated_terms("未叩及腹部包块"), ["腹部包块"])
+        self.assertIn(5.0, T.all_number_values("肝上界：右锁骨中线：五肋间"))
+        src = {"case_id": 1, "sources": [{"source_id": "a", "content": "未见乳头凹陷，皮肤改变、酒窝征、桔皮症等。既往高血压病史。胆总管呈巨大囊样扩张。无肝内胆管远端分支扩张。"}]}
+        self.assertEqual(codes("未见皮肤改变、酒窝征。", sources=("a",), case=src), set())                 # ambiguous source list: not flagged
+        self.assertEqual(codes("肝内胆管远端分支无扩张。", sources=("a",), case=src), set())               # site-dependent finding
+        self.assertEqual(codes("资料中未提供体温、血压等生命体征。", sources=("a",), case=src), set())     # 高血压病史 is not a reading
+        self.assertEqual(codes("本次资料中无体格检查记录，亦无血常规等化验结果。", sources=("a",), case=src), set())
+        self.assertEqual(T.negated_terms("重要阴性表现：体温正常"), [])
+        # found on fresh validation output: glued label+number in the record, and a denied history inside a test name
+        glued = {"case_id": 1, "sources": [{"source_id": "a", "content": "T37.1℃，P75次/分，R20次/分。血肿最厚处约20mm。否认肝炎病史。"}]}
+        self.assertEqual(codes("R 20次/分，P 75次/分。", sources=("a",), case=glued), set())
+        self.assertEqual(codes("肝炎病毒标志物等资料未记录。", sources=("a",), case=glued), set())
+        self.assertIn("unit_mismatch", codes("R 20mm。", sources=("a",), case={"case_id": 1, "sources": [{"source_id": "a", "content": "R20次/分。"}]}))
+        self.assertEqual(codes("骨巨细胞瘤好发于20~40岁，需完善24小时尿检查。", "diagnostic_discussion", sources=("a",), case=src), set())
+        self.assertIn("number_not_in_source", codes("直接胆红素约占总胆红素68%。", "diagnostic_discussion", sources=("a",), case=src))
+
+    def test_only_denied_history_counts_as_conflict(self):
+        L = build_ledger(parse_case(self.ZH, 0))
+        self.assertEqual([(c["kind"], c["term"]) for c in L.conflicts], [("polarity", "糖尿病")])   # not 头晕 (time-specific negative)
+        self.assertEqual(T.negated_terms("手术瘢痕：无。"), ["手术瘢痕"])
+
+    def test_value_attached_to_wrong_measurement(self):
+        self.assertIn("value_label_mismatch", codes("血钾 138 mmol/L。", sources=("a",), case=self.ZH))
+        self.assertNotIn("value_label_mismatch", codes("血钾 3.1 mmol/L，血钠 138 mmol/L。", sources=("a",), case=self.ZH))
+
+    def test_critical_omissions_are_surfaced(self):
+        c = parse_case(self.ZH, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["case_features"] = [Statement("患者男，60岁。血钾 3.1 mmol/L。", ["a"])]
+        self.assertEqual(sorted(f.text for f in V.omission_findings(n, L)), ["病理结果未回。", "青霉素过敏。"])
+        n.sections["case_features"].append(Statement("青霉素过敏。病理结果未回。", ["a"]))
+        self.assertEqual(V.omission_findings(n, L), [])
+        self.assertEqual(V.measurement_coverage(n, L), (1, 4))
+
+
+class DataPipeline(unittest.TestCase):
+    def test_pii_scrub(self):
+        from data_pipeline.quality import scrub_pii
+        t, hits = scrub_pii("张三丰，男，45岁，住院号：A123456，联系电话：13812345678。身份证110101199003071234。\n病人，男，3岁。王某，女，20岁。")
+        self.assertNotIn("张三丰", t)
+        self.assertNotIn("13812345678", t)
+        self.assertNotIn("110101199003071234", t)
+        self.assertNotIn("A123456", t)
+        self.assertIn("病人，男，3岁", t)
+        self.assertEqual(hits["possible_name"], 1)
+
+    def test_duplicates_and_group_splits(self):
+        from data_pipeline import quality as Q
+        a = "患者男，49岁，3小时前解大便后出现右下腹疼痛，右下腹可触及一包块，既往体健。" * 3
+        self.assertEqual(Q.text_hash(a), Q.text_hash(a.replace("，", " , ")))
+        self.assertEqual(Q.near_duplicate_groups({"x": a, "y": a + "体温37.8℃。", "z": "完全不同的另一份病历，主诉头痛三天伴发热。" * 3}), [["x", "y"]])
+        s = Q.assign_splits({"c1": "dx:痔", "c2": "dx:痔", "c3": "dx:胃癌"})
+        self.assertEqual(s["c1"], s["c2"])
+        self.assertEqual(s, Q.assign_splits({"c3": "dx:胃癌", "c2": "dx:痔", "c1": "dx:痔"}))     # order-independent, deterministic
+        self.assertIn("too_short", Q.corruption_issues("短"))
+
+    def test_cmb_clin_sectioning_withholds_post_admission_content(self):
+        from data_pipeline.cmb_clin import question_kinds, split_sections
+        kept, withheld = split_sections("现病史\n（1）病史摘要\n病人，男，49岁，3小时前解大便后出现右下腹疼痛。\n\n体格检查\nT 37.8℃，P 101次/分，腹软，右侧腹股沟区可扪及肿块。\n\n"
+                                        "辅助检查\n超声检查\n\n治疗经过\n急诊行疝修补术，术后恢复良好，7天后出院。\n\n辅助检查\n术后病理：肠壁组织缺血坏死。")
+        self.assertEqual([k["slug"] for k in kept], ["hpi", "exam"])
+        self.assertTrue(all("术后" not in k["text"] and "出院" not in k["text"] for k in kept))
+        self.assertEqual([w["reason"][:4] for w in withheld], ["empt", "post", "post"])
+        self.assertEqual(question_kinds("简述该病人的鉴别诊断。"), ["differential"])
+        self.assertEqual(question_kinds("简述本例病人的诊断及诊断依据，鉴别诊断。"), ["differential", "diagnosis"])
+        self.assertEqual(question_kinds("治疗原则是什么？"), ["plan"])
+
+    def test_typicalcase_sectioning_and_denied_history_precision(self):
+        from data_pipeline.typicalcase_dc import split_sections
+        secs = split_sections("个人信息：男，28 岁。\n主诉：头痛 6 个月。\n现病史：6 个月前出现头痛。\n既往史：无。\n\n**六、家族史**\n\n无肿瘤家族史。\n体格检查：无。\n检查检验：\n    - 血常规正常。")
+        self.assertEqual(list(secs), ["hx", "past", "exam", "tests"])
+        self.assertEqual(len(secs["hx"]), 3)
+        self.assertIn("    - 血常规正常。", secs["tests"])
+        # a denied history is not contradicted by the term inside a test name or a negative result
+        mk = lambda b: build_ledger(parse_case({"case_id": 1, "sources": [{"source_id": "a", "content": "否认肝炎、结核病史，否认药物、食物过敏史。"},
+                                                                         {"source_id": "b", "content": b}]}, 0)).conflicts
+        self.assertEqual(mk("肝炎标志物、肿瘤标志物未见异常。自行服用感冒药物。"), [])
+        self.assertEqual([c["term"] for c in mk("肝脏病理检查：中度慢性肝炎伴结节性肝硬化形成。")], ["肝炎"])
+
+    def test_standardized_dataset_invariants(self):
+        d = ROOT / "data" / "standardized" / "cmb_clin"
+        cases = json.loads((d / "cases.json").read_text("utf-8"))
+        refs = {r["case_id"]: r for r in json.loads((d / "references.json").read_text("utf-8"))}
+        ids = [s["source_id"] for c in cases for s in c["sources"]]
+        self.assertEqual(len(ids), len(set(ids)))                                   # source ids globally unique
+        self.assertEqual(len(cases), len(refs))
+        by_label = {}
+        for c in cases:
+            r = refs[c["case_id"]]
+            self.assertTrue(parse_case(c, 0).usable)
+            text = "\n".join(s["content"] for s in c["sources"])
+            self.assertNotIn("案例分析", text)                                        # the diagnosis-bearing title never leaks
+            self.assertFalse(any(h in text.split("\n") for h in ("治疗经过", "治疗过程", "病情变化")))
+            self.assertIsNone(r["reference"]["case_features"])                       # nothing generated
+            if r["split"] != "excluded_pending_review":
+                by_label.setdefault(r["classification"]["disease_label"], set()).add(r["split"])
+        self.assertTrue(all(len(v) == 1 for v in by_label.values()))                # no disease label spans two splits
 
 
 class Parsing(unittest.TestCase):
@@ -374,6 +526,40 @@ class EndToEnd(unittest.TestCase):
         self.assertFalse(out.exists())
         p, _, _ = self._run([CASE], {"LLM_API_BASE": ""})
         self.assertEqual(p.returncode, 1)
+
+    def test_env_example_parses_to_defaults(self):
+        # regression: `KEY=   # comment` is read by python-dotenv as the comment text, which once dropped output fields
+        d = tempfile.mkdtemp()
+        (Path(d) / ".env").write_text((ROOT / ".env.example").read_text("utf-8"), "utf-8")
+        (Path(d) / "input.json").write_text(json.dumps([CASE]), "utf-8")
+        env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "OUTPUT_", "PIPELINE", "MOCK_"))}
+        p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=env, capture_output=True, text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        rec = json.loads((Path(d) / "output.json").read_text("utf-8"))[0]
+        self.assertEqual(schema_errors(rec), [])
+
+    def test_prompt_version_resolved_after_dotenv(self):
+        # regression (review P2): PROMPT_VERSION was read at import time, before .env was loaded
+        from medtrace import config as C
+        from medtrace import pipeline as P
+        d = tempfile.mkdtemp()
+        (Path(d) / ".env").write_text("PROMPT_VERSION=v1\n", "utf-8")
+        before = set(os.environ)
+        old_cwd, old = os.getcwd(), os.environ.pop("PROMPT_VERSION", None)
+        try:
+            os.chdir(d)
+            C.prompt_version.cache_clear()
+            self.assertEqual(C.prompt_version(), "v1")
+            self.assertEqual(P.prompt_dir().name, "v1")
+            self.assertTrue((P.prompt_dir() / "en" / "a0.txt").is_file())
+            self.assertTrue(P.prompt_fingerprint().startswith("v1:"))
+        finally:
+            os.chdir(old_cwd)
+            C.prompt_version.cache_clear()
+            for k in set(os.environ) - before:
+                os.environ.pop(k, None)
+            if old is not None:
+                os.environ["PROMPT_VERSION"] = old
 
     def test_strict_exit_and_envelope(self):
         p, out, _ = self._run({"cases": [CASE]}, {"MOCK_FAULTS": "bad_json:1", "STRICT_EXIT": "1"})

@@ -16,6 +16,7 @@ import os
 import statistics as st
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from medtrace.config import load_config
@@ -38,9 +39,9 @@ def parse_faults(spec: str) -> dict:
     return {k.strip(): float(v) for k, v in (p.split(":", 1) for p in spec.split(",") if ":" in p)}
 
 
-def run(variants, cases, faults, seed, budget=None):
+def run(variants, cases, faults, seed, budget=None, workers=1, mock=False):
     cfg0 = load_config()
-    if not cfg0.api_base:
+    if mock or faults or not cfg0.api_base:      # fault injection only exists in the mock: never send such a run to a real model
         cfg0.api_base = "mock://"
     is_mock = cfg0.api_base.startswith("mock")
     rows, outputs = [], {v: [] for v in variants}
@@ -48,7 +49,9 @@ def run(variants, cases, faults, seed, budget=None):
         cfg = copy.copy(cfg0)
         cfg.pipeline, cfg.max_calls_per_case = v, (budget or BUDGET[v])
         cfg.output_field_map, cfg.output_fields, cfg.include_meta = {}, [], False
-        for i, item in enumerate(cases):
+        cfg.repair_call = True     # the ablation's A2/S2 are defined with the repair call (production default is off)
+        def one(job, v=v, cfg=cfg):
+            i, item = job
             mock = MockLLM(faults, seed) if is_mock else None
             pipe = Pipeline(cfg, LLMClient(cfg, mock=mock))
             case = parse_case(item["case"], i, cfg.cutoff_mode)
@@ -57,7 +60,7 @@ def run(variants, cases, faults, seed, budget=None):
             hits = M.key_fact_hits(rec, ann)
             ok_refs, n_refs = M.refs_valid(rec, item["case"])
             fs = M.fault_survival(rec, mock.fault_log) if mock else []
-            rows.append({
+            return {
                 "variant": v, "case_id": case.case_id, "category": ann["category"], "split": ann["split"],
                 "status": res.status, "schema_valid": int(M.is_schema_valid(rec)),
                 "raw_parse_retries": res.log.get("raw_parse_retries", 0),
@@ -71,8 +74,12 @@ def run(variants, cases, faults, seed, budget=None):
                 "faults_survived_unflagged": sum(f["survived"] and not f["flagged"] for f in fs),
                 "fault_detail": ";".join(f'{f["fault"]}:{"S" if f["survived"] else "R"}{"f" if f["flagged"] else ""}' for f in fs),
                 "calls": res.log["calls"], "retries": res.log["retries"], "latency": res.log["latency"],
-            })
-            outputs[v].append(rec)
+            }, rec
+
+        with ThreadPoolExecutor(max(1, workers)) as ex:
+            for row, rec in ex.map(one, list(enumerate(cases))):
+                rows.append(row)
+                outputs[v].append(rec)
     return rows, outputs, cfg0
 
 
@@ -119,10 +126,12 @@ def main(argv=None) -> int:
     ap.add_argument("--faults", default="", help="mock only: fault:prob,...")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--budget", type=int, default=0, help="override per-variant model-call budget")
+    ap.add_argument("--mock", action="store_true", help="force the offline mock model even if .env configures a real endpoint")
+    ap.add_argument("--workers", type=int, default=1, help="cases in parallel (mind the provider's rate limits)")
     a = ap.parse_args(argv)
     variants = [v.strip().upper() for v in a.variants.split(",") if v.strip()]
     cases = load_eval_cases(a.split)
-    rows, outputs, cfg = run(variants, cases, parse_faults(a.faults), a.seed, a.budget or None)
+    rows, outputs, cfg = run(variants, cases, parse_faults(a.faults), a.seed, a.budget or None, a.workers, a.mock)
     out = HERE / "results" / a.name
     out.mkdir(parents=True, exist_ok=True)
     with open(out / "per_case.csv", "w", newline="", encoding="utf-8") as f:

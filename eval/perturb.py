@@ -46,9 +46,10 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", default="A2")
     ap.add_argument("--name", default="perturb")
+    ap.add_argument("--mock", action="store_true", help="force the offline mock model even if .env configures a real endpoint")
     a = ap.parse_args(argv)
     cfg = load_config()
-    if not cfg.api_base:
+    if a.mock or not cfg.api_base:
         cfg.api_base = "mock://"
     cfg.pipeline, cfg.max_calls_per_case = a.variant.upper(), BUDGET[a.variant.upper()]
     cfg.output_field_map, cfg.output_fields = {}, []

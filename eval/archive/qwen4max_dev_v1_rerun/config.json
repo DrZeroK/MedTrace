@@ -1,0 +1,51 @@
+{
+  "name": "qwen4max_dev_v1_rerun",
+  "dataset": "cmb_clin",
+  "split": "dev",
+  "tier": "",
+  "limit": 0,
+  "n_cases": 26,
+  "variants": [
+    "A1",
+    "A2"
+  ],
+  "budget": {
+    "A1": 1,
+    "A2": 2
+  },
+  "model": "qwen4-max",
+  "mock": false,
+  "prompt": "v1:af1abc016256",
+  "config": {
+    "input_path": "input.json",
+    "output_path": "output.json",
+    "log_dir": "logs",
+    "api_base": "https://ws-REDACTED.cn-beijing.maas.aliyuncs.com/compatible-mode/v1",
+    "api_key": "<set>",
+    "model": "qwen4-max",
+    "timeout": 600.0,
+    "max_retries": 2,
+    "retry_backoff": 2.0,
+    "temperature": 0.0,
+    "max_tokens": 0,
+    "json_mode": false,
+    "extra_body": {},
+    "pipeline": "A2",
+    "max_calls_per_case": 2,
+    "case_timeout": 0.0,
+    "total_timeout": 0.0,
+    "workers": 1,
+    "cutoff_mode": "redact",
+    "output_lang": "auto",
+    "inline_citations": false,
+    "numbered": true,
+    "include_meta": false,
+    "output_envelope": "auto",
+    "output_field_map": {},
+    "output_fields": [],
+    "on_unresolved": "flag",
+    "checkpoint": true,
+    "strict_exit": false
+  },
+  "dataset_manifest": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+}
