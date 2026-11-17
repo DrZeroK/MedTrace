@@ -51,13 +51,15 @@
    "content": "Chinese biomedical NLU tasks: entity recognition (CMeEE), relation extraction (CMeIE), clinical finding event extraction with polarity (CHIP-CDEE), diagnosis normalisation (CHIP-CDN), dialogue tasks",
    "provenance": "mixed: textbooks, clinical practice text, de-identified EMR fragments, online consultations",
    "license": "code repository Apache-2.0 (LICENSE verified). Data is distributed only through Tianchi (dataId 95414) under that platform's per-dataset terms - NOT verified",
-   "verified": "repository LICENSE and README fetched; Tianchi unreachable from this environment and requires an account",
+   "verified": "repository LICENSE fetched; on 2026-11-17 the team supplied Tianchi downloads of CHIP-CDEE, CHIP-CDN, CHIP-CTC, CHIP-STS and CHIP-YIER, which were inspected. The archives contain no licence text: use is governed by the Tianchi terms the downloader accepted",
    "access": "Tianchi account, accept terms, manual download",
    "redistribution": "assume not permitted",
-   "permitted_use_here": [],
-   "relevance": "medium-high for the fact-extraction and negation components (CHIP-CDEE finding polarity; CMeEE entities); low for note generation",
+   "permitted_use_here": [
+    "CHIP-CDEE: external polarity test for the negation rules (tune on train, report on dev; aggregates only)"
+   ],
+   "relevance": "CHIP-CDEE high for negation (10,899 findings in real EMR sentences labelled 肯定/否定/不确定). CHIP-CDN possible later use for diagnosis-name matching. CHIP-CTC (trial criteria), CHIP-STS (question similarity) and CHIP-YIER (exam and case questions) are not relevant to admission-note generation and are not used",
    "limits": "sentence-level tasks, test labels withheld; terms must be read by the account holder",
-   "status": "manual acquisition by the team; adapter not yet written"
+   "status": "CHIP-CDEE in use (data_pipeline/cdee_negation.py); raw files local only, never committed"
   },
   {
    "id": "imcs21",

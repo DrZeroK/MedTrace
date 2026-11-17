@@ -90,7 +90,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     # real-model run: "资料中未记录生命体征、药物过敏史" was flagged as an undocumented negative.) What it must not
     # do is claim a core item is undocumented when the records do document it.
     meta_missing = sec == "features" and T.has_missing_cue(text)
-    if meta_missing:
+    if meta_missing and T.support(text, L.tokens_all) < 0.9:      # >= 0.9: the records' own sentence, quoted (e.g. "具体用药不详")
         for key, rx in _CORE_DOC.items():
             if rx.search(text) and key not in {u["key"] for u in L.undocumented} and _SAYS_ABSENT.search(text):
                 add("false_missing", HIGH, f"states that {key} information is not documented, but the records contain it")

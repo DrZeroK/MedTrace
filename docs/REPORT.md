@@ -5,7 +5,7 @@
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic
 fact ledger and verifier, an offline mock model with fault injection, an evaluation set of 16 annotated synthetic
 cases (11 development, 5 held out; 12 English, 4 Chinese; two per category), 7 one-fact perturbation tests,
-ablation / perturbation / blinded-review tooling, and 45 automated tests.
+ablation / perturbation / blinded-review tooling, and 48 automated tests.
 
 ## 2. What has been measured — and what has not
 
@@ -87,8 +87,17 @@ Real hospital language (MedCT-clinical-notes, Apache-2.0; 5,554 unique real note
 | A year.month range (`2023.9-2023.12`) was read as a date, leaving a stray number that the verifier flagged | date pattern tightened | 0 false alarms on 23,380 verbatim sentences |
 | Dose, rate, immunoassay and pressure units (mg, μg, ml/kg/h, m/s, IU/ml, nmol/L, cmH2O …) were not recognised, so those values escaped unit-mismatch checking | 30 units added | recognised measurements 4,970 → 6,035 |
 
-This shows the rules do not misfire on faithful real text. It does not show that negation polarity is assigned
-correctly (no polarity labels in that dataset) — an external labelled test (CHIP-CDEE or IMCS-21) is still needed.
+Negation polarity against labelled real EMR sentences (CHIP-CDEE, `data/standardized/chip_cdee/negation_report.md`;
+rules tuned on its train split, numbers below are the held-out dev split, 1,460 findings):
+
+| Negation rules | Precision | Recall | F1 |
+|---|---|---|---|
+| Before | 0.926 | 0.943 | 0.934 |
+| After two fixes | 0.986 | 0.978 | 0.982 |
+
+The two systematic errors were "无明显诱因出现咳嗽" (a fixed phrase wrongly negating the symptoms after it) and
+"无尿频、尿急、尿痛" (missed because "无尿" is protected as anuria). Uncertainty is still detected only per sentence
+(47 of 65 uncertain findings sit in a sentence with an uncertainty cue); it is not attached to individual findings.
 
 `python -m eval.run_external` reports diagnosis hit (61 eligible cases), differential recall against the expert
 answer, measurement coverage and verifier findings per variant. It has only been run with the mock (mechanics:

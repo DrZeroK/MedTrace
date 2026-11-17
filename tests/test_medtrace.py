@@ -218,6 +218,15 @@ class ChineseAndNewChecks(unittest.TestCase):
         self.assertEqual(codes("2023.9-2023.12至外院住院治疗。", sources=("a",),
                                case={"case_id": 1, "sources": [{"source_id": "a", "content": "2023.9-2023.12至外院住院治疗。"}]}), set())
 
+    def test_negation_rules_tuned_on_chip_cdee(self):
+        s = "入院前5月，患者无明显诱因出现咳嗽、咳痰，无胸闷、胸痛，无尿频、尿急、尿痛，未再出现咯血。"
+        for pos in ("咳嗽", "咳痰"):
+            self.assertTrue(T.term_positive_in(pos, s), pos)          # "无明显诱因" negates nothing
+        for neg in ("胸闷", "胸痛", "尿频", "尿急", "尿痛", "咯血"):
+            self.assertFalse(T.term_positive_in(neg, s), neg)
+        self.assertTrue(T.term_positive_in("无尿", "患者无尿2天，伴乏力。"))   # anuria is a positive finding
+        self.assertEqual(T.negated_terms("患者无尿2天。"), [])
+
     def test_only_denied_history_counts_as_conflict(self):
         L = build_ledger(parse_case(self.ZH, 0))
         self.assertEqual([(c["kind"], c["term"]) for c in L.conflicts], [("polarity", "糖尿病")])   # not 头晕 (time-specific negative)

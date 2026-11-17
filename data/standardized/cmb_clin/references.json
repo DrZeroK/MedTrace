@@ -166,7 +166,7 @@
    "complexity": "high",
    "n_chars": 1320,
    "n_measurements": 16,
-   "n_negative_statements": 4
+   "n_negative_statements": 3
   },
   "quality": {
    "tier": "A",
@@ -315,10 +315,6 @@
     }
    ],
    "negatives": [
-    {
-     "source_id": "cmbclin-001-hpi",
-     "text": "杨XX，女，59岁，30年前无明显诱因开始出现反酸、反食、烧心，胸骨后烧灼感，伴胃胀、嗳气，弯腰后反酸加重，不规律服用“奥美拉唑、吗丁啉、莫沙必利”症状可缓解，停药反复发作。"
-    },
     {
      "source_id": "cmbclin-001-hpi",
      "text": "5年前开始出现咳嗽、咳痰，咳嗽严重时伴胸闷、喘息症状，无明显季节性，常于进食后1小时及凌晨发作，止咳平喘效果不佳，生活质量明显下降。"
@@ -2158,7 +2154,7 @@
    "complexity": "low",
    "n_chars": 388,
    "n_measurements": 0,
-   "n_negative_statements": 6
+   "n_negative_statements": 5
   },
   "quality": {
    "tier": "A",
@@ -2223,10 +2219,6 @@
    "dx_metric_eligible": true,
    "measurements": [],
    "negatives": [
-    {
-     "source_id": "cmbclin-013-hpi",
-     "text": "患者于入院前1年无明显诱因出现腰痛，同时伴有左下肢放射痛。"
-    },
     {
      "source_id": "cmbclin-013-hpi",
      "text": "于入院前1月疼痛再次加重，并且伴有双下肢麻木无力感，于门诊保守治疗，症状无明显缓解。"
@@ -3820,7 +3812,7 @@
    "complexity": "medium",
    "n_chars": 521,
    "n_measurements": 3,
-   "n_negative_statements": 7
+   "n_negative_statements": 8
   },
   "quality": {
    "tier": "A",
@@ -3897,6 +3889,10 @@
    "negatives": [
     {
      "source_id": "cmbclin-023-hpi",
+     "text": "病人于7年前无明显诱因出现剧烈活动时不自主尿外漏，无尿频、尿痛、排尿困难、发热、血尿等症状，未予以重视，近1年来上述症状逐渐加重，伴行走时亦有尿外漏。"
+    },
+    {
+     "source_id": "cmbclin-023-hpi",
      "text": "在我院就诊，查尿流动力学示：“最大尿流率：47.5ml/s”，超声示“双肾无积水、输尿管无扩张，残余尿阴性“。"
     },
     {
@@ -3950,7 +3946,7 @@
    "complexity": "medium",
    "n_chars": 441,
    "n_measurements": 14,
-   "n_negative_statements": 5
+   "n_negative_statements": 4
   },
   "quality": {
    "tier": "B",
@@ -4093,10 +4089,6 @@
     },
     {
      "source_id": "cmbclin-024-hpi",
-     "text": "1个月前病人无明显诱因突然出现腹痛、腹胀、停止排气排便，至急诊就诊，诊断为肠梗阻，急诊行剖腹探查术。"
-    },
-    {
-     "source_id": "cmbclin-024-hpi",
      "text": "术后至今病人每日大便10余次，为水样便，量较多，无脓血，无腹痛、腹胀。"
     },
     {
@@ -4136,7 +4128,7 @@
    "complexity": "high",
    "n_chars": 492,
    "n_measurements": 7,
-   "n_negative_statements": 2
+   "n_negative_statements": 3
   },
   "quality": {
    "tier": "A",
@@ -4240,6 +4232,10 @@
     {
      "source_id": "cmbclin-025-hpi",
      "text": "但病人症状无缓解，仍高热，憋气症状加重。"
+    },
+    {
+     "source_id": "cmbclin-025-exam",
+     "text": "心界不大，未闻异常杂音。"
     },
     {
      "source_id": "cmbclin-025-exam",
@@ -5162,7 +5158,7 @@
    "complexity": "medium",
    "n_chars": 615,
    "n_measurements": 14,
-   "n_negative_statements": 6
+   "n_negative_statements": 5
   },
   "quality": {
    "tier": "A",
@@ -5311,10 +5307,6 @@
     }
    ],
    "negatives": [
-    {
-     "source_id": "cmbclin-032-hpi",
-     "text": "患者，女/60y，2个月前，无明显诱因出现中上腹不适，渐加重，伴后背部持续疼痛，1个月前出现皮肤黄染，于当地医院就诊。"
-    },
     {
      "source_id": "cmbclin-032-exam",
      "text": "全身皮肤、巩膜黄染，甲状腺未见明显结节，双侧颈部未闻及血管杂音。"
@@ -5860,7 +5852,7 @@
    "complexity": "high",
    "n_chars": 653,
    "n_measurements": 20,
-   "n_negative_statements": 4
+   "n_negative_statements": 3
   },
   "quality": {
    "tier": "A",
@@ -6039,10 +6031,6 @@
     }
    ],
    "negatives": [
-    {
-     "source_id": "cmbclin-036-hpi",
-     "text": "患者，男，70岁，于7日前无意中发现颈左后部皮肤红肿，伴触痛，触摸表面不光滑，有多个凸点。"
-    },
     {
      "source_id": "cmbclin-036-exam",
      "text": "发育正常，营养中等，自主体位，查体合作，全身皮肤及黏膜无黄染，颈左侧可触及多枚肿大淋巴结，最大约2.5cm×1.5cm，质韧，可推动，伴触痛，于颈左后部皮肤，可见皮肤红肿，局部可见皮肤破溃，伴脓性分泌物排出，触痛，有皮下波动感。"
@@ -6362,7 +6350,7 @@
    "complexity": "medium",
    "n_chars": 375,
    "n_measurements": 7,
-   "n_negative_statements": 5
+   "n_negative_statements": 4
   },
   "quality": {
    "tier": "A",
@@ -6460,10 +6448,6 @@
     {
      "source_id": "cmbclin-039-hpi",
      "text": "王XX，女，50岁，近2周来无明显诱因出现皮肤黄染，极度乏力，伴恶心、呕吐等消化道症状，既往病史无特殊。"
-    },
-    {
-     "source_id": "cmbclin-039-hpi",
-     "text": "无明显诱因出现皮肤黄染、乏力，伴恶心、呕吐2周余。"
     },
     {
      "source_id": "cmbclin-039-exam",
@@ -8443,7 +8427,7 @@
    "complexity": "high",
    "n_chars": 498,
    "n_measurements": 15,
-   "n_negative_statements": 3
+   "n_negative_statements": 2
   },
   "quality": {
    "tier": "A",
@@ -8592,10 +8576,6 @@
     }
    ],
    "negatives": [
-    {
-     "source_id": "cmbclin-052-hpi",
-     "text": "约40小时前病人无明显诱因下出现右上腹部疼痛，呈持续性胀痛，不向身体其他部位放射；"
-    },
     {
      "source_id": "cmbclin-052-hpi",
      "text": "伴有恶心呕吐1次，不伴呕血黑便、腹泻、便血等症状。"
@@ -9298,7 +9278,7 @@
    "complexity": "high",
    "n_chars": 787,
    "n_measurements": 12,
-   "n_negative_statements": 12
+   "n_negative_statements": 11
   },
   "quality": {
    "tier": "A",
@@ -9422,10 +9402,6 @@
     }
    ],
    "negatives": [
-    {
-     "source_id": "cmbclin-057-hpi",
-     "text": "马XX，女，33岁，病人10余年前无明显诱因出现低血糖发作，多发生于餐前，表现为乏力、复视及大汗，进食后30～40分钟可缓解，每年发作约2～3次；"
-    },
     {
      "source_id": "cmbclin-057-hpi",
      "text": "无糖尿病史，无外源性胰岛素、磺脲类药物等特殊药物使用史。"
@@ -10739,7 +10715,7 @@
    "complexity": "high",
    "n_chars": 497,
    "n_measurements": 11,
-   "n_negative_statements": 8
+   "n_negative_statements": 7
   },
   "quality": {
    "tier": "A",
@@ -10862,10 +10838,6 @@
     }
    ],
    "negatives": [
-    {
-     "source_id": "cmbclin-064-hpi",
-     "text": "病人2小时前无明显诱因突然出现上腹部疼痛，呈刀割样持续性剧痛逐渐扩展至全腹，活动时加重。"
-    },
     {
      "source_id": "cmbclin-064-hpi",
      "text": "伴恶心无呕吐；"

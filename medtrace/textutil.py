@@ -186,7 +186,11 @@ def all_number_values(text: str) -> set[float]:
 _NEG_PRE = re.compile(
     r"(?i)\b(?:no evidence of|no history of|no known|no signs? of|negative for|absence of|free of|"
     r"denies|denied|deny|without|never had|(?:does|did|do|has|have|had|is|was|are|were)\s+not|no|nor)\b"
-    r"|否认|未见|未闻及|未触及|未扪及|未及|未发现|未引出|未诉|不伴|没有|无(?!力|尿|菌|创|法|效|关|名|需|论|痛性)")
+    # Chinese cues, tuned on CHIP-CDEE train (real EMR sentences with polarity labels):
+    #  - "无明显诱因出现咳嗽" is a fixed phrase (no obvious precipitant); it does not negate what follows
+    #  - "无尿" alone is anuria (a positive finding) but "无尿频、尿急、尿痛" is a negated list
+    r"|否认|未(?:再)?(?:见|闻及|触及|扪及|及|发现|引出|诉|述|出现|查见|探及|发生|检出|检验出|闻|触)|不伴|没有"
+    r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
 _NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
                      r"reported|has|had|presents?|complains?|with|positive|present)\b")

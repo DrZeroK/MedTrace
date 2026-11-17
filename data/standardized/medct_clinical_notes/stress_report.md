@@ -8,9 +8,9 @@ Aggregate statistics only; no note text is reproduced here. Source: TigerResearc
 | Unique fragments of at least 15 characters | 5554 |
 | Sentences produced by the splitter | 23380 |
 | Unit-bearing measurements recognised | 6035 |
-| Sentences with a negation cue | 4982 |
+| Sentences with a negation cue | 4951 |
 | Sentences marked pending / not done | 313 |
-| Sentences the record itself marks uncertain | 1205 |
+| Sentences the record itself marks uncertain | 1208 |
 | **Verifier false alarms on verbatim text (high or medium)** | **0** (none) |
 | Identifier patterns redacted before processing | {'possible_name': 1, 'named_field': 1} |
 
