@@ -27,6 +27,9 @@ class CallStats:
     http_attempts: int = 0    # including retries
     retries: int = 0
     latency: float = 0.0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
     errors: list = field(default_factory=list)
 
 
@@ -75,9 +78,15 @@ class LLMClient:
         finally:
             stats.latency += time.monotonic() - t0
 
+    def _check_request_budget(self, stats: CallStats) -> None:
+        limit = self.cfg.max_requests_per_case
+        if limit > 0 and stats.http_attempts >= limit:
+            raise BudgetExceeded(f"request budget for this case is exhausted ({stats.http_attempts}/{limit} HTTP attempts)")
+
     def _chat(self, system, user, stats, deadline):
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         if self.mock is not None:
+            self._check_request_budget(stats)
             stats.http_attempts += 1
             return self.mock.complete(messages)
         payload = {"model": self.cfg.model, "messages": messages, "temperature": self.cfg.temperature, "stream": False}
@@ -85,6 +94,10 @@ class LLMClient:
             payload["max_tokens"] = self.cfg.max_tokens
         if self.cfg.json_mode:
             payload["response_format"] = {"type": "json_object"}
+        if self.cfg.seed is not None:
+            payload["seed"] = self.cfg.seed
+        if self.cfg.enable_thinking is not None:
+            payload["chat_template_kwargs"] = {"enable_thinking": self.cfg.enable_thinking}
         payload.update(self.cfg.extra_body or {})
         headers = {"Content-Type": "application/json"}
         if self.cfg.api_key:
@@ -97,11 +110,13 @@ class LLMClient:
                 if remaining <= 1:
                     raise BudgetExceeded(f"time budget exhausted before model call ({last})")
                 timeout = min(timeout, remaining)
+            self._check_request_budget(stats)
             stats.http_attempts += 1
             retryable = True
             try:
                 status, body = _post(self.url, headers, payload, timeout)
                 if status == 200:
+                    self._usage(body, stats)
                     return self._content(body)
                 last = f"HTTP {status}: {body[:200]}"
                 retryable = status in _RETRY_STATUS
@@ -118,6 +133,20 @@ class LLMClient:
                 pause = max(0.0, min(pause, deadline - time.monotonic() - 1))
             time.sleep(pause)
         raise LLMError(f"model call failed: {last}")
+
+    @staticmethod
+    def _usage(body: str, stats: CallStats) -> None:
+        """Accumulate token usage from a successful response when present; a missing/odd usage never fails the call."""
+        try:
+            usage = json.loads(body).get("usage")
+        except (ValueError, AttributeError):
+            return
+        if not isinstance(usage, dict):
+            return
+        for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
+            v = usage.get(key)
+            if isinstance(v, int):
+                setattr(stats, key, getattr(stats, key) + v)
 
     @staticmethod
     def _content(body: str) -> str:

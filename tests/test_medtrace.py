@@ -6,7 +6,9 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 import unittest
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -20,7 +22,7 @@ from medtrace.ledger import build_ledger                              # noqa: E4
 from medtrace.llm import CallStats, LLMClient, LLMError                # noqa: E402
 from medtrace.mock_llm import MockLLM                                 # noqa: E402
 from medtrace.mock_server import make_server                          # noqa: E402
-from medtrace.note import Note, ParseError, Statement, note_from_model, parse_json_object, schema_errors  # noqa: E402
+from medtrace.note import Note, ParseError, Statement, note_from_model, parse_json_object, schema_errors, to_record  # noqa: E402
 from medtrace.pipeline import Pipeline, apply_patches                 # noqa: E402
 from medtrace.update import diff_cases                                # noqa: E402
 
@@ -497,6 +499,88 @@ class Http(unittest.TestCase):
         c = cfg(api_base="http://127.0.0.1:9/v1", max_retries=0, timeout=2)          # nothing listening
         self.assertEqual(Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0)).status, "fallback")
 
+    def _srv(self, **kw):
+        srv = make_server(0, mock=MockLLM(), seed=3, **kw)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        self.addCleanup(srv.server_close)
+        self.addCleanup(srv.shutdown)
+        return srv
+
+    def _url(self, srv):
+        return f"http://127.0.0.1:{srv.server_address[1]}/v1"
+
+    def test_default_payload_omits_seed_and_thinking(self):
+        srv = self._srv()
+        c = cfg(api_base=self._url(srv))
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+        self.assertTrue(srv.requests)
+        for req in srv.requests:
+            self.assertNotIn("seed", req)
+            self.assertNotIn("chat_template_kwargs", req)
+
+    def test_seed_and_thinking_sent_when_configured(self):
+        srv = self._srv()
+        c = cfg(api_base=self._url(srv), seed=42, enable_thinking=False)
+        Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        req = srv.requests[0]
+        self.assertEqual(req["seed"], 42)
+        self.assertEqual(req["chat_template_kwargs"], {"enable_thinking": False})
+
+    def test_extra_body_overrides_seed_and_thinking(self):
+        srv = self._srv()
+        c = cfg(api_base=self._url(srv), seed=42, enable_thinking=False,
+                extra_body={"seed": 7, "chat_template_kwargs": {"enable_thinking": True}})
+        Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        req = srv.requests[0]
+        self.assertEqual(req["seed"], 7)
+        self.assertEqual(req["chat_template_kwargs"], {"enable_thinking": True})
+
+    def test_usage_accumulates_in_case_log(self):
+        srv = self._srv(usage={"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12})
+        c = cfg(api_base=self._url(srv))
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+        n = r.log["calls"]
+        self.assertEqual((r.log["prompt_tokens"], r.log["completion_tokens"], r.log["total_tokens"]), (5 * n, 7 * n, 12 * n))
+
+    def test_missing_usage_still_succeeds(self):
+        srv = self._srv()
+        c = cfg(api_base=self._url(srv))
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+        self.assertEqual(r.log["total_tokens"], 0)
+        self.assertEqual(schema_errors(r.record), [])
+
+    def test_request_budget_counts_retries(self):
+        srv = self._srv(http_faults={"http500": 1.0})
+        c = cfg(api_base=self._url(srv), max_retries=5, retry_backoff=0.01, max_requests_per_case=2)
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "fallback")
+        self.assertTrue(r.log.get("budget_exhausted"))
+        self.assertEqual(len(srv.requests), 2)
+        self.assertEqual(schema_errors(r.record), [])
+
+    def test_reserve_skips_repair(self):
+        p, _ = pipe({"wrong_number": 1.0}, repair_call=True, time_reserve=1.0)
+        r = p.run_case(parse_case(CASE, 0), deadline=time.monotonic() + 0.5)
+        self.assertEqual(r.status, "ok")
+        self.assertIn("repair", r.log.get("time_budget_skipped", []))
+
+    def test_no_deadline_never_skips(self):
+        p, _ = pipe({"wrong_number": 1.0}, repair_call=True)
+        r = p.run_case(parse_case(CASE, 0))
+        self.assertNotIn("time_budget_skipped", r.log)
+
+    def test_case_timeout_falls_back(self):
+        os.environ["MOCK_SLOW_SECONDS"] = "3"
+        srv = self._srv(http_faults={"slow": 1.0})
+        c = cfg(api_base=self._url(srv), max_retries=0)
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0), deadline=time.monotonic() + 2.0)
+        self.assertEqual(r.status, "fallback")
+        self.assertEqual(schema_errors(r.record), [])
+        self.assertEqual(len(srv.requests), 1)
+
 
 class EndToEnd(unittest.TestCase):
     def _run(self, doc, env=None, raw=None):
@@ -519,6 +603,64 @@ class EndToEnd(unittest.TestCase):
         self.assertFalse([f for f in os.listdir(d) if f.startswith(".tmp_")])
         events = [json.loads(l)["event"] for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
         self.assertEqual(events.count("case"), 7)
+
+    def test_output_aliases_byte_identical(self):
+        p, out, d = self._run([CASE, dict(CASE, case_id="C2")], {"OUTPUT_ALIASES": "results.json"})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        alias = d / "results.json"
+        self.assertTrue(alias.exists())
+        self.assertEqual(alias.read_bytes(), out.read_bytes())
+        self.assertEqual(schema_errors(json.loads(alias.read_text("utf-8"))[0]), [])
+        self.assertFalse([f for f in os.listdir(d) if f.startswith(".tmp_")])
+
+    def test_alias_same_dir_and_dedupe(self):
+        p, out, d = self._run([CASE], {"OUTPUT_ALIASES": "sub/results.json,results.json,output.json"})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertTrue((d / "results.json").exists())
+        self.assertEqual((d / "results.json").read_bytes(), out.read_bytes())
+        self.assertFalse((d / "sub").exists())
+
+    def test_no_alias_unchanged(self):
+        p, out, d = self._run([CASE])
+        self.assertEqual(p.returncode, 0, p.stderr)
+        self.assertTrue(out.exists())
+        self.assertFalse((d / "results.json").exists())
+
+    def test_run_end_carries_totals(self):
+        srv = make_server(0, mock=MockLLM(), seed=3, usage={"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12})
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        self.addCleanup(srv.server_close)
+        self.addCleanup(srv.shutdown)
+        url = f"http://127.0.0.1:{srv.server_address[1]}/v1"
+        p, out, d = self._run([CASE], {"LLM_API_BASE": url})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        events = [json.loads(l) for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
+        end = [e for e in events if e["event"] == "run_end"][-1]
+        cases = [e for e in events if e["event"] == "case"]
+        for k in ("prompt_tokens", "completion_tokens", "total_tokens", "calls", "http_attempts", "retries"):
+            self.assertEqual(end[k], sum(c.get(k, 0) for c in cases))
+        self.assertGreater(end["total_tokens"], 0)
+
+    def test_run_end_latency_summary(self):
+        p, out, d = self._run([CASE, dict(CASE, case_id="C2")])
+        self.assertEqual(p.returncode, 0, p.stderr)
+        events = [json.loads(l) for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
+        end = [e for e in events if e["event"] == "run_end"][-1]
+        self.assertIn("latency_p50", end)
+        self.assertIn("latency_max", end)
+        self.assertGreaterEqual(end["latency_max"], end["latency_p50"])
+        self.assertGreaterEqual(end["latency_p50"], 0.0)
+
+    def test_output_independent_of_hash_seed(self):
+        # regression: iterating a set made review-item order differ between runs (Python randomises str hashing)
+        cases = [c["case"] for c in json.loads((ROOT / "eval" / "cases.json").read_text("utf-8"))[:8]]
+        faults = {"MOCK_FAULTS": "negation_flip:0.6,undoc_negative:0.6,wrong_number:0.5"}
+        outs = []
+        for h in ("1", "2", "3"):
+            p, out, _ = self._run(cases, {**faults, "PYTHONHASHSEED": h})
+            self.assertEqual(p.returncode, 0, p.stderr)
+            outs.append(out.read_bytes())
+        self.assertEqual(len(set(outs)), 1)
 
     def test_fatal_inputs_exit_1(self):
         p, out, _ = self._run(None, raw="{broken")
@@ -570,6 +712,151 @@ class EndToEnd(unittest.TestCase):
         p, out, _ = self._run([dict(CASE, case_id=i) for i in range(4)], {"TOTAL_TIMEOUT": "0.001"})
         self.assertEqual(p.returncode, 0)
         self.assertEqual([r["case_id"] for r in json.loads(out.read_text("utf-8"))], [0, 1, 2, 3])
+
+
+class BasisField(unittest.TestCase):
+    OBJ = {"case_features": [{"text": "Fever for 3 days.", "sources": ["S1"]}],
+           "diagnostic_discussion": [{"kind": "assessment", "basis": "knowledge", "text": "Pneumonia is a common diagnosis.", "sources": ["S1"]}],
+           "treatment_plan": [{"kind": "treatment", "basis": "inference", "text": "Consider antibiotics.", "sources": ["S1"]}]}
+
+    def test_parse_and_copy_basis(self):
+        n = note_from_model(self.OBJ)
+        self.assertEqual(n.sections["diagnostic_discussion"][0].basis, "knowledge")
+        self.assertEqual(n.sections["case_features"][0].basis, "")
+        c = n.copy()
+        self.assertEqual(c.sections["diagnostic_discussion"][0].basis, "knowledge")
+        self.assertEqual(c.sections["treatment_plan"][0].basis, "inference")
+
+    def test_replace_patch_preserves_basis(self):
+        c = parse_case(CASE, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("Consider antibiotics.", ["S1"], "treatment", "inference")]
+        res = apply_patches(n, [{"section": "treatment_plan", "index": 0, "action": "replace",
+                                 "text": "Consider appropriate antibiotics."}], c, L, "review", set())
+        self.assertEqual(res["applied"], 1)
+        self.assertEqual(n.sections["treatment_plan"][0].basis, "inference")
+
+    def test_to_record_evidence_basis(self):
+        rec = to_record(note_from_model(self.OBJ), parse_case(CASE, 0), cfg())
+        disc = [e for e in rec["evidence"] if e["section"] == "diagnostic_discussion"]
+        self.assertEqual(disc[0]["basis"], "knowledge")
+        feat = [e for e in rec["evidence"] if e["section"] == "case_features"]
+        self.assertNotIn("basis", feat[0])
+
+    def test_invalid_basis_schema_error(self):
+        rec = to_record(note_from_model(self.OBJ), parse_case(CASE, 0), cfg())
+        rec["evidence"][0]["basis"] = "bogus"      # the schema guard still rejects an off-enum basis in a record
+        self.assertTrue(schema_errors(rec))
+
+    def test_off_enum_basis_dropped_at_parse(self):
+        obj = json.loads(json.dumps(self.OBJ))
+        obj["diagnostic_discussion"][0]["basis"] = "conflict"   # real model occasionally emits off-enum values
+        n = note_from_model(obj)
+        self.assertEqual(n.sections["diagnostic_discussion"][0].basis, "")
+        self.assertEqual(schema_errors(to_record(n, parse_case(CASE, 0), cfg())), [])
+
+    def test_knowledge_statement_with_record_value_flagged(self):
+        c = parse_case(CASE, 0)
+        L = build_ledger(c)
+        st = Statement("Potassium 4.1 mmol/L is typical.", ["S2"], "assessment", "knowledge")
+        self.assertIn("knowledge_record_value", {f.code for f in V.check_statement("diagnostic_discussion", 0, st, c, L)})
+        st2 = Statement("A prevalence of 30% is reported.", ["S2"], "assessment", "knowledge")
+        self.assertNotIn("knowledge_record_value", {f.code for f in V.check_statement("diagnostic_discussion", 0, st2, c, L)})
+
+    def test_mock_a2_emits_record_basis(self):
+        p, _ = pipe()
+        r = p.run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+        self.assertEqual(schema_errors(r.record), [])
+        ev = [e for e in r.record["evidence"] if e["section"] in ("diagnostic_discussion", "treatment_plan")]
+        self.assertTrue(ev)
+        self.assertTrue(all(e.get("basis") == "record" for e in ev))
+
+
+class Wp8FalseAlarms(unittest.TestCase):
+    """Regression guards for the false-alarm patterns fixed in WP-8 (real TypicalCase-DC prose)."""
+
+    def test_glued_analyte_number_in_source(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "动脉血气：PCO232.4 mmHg，PO246 mmHg，SO270%。维生素B12766.49pg/ml。"}]}
+        self.assertEqual(codes("动脉血气：PCO2 32.4 mmHg，PO2 46 mmHg，SO2 70%。", sources=("a",), case=case) - {"missing_ref"}, set())
+        self.assertNotIn("number_not_in_source", codes("维生素B12 766.49pg/ml。", sources=("a",), case=case))
+
+    def test_glued_number_recovery_rejects_ordinary_labels(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "Creatinine120 umol/L."}]}
+        self.assertEqual(T.all_number_values("Creatinine120 umol/L."), {120.0})
+        self.assertIn("number_not_in_source", codes("Creatinine 20 umol/L.", sources=("a",), case=case))
+
+    def test_scientific_notation_unit(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "白细胞计数 1.0×106/L。"}]}
+        self.assertEqual(codes("白细胞1.0×10^6/L。", sources=("a",), case=case) - {"missing_ref"}, set())
+
+    def test_serial_and_side_labels_not_mismatch(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "血常规：白细胞 36.81×10⁹/L，血红蛋白 77g/L。现病史：白细胞（WBC）13.93×10⁹/L，血红蛋白（HBG）104g/L。眼压：右眼 19.3 mmHg。眼轴右眼 25.02 mm。"}]}
+        self.assertNotIn("value_label_mismatch", codes("白细胞13.93×10⁹/L，血红蛋白104g/L。", sources=("a",), case=case))
+        self.assertNotIn("value_label_mismatch", codes("眼轴右眼 25.02 mm。", sources=("a",), case=case))
+
+    def test_single_swap_still_flagged(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "血钾 3.1 mmol/L，血钠 138 mmol/L。"}]}
+        self.assertIn("value_label_mismatch", codes("血钾 138 mmol/L。", sources=("a",), case=case))
+
+    def test_buhui_negation(self):
+        self.assertEqual(T.negated_terms("不会注视及追视"), ["注视", "追视"])
+
+    def test_postfix_negation_scope(self):
+        self.assertNotIn("家族", T.clearly_positive_text("家族史均无特殊"))
+        self.assertNotIn("家族", T.clearly_positive_text("家族史无"))
+        self.assertNotIn("病理征", T.clearly_positive_text("病理征未引出"))
+        self.assertNotIn("检查检验", T.clearly_positive_text("检查检验结果暂无"))
+
+    def test_section_header_not_finding(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "个人史\n无特殊。\n体格检查\n无特殊。"}]}
+        self.assertNotIn("negation_flip", codes("个人史无特殊。", sources=("a",), case=case))
+        self.assertNotIn("negation_flip", codes("体格检查无特殊。", sources=("a",), case=case))
+
+
+class Docs(unittest.TestCase):
+    def test_no_commercial_endpoint_example(self):
+        for f in ("README.md", ".env.example", "docs/REQUIREMENTS.md", "docs/REPORT.md"):
+            self.assertNotIn("dashscope", (ROOT / f).read_text("utf-8").lower(), f)
+
+
+class Packaging(unittest.TestCase):
+    def setUp(self):
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import build_submission as B
+        self.B = B
+
+    def test_requirements_in_sync(self):
+        lines = lambda p: [l.strip() for l in (ROOT / p).read_text("utf-8").splitlines() if l.strip()]
+        self.assertEqual(lines("requirements.txt"), lines("requires.txt"))
+
+    def test_zip_whitelist(self):
+        d = Path(tempfile.mkdtemp())
+        names, total = self.B.build_zip(ROOT, d / "sub.zip")
+        for expected in ("main.py", "medtrace/prompts/v2/zh/a1.txt", "docs/RESOURCE_REGISTRATION.md", "input.example.json"):
+            self.assertIn(expected, names)
+        self.assertNotIn(".env", names)
+        for n in names:
+            self.assertFalse(n.startswith(("eval/", "data/", "data_pipeline/", "tests/")))
+            self.assertNotIn("__pycache__", n)
+            self.assertNotIn(".DS_Store", n)
+            self.assertFalse(n.endswith(".pyc"))
+        self.assertGreater(total, 0)
+
+    def test_zip_smoke_run(self):
+        d = Path(tempfile.mkdtemp())
+        self.B.build_zip(ROOT, d / "sub.zip")
+        ext = d / "unzipped"
+        with zipfile.ZipFile(d / "sub.zip") as zf:
+            zf.extractall(ext)
+        env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "OUTPUT_", "PIPELINE", "MOCK_"))}
+        env["LLM_API_BASE"] = "mock://"
+        p = subprocess.run([sys.executable, "main.py", "--input", "input.example.json", "--output", "output.json"],
+                           cwd=ext, env=env, capture_output=True, text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        recs = json.loads((ext / "output.json").read_text("utf-8"))
+        self.assertEqual(schema_errors(recs[0]), [])
 
 
 if __name__ == "__main__":

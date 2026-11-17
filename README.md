@@ -4,8 +4,9 @@ Reads structured admission records (`input.json`), calls the configured (designa
 `output.json` with, per case: **Case Features**, **Diagnostic Discussion**, **Diagnostic and Treatment Plan**,
 **evidence** (statement → source ids) and **review items** (missing / conflicting / to-verify).
 
-> **Status.** Tested end to end against a mock model and, on 26 development cases, against the designated model
-> (qwen4-max): all cases completed with valid output; see `docs/REPORT.md` §2.6 for what that run does and does not
+> **Status.** Tested end to end against a mock model and, on 26 development + 17 validation CMB-Clin cases, against a
+> **non-designated commercial model** (qwen4-max, judge qwen-plus) on **public data only**; nothing has run on the
+> designated competition service yet. See `docs/REPORT.md` §2.6 for what that run does and does not
 > show. The I/O contract below is still an assumption until checked against the official technical instructions. See `docs/REQUIREMENTS.md` (what must be confirmed) and `docs/REPORT.md` (what has and
 > has not been measured). This is a research/competition system, not a medical device; every note requires clinician review.
 
@@ -18,7 +19,7 @@ The document records the supplied answers; it does not certify the current imple
 ## Run
 
 ```bash
-pip install -r requires.txt        # requests, python-dotenv, jsonschema  (Python >= 3.10; developed for 3.11)
+pip install -r requirements.txt    # requests, python-dotenv, jsonschema (identical to requires.txt; Python >= 3.10)
 cp .env.example .env               # set LLM_API_BASE / LLM_API_KEY / LLM_MODEL
 python main.py                     # input.json -> output.json, logs/run_log.jsonl
 ```
@@ -27,6 +28,17 @@ Offline (no model needed): leave `LLM_API_BASE=mock://`, `cp input.example.json 
 
 Exit codes: `0` output written and schema-valid · `1` fatal (input unreadable, output unwritable, model not
 configured) · `2` only with `STRICT_EXIT=1` when any case fell back.
+
+## Submission package
+
+```bash
+python scripts/build_submission.py            # whitelist-only ZIP -> dist/submission.zip (prints file list, size, git commit)
+```
+
+The archive contains only runtime material (`main.py`, `medtrace/` with prompts, `requirements.txt`,
+`requires.txt`, `.env.example`, `README.md`, `docs/RESOURCE_REGISTRATION.md`, `input.example.json`) — never
+`.env`, `data/`, `eval/`, `data_pipeline/` or `tests/`. Resource registration (knowledge bases: None;
+dependencies and their stdlib fallbacks) is in `docs/RESOURCE_REGISTRATION.md`; the organiser's template is pending.
 
 ## Input / output (assumed contract — configurable)
 
@@ -81,7 +93,7 @@ medtrace/inputs.py      A  input + cutoff              medtrace/mock_llm.py     
 medtrace/ledger.py      B  fact ledger                 medtrace/mock_server.py        HTTP mock (500s, timeouts, garbage)
 medtrace/pipeline.py    C–E orchestration, guards      medtrace/update.py             incremental record updates
 medtrace/verify.py      E1 deterministic checks        eval/                          cases, ablation, perturbation, blinded review
-medtrace/llm.py         model client, retries          tests/                         50 regression / fault-injection tests
+medtrace/llm.py         model client, retries          tests/                         83 regression / fault-injection tests
 medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report, datasets
 data_pipeline/          dataset audit, acquisition, QC, standardisation        data/standardized/   standardized external cases
 ```

@@ -53,15 +53,16 @@ def gold_diagnoses(ref: dict) -> list[str]:
     return ref["reference"].get("diagnoses") or [ref["classification"]["disease_label"]]
 
 
-def load_dataset(name: str, split: str, tier: str = "", limit: int = 0):
+def load_dataset(name: str, split: str, tier: str = "", limit: int = 0, offset: int = 0):
     d = ROOT / "data" / "standardized" / name
     cases = {c["case_id"]: c for c in json.loads((d / "cases.json").read_text("utf-8"))}
     refs = json.loads((d / "references.json").read_text("utf-8"))
     items = [(cases[r["case_id"]], r) for r in refs
              if (r["split"] == split or (split == "all" and r["split"] in ("dev", "validation", "test")))
              and (not tier or r["quality"]["tier"] in tier.split(","))]
-    if limit:   # deterministic pseudo-random subset (stable across runs and machines), not "the first N"
-        items = sorted(items, key=lambda x: hashlib.sha256(("sample-v1|" + x[0]["case_id"]).encode()).hexdigest())[:limit]
+    if limit or offset:   # deterministic pseudo-random order (stable across runs/machines); offset skips the first N for a disjoint sample
+        items = sorted(items, key=lambda x: hashlib.sha256(("sample-v1|" + x[0]["case_id"]).encode()).hexdigest())
+        items = items[offset:offset + limit] if limit else items[offset:]
     return items
 
 
@@ -72,6 +73,7 @@ def main(argv=None) -> int:
     ap.add_argument("--variants", default="A0,A1,A2")
     ap.add_argument("--name", default=time.strftime("ext_%Y%m%d_%H%M%S"))
     ap.add_argument("--limit", type=int, default=0, help="deterministic pseudo-random subset of this size")
+    ap.add_argument("--offset", type=int, default=0, help="skip the first N of the deterministic order (disjoint sample for held-out precision)")
     ap.add_argument("--tier", default="", help="comma list of quality tiers to include, e.g. A or A,B (default: all usable)")
     ap.add_argument("--mock", action="store_true", help="force the offline mock model even if .env configures a real endpoint")
     ap.add_argument("--workers", type=int, default=1, help="cases in parallel (mind the provider's rate limits)")
@@ -80,7 +82,7 @@ def main(argv=None) -> int:
     if a.mock or not cfg0.api_base:
         cfg0.api_base = "mock://"
     is_mock = cfg0.api_base.startswith("mock")
-    items = load_dataset(a.dataset, a.split, a.tier, a.limit)
+    items = load_dataset(a.dataset, a.split, a.tier, a.limit, a.offset)
     variants = [v.strip().upper() for v in a.variants.split(",") if v.strip()]
     rows, outputs, debug = [], {v: [] for v in variants}, {v: [] for v in variants}
     for v in variants:
@@ -152,7 +154,7 @@ def main(argv=None) -> int:
                                                                                          "gold": {"diagnoses": gold_diagnoses(ref), "eligible": bool(ref["derived"]["dx_metric_eligible"])}}}
                                                                for raw, ref in items],
                                                    ensure_ascii=False, indent=1), "utf-8")
-    conf = {"name": a.name, "dataset": a.dataset, "split": a.split, "tier": a.tier, "limit": a.limit, "n_cases": len(items), "variants": variants,
+    conf = {"name": a.name, "dataset": a.dataset, "split": a.split, "tier": a.tier, "limit": a.limit, "offset": a.offset, "n_cases": len(items), "variants": variants,
             "budget": {v: BUDGET[v] for v in variants}, "model": cfg0.model or "<mock>", "mock": is_mock,
             "prompt": prompt_fingerprint(), "config": cfg0.public(),
             "dataset_manifest": json.loads((ROOT / "data" / "standardized" / a.dataset / "manifest.json").read_text("utf-8"))["raw_sha256"]}

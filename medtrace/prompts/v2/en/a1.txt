@@ -38,10 +38,10 @@ LENGTH AND STYLE (an initial progress note must be quick for a senior clinician 
 - At most 6 review_items, only those that would change diagnosis or management.
 
 OUTPUT
-Return exactly one JSON object. Each statement is one self-contained sentence or short group of sentences. "sources" lists the ids of the records that support it (for discussion and plan items: the records containing the findings that motivate it). Use only ids that appear in <records>. Do not put source ids inside "text".
+Return exactly one JSON object. Each statement is one self-contained sentence or short group of sentences. "sources" lists the ids of the records that support it (for discussion and plan items: the records containing the findings that motivate it). Use only ids that appear in <records>. Do not put source ids inside "text". For discussion and plan items add "basis": "record" (a patient fact taken from the records), "knowledge" (general medical knowledge, which must NOT contain patient-specific values from the records), or "inference" (your reasoning from the records).
 {
   "case_features": [{"text": "...", "sources": ["id"]}],
-  "diagnostic_discussion": [{"kind": "assessment|differential|uncertainty", "text": "...", "sources": ["id"]}],
-  "treatment_plan": [{"kind": "investigation|treatment|monitoring", "text": "...", "sources": ["id"]}],
+  "diagnostic_discussion": [{"kind": "assessment|differential|uncertainty", "basis": "record|knowledge|inference", "text": "...", "sources": ["id"]}],
+  "treatment_plan": [{"kind": "investigation|treatment|monitoring", "basis": "record|knowledge|inference", "text": "...", "sources": ["id"]}],
   "review_items": [{"type": "missing|conflict|verify", "text": "what the clinician must check and why it matters", "sources": ["id"]}]
 }

@@ -19,7 +19,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from .mock_llm import MockLLM
 
 
-def make_server(port: int = 0, mock: MockLLM | None = None, http_faults: dict | None = None, seed: int = 0):
+def make_server(port: int = 0, mock: MockLLM | None = None, http_faults: dict | None = None, seed: int = 0,
+                usage: dict | None = None):
     mock = mock or MockLLM.from_env()
     faults = http_faults or {}
     rng = random.Random(seed)
@@ -31,7 +32,12 @@ def make_server(port: int = 0, mock: MockLLM | None = None, http_faults: dict | 
 
         def do_POST(self):
             body = self.rfile.read(int(self.headers.get("Content-Length", 0) or 0))
+            try:
+                req = json.loads(body.decode("utf-8"))
+            except ValueError:
+                req = None
             with lock:
+                srv.requests.append(req)
                 r = [rng.random() for _ in range(3)]
             if r[0] < faults.get("slow", 0):
                 time.sleep(float(os.environ.get("MOCK_SLOW_SECONDS", "5")))
@@ -45,8 +51,11 @@ def make_server(port: int = 0, mock: MockLLM | None = None, http_faults: dict | 
                     content = mock.complete(messages)
             except Exception as e:
                 return self._send(400, {"error": {"message": str(e)}})
-            self._send(200, {"id": "mock", "object": "chat.completion",
-                             "choices": [{"index": 0, "message": {"role": "assistant", "content": content}, "finish_reason": "stop"}]})
+            resp = {"id": "mock", "object": "chat.completion",
+                    "choices": [{"index": 0, "message": {"role": "assistant", "content": content}, "finish_reason": "stop"}]}
+            if usage is not None:
+                resp["usage"] = usage
+            self._send(200, resp)
 
         def _send(self, code, obj):
             data = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -61,6 +70,7 @@ def make_server(port: int = 0, mock: MockLLM | None = None, http_faults: dict | 
 
     srv = ThreadingHTTPServer(("127.0.0.1", port), H)
     srv.mock = mock
+    srv.requests = []          # parsed request bodies, for payload-capture tests
     return srv
 
 

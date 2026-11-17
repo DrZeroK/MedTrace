@@ -69,6 +69,7 @@ _MSG_ZH = {
     "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
     "false_missing": "资料中已有记录，却被表述为未记录",
+    "knowledge_record_value": "知识性陈述含病人记录中的特定数值",
 }
 _CORE_RX = {"allergy": r"(?i)allerg|过敏", "medication": r"(?i)medication|drug|用药|药物", "vitals": r"(?i)vital|生命体征"}
 
@@ -141,6 +142,8 @@ class Pipeline:
                 except (LLMError, ParseError) as e:
                     status = "fallback"
                     log["error"] = f"{type(e).__name__}: {e}"
+                    if isinstance(e, BudgetExceeded):
+                        log["budget_exhausted"] = True
                     note = self._fallback(case, L, tr, type(e).__name__)
         except Exception as e:  # defensive: a bug must not take the batch down
             status = "fallback"
@@ -152,6 +155,7 @@ class Pipeline:
                 note.sections[sec] = [Statement(tr["fb_disc"] if status != "ok" and sec == "diagnostic_discussion" else
                                                 tr["fb_plan"] if status != "ok" and sec == "treatment_plan" else tr["empty"])]
         log.update(status=status, calls=stats.calls, http_attempts=stats.http_attempts, retries=stats.retries,
+                   prompt_tokens=stats.prompt_tokens, completion_tokens=stats.completion_tokens, total_tokens=stats.total_tokens,
                    llm_latency=round(stats.latency, 3), latency=round(time.monotonic() - t0, 3),
                    llm_errors=stats.errors[-3:], findings_initial=V.counts(initial), findings_final=V.counts(final))
         meta = {"status": status, "pipeline": variant, "prompt": prompt_fingerprint(), "calls": stats.calls}
@@ -160,10 +164,16 @@ class Pipeline:
     # ---------------------------------------------------------------- internals
     def _generate_and_verify(self, case, L, variant, lang, stats, deadline, changes, log):
         tr = _I18N[lang]
+        low_time = lambda: deadline is not None and deadline - time.monotonic() < self.cfg.time_reserve
+        skip = lambda step: log.setdefault("time_budget_skipped", []).append(step)
         common = dict(lang=tr["lang"], cutoff=case.cutoff_raw if case.cutoff_raw not in (None, "") else tr["no_cutoff"],
                       sources=sources_block(case))
         system = load_prompt("system", lang)
-        problems = self._extract(case, system, common, lang, stats, deadline, log) if variant == "S2" else ""
+        if variant == "S2" and low_time():
+            skip("extract")
+            problems = ""
+        else:
+            problems = self._extract(case, system, common, lang, stats, deadline, log) if variant == "S2" else ""
         if variant == "A0":
             user = fill(load_prompt("a0", lang), **common)
         else:
@@ -178,6 +188,9 @@ class Pipeline:
                 log.setdefault("parse_errors", []).append(str(e))
                 if attempt == 2:
                     raise
+                if low_time():
+                    skip("regenerate")
+                    raise
         log["raw_parse_retries"] = len(log.get("parse_errors", []))
         initial = V.verify_note(note, case, L)
         if variant in ("A0", "A1"):
@@ -187,6 +200,9 @@ class Pipeline:
         actionable = [f for f in findings if f.severity in (V.HIGH, V.MEDIUM) and f.section in SECTIONS and f.index >= 0]
         mode = ("review" if variant == "A3" else
                 "repair" if self.cfg.repair_call and any(f.severity == V.HIGH for f in findings) else None)
+        if mode and low_time():
+            skip(mode)
+            mode = None
         if mode:
             try:
                 user = fill(load_prompt(mode, lang), draft=_draft_json(note),
@@ -318,7 +334,7 @@ def apply_patches(note: Note, patches: list, case: Case, L: Ledger, mode: str, f
                 reject("replace: statement was not flagged")
             else:
                 old = stmts[idx]
-                new = Statement(text.strip(), srcs or old.sources, old.kind)
+                new = Statement(text.strip(), srcs or old.sources, old.kind, old.basis)
                 f_new, f_old = V.check_statement(sec, idx, new, case, L), V.check_statement(sec, idx, old, case, L)
                 if high(f_new) or bad(f_new) > bad(f_old):
                     reject("replace: new text fails verification")

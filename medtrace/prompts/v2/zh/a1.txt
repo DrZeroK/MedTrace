@@ -38,10 +38,10 @@
 - review_items不超过6条，只列会改变诊断或处理的事项。
 
 输出
-只输出一个JSON对象。每条陈述为一句或一小组完整的句子。“sources”列出支持该陈述的资料编号（讨论和计划条目：列出其所依据所见的资料编号）。只能使用<records>中出现的编号。不要把来源编号写进“text”。
+只输出一个JSON对象。每条陈述为一句或一小组完整的句子。“sources”列出支持该陈述的资料编号（讨论和计划条目：列出其所依据所见的资料编号）。只能使用<records>中出现的编号。不要把来源编号写进“text”。讨论和计划条目须加“basis”：“record”（源于记录的病人事实）、“knowledge”（通用医学知识，不得含记录中的病人特定数值）、“inference”（基于记录的推理）。
 {
   "case_features": [{"text": "……", "sources": ["编号"]}],
-  "diagnostic_discussion": [{"kind": "assessment|differential|uncertainty", "text": "……", "sources": ["编号"]}],
-  "treatment_plan": [{"kind": "investigation|treatment|monitoring", "text": "……", "sources": ["编号"]}],
+  "diagnostic_discussion": [{"kind": "assessment|differential|uncertainty", "basis": "record|knowledge|inference", "text": "……", "sources": ["编号"]}],
+  "treatment_plan": [{"kind": "investigation|treatment|monitoring", "basis": "record|knowledge|inference", "text": "……", "sources": ["编号"]}],
   "review_items": [{"type": "missing|conflict|verify", "text": "需医生核实的内容及其重要性", "sources": ["编号"]}]
 }
