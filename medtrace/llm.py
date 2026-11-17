@@ -60,7 +60,9 @@ class LLMClient:
     def __init__(self, cfg, mock=None):
         self.cfg = cfg
         self.mock = mock
-        if self.mock is None and cfg.api_base.lower().startswith("mock"):
+        # An explicit official ENDPOINT outranks a legacy mock base: copying .env.example (LLM_API_BASE=mock://)
+        # and filling ENDPOINT must reach the real service, not silently return synthetic mock output.
+        if self.mock is None and not cfg.endpoint and cfg.api_base.lower().startswith("mock"):
             from .mock_llm import MockLLM
             self.mock = MockLLM.from_env()
         if self.mock is None and not cfg.endpoint and not cfg.api_base:
@@ -69,6 +71,9 @@ class LLMClient:
         if cfg.endpoint:
             # Official provider spec: ENDPOINT is the complete request address (includes its path).
             # Use it verbatim - do not append /v1 or /chat/completions.
+            if self.mock is None and not (cfg.model or "").strip():
+                raise LLMError("MODEL_NAME must be non-empty when ENDPOINT is set (official config requires "
+                               "both MODEL_NAME and ENDPOINT)")
             self.url = cfg.endpoint
         else:
             base = cfg.api_base.rstrip("/")

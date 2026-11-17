@@ -953,6 +953,21 @@ class OfficialProtocol(EndToEnd):
         c2 = Config(api_base="http://host:8000/v1", model="qwen")
         self.assertEqual(LLMClient(c2).url, "http://host:8000/v1/chat/completions")
 
+    def test_endpoint_overrides_mock_base(self):
+        # PR#4 P1: an explicit ENDPOINT must reach the real service even when LLM_API_BASE=mock:// (copied .env.example).
+        c = Config(endpoint="http://host:8000/v1/chat/completions", api_base="mock://", model="qwen")
+        client = LLMClient(c)
+        self.assertIsNone(client.mock)
+        self.assertEqual(client.url, "http://host:8000/v1/chat/completions")
+
+    def test_endpoint_requires_model_name(self):
+        # PR#4 P2: ENDPOINT without MODEL_NAME is a config error (official runner exits 2), not an empty model value.
+        for bad in ("", "   "):
+            with self.assertRaises(LLMError):
+                LLMClient(Config(endpoint="http://host:8000/v1/chat/completions", model=bad))
+        LLMClient(Config(endpoint="http://host:8000/v1/chat/completions", model="qwen", api_key=""))  # keyless + model OK
+        self.assertIsNotNone(LLMClient(Config(api_base="mock://")).mock)                              # mock needs no model
+
     def test_official_record_success_shape(self):
         note = note_from_model({
             "case_features": ["Fever and cough [[S1]]", "No chest pain [[S1]]", "Temp 38.5 [[S2]]"],
