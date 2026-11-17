@@ -497,6 +497,68 @@ class Http(unittest.TestCase):
         c = cfg(api_base="http://127.0.0.1:9/v1", max_retries=0, timeout=2)          # nothing listening
         self.assertEqual(Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0)).status, "fallback")
 
+    def _srv(self, **kw):
+        srv = make_server(0, mock=MockLLM(), seed=3, **kw)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        self.addCleanup(srv.server_close)
+        self.addCleanup(srv.shutdown)
+        return srv
+
+    def _url(self, srv):
+        return f"http://127.0.0.1:{srv.server_address[1]}/v1"
+
+    def test_default_payload_omits_seed_and_thinking(self):
+        srv = self._srv()
+        c = cfg(api_base=self._url(srv))
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+        self.assertTrue(srv.requests)
+        for req in srv.requests:
+            self.assertNotIn("seed", req)
+            self.assertNotIn("chat_template_kwargs", req)
+
+    def test_seed_and_thinking_sent_when_configured(self):
+        srv = self._srv()
+        c = cfg(api_base=self._url(srv), seed=42, enable_thinking=False)
+        Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        req = srv.requests[0]
+        self.assertEqual(req["seed"], 42)
+        self.assertEqual(req["chat_template_kwargs"], {"enable_thinking": False})
+
+    def test_extra_body_overrides_seed_and_thinking(self):
+        srv = self._srv()
+        c = cfg(api_base=self._url(srv), seed=42, enable_thinking=False,
+                extra_body={"seed": 7, "chat_template_kwargs": {"enable_thinking": True}})
+        Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        req = srv.requests[0]
+        self.assertEqual(req["seed"], 7)
+        self.assertEqual(req["chat_template_kwargs"], {"enable_thinking": True})
+
+    def test_usage_accumulates_in_case_log(self):
+        srv = self._srv(usage={"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12})
+        c = cfg(api_base=self._url(srv))
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+        n = r.log["calls"]
+        self.assertEqual((r.log["prompt_tokens"], r.log["completion_tokens"], r.log["total_tokens"]), (5 * n, 7 * n, 12 * n))
+
+    def test_missing_usage_still_succeeds(self):
+        srv = self._srv()
+        c = cfg(api_base=self._url(srv))
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+        self.assertEqual(r.log["total_tokens"], 0)
+        self.assertEqual(schema_errors(r.record), [])
+
+    def test_request_budget_counts_retries(self):
+        srv = self._srv(http_faults={"http500": 1.0})
+        c = cfg(api_base=self._url(srv), max_retries=5, retry_backoff=0.01, max_requests_per_case=2)
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "fallback")
+        self.assertTrue(r.log.get("budget_exhausted"))
+        self.assertEqual(len(srv.requests), 2)
+        self.assertEqual(schema_errors(r.record), [])
+
 
 class EndToEnd(unittest.TestCase):
     def _run(self, doc, env=None, raw=None):
@@ -519,6 +581,21 @@ class EndToEnd(unittest.TestCase):
         self.assertFalse([f for f in os.listdir(d) if f.startswith(".tmp_")])
         events = [json.loads(l)["event"] for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
         self.assertEqual(events.count("case"), 7)
+
+    def test_run_end_carries_totals(self):
+        srv = make_server(0, mock=MockLLM(), seed=3, usage={"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12})
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        self.addCleanup(srv.server_close)
+        self.addCleanup(srv.shutdown)
+        url = f"http://127.0.0.1:{srv.server_address[1]}/v1"
+        p, out, d = self._run([CASE], {"LLM_API_BASE": url})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        events = [json.loads(l) for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
+        end = [e for e in events if e["event"] == "run_end"][-1]
+        cases = [e for e in events if e["event"] == "case"]
+        for k in ("prompt_tokens", "completion_tokens", "total_tokens", "calls", "http_attempts", "retries"):
+            self.assertEqual(end[k], sum(c.get(k, 0) for c in cases))
+        self.assertGreater(end["total_tokens"], 0)
 
     def test_fatal_inputs_exit_1(self):
         p, out, _ = self._run(None, raw="{broken")

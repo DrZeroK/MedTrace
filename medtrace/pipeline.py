@@ -141,6 +141,8 @@ class Pipeline:
                 except (LLMError, ParseError) as e:
                     status = "fallback"
                     log["error"] = f"{type(e).__name__}: {e}"
+                    if isinstance(e, BudgetExceeded):
+                        log["budget_exhausted"] = True
                     note = self._fallback(case, L, tr, type(e).__name__)
         except Exception as e:  # defensive: a bug must not take the batch down
             status = "fallback"
@@ -152,6 +154,7 @@ class Pipeline:
                 note.sections[sec] = [Statement(tr["fb_disc"] if status != "ok" and sec == "diagnostic_discussion" else
                                                 tr["fb_plan"] if status != "ok" and sec == "treatment_plan" else tr["empty"])]
         log.update(status=status, calls=stats.calls, http_attempts=stats.http_attempts, retries=stats.retries,
+                   prompt_tokens=stats.prompt_tokens, completion_tokens=stats.completion_tokens, total_tokens=stats.total_tokens,
                    llm_latency=round(stats.latency, 3), latency=round(time.monotonic() - t0, 3),
                    llm_errors=stats.errors[-3:], findings_initial=V.counts(initial), findings_final=V.counts(final))
         meta = {"status": status, "pipeline": variant, "prompt": prompt_fingerprint(), "calls": stats.calls}

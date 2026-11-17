@@ -59,6 +59,12 @@ def _flag(*names, default=False):
     return str(_get(*names, default="1" if default else "0")).strip().lower() in ("1", "true", "yes", "on")
 
 
+def _tri_flag(*names):
+    """None when unset (omit the field, server default); otherwise a bool."""
+    v = _get(*names)
+    return None if v is None else str(v).strip().lower() in ("1", "true", "yes", "on")
+
+
 @dataclass
 class Config:
     input_path: str = "input.json"
@@ -73,9 +79,12 @@ class Config:
     temperature: float = 0.0
     max_tokens: int = 0             # 0 => omit, use server default
     json_mode: bool = False         # send response_format=json_object if the endpoint supports it
-    extra_body: dict = field(default_factory=dict)   # merged into every request (provider-specific switches)
+    seed: int | None = None         # None => omit; vLLM accepts a top-level "seed" (Q4)
+    enable_thinking: bool | None = None   # None => omit (server default, not necessarily off); sent as chat_template_kwargs (Q7)
+    extra_body: dict = field(default_factory=dict)   # merged into every request last (provider-specific switches, may override the above)
     pipeline: str = "A2"
     max_calls_per_case: int = 2     # logical model calls (generation, one regeneration on unparseable output, optional repair/review)
+    max_requests_per_case: int = 0  # every HTTP attempt incl. retries (Q5); 0 => unlimited until the organiser publishes a limit
     repair_call: bool = True        # A2: targeted repair call on high-severity findings. load_config() defaults it OFF:
                                     # on real qwen4-max output it fired only on verifier false alarms (docs/REPORT.md 2.6)
     case_timeout: float = 0.0       # 0 => unlimited
@@ -114,8 +123,11 @@ def load_config(**overrides) -> Config:
         temperature=_num(float, "LLM_TEMPERATURE", default=0.0),
         max_tokens=_num(int, "LLM_MAX_TOKENS", default=0),
         json_mode=_flag("LLM_JSON_MODE"),
+        seed=_num(int, "LLM_SEED", default=None),
+        enable_thinking=_tri_flag("LLM_ENABLE_THINKING"),
         pipeline=str(_get("PIPELINE", default="A2")).upper(),
         max_calls_per_case=_num(int, "MAX_CALLS_PER_CASE", default=2),
+        max_requests_per_case=max(0, _num(int, "MAX_REQUESTS_PER_CASE", default=0)),
         repair_call=_flag("REPAIR_CALL"),
         case_timeout=_num(float, "CASE_TIMEOUT", default=0.0),
         total_timeout=_num(float, "TOTAL_TIMEOUT", default=0.0),
