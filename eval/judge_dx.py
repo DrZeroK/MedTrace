@@ -52,7 +52,7 @@ def main(argv=None) -> int:
     argv = argv or sys.argv[1:]
     run = Path(argv[0])
     workers = int(argv[argv.index("--workers") + 1]) if "--workers" in argv else 4
-    cfg = copy.copy(load_config())
+    cfg = copy.copy(load_config(development=True))
     cfg.model = os.environ.get("JUDGE_MODEL", "qwen-plus")
     cfg.max_calls_per_case, cfg.extra_body = 1, {}
     client = LLMClient(cfg)

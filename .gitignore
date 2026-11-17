@@ -5,8 +5,10 @@ __pycache__/
 logs/
 output.json
 results.json
+/run_log.json
 /input.json
 eval/results/
+eval/archive/
 data/raw/
 .venv/
 data/reference_indexes/
