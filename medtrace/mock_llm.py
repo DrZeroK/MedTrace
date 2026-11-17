@@ -86,16 +86,16 @@ class MockLLM:
         first = sources[0][0]
         feats = [{"text": s, "sources": [sid]} for sid, content in sources for s in split_sentences(content)[:10]]
         if zh:
-            disc = [{"kind": "assessment", "text": "根据上述记录所见可提出初步诊断方向，但尚不能明确，需由医生结合病情判断。", "sources": [first]},
-                    {"kind": "uncertainty", "text": "现有资料不足以进一步缩小鉴别诊断范围。", "sources": [first]}]
-            plan = [{"kind": "investigation", "text": "建议完善与记录所见相关的检查。", "sources": [first]},
-                    {"kind": "monitoring", "text": "建议监测生命体征，待结果回报后再评估。", "sources": [first]}]
+            disc = [{"kind": "assessment", "basis": "record", "text": "根据上述记录所见可提出初步诊断方向，但尚不能明确，需由医生结合病情判断。", "sources": [first]},
+                    {"kind": "uncertainty", "basis": "record", "text": "现有资料不足以进一步缩小鉴别诊断范围。", "sources": [first]}]
+            plan = [{"kind": "investigation", "basis": "record", "text": "建议完善与记录所见相关的检查。", "sources": [first]},
+                    {"kind": "monitoring", "basis": "record", "text": "建议监测生命体征，待结果回报后再评估。", "sources": [first]}]
             review = [{"type": "verify", "text": "模拟模型输出：临床内容需医生审核。"}]
         else:
-            disc = [{"kind": "assessment", "text": "The recorded findings suggest a working diagnosis that is not yet established and requires clinician assessment.", "sources": [first]},
-                    {"kind": "uncertainty", "text": "The differential diagnosis cannot be narrowed further from the available records.", "sources": [first]}]
-            plan = [{"kind": "investigation", "text": "Recommend completing the investigations indicated by the recorded findings.", "sources": [first]},
-                    {"kind": "monitoring", "text": "Recommend monitoring of vital signs and reassessment once results are available.", "sources": [first]}]
+            disc = [{"kind": "assessment", "basis": "record", "text": "The recorded findings suggest a working diagnosis that is not yet established and requires clinician assessment.", "sources": [first]},
+                    {"kind": "uncertainty", "basis": "record", "text": "The differential diagnosis cannot be narrowed further from the available records.", "sources": [first]}]
+            plan = [{"kind": "investigation", "basis": "record", "text": "Recommend completing the investigations indicated by the recorded findings.", "sources": [first]},
+                    {"kind": "monitoring", "basis": "record", "text": "Recommend monitoring of vital signs and reassessment once results are available.", "sources": [first]}]
             review = [{"type": "verify", "text": "Mock model output: clinical content requires clinician review."}]
 
         src_nums = all_number_values(" ".join(c for _, c in sources))

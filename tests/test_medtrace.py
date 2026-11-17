@@ -22,7 +22,7 @@ from medtrace.ledger import build_ledger                              # noqa: E4
 from medtrace.llm import CallStats, LLMClient, LLMError                # noqa: E402
 from medtrace.mock_llm import MockLLM                                 # noqa: E402
 from medtrace.mock_server import make_server                          # noqa: E402
-from medtrace.note import Note, ParseError, Statement, note_from_model, parse_json_object, schema_errors  # noqa: E402
+from medtrace.note import Note, ParseError, Statement, note_from_model, parse_json_object, schema_errors, to_record  # noqa: E402
 from medtrace.pipeline import Pipeline, apply_patches                 # noqa: E402
 from medtrace.update import diff_cases                                # noqa: E402
 
@@ -701,6 +701,50 @@ class EndToEnd(unittest.TestCase):
         p, out, _ = self._run([dict(CASE, case_id=i) for i in range(4)], {"TOTAL_TIMEOUT": "0.001"})
         self.assertEqual(p.returncode, 0)
         self.assertEqual([r["case_id"] for r in json.loads(out.read_text("utf-8"))], [0, 1, 2, 3])
+
+
+class BasisField(unittest.TestCase):
+    OBJ = {"case_features": [{"text": "Fever for 3 days.", "sources": ["S1"]}],
+           "diagnostic_discussion": [{"kind": "assessment", "basis": "knowledge", "text": "Pneumonia is a common diagnosis.", "sources": ["S1"]}],
+           "treatment_plan": [{"kind": "treatment", "basis": "inference", "text": "Consider antibiotics.", "sources": ["S1"]}]}
+
+    def test_parse_and_copy_basis(self):
+        n = note_from_model(self.OBJ)
+        self.assertEqual(n.sections["diagnostic_discussion"][0].basis, "knowledge")
+        self.assertEqual(n.sections["case_features"][0].basis, "")
+        c = n.copy()
+        self.assertEqual(c.sections["diagnostic_discussion"][0].basis, "knowledge")
+        self.assertEqual(c.sections["treatment_plan"][0].basis, "inference")
+
+    def test_to_record_evidence_basis(self):
+        rec = to_record(note_from_model(self.OBJ), parse_case(CASE, 0), cfg())
+        disc = [e for e in rec["evidence"] if e["section"] == "diagnostic_discussion"]
+        self.assertEqual(disc[0]["basis"], "knowledge")
+        feat = [e for e in rec["evidence"] if e["section"] == "case_features"]
+        self.assertNotIn("basis", feat[0])
+
+    def test_invalid_basis_schema_error(self):
+        obj = json.loads(json.dumps(self.OBJ))
+        obj["diagnostic_discussion"][0]["basis"] = "bogus"
+        rec = to_record(note_from_model(obj), parse_case(CASE, 0), cfg())
+        self.assertTrue(schema_errors(rec))
+
+    def test_knowledge_statement_with_record_value_flagged(self):
+        c = parse_case(CASE, 0)
+        L = build_ledger(c)
+        st = Statement("Potassium 4.1 mmol/L is typical.", ["S2"], "assessment", "knowledge")
+        self.assertIn("knowledge_record_value", {f.code for f in V.check_statement("diagnostic_discussion", 0, st, c, L)})
+        st2 = Statement("A prevalence of 30% is reported.", ["S2"], "assessment", "knowledge")
+        self.assertNotIn("knowledge_record_value", {f.code for f in V.check_statement("diagnostic_discussion", 0, st2, c, L)})
+
+    def test_mock_a2_emits_record_basis(self):
+        p, _ = pipe()
+        r = p.run_case(parse_case(CASE, 0))
+        self.assertEqual(r.status, "ok")
+        self.assertEqual(schema_errors(r.record), [])
+        ev = [e for e in r.record["evidence"] if e["section"] in ("diagnostic_discussion", "treatment_plan")]
+        self.assertTrue(ev)
+        self.assertTrue(all(e.get("basis") == "record" for e in ev))
 
 
 class Docs(unittest.TestCase):

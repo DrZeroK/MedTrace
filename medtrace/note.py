@@ -28,6 +28,7 @@ class Statement:
     text: str
     sources: list = field(default_factory=list)
     kind: str = ""
+    basis: str = ""             # record | knowledge | inference (optional; discussion/plan)
 
 
 @dataclass
@@ -38,7 +39,7 @@ class Note:
     structured: bool = True                              # False when the model returned free prose
 
     def copy(self) -> "Note":
-        return Note({k: [Statement(s.text, list(s.sources), s.kind) for s in v] for k, v in self.sections.items()},
+        return Note({k: [Statement(s.text, list(s.sources), s.kind, s.basis) for s in v] for k, v in self.sections.items()},
                     [dict(r) for r in self.review_items], [dict(e) for e in self.extra_evidence], self.structured)
 
     def text(self, section=None) -> str:
@@ -81,11 +82,12 @@ def _ids(v) -> list[str]:
 
 def _stmt(item) -> Statement | None:
     if isinstance(item, str):
-        text, src, kind = item, [], ""
+        text, src, kind, basis = item, [], "", ""
     elif isinstance(item, dict):
         text = item.get("text") or item.get("statement") or item.get("content") or item.get("description") or ""
         src = _ids(item.get("sources", item.get("source_ids", item.get("source"))))
         kind = str(item.get("kind") or item.get("type") or "")
+        basis = str(item.get("basis") or "")
     else:
         return None
     if not isinstance(text, str):
@@ -95,7 +97,7 @@ def _stmt(item) -> Statement | None:
             if i not in src:
                 src.append(i)
     text = strip_enum(_MARK.sub("", text))
-    return Statement(text, src, kind) if text else None
+    return Statement(text, src, kind, basis) if text else None
 
 
 def note_from_model(obj: dict) -> Note:
@@ -153,8 +155,15 @@ def to_record(note: Note, case, cfg, meta: dict | None = None) -> dict:
     rec = {"case_id": case.case_id}
     for sec in SECTIONS:
         rec[sec] = render_section(note.sections[sec], numbered, cfg.inline_citations)
-    evidence = [{"section": sec, "statement": s.text, "source_ids": [rid(i) for i in s.sources]}
-                for sec in SECTIONS for s in note.sections[sec] if s.sources]
+    evidence = []
+    for sec in SECTIONS:
+        for s in note.sections[sec]:
+            if not s.sources:
+                continue
+            e = {"section": sec, "statement": s.text, "source_ids": [rid(i) for i in s.sources]}
+            if s.basis:
+                e["basis"] = s.basis
+            evidence.append(e)
     evidence += [{"section": e["section"], "statement": e["statement"], "source_ids": [rid(i) for i in e["source_ids"]]}
                  for e in note.extra_evidence if e["source_ids"]]
     rec["evidence"] = evidence
@@ -179,7 +188,8 @@ OUTPUT_SCHEMA = {
         "evidence": {"type": "array", "items": {
             "type": "object", "required": ["section", "statement", "source_ids"],
             "properties": {"section": {"type": "string"}, "statement": {"type": "string"},
-                           "source_ids": {"type": "array", "minItems": 1}}}},
+                           "source_ids": {"type": "array", "minItems": 1},
+                           "basis": {"enum": ["record", "knowledge", "inference"]}}}},
         "review_items": {"type": "array", "items": {
             "type": "object", "required": ["type", "description", "source_ids"],
             "properties": {"type": {"enum": list(REVIEW_TYPES)}, "description": {"type": "string", "minLength": 1},
@@ -197,4 +207,6 @@ def schema_errors(rec: dict) -> list[str]:
         errs = [f"missing {k}" for k in OUTPUT_SCHEMA["required"] if k not in rec]
         errs += [f"{k} must be a non-empty string" for k in SECTIONS if not (isinstance(rec.get(k), str) and rec.get(k))]
         errs += [f"{k} must be a list" for k in ("evidence", "review_items") if not isinstance(rec.get(k), list)]
+        errs += [f"evidence basis must be record/knowledge/inference" for e in rec.get("evidence", [])
+                 if isinstance(e, dict) and "basis" in e and e["basis"] not in ("record", "knowledge", "inference")]
         return errs

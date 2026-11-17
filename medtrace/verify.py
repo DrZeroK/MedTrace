@@ -95,6 +95,14 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 add("unit_mismatch", HIGH if sec == "features" else MEDIUM,
                     f"{raw!r}: records give this value with unit(s) {sorted(L.units[val])}")
 
+    # ---- a knowledge statement must not carry patient-specific values from the records
+    if st.basis == "knowledge" and sec in ("discussion", "plan"):
+        for val, unit, raw in T.extract_numbers(T.mask_dates(text, year or 2000)):
+            if val in L.numbers:
+                add("knowledge_record_value", MEDIUM,
+                    f"knowledge statement carries {raw!r}, a value found in the patient's records")
+                break
+
     # ---- value attached to the wrong measurement (e.g. sodium's value reported as potassium)
     if sec == "features":
         for num in numerics(text, year):
