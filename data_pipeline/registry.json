@@ -69,14 +69,14 @@
    "paper": "Bioinformatics 2022, btac817",
    "content": "4,116 annotated online paediatric consultations (10 diseases): entities, dialogue acts, symptom labels with present/absent/uncertain status, and a structured medical report per dialogue",
    "provenance": "online consultation platform dialogues",
-   "license": "NO LICENCE FILE in the repository (verified: LICENSE returns 404 on main and master). No licence means no grant: research evaluation at most, no redistribution",
-   "verified": "both READMEs fetched; data files are not confirmed to be in the repository; the test set is on Tianchi",
+   "license": "no licence file in the GitHub repository (verified) and none in the Tianchi archives; governed by the Tianchi terms the downloader accepted. No redistribution",
+   "verified": "both READMEs fetched; on 2026-11-17 the team supplied the Tianchi IMCS-V2 archives (DAC, MRG, NER, SR share one corpus: 2,472 train / 833 dev dialogues with symptom status labels and two reference reports each), which were inspected and scored",
    "access": "repository / Tianchi",
    "redistribution": "not permitted (no licence)",
    "permitted_use_here": [],
-   "relevance": "medium: symptom present/absent/uncertain labels are a good external test of negation and uncertainty handling; outpatient paediatric dialogue is far from inpatient admission records",
-   "limits": "domain mismatch; licence absent - ask the authors before any use beyond private evaluation",
-   "status": "not acquired"
+   "relevance": "low, lower than first assumed. Scored without tuning, the sentence-level negation rules reach F1 0.42 on the dev symptom-status labels (0.98 on CHIP-CDEE). The gap is mostly not a rule defect: a symptom in a doctor's question ('有痰吗？') is labelled by the patient's later answer, which no sentence-level rule can know, and the language is colloquial parent chat ('不发烧', '没吐过') rather than record style",
+   "limits": "labels are dialogue-level, text is conversational paediatric outpatient chat; the reference reports copy the doctor's own diagnosis and advice from the dialogue. Not a valid test or tuning source for admission-record processing",
+   "status": "inspected and scored once; deliberately not used for tuning or evaluation"
   },
   {
    "id": "lungcure",
