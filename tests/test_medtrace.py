@@ -716,6 +716,16 @@ class BasisField(unittest.TestCase):
         self.assertEqual(c.sections["diagnostic_discussion"][0].basis, "knowledge")
         self.assertEqual(c.sections["treatment_plan"][0].basis, "inference")
 
+    def test_replace_patch_preserves_basis(self):
+        c = parse_case(CASE, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("Consider antibiotics.", ["S1"], "treatment", "inference")]
+        res = apply_patches(n, [{"section": "treatment_plan", "index": 0, "action": "replace",
+                                 "text": "Consider appropriate antibiotics."}], c, L, "review", set())
+        self.assertEqual(res["applied"], 1)
+        self.assertEqual(n.sections["treatment_plan"][0].basis, "inference")
+
     def test_to_record_evidence_basis(self):
         rec = to_record(note_from_model(self.OBJ), parse_case(CASE, 0), cfg())
         disc = [e for e in rec["evidence"] if e["section"] == "diagnostic_discussion"]
@@ -760,6 +770,11 @@ class Wp8FalseAlarms(unittest.TestCase):
         case = {"case_id": 1, "sources": [{"source_id": "a", "content": "动脉血气：PCO232.4 mmHg，PO246 mmHg，SO270%。维生素B12766.49pg/ml。"}]}
         self.assertEqual(codes("动脉血气：PCO2 32.4 mmHg，PO2 46 mmHg，SO2 70%。", sources=("a",), case=case) - {"missing_ref"}, set())
         self.assertNotIn("number_not_in_source", codes("维生素B12 766.49pg/ml。", sources=("a",), case=case))
+
+    def test_glued_number_recovery_rejects_ordinary_labels(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "Creatinine120 umol/L."}]}
+        self.assertEqual(T.all_number_values("Creatinine120 umol/L."), {120.0})
+        self.assertIn("number_not_in_source", codes("Creatinine 20 umol/L.", sources=("a",), case=case))
 
     def test_scientific_notation_unit(self):
         case = {"case_id": 1, "sources": [{"source_id": "a", "content": "白细胞计数 1.0×106/L。"}]}

@@ -334,7 +334,7 @@ def apply_patches(note: Note, patches: list, case: Case, L: Ledger, mode: str, f
                 reject("replace: statement was not flagged")
             else:
                 old = stmts[idx]
-                new = Statement(text.strip(), srcs or old.sources, old.kind)
+                new = Statement(text.strip(), srcs or old.sources, old.kind, old.basis)
                 f_new, f_old = V.check_statement(sec, idx, new, case, L), V.check_statement(sec, idx, old, case, L)
                 if high(f_new) or bad(f_new) > bad(f_old):
                     reject("replace: new text fails verification")

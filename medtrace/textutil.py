@@ -159,7 +159,9 @@ _UNIT_ALT = "|".join(re.escape(u) for u in sorted(_UNITS, key=len, reverse=True)
 _UNIT_ALT += r"|[×xX*]10(?:\^\d+|\d+|[⁰¹²³⁴⁵⁶⁷⁸⁹]+)/[Ll]"   # scientific-notation counts (×10^6/L, ×106/L, ×10⁶/L …)
 _NUM_STRICT = re.compile(r"(?<![A-Za-z0-9_.\-])(\d+(?:\.\d+)?)(?:\s*(" + _UNIT_ALT + r")(?![A-Za-z]))?", re.I)
 _NUM_ANY = re.compile(r"\d+(?:\.\d+)?")
-_GLUED_NUM = re.compile(r"(?<=[A-Za-z])(\d+(?:\.\d+)?)")     # analyte label glued to its value ("PCO232.4", "B12766.49")
+# Only unambiguous analyte subscripts: the digits after the recognised prefix are the complete value.
+# A generic letter+digit suffix is unsafe ("Creatinine120" must not manufacture 20 and 0).
+_GLUED_NUM = re.compile(r"(?i)(?<![A-Za-z0-9])(PCO2|PO2|SO2|B12)(\d+(?:\.\d+)?)")
 _SUPER = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 
 
@@ -200,16 +202,11 @@ def all_number_values(text: str) -> set[float]:
     """Permissive extraction for *source* text (superset => fewer false alarms)."""
     t = fw(text)
     vals = {float(x) for x in _NUM_ANY.findall(t)}
-    # Records glue an analyte subscript to its value ("PCO232.4 mmHg", "维生素B12766.49pg/ml"): the digit run
-    # reads as 232.4 / 12766.49, hiding the true 32.4 / 766.49. Also admit the suffixes after 1-2 leading digits.
+    # Some records glue an analyte subscript to its complete value ("PCO232.4 mmHg" means PCO2 = 32.4,
+    # "维生素B12766.49pg/ml" means B12 = 766.49). Recover only these recognised forms; arbitrary suffix slicing
+    # would accept incorrect clinical measurements ("Creatinine120" must not make 20 or 0 source-supported).
     for m in _GLUED_NUM.finditer(t):
-        s = m.group(1)
-        for k in (1, 2):
-            if len(s) > k and s[k] != "." and s[k].isdigit():
-                try:
-                    vals.add(float(s[k:]))
-                except ValueError:
-                    pass
+        vals.add(float(m.group(2)))
     vals |= {float(_ZH_NUM[ch]) for ch in set(text or "") if ch in _ZH_NUM}
     return vals
 
