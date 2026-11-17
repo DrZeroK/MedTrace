@@ -27,9 +27,9 @@ done), plus malformed JSON (0.15) and a hallucinating reviewer (0.5). The same e
 |---|---|---|---|---|---|---|
 | A0 baseline | 41/48 | 152/178 | 152 | 91.9% | 96.5% | 1.00 |
 | A1 grounded prompt | 41/48 | 152/178 | 152 | 97.9% | 96.5% | 1.00 |
-| A2 + deterministic verification | 46/48 | 27/224 | **0** | 100% | 91.6% | 1.96 |
-| S2 extraction → A2 | 46/48 | 27/224 | **0** | 100% | 91.6% | 2.96 |
-| A3 + semantic review | 46/48 | 25/224 | **0** | 100% | 91.6% | 2.00 |
+| A2 + deterministic verification | 46/48 | 28/224 | **0** | 100% | 91.6% | 1.96 |
+| S2 extraction → A2 | 46/48 | 28/224 | **0** | 100% | 91.6% | 2.96 |
+| A3 + semantic review | 46/48 | 26/224 | **0** | 100% | 91.6% | 2.00 |
 
 With a strict single-call budget (`mock_faults_single_call`, seed 1) A2 cannot repair, so 42/54 injected errors stay
 in the text, but all 42 are listed under `review_items`; coverage 97.3%.
