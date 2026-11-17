@@ -4,14 +4,14 @@ Status: **draft — the organiser's registration template is pending [ORG]** (co
 This document follows the fields the Q&A asks for (name, source, version, purpose, size, dependencies)
 and will be reformatted once the official template is published. The authoritative version of every
 code resource is the git commit of the submission package; `python scripts/build_submission.py`
-prints that commit and the prompt fingerprint at build time.
+prints that commit and the prompt fingerprint at build time; `submission.manifest.json` also records each file's SHA-256.
 
 ## Knowledge bases
 
 **No approved clinical release yet.** Optional SQLite knowledge support is implemented;
-`KB_PATH` is empty by default. Draft content under `knowledge/` is not shipped.
+No external knowledge is enabled by default. Draft content under `knowledge/` is not shipped.
 When an approved release is supplied to `build_submission.py --knowledge`, its database
-and manifest ship under `resources/`. The manifest registers each entry's source,
+and manifest ship under `resources/`; official execution automatically loads that bundled database. The manifest registers each entry's source,
 version, purpose/type, scope, permission and reviewer, plus total size, SHA-256 and
 dependencies (Python >=3.10, SQLite FTS5). See `docs/KNOWLEDGE_BASE.md`.
 
@@ -33,9 +33,11 @@ datasets (CHIP-CDEE train split) but no labelled data is shipped or loaded at ru
 
 | Package | Pin | Purpose | Fallback if absent |
 |---|---|---|---|
-| requests | >=2.28 | HTTP client | urllib (stdlib) — `medtrace/llm.py` `_post` |
-| python-dotenv | >=1.0 | `.env` loading | minimal parser — `medtrace/config.py` `load_dotenv_files` |
-| jsonschema | >=4.0 | output schema validation | manual required/type checks — `medtrace/note.py` |
+| requests | ==2.34.2 | HTTP client | urllib (stdlib) — `medtrace/llm.py` `_post` |
+| python-dotenv | ==1.2.4 | `.env` loading | minimal parser — `medtrace/config.py` |
+| jsonschema | ==4.26.0 | legacy/development output schema validation | manual checks — `medtrace/note.py`; official validation always uses the same stdlib implementation |
+
+Transitive dependencies are also pinned in both dependency files from the verified Python 3.11 environment.
 
 The runtime completes with none of the three installed (stdlib fallbacks). No runtime install or
 download occurs; the only network use is the configured model endpoint (competition Q&A Q3).

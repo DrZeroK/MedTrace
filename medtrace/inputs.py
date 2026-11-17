@@ -34,6 +34,7 @@ class Case:
     cutoff_tz: Any = None               # UTC offset of record_cutoff, when it carries one
     sources: list[Source] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)       # fatal for this case
+    protocol_errors: list[str] = field(default_factory=list)  # official validation, separate from tolerant development parsing
     warnings: list[str] = field(default_factory=list)
     excluded_sources: list[str] = field(default_factory=list)
     redacted: list[tuple[str, str]] = field(default_factory=list)   # (sid, sentence) beyond cutoff
@@ -101,7 +102,7 @@ def _source_time(d: dict, cutoff_tz=None):
 def parse_case(raw, index: int, cutoff_mode: str = "redact") -> Case:
     if not isinstance(raw, dict):
         return Case(index=index, case_id=None, errors=["case is not a JSON object"])
-    c = Case(index=index, case_id=raw.get("case_id"))
+    c = Case(index=index, case_id=raw.get("case_id"), protocol_errors=_protocol_errors(raw))
     if c.case_id is None or isinstance(c.case_id, (dict, list)):
         c.warnings.append("missing or non-scalar case_id")
     c.cutoff_raw = raw.get("record_cutoff")
@@ -127,7 +128,7 @@ def parse_case(raw, index: int, cutoff_mode: str = "redact") -> Case:
         if rid is None or isinstance(rid, (dict, list)) or str(rid).strip() == "":
             rid = f"source_{j + 1}"
             c.warnings.append(f"sources[{j}] has no source_id; assigned {rid!r}")
-        sid = str(rid).strip()
+        sid = rid if isinstance(rid, str) else str(rid).strip()
         t, t_has_time, comparable = _source_time(s, c.cutoff_tz)
         if t and c.cutoff and not comparable:
             c.warnings.append(f"source {sid!r}: only one of source timestamp / record_cutoff has a UTC offset; compared as written")
@@ -152,6 +153,31 @@ def parse_case(raw, index: int, cutoff_mode: str = "redact") -> Case:
             c.errors.append("no source content remains before the cutoff")
     c.lang = detect_lang(c.text)
     return c
+
+
+def _protocol_errors(raw: dict) -> list[str]:
+    errors = []
+    cutoff = raw.get("record_cutoff")
+    if not isinstance(cutoff, str) or not cutoff.strip() or not parse_instant(cutoff)[1]:
+        errors.append("record_cutoff must be a valid non-empty timestamp or T0")
+    sources = raw.get("sources")
+    if not isinstance(sources, list) or not sources:
+        return errors + ["sources must be a non-empty array"]
+    seen = set()
+    for i, source in enumerate(sources):
+        if not isinstance(source, dict):
+            errors.append(f"sources[{i}] must be an object")
+            continue
+        sid = source.get("source_id")
+        if not isinstance(sid, str) or not sid.strip():
+            errors.append(f"sources[{i}].source_id must be a non-empty string")
+        elif sid in seen:
+            errors.append(f"sources[{i}].source_id is duplicated")
+        else:
+            seen.add(sid)
+        if not isinstance(source.get("content"), str) or not source["content"].strip():
+            errors.append(f"sources[{i}].content must be a non-empty string")
+    return errors
 
 
 def _apply_sentence_cutoff(c: Case, redact: bool) -> None:

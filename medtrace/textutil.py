@@ -101,6 +101,7 @@ def parse_instant(raw, ref_tz=None):
     A timestamp carrying a UTC offset is an absolute instant. It is converted to `ref_tz` (the cutoff's own
     offset) before the offset is dropped, so that instants with different offsets compare correctly; without a
     `ref_tz` its own local clock is kept and its tzinfo returned. Date-only values mean the end of that day.
+    The protocol marker T0 is valid but has no calendar mapping: (None, True, None), with no date filtering.
     """
     if raw is None or raw == "":
         return None, True, None
@@ -115,6 +116,8 @@ def parse_instant(raw, ref_tz=None):
             return None, False, None
     else:
         s = str(raw).strip()
+        if s == "T0":
+            return None, True, None
         try:
             dt = datetime.fromisoformat(s.replace("Z", "+00:00").replace("z", "+00:00"))
             has_time = len(s) > 10

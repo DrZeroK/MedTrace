@@ -71,7 +71,7 @@ def main(argv=None) -> int:
     ap.add_argument("new")
     ap.add_argument("--output", default="output.json")
     a = ap.parse_args(argv)
-    cfg = load_config(output_path=a.output)
+    cfg = load_config(development=True, output_path=a.output)
     prev_cases, _ = load_cases(a.previous, cfg.cutoff_mode)
     new_cases, envelope = load_cases(a.new, cfg.cutoff_mode)
     prev_by_id = {json.dumps(c.case_id, default=str): c for c in prev_cases}

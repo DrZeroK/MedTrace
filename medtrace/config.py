@@ -1,7 +1,6 @@
-"""Configuration: everything is read from the environment / .env. Nothing is hardcoded.
+"""Official configuration is read only from the two-key .env beside main.py.
 
-Several aliases are accepted per setting because the organiser's variable names
-are not yet confirmed (see docs/REQUIREMENTS.md).
+Development aliases and tunable settings require explicit development mode.
 """
 from __future__ import annotations
 
@@ -16,17 +15,18 @@ PIPELINES = ("A0", "A1", "A2", "S2", "A3")  # A2 == strategy S1 (default), A3 ==
 DEFAULT_PROMPT_VERSION = "v2"
 
 
+class ConfigError(ValueError):
+    pass
+
+
 @lru_cache(maxsize=1)
 def prompt_version() -> str:
-    """v2 concise (default) | v1 original long-form. Resolved on first use, after .env is read: evaluating this
-    at import time silently ignored a PROMPT_VERSION that lives only in .env (modules import before load_config).
-    Call .cache_clear() if the environment changes within one process."""
-    load_dotenv_files()
+    """Development helper; official callers pass their fixed Config.prompt_version explicitly."""
     return str(_get("PROMPT_VERSION", default=DEFAULT_PROMPT_VERSION)).strip() or DEFAULT_PROMPT_VERSION
 
 
 def load_dotenv_files() -> None:
-    for p in (Path.cwd() / ".env", ROOT / ".env"):
+    for p in (Path.cwd() / ".env",):
         if not p.is_file():
             continue
         try:
@@ -67,6 +67,8 @@ def _tri_flag(*names):
 
 @dataclass
 class Config:
+    development: bool = False
+    prompt_version: str = DEFAULT_PROMPT_VERSION
     kb_path: str = ""
     input_path: str = "input.json"
     output_path: str = "output.json"
@@ -82,7 +84,7 @@ class Config:
     temperature: float = 0.0
     max_tokens: int = 0             # 0 => omit, use server default
     json_mode: bool = False         # send response_format=json_object if the endpoint supports it
-    seed: int | None = None         # None => omit; vLLM accepts a top-level "seed" (Q4)
+    seed: int | None = 42           # fixed request seed; unsupported services must be documented before changing it
     enable_thinking: bool | None = None   # None => omit (server default, not necessarily off); sent as chat_template_kwargs (Q7)
     extra_body: dict = field(default_factory=dict)   # merged into every request last (provider-specific switches, may override the above)
     pipeline: str = "A2"
@@ -119,9 +121,60 @@ class Config:
         return d
 
 
-def load_config(**overrides) -> Config:
+def load_config(*, development: bool = False, **overrides) -> Config:
+    if not development:
+        if any(v is not None for v in overrides.values()):
+            raise ConfigError("official execution uses fixed paths and parameters; use --development for overrides")
+        path = ROOT / ".env"
+        try:
+            lines = [line.strip() for line in path.read_text("utf-8").splitlines() if line.strip() and not line.lstrip().startswith("#")]
+        except (OSError, UnicodeError) as e:
+            raise ConfigError("cannot read UTF-8 .env beside main.py") from e
+        keys = [line.split("=", 1)[0].strip() for line in lines]
+        if len(lines) != 2 or set(keys) != {"MODEL_NAME", "ENDPOINT"} or any("=" not in line for line in lines):
+            raise ConfigError(".env must have exactly one MODEL_NAME and one ENDPOINT assignment")
+        for line in lines:
+            value = line.split("=", 1)[1].strip()
+            if value[:1] in ("'", '"') and value.count(value[0]) != 2:
+                raise ConfigError(".env contains an unmatched or multiline quoted value")
+        try:
+            from dotenv import dotenv_values
+        except ImportError:
+            dotenv_values = None
+        try:
+            if dotenv_values is not None:
+                values = dict(dotenv_values(path, interpolate=False))
+            else:
+                values = {}
+                for line in lines:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" not in line:
+                        raise ConfigError(".env requires KEY=value assignments")
+                    k, v = line.split("=", 1)
+                    values[k.strip()] = v.split(" #", 1)[0].strip().strip("'\"")
+        except OSError as e:
+            raise ConfigError("cannot read .env beside main.py") from e
+        if set(values) != {"MODEL_NAME", "ENDPOINT"} or not all(isinstance(v, str) and v.strip() for v in values.values()):
+            raise ConfigError(".env must contain only non-empty MODEL_NAME and ENDPOINT")
+        from urllib.parse import urlsplit
+        endpoint = values["ENDPOINT"].strip()
+        try:
+            url = urlsplit(endpoint)
+            valid = url.scheme in ("http", "https") and url.hostname and url.port != 0 and not url.username and not url.password
+        except ValueError:
+            valid = False
+        if not valid or url.fragment or any(c.isspace() for c in endpoint):
+            raise ConfigError("ENDPOINT must be a complete HTTP(S) URL without credentials or fragments")
+        kb = ROOT / "resources" / "knowledge.sqlite"
+        return Config(input_path=str(ROOT / "input.json"), output_path=str(ROOT / "output.json"),
+                      log_dir=str(ROOT / "logs"), endpoint=endpoint, model=values["MODEL_NAME"].strip(),
+                      kb_path=str(kb) if kb.is_file() else "", repair_call=False)
     load_dotenv_files()
     c = Config(
+        development=True,
+        prompt_version=str(_get("PROMPT_VERSION", default=DEFAULT_PROMPT_VERSION)).strip(),
         kb_path=_get("KB_PATH", default=""),
         input_path=_get("INPUT_PATH", default="input.json"),
         output_path=_get("OUTPUT_PATH", default="output.json"),
@@ -130,14 +183,14 @@ def load_config(**overrides) -> Config:
         endpoint=_get("ENDPOINT", default=""),
         api_key=_get("LLM_API_KEY", "OPENAI_API_KEY", "API_KEY", default=""),
         model=_get("MODEL_NAME", "LLM_MODEL", "MODEL", default=""),
-        output_protocol=str(_get("OUTPUT_PROTOCOL", default="official")).lower(),
+        output_protocol=str(_get("OUTPUT_PROTOCOL", default="legacy")).lower(),
         timeout=_num(float, "LLM_TIMEOUT", default=600.0),
         max_retries=_num(int, "LLM_MAX_RETRIES", default=2),
         retry_backoff=_num(float, "LLM_RETRY_BACKOFF", default=2.0),
         temperature=_num(float, "LLM_TEMPERATURE", default=0.0),
         max_tokens=_num(int, "LLM_MAX_TOKENS", default=0),
         json_mode=_flag("LLM_JSON_MODE"),
-        seed=_num(int, "LLM_SEED", default=None),
+        seed=_num(int, "LLM_SEED", default=42),
         enable_thinking=_tri_flag("LLM_ENABLE_THINKING"),
         pipeline=str(_get("PIPELINE", default="A2")).upper(),
         max_calls_per_case=_num(int, "MAX_CALLS_PER_CASE", default=2),

@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import statistics
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -22,11 +23,12 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .config import ROOT, load_config
+from .config import ROOT, ConfigError, load_config
 from .inputs import InputError, load_cases
 from .llm import LLMClient, LLMError
 from .pipeline import Pipeline, prompt_fingerprint
 from .knowledge import KnowledgeError, digest_file, write_audit
+from .note import official_schema_errors
 
 log = logging.getLogger("medtrace")
 
@@ -59,7 +61,11 @@ def wrap(records: list, envelope: str, cfg):
 
 def _git_rev() -> str:
     try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True, timeout=5).stdout.strip()
+        manifest = ROOT / "submission.manifest.json"
+        if manifest.is_file():
+            return json.loads(manifest.read_text("utf-8"))["git_commit"]
+        git = shutil.which("git")
+        return subprocess.run([git, "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, timeout=5).stdout.strip() if git else ""
     except Exception:
         return ""
 
@@ -68,27 +74,36 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="MedTrace: evidence-grounded initial progress note generation")
     ap.add_argument("--input")
     ap.add_argument("--output")
+    ap.add_argument("--development", action="store_true", help="explicitly enable development env settings and path overrides")
     ap.add_argument("--pipeline", help="A0 | A1 | A2 (default, =S1) | S2 | A3 (=S3)")
     args = ap.parse_args(argv)
-    cfg = load_config(input_path=args.input, output_path=args.output, pipeline=args.pipeline.upper() if args.pipeline else None)
-
     logging.basicConfig(level=logging.INFO, stream=sys.stderr, format="%(asctime)s %(levelname)s %(message)s")
+    try:
+        cfg = load_config(development=args.development, input_path=args.input, output_path=args.output,
+                          pipeline=args.pipeline.upper() if args.pipeline else None)
+    except ConfigError as e:
+        log.error("FATAL: %s", e)
+        return 2
     run_log = None
     try:
         os.makedirs(cfg.log_dir, exist_ok=True)
         run_log = open(Path(cfg.log_dir) / "run_log.jsonl", "a", encoding="utf-8")
     except OSError as e:
-        log.warning("cannot open run log (%s); continuing without it", e)
+        log.error("FATAL: cannot open run log (%s)", e)
+        return 1
 
+    audit_run_id = str(uuid.uuid4())
+    events = []
     def emit(obj):
+        obj = {**obj, "run_id": audit_run_id, "time": datetime.now(timezone.utc).isoformat()}
+        events.append(obj)
         if run_log:
             run_log.write(json.dumps(obj, ensure_ascii=False, default=str) + "\n")
             run_log.flush()
 
     started = time.monotonic()
-    audit_run_id = str(uuid.uuid4())
     emit({"event": "run_start", "time": datetime.now(timezone.utc).isoformat(), "config": cfg.public(),
-          "prompt": prompt_fingerprint(), "git": _git_rev(), "python": sys.version.split()[0]})
+          "prompt": prompt_fingerprint(cfg.prompt_version), "git": _git_rev(), "python": sys.version.split()[0]})
     try:
         cases, envelope = load_cases(cfg.input_path, cfg.cutoff_mode)
         if cfg.official:
@@ -121,7 +136,12 @@ def main(argv=None) -> int:
     deadline_all = started + cfg.total_timeout if cfg.total_timeout > 0 else None
 
     def write():
-        obj = wrap([r.record for r in results], envelope, cfg)
+        obj = [r.record for r in results] if cfg.official else wrap([r.record for r in results], envelope, cfg)
+        if cfg.official:
+            for case, record in zip(cases, obj):
+                errors = official_schema_errors(record, {s.raw_id for s in case.sources})
+                if record.get("case_id") != case.case_id or errors:
+                    raise ValueError("invalid final output: " + "; ".join(errors))
         atomic_write_json(cfg.output_path, obj)
         if pipe.kb:
             write_audit(cfg.output_path, results, pipe.kb, digest_file(cfg.input_path), audit_run_id)
@@ -137,7 +157,7 @@ def main(argv=None) -> int:
     try:
         if pipe.kb:
             write_audit(cfg.output_path, [], pipe.kb, digest_file(cfg.input_path), audit_run_id)
-        if cfg.checkpoint and cases:
+        if cfg.checkpoint and not cfg.official and cases:
             # Seed the output with conservative extract-only notes so that a valid, complete file exists
             # from the first second, whatever happens to the model service or the process later.
             offline = Pipeline(cfg, _Unavailable())
@@ -163,7 +183,7 @@ def main(argv=None) -> int:
             emit({"event": "case", **r.log})
             log.info("case %s [%d/%d] status=%s calls=%s latency=%ss", c.case_id, c.index + 1, len(cases),
                      r.status, r.log.get("calls"), r.log.get("latency"))
-            if cfg.checkpoint:
+            if cfg.checkpoint and not cfg.official:
                 write()
 
         if cfg.workers > 1:
@@ -175,20 +195,30 @@ def main(argv=None) -> int:
             for c in cases:
                 done(c, work(c))
         write()
-    except OSError as e:
+    except (OSError, ValueError) as e:
         log.error("FATAL: cannot write output %r: %s", cfg.output_path, e)
         emit({"event": "fatal", "error": str(e)})
         if run_log:
             run_log.close()
         return 1
+    except BaseException:
+        if run_log:
+            run_log.close()
+        raise
 
     n_fb = sum(r.status != "ok" for r in results)
     emit({"event": "run_end", "cases": len(cases), "not_ok": n_fb, "seconds": round(time.monotonic() - started, 2),
+          "input_sha256": digest_file(cfg.input_path), "output_sha256": digest_file(cfg.output_path),
           "latency_p50": round(statistics.median(latencies), 3) if latencies else 0.0,
           "latency_max": round(max(latencies), 3) if latencies else 0.0, **totals})
     log.info("wrote %s: %d case(s), %d not ok, %.1fs", cfg.output_path, len(cases), n_fb, time.monotonic() - started)
     if run_log:
         run_log.close()
+    try:
+        atomic_write_json(str(Path(cfg.output_path).with_name("run_log.json")), events)
+    except OSError as e:
+        log.error("FATAL: cannot export run_log.json: %s", e)
+        return 1
     if cfg.official:
         return 0
     return 2 if (cfg.strict_exit and n_fb) else 0
@@ -203,8 +233,8 @@ def _validate_official_input(cases, envelope):
     seen = set()
     for c in cases:
         key = json.dumps(c.case_id, ensure_ascii=False, sort_keys=True, default=str)
-        if c.case_id is None or (isinstance(c.case_id, str) and not c.case_id.strip()):
-            raise InputError(f"case at index {c.index} has a missing or empty case_id")
+        if not isinstance(c.case_id, str) or not c.case_id.strip():
+            raise InputError(f"case at index {c.index} must have a non-empty string case_id")
         if key in seen:
             raise InputError(f"duplicate case_id: {c.case_id}")
         seen.add(key)

@@ -58,7 +58,9 @@ On construction failure, preserve the incomplete artifact and use a new destinat
 
 ## Runtime and auditing
 
-Set `KB_PATH` to the database's absolute path. Empty disables it. Startup verifies
+Official execution automatically loads `resources/knowledge.sqlite` beside main.py when bundled;
+without that file no external knowledge is enabled. In explicit development mode,
+set `KB_PATH` to an approved database's absolute path; empty disables it. Startup verifies
 the hash, schema, approval metadata, read-only SQL access and FTS5. Explicitly enabled
 but invalid knowledge is fatal before generation. The batch and incremental entry
 points preflight their audit output before model calls. Mid-case retrieval errors
@@ -121,11 +123,13 @@ The submission builder takes optional `--knowledge /absolute/path/knowledge.sqli
 It validates that release and bundles exactly the database and manifest under
 `resources/knowledge.sqlite` and `resources/knowledge.manifest.json`, with the resource
 documentation. Draft content, evaluation questions and clinical answer datasets are
-excluded. Configure KB_PATH to the absolute extracted resource path on the target.
+excluded. Official execution resolves the bundled resource path automatically; do not
+add KB_PATH to the official two-key .env or carry a development-machine path into it.
 Do not relocate a release independently from its companion manifest.
 
 Validate Python >=3.10 and SQLite FTS5 on the target; run a mock smoke test without
 public network access. Record database hash, prompt fingerprint, model configuration
-and package size. Roll back by pointing KB_PATH to a retained prior release or clearing
-it. Embeddings, vector services and case retrieval remain deferred until measured
+and package size. For official execution, build a new package from a retained prior
+release (or without knowledge); retain the original package and logs. In development,
+switch KB_PATH to a retained release or leave the setting empty. Embeddings, vector services and case retrieval remain deferred until measured
 lexical-retrieval failures justify them.

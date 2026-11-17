@@ -8,6 +8,7 @@ import json
 import re
 import time
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 
 _THINK = re.compile(r"<think>.*?</think>", re.S | re.I)
 _RETRY_STATUS = {408, 409, 425, 429, 500, 502, 503, 504, 529}
@@ -31,6 +32,7 @@ class CallStats:
     completion_tokens: int = 0
     total_tokens: int = 0
     errors: list = field(default_factory=list)
+    attempts: list = field(default_factory=list)
 
 
 def _post(url, headers, payload, timeout):
@@ -41,17 +43,24 @@ def _post(url, headers, payload, timeout):
         requests = None
     if requests is not None:
         try:
-            r = requests.post(url, headers=headers, json=payload, timeout=timeout)
-            return r.status_code, r.text
+            with requests.Session() as session:
+                session.trust_env = False
+                r = session.post(url, headers=headers, json=payload, timeout=timeout, allow_redirects=False)
+                return r.status_code, r.text
         except requests.RequestException as e:
             raise ConnectionError(f"{type(e).__name__}: {e}") from e
     import urllib.request, urllib.error
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args, **kwargs):
+            return None
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with opener.open(req, timeout=timeout) as r:
             return r.status, r.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
-        return e.code, e.read().decode("utf-8", "replace")
+        with e:
+            return e.code, e.read().decode("utf-8", "replace")
     except Exception as e:
         raise ConnectionError(f"{type(e).__name__}: {e}") from e
 
@@ -99,7 +108,12 @@ class LLMClient:
         if self.mock is not None:
             self._check_request_budget(stats)
             stats.http_attempts += 1
-            return self.mock.complete(messages)
+            attempt = {"number": stats.http_attempts, "transport": "mock", "started_at": datetime.now(timezone.utc).isoformat()}
+            stats.attempts.append(attempt)
+            try:
+                return self.mock.complete(messages)
+            finally:
+                attempt["finished_at"] = datetime.now(timezone.utc).isoformat()
         payload = {"model": self.cfg.model, "messages": messages, "temperature": self.cfg.temperature, "stream": False}
         if self.cfg.max_tokens > 0:
             payload["max_tokens"] = self.cfg.max_tokens
@@ -111,7 +125,7 @@ class LLMClient:
             payload["chat_template_kwargs"] = {"enable_thinking": self.cfg.enable_thinking}
         payload.update(self.cfg.extra_body or {})
         headers = {"Content-Type": "application/json"}
-        if self.cfg.api_key:
+        if self.cfg.api_key and not self.cfg.official:
             headers["Authorization"] = f"Bearer {self.cfg.api_key}"
         last = "no attempt made"
         for attempt in range(self.cfg.max_retries + 1):
@@ -123,9 +137,12 @@ class LLMClient:
                 timeout = min(timeout, remaining)
             self._check_request_budget(stats)
             stats.http_attempts += 1
+            detail = {"number": stats.http_attempts, "transport": "http", "started_at": datetime.now(timezone.utc).isoformat()}
+            stats.attempts.append(detail)
             retryable = True
             try:
                 status, body = _post(self.url, headers, payload, timeout)
+                detail["status_code"] = status
                 if status == 200:
                     self._usage(body, stats)
                     return self._content(body)
@@ -135,6 +152,9 @@ class LLMClient:
                 last = str(e)
             except LLMError as e:      # 200 with unusable body
                 last = str(e)
+            finally:
+                detail["finished_at"] = datetime.now(timezone.utc).isoformat()
+            detail["error"] = last
             stats.errors.append(last)
             if not retryable or attempt == self.cfg.max_retries:
                 break

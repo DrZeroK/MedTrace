@@ -78,7 +78,7 @@ def main(argv=None) -> int:
     ap.add_argument("--mock", action="store_true", help="force the offline mock model even if .env configures a real endpoint")
     ap.add_argument("--workers", type=int, default=1, help="cases in parallel (mind the provider's rate limits)")
     a = ap.parse_args(argv)
-    cfg0 = load_config()
+    cfg0 = load_config(development=True)
     if a.mock or not cfg0.api_base:
         cfg0.api_base = "mock://"
     is_mock = cfg0.api_base.startswith("mock")
@@ -156,7 +156,7 @@ def main(argv=None) -> int:
                                                    ensure_ascii=False, indent=1), "utf-8")
     conf = {"name": a.name, "dataset": a.dataset, "split": a.split, "tier": a.tier, "limit": a.limit, "offset": a.offset, "n_cases": len(items), "variants": variants,
             "budget": {v: BUDGET[v] for v in variants}, "model": cfg0.model or "<mock>", "mock": is_mock,
-            "prompt": prompt_fingerprint(), "config": cfg0.public(),
+            "prompt": prompt_fingerprint(cfg0.prompt_version), "config": cfg0.public(),
             "dataset_manifest": json.loads((ROOT / "data" / "standardized" / a.dataset / "manifest.json").read_text("utf-8"))["raw_sha256"]}
     (out / "config.json").write_text(json.dumps(conf, ensure_ascii=False, indent=2), "utf-8")
     note = ("**MOCK MODEL** - mechanics only; the mock does not reason, so dx_hit / ddx_recall are meaningless here.\n\n" if is_mock else "")

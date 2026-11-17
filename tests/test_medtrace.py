@@ -66,6 +66,13 @@ class TextUtil(unittest.TestCase):
         self.assertTrue(T.is_after(d[1][0], False, cut))
         self.assertEqual(T.parse_cutoff("garbage"), (None, False))
 
+    def test_symbolic_cutoff(self):
+        for marker in ("T0", " T0 "):
+            self.assertEqual(T.parse_instant(marker), (None, True, None))
+            self.assertEqual(T.parse_cutoff(marker), (None, True))
+        for invalid in ("T1", "T0+1", "T0garbage"):
+            self.assertEqual(T.parse_cutoff(invalid), (None, False))
+
     def test_numbers_units(self):
         n = T.extract_numbers("WBC 15.2 ×10^9/L, SpO2 93%, BP 128/76 mmHg, HbA1c raised")
         self.assertEqual([(v, u) for v, u, _ in n], [(15.2, "×10^9/l"), (93.0, "%"), (128.0, None), (76.0, "mmhg")])
@@ -82,6 +89,22 @@ class TextUtil(unittest.TestCase):
 
 
 class Inputs(unittest.TestCase):
+    def test_symbolic_cutoff_preserves_available_records(self):
+        raw = copy.deepcopy(CASE)
+        raw["record_cutoff"] = "T0"
+        raw["sources"][0]["time"] = "2026-03-05T09:00:00Z"
+        for mode in ("redact", "warn", "off"):
+            with self.subTest(mode=mode):
+                c = parse_case(raw, 0, mode)
+                self.assertTrue(c.usable)
+                self.assertEqual(c.cutoff_raw, "T0")
+                self.assertIsNone(c.cutoff)
+                self.assertIsNone(c.cutoff_tz)
+                self.assertEqual(c.warnings, [])
+                self.assertEqual(c.excluded_sources, [])
+                self.assertEqual(c.redacted, [])
+                self.assertEqual([s.content for s in c.sources], [s["content"] for s in raw["sources"]])
+
     def test_cutoff_redaction(self):
         c = parse_case(CASE, 0)
         self.assertNotIn("Streptococcus", c.text)
@@ -512,14 +535,14 @@ class Http(unittest.TestCase):
     def _url(self, srv):
         return f"http://127.0.0.1:{srv.server_address[1]}/v1"
 
-    def test_default_payload_omits_seed_and_thinking(self):
+    def test_default_payload_fixes_seed_and_omits_thinking(self):
         srv = self._srv()
         c = cfg(api_base=self._url(srv))
         r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
         self.assertEqual(r.status, "ok")
         self.assertTrue(srv.requests)
         for req in srv.requests:
-            self.assertNotIn("seed", req)
+            self.assertEqual(req["seed"], 42)
             self.assertNotIn("chat_template_kwargs", req)
 
     def test_seed_and_thinking_sent_when_configured(self):
@@ -591,7 +614,7 @@ class EndToEnd(unittest.TestCase):
         inp, out = Path(d) / "input.json", Path(d) / "output.json"
         inp.write_text(raw if raw is not None else json.dumps(doc, ensure_ascii=False), "utf-8")
         e = {**os.environ, "LLM_API_BASE": "mock://", "OUTPUT_PROTOCOL": "legacy", "LOG_DIR": str(Path(d) / "logs"), "INPUT_PATH": str(inp), "OUTPUT_PATH": str(out), **(env or {})}
-        p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=e, capture_output=True, text=True, timeout=120)
+        p = subprocess.run([sys.executable, str(ROOT / "main.py"), "--development"], cwd=d, env=e, capture_output=True, text=True, timeout=120)
         return p, out, Path(d)
 
     def test_batch_order_and_isolation(self):
@@ -675,13 +698,13 @@ class EndToEnd(unittest.TestCase):
     def test_env_example_parses_to_defaults(self):
         # regression: `KEY=   # comment` is read by python-dotenv as the comment text, which once dropped output fields
         d = tempfile.mkdtemp()
-        (Path(d) / ".env").write_text((ROOT / ".env.example").read_text("utf-8"), "utf-8")
+        (Path(d) / ".env").write_text((ROOT / ".env.development.example").read_text("utf-8"), "utf-8")
         (Path(d) / "input.json").write_text(json.dumps([CASE]), "utf-8")
         env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "OUTPUT_", "PIPELINE", "MOCK_"))}
-        p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=env, capture_output=True, text=True, timeout=120)
+        p = subprocess.run([sys.executable, str(ROOT / "main.py"), "--development"], cwd=d, env=env, capture_output=True, text=True, timeout=120)
         self.assertEqual(p.returncode, 0, p.stderr)
         rec = json.loads((Path(d) / "output.json").read_text("utf-8"))[0]
-        self.assertEqual(official_schema_errors(rec), [])    # .env.example now defaults to the official protocol
+        self.assertEqual(schema_errors(rec), [])  # development template retains the legacy contract
 
     def test_prompt_version_resolved_after_dotenv(self):
         # regression (review P2): PROMPT_VERSION was read at import time, before .env was loaded
@@ -694,6 +717,7 @@ class EndToEnd(unittest.TestCase):
         try:
             os.chdir(d)
             C.prompt_version.cache_clear()
+            C.load_config(development=True)
             self.assertEqual(C.prompt_version(), "v1")
             self.assertEqual(P.prompt_dir().name, "v1")
             self.assertTrue((P.prompt_dir() / "en" / "a0.txt").is_file())
@@ -847,6 +871,18 @@ class Packaging(unittest.TestCase):
             self.assertFalse(n.endswith(".pyc"))
         self.assertGreater(total, 0)
 
+    def test_packaged_env_example_is_minimal(self):
+        # Tech spec 附件3 §1: the shipped .env.example contains only MODEL_NAME and ENDPOINT,
+        # not the repo's rich development template.
+        d = Path(tempfile.mkdtemp())
+        self.B.build_zip(ROOT, d / "sub.zip")
+        with zipfile.ZipFile(d / "sub.zip") as zf:
+            env = zf.read(".env.example").decode("utf-8")
+        keys = sorted(l.split("=", 1)[0].strip() for l in env.splitlines() if l.strip() and not l.startswith("#"))
+        self.assertEqual(keys, ["ENDPOINT", "MODEL_NAME"])
+        for banned in ("LLM_", "INPUT_PATH", "OUTPUT_", "PIPELINE", "KB_PATH", "dashscope"):
+            self.assertNotIn(banned, env)
+
     def test_zip_smoke_run(self):
         d = Path(tempfile.mkdtemp())
         self.B.build_zip(ROOT, d / "sub.zip")
@@ -855,7 +891,8 @@ class Packaging(unittest.TestCase):
             zf.extractall(ext)
         env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "OUTPUT_", "PIPELINE", "MOCK_"))}
         env["LLM_API_BASE"] = "mock://"
-        p = subprocess.run([sys.executable, str(ext / "main.py"), "--input", str(ext / "input.example.json"), "--output", str(ext / "output.json")],
+        env["OUTPUT_PROTOCOL"] = "official"
+        p = subprocess.run([sys.executable, str(ext / "main.py"), "--development", "--input", str(ext / "input.example.json"), "--output", str(ext / "output.json")],
                            cwd=ext, env=env, capture_output=True, text=True, timeout=120)
         self.assertEqual(p.returncode, 0, p.stderr)
         recs = json.loads((ext / "output.json").read_text("utf-8"))
@@ -918,30 +955,16 @@ class OfficialProtocol(EndToEnd):
     """Provider-spec mode: MODEL_NAME/ENDPOINT, keyless, official output schema (Q3/Q8/Q9 + tech spec)."""
 
     def test_config_dual_mode_defaults(self):
-        from medtrace.config import load_config
-        keys = ("ENDPOINT", "MODEL_NAME", "LLM_API_BASE", "LLM_API_KEY", "LLM_MODEL", "OUTPUT_PROTOCOL")
-        old = {k: os.environ.get(k) for k in keys}
-        try:
-            for k in keys:
-                os.environ.pop(k, None)
-            c = load_config()
-            self.assertTrue(c.official)                       # official is the default output protocol
-            self.assertEqual(c.output_protocol, "official")
-            os.environ["OUTPUT_PROTOCOL"] = "legacy"          # legacy remains available as an explicit opt-in
-            self.assertFalse(load_config().official)
-            os.environ["ENDPOINT"] = "http://host:8000/v1/chat/completions"
-            os.environ["MODEL_NAME"] = "qwen-official"
-            os.environ["OUTPUT_PROTOCOL"] = "official"
-            c = load_config()
+        from unittest.mock import patch
+        from medtrace import config as C
+        d = Path(tempfile.mkdtemp())
+        (d / ".env").write_text("MODEL_NAME=qwen-official\nENDPOINT=http://host:8000/v1/chat/completions\n")
+        with patch.object(C, "ROOT", d), patch.object(Path, "cwd", return_value=d), patch.dict(os.environ, {}, clear=True):
+            c = C.load_config()
             self.assertTrue(c.official)
             self.assertEqual(c.endpoint, "http://host:8000/v1/chat/completions")
             self.assertEqual(c.model, "qwen-official")
-        finally:
-            for k, v in old.items():
-                if v is None:
-                    os.environ.pop(k, None)
-                else:
-                    os.environ[k] = v
+            self.assertFalse(C.load_config(development=True).official)
 
     def test_endpoint_used_verbatim_no_auth_header(self):
         # Official ENDPOINT is used verbatim (no path appended) and needs no key.
@@ -1000,14 +1023,13 @@ class OfficialProtocol(EndToEnd):
         self.assertEqual(official_schema_errors(recs[0]), [], official_schema_errors(recs[0]))
 
     def test_official_exit_code_config_missing(self):
-        d = tempfile.mkdtemp()
-        (Path(d) / "input.json").write_text(json.dumps([CASE]), "utf-8")
-        env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "ENDPOINT", "MODEL_NAME", "OUTPUT_"))}
-        # Blank every model-config key so the workspace .env fallback cannot supply one.
-        for k in ("ENDPOINT", "MODEL_NAME", "LLM_API_BASE", "LLM_API_KEY", "LLM_MODEL"):
-            env[k] = ""
-        env["OUTPUT_PROTOCOL"] = "official"
-        p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=env, capture_output=True, text=True, timeout=60)
+        from scripts.build_submission import build_zip
+        d = Path(tempfile.mkdtemp())
+        build_zip(ROOT, d / "package.zip")
+        with zipfile.ZipFile(d / "package.zip") as z:
+            z.extractall(d / "package")
+        p = subprocess.run([sys.executable, str(d / "package/main.py")], cwd=d,
+                           env={"PATH": os.environ.get("PATH", "")}, capture_output=True, text=True, timeout=60)
         self.assertEqual(p.returncode, 2, p.stderr)
 
 

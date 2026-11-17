@@ -40,7 +40,7 @@ def parse_faults(spec: str) -> dict:
 
 
 def run(variants, cases, faults, seed, budget=None, workers=1, mock=False):
-    cfg0 = load_config()
+    cfg0 = load_config(development=True)
     if mock or faults or not cfg0.api_base:      # fault injection only exists in the mock: never send such a run to a real model
         cfg0.api_base = "mock://"
     is_mock = cfg0.api_base.startswith("mock")
@@ -144,7 +144,7 @@ def main(argv=None) -> int:
     is_mock = cfg.api_base.startswith("mock")
     conf = {"name": a.name, "variants": variants, "split": a.split, "n_cases": len(cases), "faults": a.faults, "seed": a.seed,
             "budget": {v: (a.budget or BUDGET[v]) for v in variants}, "model": cfg.model or "<mock>", "mock": is_mock,
-            "prompt": prompt_fingerprint(), "config": cfg.public()}
+            "prompt": prompt_fingerprint(cfg.prompt_version), "config": cfg.public()}
     (out / "config.json").write_text(json.dumps(conf, ensure_ascii=False, indent=2), "utf-8")
     note = ("**MOCK MODEL.** These numbers test the software and the verifier's ability to catch *injected* errors. "
             "They say nothing about clinical quality or about the designated model.\n\n" if is_mock else "")

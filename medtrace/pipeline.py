@@ -16,6 +16,7 @@ import json
 import re
 import time
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 
@@ -27,11 +28,11 @@ from .inputs import Case
 from .ledger import build_ledger, digest, Ledger
 from .llm import BudgetExceeded, CallStats, LLMError
 from .note import (Note, ParseError, Statement, SECTIONS, note_from_model, parse_json_object,
-                   to_record, to_official_record, _stmt)
+                   to_record, to_official_record, official_schema_errors, _stmt)
 
 
-def prompt_dir() -> Path:
-    return Path(__file__).parent / "prompts" / prompt_version()
+def prompt_dir(version: str | None = None) -> Path:
+    return Path(__file__).parent / "prompts" / (version or prompt_version())
 
 
 _I18N = {
@@ -82,14 +83,14 @@ def _load_prompt(version: str, name: str, lang: str) -> str:
     return (Path(__file__).parent / "prompts" / version / lang / f"{name}.txt").read_text("utf-8")
 
 
-def load_prompt(name: str, lang: str) -> str:
-    return _load_prompt(prompt_version(), name, lang)
+def load_prompt(name: str, lang: str, version: str | None = None) -> str:
+    return _load_prompt(version or prompt_version(), name, lang)
 
 
-def prompt_fingerprint() -> str:
-    version = prompt_version()
+def prompt_fingerprint(version: str | None = None) -> str:
+    version = version or prompt_version()
     h = hashlib.sha256()
-    for p in sorted(prompt_dir().rglob("*.txt")):
+    for p in sorted(prompt_dir(version).rglob("*.txt")):
         h.update(p.read_bytes())
     return f"{version}:{h.hexdigest()[:12]}"
 
@@ -144,6 +145,7 @@ class Pipeline:
                  changes: str = "") -> CaseResult:
         variant = variant or self.cfg.pipeline
         t0 = time.monotonic()
+        started_at = datetime.now(timezone.utc).isoformat()
         stats = CallStats()
         log = {"case_id": case.case_id, "index": case.index, "variant": variant, "warnings": list(case.warnings),
                "excluded_sources": case.excluded_sources, "redacted_statements": len(case.redacted)}
@@ -151,9 +153,10 @@ class Pipeline:
         tr = _I18N[lang]
         initial, final, status = [], [], "ok"
         try:
-            if not case.usable:
+            if not case.usable or (self.cfg.official and case.protocol_errors):
                 status = "input_error"
-                reason = "; ".join(case.errors) or "no sources"
+                reason = "; ".join(case.errors + case.protocol_errors) or "no sources"
+                log["error"] = reason
                 note = Note()
                 note.sections["case_features"] = [Statement(tr["no_input"].format(reason=reason))]
                 note.review_items.append({"type": "missing", "description": tr["no_input"].format(reason=reason), "source_ids": []})
@@ -174,6 +177,8 @@ class Pipeline:
                         audit.update(status="degraded", error=str(e))
                 try:
                     note, initial, final = self._generate_and_verify(case, L, variant, lang, stats, deadline, changes, log)
+                    if self.cfg.official and any(not note.sections[sec] for sec in SECTIONS):
+                        raise ParseError("generation left an empty required section")
                 except (LLMError, ParseError) as e:
                     status = "fallback"
                     log["error"] = f"{type(e).__name__}: {e}"
@@ -208,7 +213,8 @@ class Pipeline:
                    prompt_tokens=stats.prompt_tokens, completion_tokens=stats.completion_tokens, total_tokens=stats.total_tokens,
                    llm_latency=round(stats.latency, 3), latency=round(time.monotonic() - t0, 3),
                    llm_errors=stats.errors[-3:], findings_initial=V.counts(initial), findings_final=V.counts(final))
-        meta = {"status": status, "pipeline": variant, "prompt": prompt_fingerprint(), "calls": stats.calls}
+        log.update(started_at=started_at, finished_at=datetime.now(timezone.utc).isoformat(), attempts=stats.attempts)
+        meta = {"status": status, "pipeline": variant, "prompt": prompt_fingerprint(self.cfg.prompt_version), "calls": stats.calls}
         if self.cfg.official:
             if status == "ok":
                 record = to_official_record(note, case, meta, status="success")
@@ -217,6 +223,12 @@ class Pipeline:
                                             error={"code": status.upper(), "message": str(log.get("error", status))})
         else:
             record = to_record(note, case, self.cfg, meta)
+        if self.cfg.official:
+            errors = official_schema_errors(record, {s.raw_id for s in case.sources})
+            if errors:
+                status = "fallback"
+                log.update(status=status, error="invalid generated record: " + "; ".join(errors))
+                record = to_official_record(note, case, status="failed", error={"code": "INVALID_OUTPUT", "message": log["error"]})
         return CaseResult(record, note, status, initial, final, log)
 
     # ---------------------------------------------------------------- internals
@@ -227,22 +239,22 @@ class Pipeline:
         common = dict(lang=tr["lang"], cutoff=case.cutoff_raw if case.cutoff_raw not in (None, "") else tr["no_cutoff"],
                       sources=sources_block(case))
         kb_context = knowledge_block(list(L.knowledge_cards.values()))
-        system = load_prompt("system", lang)
+        system = load_prompt("system", lang, self.cfg.prompt_version)
         if variant == "S2" and low_time():
             skip("extract")
             problems = ""
         else:
             problems = self._extract(case, system, common, lang, stats, deadline, log) if variant == "S2" else ""
         if variant == "A0":
-            user = fill(load_prompt("a0", lang), **common)
+            user = fill(load_prompt("a0", lang, self.cfg.prompt_version), **common)
         else:
-            user = fill(load_prompt("a1", lang), ledger=digest(L), problems=problems, changes=changes, **common)
+            user = fill(load_prompt("a1", lang, self.cfg.prompt_version), ledger=digest(L), problems=problems, changes=changes, **common)
         user += kb_context
         note = None
         for attempt in (1, 2):
             raw = self.client.chat(system, user, stats, deadline)
             try:
-                note = note_from_model(parse_json_object(raw))
+                note = note_from_model(parse_json_object(raw), require_complete=self.cfg.official)
                 break
             except ParseError as e:
                 log.setdefault("parse_errors", []).append(str(e))
@@ -266,7 +278,7 @@ class Pipeline:
             mode = None
         if mode:
             try:
-                user = fill(load_prompt(mode, lang), draft=_draft_json(note),
+                user = fill(load_prompt(mode, lang, self.cfg.prompt_version), draft=_draft_json(note),
                             findings=json.dumps([{"section": f.section, "index": f.index, "issue": f.message} for f in actionable],
                                                 ensure_ascii=False, indent=1), **common)
                 user += kb_context
@@ -287,7 +299,7 @@ class Pipeline:
     def _extract(self, case, system, common, lang, stats, deadline, log) -> str:
         """S2: model-extracted problem list; every quote must be found verbatim in its cited source."""
         try:
-            obj = parse_json_object(self.client.chat(system, fill(load_prompt("extract", lang), **common), stats, deadline))
+            obj = parse_json_object(self.client.chat(system, fill(load_prompt("extract", lang, self.cfg.prompt_version), **common), stats, deadline))
         except (LLMError, ParseError) as e:
             log["extract_error"] = f"{type(e).__name__}: {e}"
             return ""
