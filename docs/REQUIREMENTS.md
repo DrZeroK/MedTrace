@@ -49,7 +49,7 @@ Given (not assumed): entry point `python main.py`; input fields `case_id`, `reco
 | Output field names | `case_features`, `diagnostic_discussion`, `treatment_plan`, `evidence`, `review_items`. The data-work brief once named the third field `plan`; if official, set `OUTPUT_FIELD_MAP={"treatment_plan":"plan"}` | `OUTPUT_FIELD_MAP`, `OUTPUT_FIELDS` |
 | Extra fields (`evidence`, `review_items`) allowed? inline citations? | separate arrays; inline off | `OUTPUT_FIELDS`, `INLINE_CITATIONS=1` |
 | Output language | follows the records | `OUTPUT_LANG` |
-| `record_cutoff` format and semantics | ISO / common dates; date-only = end of day; UTC offsets honoured; post-cutoff sources/sentences withheld | `CUTOFF_MODE`, `textutil.parse_cutoff` |
+| `record_cutoff` format and semantics | `T0` accepted as a symbolic marker: supplied facts are available at T0, no calendar filtering without a date mapping; ISO / common dates: date-only = end of day, UTC offsets honoured, post-cutoff sources/sentences withheld | `CUTOFF_MODE`, `textutil.parse_cutoff` |
 | Model API protocol | OpenAI-compatible `POST {base}/chat/completions`, bearer key; exact endpoint/model/JSON-mode unconfirmed | `medtrace/llm.py` |
 | Env variable names | `LLM_*` plus common aliases | `medtrace/config.py` |
 | Time limits | none by default; `TIME_RESERVE_SECONDS` is our safety margin, not an official limit | `CASE_TIMEOUT`, `TOTAL_TIMEOUT`, `LLM_TIMEOUT` |

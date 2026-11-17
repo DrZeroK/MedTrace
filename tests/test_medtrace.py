@@ -66,6 +66,13 @@ class TextUtil(unittest.TestCase):
         self.assertTrue(T.is_after(d[1][0], False, cut))
         self.assertEqual(T.parse_cutoff("garbage"), (None, False))
 
+    def test_symbolic_cutoff(self):
+        for marker in ("T0", " T0 "):
+            self.assertEqual(T.parse_instant(marker), (None, True, None))
+            self.assertEqual(T.parse_cutoff(marker), (None, True))
+        for invalid in ("T1", "T0+1", "T0garbage"):
+            self.assertEqual(T.parse_cutoff(invalid), (None, False))
+
     def test_numbers_units(self):
         n = T.extract_numbers("WBC 15.2 ×10^9/L, SpO2 93%, BP 128/76 mmHg, HbA1c raised")
         self.assertEqual([(v, u) for v, u, _ in n], [(15.2, "×10^9/l"), (93.0, "%"), (128.0, None), (76.0, "mmhg")])
@@ -82,6 +89,22 @@ class TextUtil(unittest.TestCase):
 
 
 class Inputs(unittest.TestCase):
+    def test_symbolic_cutoff_preserves_available_records(self):
+        raw = copy.deepcopy(CASE)
+        raw["record_cutoff"] = "T0"
+        raw["sources"][0]["time"] = "2026-03-05T09:00:00Z"
+        for mode in ("redact", "warn", "off"):
+            with self.subTest(mode=mode):
+                c = parse_case(raw, 0, mode)
+                self.assertTrue(c.usable)
+                self.assertEqual(c.cutoff_raw, "T0")
+                self.assertIsNone(c.cutoff)
+                self.assertIsNone(c.cutoff_tz)
+                self.assertEqual(c.warnings, [])
+                self.assertEqual(c.excluded_sources, [])
+                self.assertEqual(c.redacted, [])
+                self.assertEqual([s.content for s in c.sources], [s["content"] for s in raw["sources"]])
+
     def test_cutoff_redaction(self):
         c = parse_case(CASE, 0)
         self.assertNotIn("Streptococcus", c.text)
