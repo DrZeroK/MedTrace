@@ -103,6 +103,10 @@ python main.py --input data/standardized/cmb_clin/cases.json --output out.json  
 python -m eval.run_external --dataset cmb_clin --split dev --variants A0,A1,A2  # diagnosis hit, differential recall, coverage
 python -m data_pipeline.acquire medct_clinical_notes && python -m data_pipeline.medct_stress   # real-note stress test (aggregates only)
 ```
+TypicalCase-DC (2,591 case reports in admission-record sections with gold diagnoses) is the larger evaluation set
+but cannot be redistributed: place the Tianchi download in `data/raw/cblue/TypicalCase-DC/`, run
+`python -m data_pipeline.typicalcase_dc`, then `python -m eval.run_external --dataset typicalcase_dc --split dev --tier A --limit 40`.
+
 Audit and ranking: `docs/DATASETS.md`. Labelling rules: `docs/ANNOTATION_GUIDELINES.md`. QC report:
 `data/standardized/cmb_clin/qc_report.md`.
 

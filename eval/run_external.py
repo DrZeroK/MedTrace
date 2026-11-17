@@ -4,7 +4,9 @@
     python -m eval.run_external --dataset cmb_clin --split test ...        # final comparison only
 
 Automatic metrics (all proxies; labels are either the dataset's own expert references or rule-derived, never generated):
-  dx_hit            eligible cases whose Diagnostic Discussion names the textbook diagnosis (string match on the case-title label)
+  dx_hit            eligible cases whose Diagnostic Discussion names at least one gold diagnosis (verbatim string match;
+                    strict - a correct diagnosis under another name is counted as a miss, so read misses before trusting it)
+  dx_recall         share of all gold diagnoses named
   ddx_recall        share of the reference answer's differential diagnoses named in the Diagnostic Discussion
   measurement_cov   share of the record's unit-bearing measurements whose value appears in the note
   verifier_high     notes with at least one unresolved high-severity deterministic finding
@@ -16,6 +18,7 @@ from __future__ import annotations
 import argparse
 import copy
 import csv
+import hashlib
 import json
 import re
 import statistics as st
@@ -46,11 +49,20 @@ def name_hit(name: str, text: str) -> bool:
     return any(_norm(a) in t for a in alts)
 
 
-def load_dataset(name: str, split: str):
+def gold_diagnoses(ref: dict) -> list[str]:
+    return ref["reference"].get("diagnoses") or [ref["classification"]["disease_label"]]
+
+
+def load_dataset(name: str, split: str, tier: str = "", limit: int = 0):
     d = ROOT / "data" / "standardized" / name
     cases = {c["case_id"]: c for c in json.loads((d / "cases.json").read_text("utf-8"))}
     refs = json.loads((d / "references.json").read_text("utf-8"))
-    return [(cases[r["case_id"]], r) for r in refs if r["split"] == split or (split == "all" and r["split"] in ("dev", "validation", "test"))]
+    items = [(cases[r["case_id"]], r) for r in refs
+             if (r["split"] == split or (split == "all" and r["split"] in ("dev", "validation", "test")))
+             and (not tier or r["quality"]["tier"] in tier.split(","))]
+    if limit:   # deterministic pseudo-random subset (stable across runs and machines), not "the first N"
+        items = sorted(items, key=lambda x: hashlib.sha256(("sample-v1|" + x[0]["case_id"]).encode()).hexdigest())[:limit]
+    return items
 
 
 def main(argv=None) -> int:
@@ -59,15 +71,15 @@ def main(argv=None) -> int:
     ap.add_argument("--split", default="dev", choices=["dev", "validation", "test", "all"])
     ap.add_argument("--variants", default="A0,A1,A2")
     ap.add_argument("--name", default=time.strftime("ext_%Y%m%d_%H%M%S"))
-    ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--limit", type=int, default=0, help="deterministic pseudo-random subset of this size")
+    ap.add_argument("--tier", default="", help="comma list of quality tiers to include, e.g. A or A,B (default: all usable)")
     ap.add_argument("--workers", type=int, default=1, help="cases in parallel (mind the provider's rate limits)")
     a = ap.parse_args(argv)
     cfg0 = load_config()
     if not cfg0.api_base:
         cfg0.api_base = "mock://"
     is_mock = cfg0.api_base.startswith("mock")
-    items = load_dataset(a.dataset, a.split)
-    items = items[:a.limit] if a.limit else items
+    items = load_dataset(a.dataset, a.split, a.tier, a.limit)
     variants = [v.strip().upper() for v in a.variants.split(",") if v.strip()]
     rows, outputs, debug = [], {v: [] for v in variants}, {v: [] for v in variants}
     for v in variants:
@@ -83,13 +95,16 @@ def main(argv=None) -> int:
             disc = rec["diagnostic_discussion"]
             der = ref["derived"]
             hit, tot = V.measurement_coverage(res.note, build_ledger(case))
-            ddx = der["reference_differentials"]
+            ddx = der.get("reference_differentials", [])
+            gold = gold_diagnoses(ref)
+            named = sum(name_hit(g, disc) for g in gold)
             ok_refs, n_refs = M.refs_valid(rec, raw)
             row = {
-                "variant": v, "case_id": case.case_id, "tier": ref["quality"]["tier"], "chapter": ref["classification"]["specialty_chapter"],
+                "variant": v, "case_id": case.case_id, "tier": ref["quality"]["tier"], "chapter": ref["classification"].get("specialty_chapter", ""),
                 "complexity": ref["classification"]["complexity"], "status": res.status, "schema_valid": int(not schema_errors(rec)),
                 "dx_eligible": int(der["dx_metric_eligible"]),
-                "dx_hit": int(name_hit(ref["classification"]["disease_label"], disc)) if der["dx_metric_eligible"] else "",
+                "dx_hit": int(named > 0) if der["dx_metric_eligible"] else "",          # at least one gold diagnosis named
+                "dx_named": named if der["dx_metric_eligible"] else "", "dx_total": len(gold) if der["dx_metric_eligible"] else "",
                 "ddx_named": sum(name_hit(n, disc) for n in ddx), "ddx_total": len(ddx),
                 "meas_hit": hit, "meas_total": tot, "refs_valid": ok_refs, "refs_total": n_refs,
                 "verifier_high_initial": res.log["findings_initial"]["high"],
@@ -113,6 +128,7 @@ def main(argv=None) -> int:
             "variant": v, "cases": len(r), "completed_ok_%": pct(sum(x["status"] == "ok" for x in r), len(r)),
             "schema_valid_%": pct(sum(x["schema_valid"] for x in r), len(r)),
             "dx_hit_%": pct(sum(x["dx_hit"] for x in el), len(el)) + f" (n={len(el)})",
+            "dx_recall_%": pct(sum(x["dx_named"] for x in el), sum(x["dx_total"] for x in el)),
             "ddx_recall_%": pct(sum(x["ddx_named"] for x in r), sum(x["ddx_total"] for x in r)),
             "measurement_cov_%": pct(sum(x["meas_hit"] for x in r), sum(x["meas_total"] for x in r)),
             "refs_valid_%": pct(sum(x["refs_valid"] for x in r), sum(x["refs_total"] for x in r)),
@@ -133,7 +149,7 @@ def main(argv=None) -> int:
     # for eval.blind_review: the records each reviewer needs, plus the dataset's expert reference answers
     (out / "cases_used.json").write_text(json.dumps([{"case": raw, "annotation": {"reference": ref["reference"]}} for raw, ref in items],
                                                    ensure_ascii=False, indent=1), "utf-8")
-    conf = {"name": a.name, "dataset": a.dataset, "split": a.split, "n_cases": len(items), "variants": variants,
+    conf = {"name": a.name, "dataset": a.dataset, "split": a.split, "tier": a.tier, "limit": a.limit, "n_cases": len(items), "variants": variants,
             "budget": {v: BUDGET[v] for v in variants}, "model": cfg0.model or "<mock>", "mock": is_mock,
             "prompt": prompt_fingerprint(), "config": cfg0.public(),
             "dataset_manifest": json.loads((ROOT / "data" / "standardized" / a.dataset / "manifest.json").read_text("utf-8"))["raw_sha256"]}

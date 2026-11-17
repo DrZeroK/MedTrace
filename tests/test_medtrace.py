@@ -279,6 +279,18 @@ class DataPipeline(unittest.TestCase):
         self.assertEqual(question_kinds("简述本例病人的诊断及诊断依据，鉴别诊断。"), ["differential", "diagnosis"])
         self.assertEqual(question_kinds("治疗原则是什么？"), ["plan"])
 
+    def test_typicalcase_sectioning_and_denied_history_precision(self):
+        from data_pipeline.typicalcase_dc import split_sections
+        secs = split_sections("个人信息：男，28 岁。\n主诉：头痛 6 个月。\n现病史：6 个月前出现头痛。\n既往史：无。\n\n**六、家族史**\n\n无肿瘤家族史。\n体格检查：无。\n检查检验：\n    - 血常规正常。")
+        self.assertEqual(list(secs), ["hx", "past", "exam", "tests"])
+        self.assertEqual(len(secs["hx"]), 3)
+        self.assertIn("    - 血常规正常。", secs["tests"])
+        # a denied history is not contradicted by the term inside a test name or a negative result
+        mk = lambda b: build_ledger(parse_case({"case_id": 1, "sources": [{"source_id": "a", "content": "否认肝炎、结核病史，否认药物、食物过敏史。"},
+                                                                         {"source_id": "b", "content": b}]}, 0)).conflicts
+        self.assertEqual(mk("肝炎标志物、肿瘤标志物未见异常。自行服用感冒药物。"), [])
+        self.assertEqual([c["term"] for c in mk("肝脏病理检查：中度慢性肝炎伴结节性肝硬化形成。")], ["肝炎"])
+
     def test_standardized_dataset_invariants(self):
         d = ROOT / "data" / "standardized" / "cmb_clin"
         cases = json.loads((d / "cases.json").read_text("utf-8"))

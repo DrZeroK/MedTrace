@@ -7,3 +7,5 @@ output.json
 eval/results/
 data/raw/
 .venv/
+data/standardized/typicalcase_dc/cases.json
+data/standardized/typicalcase_dc/references.json

@@ -141,6 +141,26 @@ def build_ledger(case: Case) -> Ledger:
     return L
 
 
+# A denied history is only contradicted by a statement that asserts the condition. Seen on 2,578 real case reports:
+# most "contradictions" were the term inside a test name ("肝炎标志物…未见异常", "肿瘤指标…无异常", "丙型肝炎病毒抗体 0.12").
+_TEST_SUFFIX = re.compile(r"^(?:病毒)?(?:标志物|抗体|抗原|指标|相关|检测|筛查|系列|全套|谱|dna|rna|病毒|史|家族史)", re.I)
+_NEG_RESULT = re.compile(r"(?i)未见(?:明显)?异常|无异常|阴性|无阳性|正常|排除|除外|待排|negative|normal|unremarkable|ruled out")
+
+
+_GENERIC_TERMS = {"药物", "食物", "其他", "其它", "异常", "不适", "特殊", "家族", "drug", "food", "other"}   # list fragments, not conditions
+
+
+def _asserts(term: str, text: str) -> bool:
+    pos = T.positive_text(text)
+    i = pos.find(term)
+    while i >= 0:
+        after = pos[i + len(term):]
+        if not _TEST_SUFFIX.match(after) and not _NEG_RESULT.search(after[:60]):
+            return True
+        i = pos.find(term, i + 1)
+    return False
+
+
 def _find_conflicts(L: Ledger) -> None:
     fact = {f.fid: f for f in L.facts}
     seen = set()
@@ -150,9 +170,9 @@ def _find_conflicts(L: Ledger) -> None:
     #     (measured on CMB-Clin: 35 polarity flags in 74 cases, essentially all false).
     for f in L.facts:
         for term in T.denied_terms(f.text):
-            if term in seen:
+            if term in seen or term in _GENERIC_TERMS:
                 continue
-            pos = [g for g in L.facts if g.sid != f.sid and term in T.positive_text(g.text)]
+            pos = [g for g in L.facts if g.sid != f.sid and _asserts(term, g.text)]
             if pos:
                 seen.add(term)
                 L.conflicts.append({"kind": "polarity", "term": term, "detail": f'"{f.text}" vs "{pos[0].text}"',

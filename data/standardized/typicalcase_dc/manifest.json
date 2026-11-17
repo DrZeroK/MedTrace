@@ -1,0 +1,54 @@
+{
+ "dataset": "typicalcase_dc",
+ "raw_sha256": "08d51e7cd7f862c03b522b5754d937b61c07210387a91b128e624f3b47870cf8",
+ "raw_items": 2591,
+ "counts": {
+  "kept": 2578,
+  "dropped_multi_patient": 9,
+  "dropped_exact_duplicate": 2,
+  "dropped_corrupt_or_unlabelled": 1,
+  "dropped_unstructured": 1
+ },
+ "tiers": {
+  "B": 1026,
+  "A": 836,
+  "review_required": 716
+ },
+ "splits": {
+  "test": 940,
+  "excluded_pending_review": 716,
+  "dev": 524,
+  "validation": 398
+ },
+ "tier_A_by_split": {
+  "test": 425,
+  "dev": 232,
+  "validation": 179
+ },
+ "completeness": {
+  "complete": 2283,
+  "partial": 295
+ },
+ "complexity": {
+  "high": 1614,
+  "medium": 963,
+  "low": 1
+ },
+ "gold_diagnoses_per_case": {
+  "1": 1884,
+  "2": 194,
+  "5": 182,
+  "3": 175,
+  "4": 143
+ },
+ "cases_with_dates": 664,
+ "pii_hits": {
+  "already_masked_name": 11
+ },
+ "split_salt": "medtrace-v1",
+ "split_ratios": {
+  "dev": 0.3,
+  "validation": 0.2,
+  "test": 0.5
+ }
+}
