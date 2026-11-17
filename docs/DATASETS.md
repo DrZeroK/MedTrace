@@ -18,6 +18,7 @@ Nothing was downloaded that requires an account, a gate, or an agreement.
 | 6 | **CliMedBench** ([repo](https://github.com/Optifine-TAT/CliMedBench), [paper](https://arxiv.org/abs/2410.03502)) | 33,735 questions in 14 clinical scenarios, largely from real EHRs | Unverified; access reportedly by researcher application | No | Medium (QA format) | Not acquired |
 | 7 | **CCKS 2017–2019 EMR NER / Yidu-S4K** ([overview](https://arxiv.org/abs/2003.03875)) | Annotated real EMR passages (diseases, tests, operations, drugs, anatomy) | Evaluation agreement; third-party mirrors are not an authorised source | No | Medium for entity extraction only | Not acquired |
 | 8 | **MedCD, CDrugRed, CardioEHR, OEHR** | Real Chinese EHR collections behind logins or data-use agreements | DUAs | No | Unknown until document types are confirmed | Not acquired |
+| 9 | **CBLUE batch 2**: CMeEE-V2, CMeIE-V2, CMedCausal, CMF-NERD, CN-Diabetes-QC | Textbook entity and relation annotation, causal relations in online answers, few-shot NER, diabetes question classes | Tianchi terms; CMF-NERD additionally carries a confidentiality undertaking | Files inspected 2026-11-17 | Low: textbook prose, not records; no polarity, values or chronology | Inspected, **not used**. CMeIE-V2 synonym triples kept locally in case diagnosis-name matching in evaluation needs them |
 
 ## Why this order
 

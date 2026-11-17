@@ -144,6 +144,23 @@
    "relevance": "unknown until the document types are confirmed",
    "limits": "agreements must be signed by the team",
    "status": "not acquired"
+  },
+  {
+   "id": "cblue_batch2",
+   "name": "CBLUE: CMeEE-V2, CMeIE-V2, CMedCausal, CMF-NERD, CN-Diabetes-QC",
+   "rank": 9,
+   "url": "https://tianchi.aliyun.com/dataset/dataDetail?dataId=95414",
+   "paper": "arXiv:2106.08087",
+   "content": "CMeEE-V2: 23K textbook sentences with 9 entity types. CMeIE-V2: 22K textbook passages with 53 relation types (clinical manifestation, drug treatment, synonym, differential diagnosis ...). CMedCausal: causal relations in online health answers. CMF-NERD: few-shot textbook NER. CN-Diabetes-QC: diabetes question classification",
+   "provenance": "medical textbooks and online consultation text; none is a patient record",
+   "license": "Tianchi terms accepted by the downloader; no licence text in the archives. CMF-NERD ships a data-use and confidentiality undertaking (数据使用与保密承诺书)",
+   "verified": "team-supplied archives inspected 2026-11-17",
+   "access": "Tianchi account",
+   "redistribution": "not permitted",
+   "permitted_use_here": [],
+   "relevance": "low for admission-note generation: textbook prose, not records; no polarity, values or chronology. CMeIE-V2 synonym triples (about 4,800) could later make diagnosis-name matching in evaluation fairer; its disease-knowledge triples would only matter if retrieval were permitted, which it currently is not",
+   "limits": "CMF-NERD must not be used or shared beyond the signed undertaking; nothing here may be committed",
+   "status": "inspected, not used. CMeIE-V2 kept locally for a possible evaluation-side synonym table"
   }
  ]
 }
