@@ -3,8 +3,10 @@
     python scripts/build_submission.py [--output dist/submission.zip]
 
 Only runtime material ships: main.py, medtrace/ (prompts included), the dependency files,
-.env.example, README.md, the resource registration and the demo input. No .env, data/, eval/,
-data_pipeline/ or tests/ ever enters the archive.
+README.md, the resource registration and the demo input. The packaged .env.example is
+generated to contain ONLY MODEL_NAME and ENDPOINT (tech spec 附件3 §1); the repo's rich
+.env.example is a development template and is deliberately not shipped. No .env, data/,
+eval/, data_pipeline/ or tests/ ever enters the archive.
 """
 from __future__ import annotations
 
@@ -14,11 +16,19 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-WHITELIST_FILES = ["main.py", "requirements.txt", "requires.txt", ".env.example", "README.md",
+# .env.example is NOT copied from the repo; build_zip writes the minimal template below instead.
+WHITELIST_FILES = ["main.py", "requirements.txt", "requires.txt", "README.md",
                    "docs/RESOURCE_REGISTRATION.md", "input.example.json"]
 WHITELIST_FILES.append("docs/KNOWLEDGE_BASE.md")
 WHITELIST_DIRS = ["medtrace"]
 _EXCLUDE_NAMES = {"__pycache__", ".DS_Store"}
+
+# Tech spec 附件3 §1/§3: the submission .env.example carries only these two keys. The organiser
+# injects the real values at run time; the program must not require a key and must not read paths from .env.
+SUBMISSION_ENV_EXAMPLE = (
+    "MODEL_NAME=replace_with_model_name\n"
+    "ENDPOINT=http://127.0.0.1:8000/v1/chat/completions\n"
+)
 
 
 def collect_files(root: Path) -> list[str]:
@@ -54,6 +64,9 @@ def build_zip(root: Path, dest: Path, knowledge_path: Path | None = None) -> tup
             src = root / name
             zf.write(src, name)
             total += src.stat().st_size
+        zf.writestr(".env.example", SUBMISSION_ENV_EXAMPLE)   # minimal, spec-compliant template
+        names.append(".env.example")
+        total += len(SUBMISSION_ENV_EXAMPLE.encode("utf-8"))
         for src, name in resources:
             zf.write(src, name)
             names.append(name)

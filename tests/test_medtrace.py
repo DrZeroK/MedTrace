@@ -870,6 +870,18 @@ class Packaging(unittest.TestCase):
             self.assertFalse(n.endswith(".pyc"))
         self.assertGreater(total, 0)
 
+    def test_packaged_env_example_is_minimal(self):
+        # Tech spec 附件3 §1: the shipped .env.example contains only MODEL_NAME and ENDPOINT,
+        # not the repo's rich development template.
+        d = Path(tempfile.mkdtemp())
+        self.B.build_zip(ROOT, d / "sub.zip")
+        with zipfile.ZipFile(d / "sub.zip") as zf:
+            env = zf.read(".env.example").decode("utf-8")
+        keys = sorted(l.split("=", 1)[0].strip() for l in env.splitlines() if l.strip() and not l.startswith("#"))
+        self.assertEqual(keys, ["ENDPOINT", "MODEL_NAME"])
+        for banned in ("LLM_", "INPUT_PATH", "OUTPUT_", "PIPELINE", "KB_PATH", "dashscope"):
+            self.assertNotIn(banned, env)
+
     def test_zip_smoke_run(self):
         d = Path(tempfile.mkdtemp())
         self.B.build_zip(ROOT, d / "sub.zip")
