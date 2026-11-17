@@ -11,7 +11,7 @@ Reads structured admission records (`input.json`), calls the configured (designa
 
 ## Competition QA
 
-See [临床智录赛事技术 QA](docs/COMPETITION_QA.md) for all nine organizer answers supplied by the project owner,
+See [Competition Technical Q&A](docs/COMPETITION_QA.md) for all nine organizer answers supplied by the project owner,
 including offline resources, vLLM parameters, third-party API restrictions and pending submission requirements.
 The document records the supplied answers; it does not certify the current implementation's compliance.
 

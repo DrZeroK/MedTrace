@@ -1,72 +1,72 @@
-# 临床智录赛事技术 QA
+# Competition Technical Q&A
 
-- 整理日期：2026-11-17。
-- 来源：项目负责人在对话中提供的组委会答疑全文；未提供原始公告链接、发布日期或版本号。
-- 整理方式：保留全部 9 项问答内容，统一标题、段落和代码格式。
-- 适用说明：本文件记录该次答疑，后续以组委会更新后的统一技术规范、实际接口示例及正式评测配置为准。本文不代表仓库已经实现或通过全部要求。
+- Compiled on: 2026-11-17.
+- Source: the organizer's full Q&A supplied by the project owner in conversation. No original announcement URL, publication date, or version number was provided.
+- Editorial approach: all nine questions and answers are translated into English, with consistent headings, paragraphs, and code formatting.
+- Applicability: this document records the supplied answers. Subsequent unified technical specifications, actual API examples, and official evaluation configurations take precedence. This document does not certify that the repository implements or satisfies every requirement.
 
-## 规则速览
+## Rules at a Glance
 
-| 事项 | 答疑结论 | 条件或待明确内容 |
+| Topic | Organizer's answer | Conditions or pending details |
 |---|---|---|
-| 本地知识库、规则库、检索及多阶段算法 | 允许 | 来源合法合规、固定版本、随算法包提供、离线独立运行 |
-| 资源登记 | 需要 | 名称、来源、版本、用途、大小及必要依赖；模板待提供 |
-| 依赖和部署 | 原则支持合理第三方依赖 | 提供完整依赖说明；包大小和兼容性要求待明确 |
-| 正式评测网络 | 仅允许赛事指定内部服务 | 禁止公网访问及运行时在线安装、下载资源 |
-| `seed` | 可在请求体顶层传入 | 不支持时可省略并说明；不保证完全一致 |
-| Token、调用及运行预算 | 开发测试阶段暂无明确 Token 总量限制 | 正式超时、总时长、Token、调用和重试限制待发布；主动重试计入预算 |
-| `temperature`、`response_format` | 原则允许自主设置 | 以实际部署版本和统一接口规范为准 |
-| Thinking | 原则允许按策略选择 | 通过 `chat_template_kwargs` 传递；不传则使用服务端默认配置 |
-| 外部第三方 API | 禁止 | 包括商业模型、在线 Embedding、在线检索等；赛事病例不得上传第三方平台 |
-| 结果文件名 | 尚未统一 | 预检尽可能兼容 `output.json` 与 `results.json`；正式提交以更新规范为准 |
+| Local knowledge bases, rule bases, retrieval, and multi-stage algorithms | Permitted | Resources must be lawfully sourced, version-pinned, bundled with the algorithm, and able to run independently offline |
+| Resource registration | Required | Name, source, version, purpose, file size, and necessary dependencies; registration template pending |
+| Dependencies and deployment | Reasonable third-party dependencies are supported in principle | Complete dependency documentation required; package size and compatibility requirements pending |
+| Official evaluation network | Only designated internal services are accessible | No public internet access or runtime online installation or downloading of resources |
+| `seed` | May be passed at the top level of the request body | May be omitted with an explanation if unsupported; exact reproducibility is not guaranteed |
+| Token, call, and runtime budgets | No explicit total token limit during the current development and testing stage | Official timeout, runtime, token, call, and retry limits pending; participant-initiated retries count toward the call budget |
+| `temperature` and `response_format` | Participant configuration permitted in principle | Subject to the deployed version and unified API specification |
+| Thinking | Strategy-dependent selection permitted in principle | Controlled through `chat_template_kwargs`; omission uses the server default |
+| External third-party APIs | Prohibited | Includes commercial models, online embedding, and online retrieval; competition cases must not be uploaded to third-party platforms |
+| Result filename | Not yet unified | Prechecks will accommodate `output.json` and `results.json` where possible; final submissions must follow the updated specification |
 
-## 一、知识库、规则库及算法部署
+## 1. Knowledge Bases, Rule Bases, and Algorithm Deployment
 
-### Q1. 是否允许携带医学知识库、规则库和本地检索模块？
+### Q1. May participants include medical knowledge bases, rule bases, and local retrieval modules?
 
-允许。赛事鼓励参赛方采用不同的技术路线，包括但不限于 Prompt Engineering、RAG、规则引擎、多阶段推理、Agent 工作流等。
+Yes. The competition encourages different technical approaches, including but not limited to prompt engineering, RAG, rule engines, multi-stage reasoning, and agent workflows.
 
-参赛方可将固定版本的医学知识库、规则库及本地检索模块集成到算法 ZIP 中，前提是相关资源来源合法合规，能够在赛事指定环境中独立运行，不依赖外部在线服务。
+Participants may integrate fixed versions of medical knowledge bases, rule bases, and local retrieval modules into the algorithm ZIP package, provided that the resources are lawfully sourced, can run independently in the designated competition environment, and do not depend on external online services.
 
-### Q2. 知识资料如何登记？
+### Q2. How should knowledge resources be registered?
 
-请在提交时登记相关资源的名称、来源、版本、用途、文件大小及必要的运行依赖。
+At submission, register each resource's name, source, version, purpose, file size, and necessary runtime dependencies.
 
-具体登记模板由组委会统一提供。未使用额外知识库或规则库的团队，注明“无”即可。
+The organizing committee will provide a unified registration template. Teams that do not use additional knowledge bases or rule bases should indicate "None."
 
-### Q3. 算法包大小、Python 依赖和联网访问有何限制？
+### Q3. What restrictions apply to algorithm package size, Python dependencies, and internet access?
 
-原则上支持合理的 Python 第三方依赖及本地检索、计算组件。
+Reasonable third-party Python dependencies and local retrieval and computation components are supported in principle.
 
-参赛方需提供完整依赖说明（如 `requirements.txt`），确保方案能够在赛事环境中部署运行。
+Participants must provide complete dependency documentation, such as `requirements.txt`, and ensure that their solution can be deployed and run in the competition environment.
 
-算法包大小上限和依赖兼容性要求将在正式评测前统一明确。对于较大的知识库或特殊依赖，建议提前与组委会沟通。
+The algorithm package size limit and dependency compatibility requirements will be clarified uniformly before official evaluation. Teams planning to use large knowledge bases or special dependencies are advised to contact the organizing committee in advance.
 
-正式评测环境不开放公网访问，仅允许调用赛事指定的内部服务。算法运行期间不得在线下载安装额外依赖或资源。
+The official evaluation environment will not provide public internet access. Only designated internal competition services may be called. Algorithms must not install or download additional dependencies or resources online during execution.
 
-## 二、模型调用参数及评测资源
+## 2. Model Request Parameters and Evaluation Resources
 
-### Q4. 是否支持 seed 参数？
+### Q4. Is the seed parameter supported?
 
-赛事采用自部署 vLLM 模型服务。vLLM 原生支持请求级 seed 参数，可直接在 HTTP JSON 请求体顶层传入，例如 `"seed": 42`。
+The competition uses a self-hosted vLLM model service. vLLM natively supports a request-level seed parameter, which can be passed directly at the top level of the HTTP JSON request body, for example, `"seed": 42`.
 
-参赛方可使用固定随机种子。若实际接口不支持该字段，允许不传并在提交说明中注明，不因此判定违规。
+Participants may use a fixed random seed. If the actual API does not support this field, participants may omit it and explain the omission in their submission documentation; this will not be considered a violation.
 
-需要说明的是，固定 seed 有助于提高可复现性，但不代表不同运行条件下模型输出一定完全一致。
+A fixed seed helps improve reproducibility but does not guarantee identical model outputs under different runtime conditions.
 
-### Q5. Token、调用次数、超时和重试限制如何设置？
+### Q5. What limits apply to tokens, model calls, timeouts, and retries?
 
-当前开发测试阶段暂未设置明确的 Token 总量限制。
+At the current development and testing stage, no explicit total token limit has been set.
 
-正式评测阶段将根据统一资源配置，对单次模型请求超时、单病例总运行时长、Token 消耗、模型调用次数及重试次数等进行规范。
+For official evaluation, the organizers will define limits based on the shared resource configuration, including the timeout for each model request, total runtime per case, token consumption, number of model calls, and number of retries.
 
-原则上，参赛算法主动发起的重试计入模型调用预算；经确认属于赛事平台自身故障的调用，将按统一异常处理规则处理。
+In principle, retries initiated by a participant's algorithm count toward the model-call budget. Calls confirmed to have been affected by faults in the competition platform itself will be handled under unified exception-handling rules.
 
-具体限制将在正式提交截止前统一发布，并为参赛方预留调整时间。
+Specific limits will be published before the final submission deadline, with time reserved for participants to adjust their solutions.
 
-### Q6. 是否允许设置 response_format 和 temperature？
+### Q6. May participants configure response_format and temperature?
 
-自部署 vLLM 的 OpenAI 兼容接口原生支持 temperature，并在支持的版本中提供 response_format 结构化输出能力，例如：
+The self-hosted vLLM OpenAI-compatible API natively supports temperature and, in supported versions, structured output through response_format, for example:
 
 ```json
 {
@@ -77,13 +77,13 @@
 }
 ```
 
-赛事原则上允许参赛方自主设置上述参数，最终以赛事实际部署版本及统一接口规范为准。
+In principle, participants may configure these parameters themselves. Final support is subject to the deployed competition version and unified API specification.
 
-对于赛事禁止或接口不支持的参数，将尽量提供明确的错误提示，避免静默忽略造成理解偏差。
+For prohibited or unsupported parameters, the organizers will try to provide explicit error messages to avoid misunderstandings caused by silently ignored parameters.
 
-### Q7. Qwen Thinking 参数如何传递？
+### Q7. How should Qwen Thinking parameters be passed?
 
-对于采用 vLLM 原生 OpenAI 兼容接口的服务，可以通过 HTTP 请求体中的以下字段关闭 Thinking：
+For services using vLLM's native OpenAI-compatible API, Thinking can be disabled through the following field in the HTTP request body:
 
 ```json
 {
@@ -93,44 +93,44 @@
 }
 ```
 
-如果不传该字段，则使用服务端实际配置的默认模式。默认模式并不必然是关闭 Thinking，最终以赛事发布的模型配置为准。
+If this field is omitted, the service uses its actual server-side default configuration. The default does not necessarily disable Thinking; the model configuration published by the competition determines the behavior.
 
-赛事原则上允许参赛方根据算法策略选择 Thinking 模式，具体支持情况将通过统一接口示例确认。
+In principle, participants may select a Thinking mode according to their algorithm strategy. Specific support will be confirmed through unified API examples.
 
-## 三、外部 API 与数据安全
+## 3. External APIs and Data Security
 
-### Q8. 能否使用商业 Qwen API 或其他第三方服务？
+### Q8. May participants use commercial Qwen APIs or other third-party services?
 
-本次赛事禁止使用任何外部第三方 API。
+The competition prohibits all external third-party APIs.
 
-赛事提供统一的自部署 Qwen 模型服务，参赛算法应通过赛事指定接口完成模型推理。
+The competition provides a unified, self-hosted Qwen model service. Participating algorithms must perform model inference through the designated competition API.
 
-禁止调用外部商业大模型、在线 Embedding、在线知识检索或其他第三方服务。
+Calls to external commercial large language models, online embedding services, online knowledge retrieval, or other third-party services are prohibited.
 
-赛事提供的练习病例及正式评测病例均不得上传至外部第三方平台。
+Neither practice cases nor official evaluation cases supplied by the competition may be uploaded to external third-party platforms.
 
-参赛方可以使用本地知识库、规则库、检索算法及其他离线组件，但相关资源需提前登记，并确保在赛事指定环境中独立运行。
+Participants may use local knowledge bases, rule bases, retrieval algorithms, and other offline components, provided that the resources are registered in advance and can run independently in the designated competition environment.
 
-此项规定旨在保障数据安全、评测公平性及结果可复现性。
+This rule is intended to protect data security, evaluation fairness, and reproducibility.
 
-## 四、结果提交与兼容性
+## 4. Result Submission and Compatibility
 
-### Q9. 结果文件名应使用 output.json 还是 results.json？
+### Q9. Should the result file be named output.json or results.json?
 
-目前技术规范与提交材料在文件命名上存在不一致，组委会将统一修订，并明确最终的文件命名和数据结构要求。
+The technical specification and submission materials currently use inconsistent filenames. The organizing committee will revise them uniformly and clarify the final filename and data structure requirements.
 
-在兼容性预检阶段，将尽可能兼容已有文档中的两种命名方式，避免因文档差异影响参赛方测试。
+During compatibility prechecks, the organizers will accommodate both filenames found in existing documents where possible, to avoid disrupting participant testing because of documentation differences.
 
-正式提交请以更新后的统一技术规范为准。
+Official submissions must follow the updated unified technical specification.
 
-## 待组委会进一步明确
+## Items Awaiting Organizer Clarification
 
-以下事项在本次答疑中尚未确定，不应自行补成正式限制：
+The following items were not finalized in this Q&A and must not be replaced with assumed official limits:
 
-- 算法包大小上限、Python 依赖兼容性要求及资源登记模板。
-- 单次请求超时、单病例总时长、Token 消耗、模型调用及重试次数限制。
-- 平台自身故障的确认方式和统一异常处理规则。
-- 实际模型配置、Thinking 默认模式、参数支持范围及统一接口示例。
-- 最终结果文件名与数据结构。
+- Algorithm package size limit, Python dependency compatibility requirements, and resource registration template.
+- Per-request timeout, total runtime per case, token consumption, model-call limits, and retry limits.
+- How platform faults are confirmed and handled under the unified exception-handling rules.
+- Actual model configuration, default Thinking mode, supported parameters, and unified API examples.
+- Final result filename and data structure.
 
-本次答疑未给出具体模型名称、ENDPOINT 配置方式、完整输入输出 Schema 或退出码规则；这些项目需要另行对照正式技术规范。
+This Q&A does not specify the exact model name, ENDPOINT configuration method, complete input/output schemas, or exit-code rules. These items must be checked separately against the official technical specification.
