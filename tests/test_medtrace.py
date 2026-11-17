@@ -227,6 +227,20 @@ class ChineseAndNewChecks(unittest.TestCase):
         self.assertTrue(T.term_positive_in("无尿", "患者无尿2天，伴乏力。"))   # anuria is a positive finding
         self.assertEqual(T.negated_terms("患者无尿2天。"), [])
 
+    def test_negation_scope_on_real_model_prose(self):
+        # each of these was a false alarm on the first qwen4-max run
+        self.assertEqual(T.negated_terms("尿道口无明显新生物、闭合良好，无阴道前后壁脱垂"), ["新生物", "阴道前后壁脱垂"])
+        self.assertEqual(T.negated_terms("无明显神经功能障碍（感觉对称、肌力5级、病理征阴性）")[:1], ["神经功能障碍"])
+        self.assertTrue(T.term_positive_in("偶有恶心", "病程中无腹泻、偶有恶心、无呕吐"))
+        self.assertEqual(T.negated_terms("触诊：语颤：正常        胸膜摩擦感：正常       皮下捻发感：无"), ["皮下捻发感"])
+        self.assertEqual(T.negated_terms("移动性浊音：阴性"), ["移动性浊音"])
+        self.assertEqual(T.negated_terms("未叩及腹部包块"), ["腹部包块"])
+        self.assertIn(5.0, T.all_number_values("肝上界：右锁骨中线：五肋间"))
+        src = {"case_id": 1, "sources": [{"source_id": "a", "content": "未见乳头凹陷，皮肤改变、酒窝征、桔皮症等。既往高血压病史。胆总管呈巨大囊样扩张。无肝内胆管远端分支扩张。"}]}
+        self.assertEqual(codes("未见皮肤改变、酒窝征。", sources=("a",), case=src), set())                 # ambiguous source list: not flagged
+        self.assertEqual(codes("肝内胆管远端分支无扩张。", sources=("a",), case=src), set())               # site-dependent finding
+        self.assertEqual(codes("资料中未提供体温、血压等生命体征。", sources=("a",), case=src), set())     # 高血压病史 is not a reading
+
     def test_only_denied_history_counts_as_conflict(self):
         L = build_ledger(parse_case(self.ZH, 0))
         self.assertEqual([(c["kind"], c["term"]) for c in L.conflicts], [("polarity", "糖尿病")])   # not 头晕 (time-specific negative)

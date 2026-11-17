@@ -19,6 +19,8 @@ import re
 HIGH, MEDIUM, LOW = "high", "medium", "low"
 _CORE_DOC = {"allergy": re.compile(r"(?i)allerg|过敏"), "medication": re.compile(r"(?i)medication|用药"),
              "vitals": re.compile(r"(?i)vital signs|生命体征")}
+_SITE_DEPENDENT = set("扩张 肿大 压痛 增厚 异常 强化 积液 结节 占位 肿物 包块 肿块 水肿 出血 狭窄 梗阻 充血 渗出 增大 缩小 畸形 触痛 叩痛 "
+                      "叩击痛 红肿 溃疡 糜烂 杂音 啰音 疼痛 肿胀 破溃 改变 病变 转移 复发 钙化 坏死 swelling tenderness mass lesion".split())
 _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
 _SHORT = {"case_features": "features", "diagnostic_discussion": "discussion", "treatment_plan": "plan"}
 
@@ -80,7 +82,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
 
     # ---- negation
     if sec in ("features", "discussion"):
-        pos = T.positive_text(text)
+        pos = "\n".join(T.clearly_positive_text(s) for s in T.split_sentences(text))
         for term in L.neg_only:
             if term in pos:
                 add("negation_flip", HIGH if sec == "features" else LOW,
@@ -91,15 +93,20 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     # do is claim a core item is undocumented when the records do document it.
     meta_missing = sec == "features" and T.has_missing_cue(text)
     if meta_missing and T.support(text, L.tokens_all) < 0.9:      # >= 0.9: the records' own sentence, quoted (e.g. "具体用药不详")
+        clauses = re.split(r"[，,；;。.！？\n]", text)
         for key, rx in _CORE_DOC.items():
-            if rx.search(text) and key not in {u["key"] for u in L.undocumented} and _SAYS_ABSENT.search(text):
+            if key not in {u["key"] for u in L.undocumented} and any(rx.search(c) and _SAYS_ABSENT.search(c) for c in clauses):
                 add("false_missing", HIGH, f"states that {key} information is not documented, but the records contain it")
     if sec == "features" and not meta_missing:
         for term in T.negated_terms(text):
             if term in L.neg_terms:
                 continue
-            if term in L.pos_text:
+            if term in _SITE_DEPENDENT:
+                continue        # "无扩张" at one site does not contradict "扩张" at another; left to the reviewer
+            if term in L.clear_pos_text:
                 add("negation_flip", HIGH, f"{term!r} is negated here but the records document it as present")
+            elif term in L.pos_text:
+                continue        # the records mention it after a negation cue: ambiguous, not flagged
             elif term not in L.all_text:
                 add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records")
 
@@ -116,8 +123,11 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             add("weak_attribution", LOW, "the cited source supports this statement less well than other sources")
 
     # ---- proposed vs completed
-    if sec == "plan" and T.has_done_cue(text) and T.support(text, L.tokens_all) < 0.6:
-        add("unsupported_completed", HIGH, "plan describes an intervention as already done, without support in the records")
+    if sec == "plan":
+        for clause in re.split(r"[；;。！？\n]", text):
+            if T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5:
+                add("unsupported_completed", HIGH, "plan describes an intervention as already done, without support in the records")
+                break
 
     # ---- diagnostic certainty
     if sec == "discussion" and T.has_certain_cue(text) and not T.has_certain_cue(L.all_text):

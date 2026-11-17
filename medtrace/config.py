@@ -57,7 +57,7 @@ class Config:
     api_base: str = ""
     api_key: str = field(default="", repr=False)
     model: str = ""
-    timeout: float = 120.0          # seconds per HTTP request
+    timeout: float = 600.0          # seconds per HTTP request (reasoning models need minutes, see .env.example)
     max_retries: int = 2            # HTTP-level retries per model call (transient errors only)
     retry_backoff: float = 2.0
     temperature: float = 0.0
@@ -96,7 +96,7 @@ def load_config(**overrides) -> Config:
         api_base=_get("LLM_API_BASE", "OPENAI_API_BASE", "OPENAI_BASE_URL", "API_BASE", "BASE_URL", default=""),
         api_key=_get("LLM_API_KEY", "OPENAI_API_KEY", "API_KEY", default=""),
         model=_get("LLM_MODEL", "MODEL_NAME", "MODEL", default=""),
-        timeout=_num(float, "LLM_TIMEOUT", default=120.0),
+        timeout=_num(float, "LLM_TIMEOUT", default=600.0),
         max_retries=_num(int, "LLM_MAX_RETRIES", default=2),
         retry_backoff=_num(float, "LLM_RETRY_BACKOFF", default=2.0),
         temperature=_num(float, "LLM_TEMPERATURE", default=0.0),

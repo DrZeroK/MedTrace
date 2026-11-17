@@ -160,6 +160,9 @@ _NUM_STRICT = re.compile(r"(?<![A-Za-z0-9_.\-])(\d+(?:\.\d+)?)(?:\s*(" + _UNIT_A
 _NUM_ANY = re.compile(r"\d+(?:\.\d+)?")
 
 
+_ZH_NUM = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
+
+
 def norm_unit(u: str | None) -> str | None:
     if not u:
         return None
@@ -179,7 +182,9 @@ def extract_numbers(text: str) -> list[tuple[float, str | None, str]]:
 
 def all_number_values(text: str) -> set[float]:
     """Permissive extraction for *source* text (superset => fewer false alarms)."""
-    return {float(x) for x in _NUM_ANY.findall(fw(text))}
+    vals = {float(x) for x in _NUM_ANY.findall(fw(text))}
+    vals |= {float(_ZH_NUM[ch]) for ch in set(text or "") if ch in _ZH_NUM}
+    return vals
 
 
 # ----------------------------------------------------------------- negation
@@ -189,13 +194,16 @@ _NEG_PRE = re.compile(
     # Chinese cues, tuned on CHIP-CDEE train (real EMR sentences with polarity labels):
     #  - "无明显诱因出现咳嗽" is a fixed phrase (no obvious precipitant); it does not negate what follows
     #  - "无尿" alone is anuria (a positive finding) but "无尿频、尿急、尿痛" is a negated list
-    r"|否认|未(?:再)?(?:见|闻及|触及|扪及|及|发现|引出|诉|述|出现|查见|探及|发生|检出|检验出|闻|触)|不伴|没有"
+    r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触)|不伴|没有"
     r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
 _NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
                      r"reported|has|had|presents?|complains?|with|positive|present)\b")
-_END_ZH = re.compile(r"[，,；;。！？]|但|伴有")
-_CLAUSE_START = re.compile(r"[,，;；。:：]")
+_END_ZH = re.compile(r"[，,；;。！？（(]|但|伴有")
+# Inside a "、"-list after a Chinese negation cue, an item that is itself a statement ("闭合良好", "肌力5级",
+# "偶有恶心", "腹腔干…为真腔供血") is not part of the negated list. Found on the first real-model run.
+_POS_ITEM = re.compile(r"正常|良好|存在|尚可|欠|增高|升高|降低|减低|阳性|灵敏|对称|通畅|清楚|\d\s*级|供血|偶有|时有|伴|有(?!无)|为|呈|示|可见|可及|可闻")
+_CLAUSE_START = re.compile(r"[,，;；。:：]|\s{2,}|\t")     # runs of spaces separate columns in tabular exam records
 _TERM_SPLIT = re.compile(r"(?i)、|/|及|或|和|与|,|\bor\b|\band\b|\bnor\b")
 _TERM_CUT = re.compile(r"(?i)\s+(?:on|at|in|since|for|during|prior|before|after|to|of the)\b.*$")
 _TERM_LEAD = re.compile(r"(?i)^(?:any|a|an|the|known|prior|previous|recent|history of|明显|既往|其他|其它)\s*")
@@ -209,10 +217,20 @@ def neg_spans(sentence: str) -> list[tuple[int, int]]:
     for m in _NEG_PRE.finditer(sentence):
         ender = _END_ZH if _CJK.search(m.group()) else _END_EN
         e = ender.search(sentence, m.end())
-        spans.append((m.end(), e.start() if e else len(sentence)))
+        end = e.start() if e else len(sentence)
+        if ender is _END_ZH:
+            pos = m.end()
+            for item in sentence[m.end():end].split("、"):
+                if pos > m.end() and (_POS_ITEM.search(item) or len(item) > 14):
+                    end = pos - 1
+                    break
+                pos += len(item) + 1
+        spans.append((m.end(), end))
     for m in _NEG_POST.finditer(sentence):
+        # "移动性浊音：阴性" / "皮下捻发感：无": the label before the colon is what is negated
+        limit = len(sentence[:m.start()].rstrip(" \t:："))
         start = 0
-        for c in _CLAUSE_START.finditer(sentence, 0, m.start()):
+        for c in _CLAUSE_START.finditer(sentence, 0, limit):
             start = c.end()
         spans.append((start, m.start()))
     return spans
@@ -267,6 +285,15 @@ def positive_text(sentence: str) -> str:
     for s, e in neg_spans(sentence):
         chars[s:e] = " " * (e - s)
     return "".join(chars).lower()
+
+
+def clearly_positive_text(sentence: str) -> str:
+    """Only the part of a sentence before its first negation cue (and outside postfix-negated clauses). Record
+    sentences often continue a negated list across commas ("未见乳头凹陷，皮肤改变、酒窝征等"), so anything after a
+    cue is ambiguous; use this view when a false alarm is worse than a miss."""
+    m = _NEG_PRE.search(sentence)
+    head = sentence[:m.start()] if m else sentence
+    return positive_text(head)
 
 
 def term_positive_in(term: str, sentence: str) -> bool:
