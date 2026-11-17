@@ -47,6 +47,9 @@ _POST_HISTORY_OK = re.compile(r"年前|月前|既往|外院|当地医院|曾")  
 # the record itself states a diagnosis (legitimate admission information, but makes diagnosis-hit metrics trivial)
 _DX_STATED = re.compile(r"病理(?:报告|结果|诊断|检查)?[^。]{0,12}(?:为|示|[:：])|确诊|明确诊断|诊断为")
 
+# Some textbook case titles name a topic or a procedure, not a diagnosis; they cannot be scored as one.
+_TITLE_NOT_DX = re.compile(r"管理|路径|评估和准备|相关性疾病|再植|术后")
+_TITLE_SUFFIX = re.compile(r"(?:的诊疗|一例)$")
 _Q_KINDS = [("differential", re.compile(r"鉴别")), ("diagnosis", re.compile(r"诊断")),
             ("plan", re.compile(r"治疗|处理|手术|决策|预防|措施")), ("investigation", re.compile(r"检查"))]
 _DDX_ITEM = re.compile(r"(?:[①-⑳]|(?:^|\n)\s*(?:[（(]?\d{1,2}[)）.、．])?)\s*([\u4e00-\u9fffA-Za-z、/（）()]{2,24}?)\s*[:：]")
@@ -118,7 +121,8 @@ def build() -> dict:
             continue
         title = item.get("title", "")
         chapter, _, disease = title.rpartition("案例分析-")
-        chapter, disease = chapter.strip() or "未标注", disease.strip() or title.strip()
+        chapter, disease = chapter.strip() or "未标注", _TITLE_SUFFIX.sub("", disease.strip() or title.strip())
+        title_is_dx = not _TITLE_NOT_DX.search(disease)
         counts: dict = {}
         sources = []
         for s in kept:
@@ -136,6 +140,8 @@ def build() -> dict:
         dx_stated = bool(_DX_STATED.search(text)) or (len(disease) >= 2 and disease in text)
         if dx_stated:
             flags.append("diagnosis_stated_in_record")
+        if not title_is_dx:
+            flags.append("title_is_not_a_diagnosis")
         if withheld and any(w["reason"].startswith("post") for w in withheld):
             flags.append("post_admission_sections_withheld")
         tier = "review_required" if post else "B" if (dx_stated or any(f.startswith(("post_", "corruption")) for f in flags)) else "A"
@@ -177,7 +183,7 @@ def build() -> dict:
                           "note": "answers to case questions, not a written progress note; they may draw on information from withheld post-admission sections",
                           "case_features": None, "diagnostic_discussion": ref["diagnostic_discussion"], "plan": ref["plan"],
                           "evidence": None, "review_items": None, "other_qa": ref["other"]},
-            "derived": {"label_status": "rule_derived_unreviewed", "dx_metric_eligible": not dx_stated and len(disease) >= 2,
+            "derived": {"label_status": "rule_derived_unreviewed", "dx_metric_eligible": not dx_stated and len(disease) >= 2 and title_is_dx,
                         "measurements": measurements, "negatives": negatives, "pending": pending,
                         "reference_differentials": list(dict.fromkeys(n for n in ddx_names if n and n != disease))},
         })

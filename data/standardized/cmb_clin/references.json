@@ -1650,7 +1650,9 @@
   },
   "quality": {
    "tier": "A",
-   "flags": [],
+   "flags": [
+    "title_is_not_a_diagnosis"
+   ],
    "withheld_sections": [
     {
      "heading": "辅助检查",
@@ -1700,7 +1702,7 @@
   },
   "derived": {
    "label_status": "rule_derived_unreviewed",
-   "dx_metric_eligible": true,
+   "dx_metric_eligible": false,
    "measurements": [
     {
      "source_id": "cmbclin-010-aux",
@@ -4640,6 +4642,7 @@
   "quality": {
    "tier": "B",
    "flags": [
+    "title_is_not_a_diagnosis",
     "post_admission_sections_withheld"
    ],
    "withheld_sections": [
@@ -4693,7 +4696,7 @@
   },
   "derived": {
    "label_status": "rule_derived_unreviewed",
-   "dx_metric_eligible": true,
+   "dx_metric_eligible": false,
    "measurements": [
     {
      "source_id": "cmbclin-028-hpi",
@@ -5479,7 +5482,7 @@
   },
   "classification": {
    "specialty_chapter": "外科休克",
-   "disease_label": "肝胆胰术后失血性休克一例",
+   "disease_label": "肝胆胰术后失血性休克",
    "disease_label_status": "textbook_case_title",
    "document_type": "textbook teaching case (admission-style)",
    "sections_present": [
@@ -5497,6 +5500,7 @@
    "tier": "B",
    "flags": [
     "corruption:control_chars",
+    "title_is_not_a_diagnosis",
     "post_admission_sections_withheld"
    ],
    "withheld_sections": [
@@ -5549,7 +5553,7 @@
   },
   "derived": {
    "label_status": "rule_derived_unreviewed",
-   "dx_metric_eligible": true,
+   "dx_metric_eligible": false,
    "measurements": [
     {
      "source_id": "cmbclin-034-exam",
@@ -6823,7 +6827,9 @@
   },
   "quality": {
    "tier": "A",
-   "flags": [],
+   "flags": [
+    "title_is_not_a_diagnosis"
+   ],
    "withheld_sections": [],
    "pii": {},
    "near_duplicate_of": []
@@ -6850,7 +6856,7 @@
   },
   "derived": {
    "label_status": "rule_derived_unreviewed",
-   "dx_metric_eligible": true,
+   "dx_metric_eligible": false,
    "measurements": [
     {
      "source_id": "cmbclin-042-aux",
@@ -7669,7 +7675,7 @@
   },
   "classification": {
    "specialty_chapter": "肝疾病",
-   "disease_label": "囊型肝包虫病合并胆瘘的诊疗",
+   "disease_label": "囊型肝包虫病合并胆瘘",
    "disease_label_status": "textbook_case_title",
    "document_type": "textbook teaching case (admission-style)",
    "sections_present": [
@@ -9024,7 +9030,9 @@
   },
   "quality": {
    "tier": "A",
-   "flags": [],
+   "flags": [
+    "title_is_not_a_diagnosis"
+   ],
    "withheld_sections": [],
    "pii": {
     "already_masked_name": 1
@@ -9068,7 +9076,7 @@
   },
   "derived": {
    "label_status": "rule_derived_unreviewed",
-   "dx_metric_eligible": true,
+   "dx_metric_eligible": false,
    "measurements": [
     {
      "source_id": "cmbclin-055-pmh",
@@ -11772,7 +11780,7 @@
   },
   "classification": {
    "specialty_chapter": "未标注",
-   "disease_label": "ERAS路径下胰十二指肠切除术一例",
+   "disease_label": "ERAS路径下胰十二指肠切除术",
    "disease_label_status": "textbook_case_title",
    "document_type": "textbook teaching case (admission-style)",
    "sections_present": [
@@ -11790,6 +11798,7 @@
    "tier": "B",
    "flags": [
     "corruption:control_chars",
+    "title_is_not_a_diagnosis",
     "post_admission_sections_withheld"
    ],
    "withheld_sections": [
@@ -11838,7 +11847,7 @@
   },
   "derived": {
    "label_status": "rule_derived_unreviewed",
-   "dx_metric_eligible": true,
+   "dx_metric_eligible": false,
    "measurements": [
     {
      "source_id": "cmbclin-070-exam",

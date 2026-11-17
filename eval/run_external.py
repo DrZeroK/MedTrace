@@ -148,7 +148,9 @@ def main(argv=None) -> int:
         (out / f"outputs_{v}.json").write_text(json.dumps(recs, ensure_ascii=False, indent=2), "utf-8")
         (out / f"findings_{v}.json").write_text(json.dumps(debug[v], ensure_ascii=False, indent=1, default=str), "utf-8")
     # for eval.blind_review: the records each reviewer needs, plus the dataset's expert reference answers
-    (out / "cases_used.json").write_text(json.dumps([{"case": raw, "annotation": {"reference": ref["reference"]}} for raw, ref in items],
+    (out / "cases_used.json").write_text(json.dumps([{"case": raw, "annotation": {"reference": ref["reference"],
+                                                                                         "gold": {"diagnoses": gold_diagnoses(ref), "eligible": bool(ref["derived"]["dx_metric_eligible"])}}}
+                                                               for raw, ref in items],
                                                    ensure_ascii=False, indent=1), "utf-8")
     conf = {"name": a.name, "dataset": a.dataset, "split": a.split, "tier": a.tier, "limit": a.limit, "n_cases": len(items), "variants": variants,
             "budget": {v: BUDGET[v] for v in variants}, "model": cfg0.model or "<mock>", "mock": is_mock,
