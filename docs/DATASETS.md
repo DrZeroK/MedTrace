@@ -19,6 +19,7 @@ Nothing was downloaded that requires an account, a gate, or an agreement.
 | 7 | **CCKS 2017–2019 EMR NER / Yidu-S4K** ([overview](https://arxiv.org/abs/2003.03875)) | Annotated real EMR passages (diseases, tests, operations, drugs, anatomy) | Evaluation agreement; third-party mirrors are not an authorised source | No | Medium for entity extraction only | Not acquired |
 | 8 | **MedCD, CDrugRed, CardioEHR, OEHR** | Real Chinese EHR collections behind logins or data-use agreements | DUAs | No | Unknown until document types are confirmed | Not acquired |
 | 9 | **CBLUE batch 2**: CMeEE-V2, CMeIE-V2, CMedCausal, CMF-NERD, CN-Diabetes-QC | Textbook entity and relation annotation, causal relations in online answers, few-shot NER, diabetes question classes | Tianchi terms; CMF-NERD additionally carries a confidentiality undertaking | Files inspected 2026-11-17 | Low: textbook prose, not records; no polarity, values or chronology | Inspected, **not used**. CMeIE-V2 synonym triples kept locally in case diagnosis-name matching in evaluation needs them |
+| 10 | **KUAKE-QIC / QQR / QTR, Lymph-IE&AC** | Health search queries with intent and relevance labels; 108 published lymphoma case reports with coding labels | Tianchi terms | Files inspected 2026-11-17 | KUAKE: none. Lymph-IE&AC: low as-is, since every report states the diagnosis, treatment and outcome | Inspected, **not used** |
 
 ## Why this order
 

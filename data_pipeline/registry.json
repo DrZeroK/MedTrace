@@ -161,6 +161,23 @@
    "relevance": "low for admission-note generation: textbook prose, not records; no polarity, values or chronology. CMeIE-V2 synonym triples (about 4,800) could later make diagnosis-name matching in evaluation fairer; its disease-knowledge triples would only matter if retrieval were permitted, which it currently is not",
    "limits": "CMF-NERD must not be used or shared beyond the signed undertaking; nothing here may be committed",
    "status": "inspected, not used. CMeIE-V2 kept locally for a possible evaluation-side synonym table"
+  },
+  {
+   "id": "cblue_batch4",
+   "name": "KUAKE-QIC, KUAKE-QQR, KUAKE-QTR, Lymph-IE&AC",
+   "rank": 10,
+   "url": "https://tianchi.aliyun.com/dataset/dataDetail?dataId=95414",
+   "paper": "arXiv:2106.08087",
+   "content": "KUAKE-QIC/QQR/QTR: search-engine health queries with intent and relevance labels. Lymph-IE&AC: 108 published lymphoma case reports (54 labelled) with extraction targets: first-diagnosis date, sex, site, pathological classification and ICD-10 / ICD-O codes",
+   "provenance": "KUAKE: consumer search queries. Lymph-IE&AC: journal case reports (full narrative including final diagnosis, treatment and outcome)",
+   "license": "Tianchi terms accepted by the downloader; no licence text in the archives",
+   "verified": "team-supplied archives inspected 2026-11-17",
+   "access": "Tianchi account",
+   "redistribution": "not permitted",
+   "permitted_use_here": [],
+   "relevance": "KUAKE: none (search queries, not clinical records). Lymph-IE&AC: low as-is - each text states the diagnosis, treatment and outcome, so it cannot serve as admission-time input without a clinician cutting each report at admission; single disease family",
+   "limits": "Lymph-IE&AC would need manual, clinician-reviewed truncation per case to avoid leaking the final diagnosis",
+   "status": "inspected, not used"
   }
  ]
 }
