@@ -9,6 +9,12 @@ Reads structured admission records (`input.json`), calls the configured (designa
 > show. The I/O contract below is still an assumption until checked against the official technical instructions. See `docs/REQUIREMENTS.md` (what must be confirmed) and `docs/REPORT.md` (what has and
 > has not been measured). This is a research/competition system, not a medical device; every note requires clinician review.
 
+## Competition QA
+
+See [Competition Technical Q&A](docs/COMPETITION_QA.md) for all nine organizer answers supplied by the project owner,
+including offline resources, vLLM parameters, third-party API restrictions and pending submission requirements.
+The document records the supplied answers; it does not certify the current implementation's compliance.
+
 ## Run
 
 ```bash

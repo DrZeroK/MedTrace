@@ -1,0 +1,1102 @@
+[
+ {
+  "case_id": "cmbclin-003",
+  "log": {
+   "case_id": "cmbclin-003",
+   "index": 0,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 119.2,
+   "latency": 119.204,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 3
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 3
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记录生命体征、药物过敏史及当前用药情况；既往史、个人史、家族史、实验室检查及肿物病理结果亦未记录，上述项目均不能视为正常或阴性。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记载入院前已实施的任何治疗或处置，故本记录不将任何处置列为已完成事项。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 6,
+    "message": "statement content is weakly supported by the records (overlap 0.06)",
+    "text": "资料中未记载入院前已实施的任何治疗或处置，故本记录不将任何处置列为已完成事项。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "首要问题为阴茎恶性肿瘤（阴茎癌）可能性大：支持依据为50岁男性、发现阴茎肿物3个月，肿物呈菜花样3cm位于冠状沟区，质硬、不能推动，伴龟头及冠状沟糜烂、出血及恶臭，CT示阴茎头软组织肿块平扫密度均匀、增强后呈明显不均匀强化；不支持或尚不充分的依据为双侧腹股沟未触及肿大淋巴结，且尚无病理组织学证据。目前判断为“可能性大”，不能确诊，明确性质有待肿物活检病理。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-006",
+  "log": {
+   "case_id": "cmbclin-006",
+   "index": 1,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 2,
+   "retries": 1,
+   "llm_latency": 221.424,
+   "latency": 221.428,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "结合左下胸车祸撞击7天、左下胸皮肤瘀斑、卧床休息2天后于背重物用力时突发腹痛并晕厥，创伤性迟发性脾破裂致腹腔内出血可能性大，但目前不能确诊；需床旁超声、诊断性腹腔穿刺或血流动力学稳定后的腹部增强CT，必要时手术探查明确。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-008",
+  "log": {
+   "case_id": "cmbclin-008",
+   "index": 2,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.076,
+   "latency": 369.079,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-009",
+  "log": {
+   "case_id": "cmbclin-009",
+   "index": 3,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 368.958,
+   "latency": 368.961,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-010",
+  "log": {
+   "case_id": "cmbclin-010",
+   "index": 4,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 368.88,
+   "latency": 368.882,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-013",
+  "log": {
+   "case_id": "cmbclin-013",
+   "index": 5,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 97.486,
+   "latency": 97.49,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "腰椎间盘突出症（L4、5节段责任病灶可能性大）：支持依据为腰痛伴左下肢放射痛1年、劳累后加重休息缓解，L4、5椎旁深压痛伴叩击痛并向左下肢放射，左下肢直腿抬高试验30度阳性，双侧足背及小腿外侧感觉减退、双足拇指背伸肌力4级，腰椎X线示退行性改变；不支持或尚不明确之处在于MRI结果未记录，突出节段、程度及神经根受压情况未获证实，且双侧踝反射未引出与L4、5单节段定位不完全吻合，故目前只能判断为可能性大，不能确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-020",
+  "log": {
+   "case_id": "cmbclin-020",
+   "index": 6,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.871,
+   "latency": 369.872,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-023",
+  "log": {
+   "case_id": "cmbclin-023",
+   "index": 7,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.636,
+   "latency": 369.638,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-028",
+  "log": {
+   "case_id": "cmbclin-028",
+   "index": 8,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 360.238,
+   "latency": 360.243,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-030",
+  "log": {
+   "case_id": "cmbclin-030",
+   "index": 9,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 116.363,
+   "latency": 116.369,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "症状性（继发性）癫痫发作可能性大：支持依据为6天前无诱因突发全身抽搐伴意识丧失、发作后间断左手无力及麻木感，且外院头颅CT/MRI提示右额顶脑内占位性病变、本院头部MRI示右额顶部皮层下类圆形长T1、长T2异常信号影，发作症状与右侧额顶病灶在解剖定位上相符；不支持依据为脑电图呈正常脑电图表现，但发作间期脑电图正常不能除外癫痫，故不作确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-031",
+  "log": {
+   "case_id": "cmbclin-031",
+   "index": 10,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.515,
+   "latency": 369.516,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-033",
+  "log": {
+   "case_id": "cmbclin-033",
+   "index": 11,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 2,
+   "retries": 1,
+   "llm_latency": 231.299,
+   "latency": 231.303,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-035",
+  "log": {
+   "case_id": "cmbclin-035",
+   "index": 12,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 368.638,
+   "latency": 368.64,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-039",
+  "log": {
+   "case_id": "cmbclin-039",
+   "index": 13,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.185,
+   "latency": 369.187,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-041",
+  "log": {
+   "case_id": "cmbclin-041",
+   "index": 14,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.298,
+   "latency": 369.3,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-043",
+  "log": {
+   "case_id": "cmbclin-043",
+   "index": 15,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 118.395,
+   "latency": 118.404,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 5
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 5
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "前列腺癌诊断明确：1月前前列腺系统穿刺术后病理提示前列腺癌，5/12针阳性，Gleason评分4+3=7分，结合tPSA 15.6ng/ml、fPSA 2.3ng/ml及超声、MR所示左侧叶病灶，病理与影像、化验相互印证。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 5,
+    "message": "records document '转移' only as absent/denied, but it is stated here without negation",
+    "text": "前列腺癌骨转移：Gleason评分4+3=7分、tPSA 15.6ng/ml的前列腺癌存在骨转移风险，需警惕；不支持点为全身骨ECT未见明显转移，且资料未记录骨痛等症状。若后续出现新发骨痛或PSA明显上升，需复查骨显像或进一步影像以除外转移。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '包膜' only as absent/denied, but it is stated here without negation",
+    "text": "局部进展期病变（包膜外或精囊侵犯、盆腔淋巴结转移）：左侧叶肿瘤且穿刺5/12针阳性提示肿瘤负荷不小，需除外局部进展；不支持点为MR未见包膜及精囊侵犯、盆腔淋巴结无肿大，肛门指诊双侧无结节、双侧精囊可触及、指套退出无血迹。建议由影像与泌尿外科共同复核MR并结合穿刺阳性针位分布再判定。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '转移' only as absent/denied, but it is stated here without negation",
+    "text": "局部进展期病变（包膜外或精囊侵犯、盆腔淋巴结转移）：左侧叶肿瘤且穿刺5/12针阳性提示肿瘤负荷不小，需除外局部进展；不支持点为MR未见包膜及精囊侵犯、盆腔淋巴结无肿大，肛门指诊双侧无结节、双侧精囊可触及、指套退出无血迹。建议由影像与泌尿外科共同复核MR并结合穿刺阳性针位分布再判定。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '精囊侵犯' only as absent/denied, but it is stated here without negation",
+    "text": "局部进展期病变（包膜外或精囊侵犯、盆腔淋巴结转移）：左侧叶肿瘤且穿刺5/12针阳性提示肿瘤负荷不小，需除外局部进展；不支持点为MR未见包膜及精囊侵犯、盆腔淋巴结无肿大，肛门指诊双侧无结节、双侧精囊可触及、指套退出无血迹。建议由影像与泌尿外科共同复核MR并结合穿刺阳性针位分布再判定。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-044",
+  "log": {
+   "case_id": "cmbclin-044",
+   "index": 16,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 91.771,
+   "latency": 91.776,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "false_missing",
+    "severity": "high",
+    "section": "case_features",
+    "index": 10,
+    "message": "states that medication information is not documented, but the records contain it",
+    "text": "药物过敏史、抗凝或抗血小板用药史、既往其他疾病史及血常规、凝血、肝肾功能等实验室与胸部影像资料，本次提供的资料中均未记录；纤支镜活检病理结果亦未见记载。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "首要问题为右上叶支气管腔内新生物伴管腔完全阻塞：纤维支气管镜直视下已见右上叶支气管开口新生物完全阻塞管腔、表面粗糙、触之易出血，结合59岁男性、吸烟30年每天1～2包、刺激性干咳3个月渐加重、近1个月痰中带血丝及低热乏力、口服抗炎止咳治疗无明显改善，考虑中央型支气管肺癌（右上叶）可能性大；查体右上肺呼吸音稍弱与右上叶支气管阻塞相符。不支持点为全身浅表淋巴结无肿大、无明显胸闷胸痛，尚不足以判断病变范围。目前无病理结果记载，不能写为确诊，病理性质及分期均不明确。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-047",
+  "log": {
+   "case_id": "cmbclin-047",
+   "index": 17,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 107.784,
+   "latency": 107.789,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 2
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 2
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 9,
+    "message": "case-feature statement has no source reference",
+    "text": "本次资料未记录生命体征、药物过敏史、当前用药情况及肝肾功能等脏器功能指标，亦未记录病理结果与胸腹部分期影像结果，上述信息不能视为正常或阴性。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "不支持点与限度：记录中无发热等感染表现、无尿频尿急、无明显触痛，腹部初诊未触及明显包块，左侧睾丸、附睾及精索未见异常；但腹部触诊阴性不能替代腹膜后影像评估，且目前无病理证据，故只能判断为恶性可能性大，不能确诊，肿瘤类型与分期均不能确定。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-048",
+  "log": {
+   "case_id": "cmbclin-048",
+   "index": 18,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.477,
+   "latency": 369.484,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-051",
+  "log": {
+   "case_id": "cmbclin-051",
+   "index": 19,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.962,
+   "latency": 369.966,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-054",
+  "log": {
+   "case_id": "cmbclin-054",
+   "index": 20,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.328,
+   "latency": 369.33,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-061",
+  "log": {
+   "case_id": "cmbclin-061",
+   "index": 21,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 2,
+   "retries": 1,
+   "llm_latency": 243.716,
+   "latency": 243.73,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-065",
+  "log": {
+   "case_id": "cmbclin-065",
+   "index": 22,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.194,
+   "latency": 369.197,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-070",
+  "log": {
+   "case_id": "cmbclin-070",
+   "index": 23,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "error": "LLMError: model call failed: ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+   "status": "fallback",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 369.289,
+   "latency": 369.291,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-071",
+  "log": {
+   "case_id": "cmbclin-071",
+   "index": 24,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 359.653,
+   "latency": 359.657,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 3
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 3
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记录药物过敏史与当前用药情况（含抗凝、抗血小板药物），亦未记录凝血功能、肝肾功能、血型及配血结果。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 8,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记载入院前及入院后已实施的任何处置，故本记录不将任何治疗列为已完成事项。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 8,
+    "message": "statement content is weakly supported by the records (overlap 0.03)",
+    "text": "资料中未记载入院前及入院后已实施的任何处置，故本记录不将任何治疗列为已完成事项。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "第二问题为闭合性腹部损伤伴腹腔内出血，可能性大：右侧季肋部瘀斑约5cm×8cm提示该处为着力部位，腹膜刺激征阳性、移动性浊音可疑，腹部X线平片示右膈升高，并有右肩痛（可为膈面受刺激的牵涉痛），结合血压70/50mmHg、心率120次/分与血红蛋白80g/L，考虑实质脏器破裂出血可能性大，其中肝破裂可能性大；确诊尚需超声、增强CT或手术探查证实。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-072",
+  "log": {
+   "case_id": "cmbclin-072",
+   "index": 25,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 3,
+   "retries": 2,
+   "llm_latency": 357.579,
+   "latency": 357.584,
+   "llm_errors": [
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)",
+    "ReadTimeout: HTTPSConnectionPool(host='ws-REDACTED.cn-beijing.maas.aliyuncs.com', port=443): Read timed out. (read timeout=120.0)"
+   ],
+   "findings_initial": {
+    "high": 5,
+    "medium": 3,
+    "low": 2
+   },
+   "findings_final": {
+    "high": 5,
+    "medium": 3,
+    "low": 2
+   }
+  },
+  "final_findings": [
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 2,
+    "message": "'乳腺癌家族史尚不能确定' is stated as absent but is not mentioned in the records",
+    "text": "现病史中关于家族史的记载原文为“如乳腺癌家族史”，文字表述不明确，有无乳腺癌家族史尚不能确定，需核实。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 2,
+    "message": "statement content is weakly supported by the records (overlap 0.27)",
+    "text": "现病史中关于家族史的记载原文为“如乳腺癌家族史”，文字表述不明确，有无乳腺癌家族史尚不能确定，需核实。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "high",
+    "section": "case_features",
+    "index": 5,
+    "message": "'皮肤改变' is negated here but the records document it as present",
+    "text": "左乳以及双腋窝下未触及可疑肿物；未见双乳头溢液，未见乳头湿疹样改变，未见乳头凹陷，未见皮肤改变、酒窝征、桔皮症等。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "high",
+    "section": "case_features",
+    "index": 5,
+    "message": "'酒窝征' is negated here but the records document it as present",
+    "text": "左乳以及双腋窝下未触及可疑肿物；未见双乳头溢液，未见乳头湿疹样改变，未见乳头凹陷，未见皮肤改变、酒窝征、桔皮症等。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "high",
+    "section": "case_features",
+    "index": 5,
+    "message": "'桔皮症' is negated here but the records document it as present",
+    "text": "左乳以及双腋窝下未触及可疑肿物；未见双乳头溢液，未见乳头湿疹样改变，未见乳头凹陷，未见皮肤改变、酒窝征、桔皮症等。"
+   },
+   {
+    "code": "value_label_mismatch",
+    "severity": "high",
+    "section": "case_features",
+    "index": 10,
+    "message": "'钼靶中的描述部位与径线不一致：查体记为右乳外象限、大小约2cm': the records give '大小约' as [2.2]; this value belongs to another item",
+    "text": "同一右乳肿块在查体、超声与钼靶中的描述部位与径线不一致：查体记为右乳外象限、大小约2cm，超声记为右乳外上象限、大小约2.2cm×1.8cm，钼靶记为右乳外上、大小约2.5cm×2.0cm，三者并列记录，未作取舍。"
+   },
+   {
+    "code": "value_label_mismatch",
+    "severity": "high",
+    "section": "case_features",
+    "index": 10,
+    "message": "'钼靶记为右乳外上、大小约2.5cm': the records give '大小约' as [2.2]; this value belongs to another item",
+    "text": "同一右乳肿块在查体、超声与钼靶中的描述部位与径线不一致：查体记为右乳外象限、大小约2cm，超声记为右乳外上象限、大小约2.2cm×1.8cm，钼靶记为右乳外上、大小约2.5cm×2.0cm，三者并列记录，未作取舍。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 10,
+    "message": "statement content is weakly supported by the records (overlap 0.29)",
+    "text": "同一右乳肿块在查体、超声与钼靶中的描述部位与径线不一致：查体记为右乳外象限、大小约2cm，超声记为右乳外上象限、大小约2.2cm×1.8cm，钼靶记为右乳外上、大小约2.5cm×2.0cm，三者并列记录，未作取舍。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "首要问题为右乳恶性肿瘤：右乳无痛性肿块1月余，查体肿块质硬、边界不清、活动度差，超声示低回声、边界不清、“蟹足样改变”并见少量血流信号、BIRADs 4c类，钼靶示明显边缘毛刺征及可疑钙化、BIRADs 4c类，B超引导下粗针穿刺病理已提示浸润性导管癌，故右乳浸润性导管癌诊断明确（依据穿刺病理）。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "目前生命体征记录为T36.9℃、P79次/分、R18次/分、Bp126/75mmHg，资料未记载提示危及生命或需即刻抢救的情况；但已病理确诊的乳腺浸润性导管癌属需限期完成分期与手术等抗肿瘤处理的问题，不宜拖延。"
+   }
+  ]
+ }
+]

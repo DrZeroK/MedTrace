@@ -1,0 +1,2233 @@
+[
+ {
+  "case_id": "cmbclin-014",
+  "log": {
+   "case_id": "cmbclin-014",
+   "index": 0,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 78.979,
+   "latency": 79.005,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 3,
+    "low": 22
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 3,
+    "low": 22
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者潘XX，男，51岁。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "主诉：肝区胀痛伴乏力、食欲不振1个月。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：近1个月来自觉肝区胀痛不适，伴体乏力、食欲不振，偶有右中腹部隐痛；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "无发热、恶心、呕吐、腹泻；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "无肝炎病史。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "入院查体：T 36.8℃，P 74次/分，R 20次/分，Bp 116/70mmHg；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "自主体位，神志清楚，全身皮肤及巩膜无黄染，全身浅表淋巴结无肿大；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "两肺呼吸音清晰，未闻及干湿啰音；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 8,
+    "message": "case-feature statement has no source reference",
+    "text": "心率74次/分，律齐，未闻及病理性杂音；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 9,
+    "message": "case-feature statement has no source reference",
+    "text": "腹部平软，肝右肋缘下4cm，脾脏未触及，未触及腹部包块，肠鸣音活跃。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 10,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：血常规 WBC 6.02×10^9/L，N 70%，RBC 3.15×10^9/L（原文单位如此记载），Hb 78g/L；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 11,
+    "message": "case-feature statement has no source reference",
+    "text": "血CEA>106ng/ml；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 12,
+    "message": "case-feature statement has no source reference",
+    "text": "肝功能、肾功能均正常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 13,
+    "message": "case-feature statement has no source reference",
+    "text": "多普勒超声：右肝前叶低回声肿块，大小约8cm×9cm，肿块周边及内部可见星芒状血流信号，为动脉频谱。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 14,
+    "message": "case-feature statement has no source reference",
+    "text": "CT：平扫肝右前叶低密度病灶，增强扫描动脉期病灶边缘可见环形强化，瘤内密度不均匀。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 15,
+    "message": "case-feature statement has no source reference",
+    "text": "纤维结肠镜：升结肠脾区可见菜花样肿物突入肠腔，表面有散在溃疡，局部肠黏膜僵硬，取病变处组织4块送病检，病理报告为结肠腺癌。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 16,
+    "message": "case-feature statement has no source reference",
+    "text": "重要阴性表现：无发热及消化道急性症状，无黄染，无浅表淋巴结肿大，脾不大，未触及腹部包块，肝肾功能正常。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 16,
+    "message": "'消化道急性症状' is stated as absent but is not mentioned in the records",
+    "text": "重要阴性表现：无发热及消化道急性症状，无黄染，无浅表淋巴结肿大，脾不大，未触及腹部包块，肝肾功能正常。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 16,
+    "message": "'浅表淋巴结肿大' is stated as absent but is not mentioned in the records",
+    "text": "重要阴性表现：无发热及消化道急性症状，无黄染，无浅表淋巴结肿大，脾不大，未触及腹部包块，肝肾功能正常。"
+   },
+   {
+    "code": "undocumented_normal",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 16,
+    "message": "states a normal finding that is weakly supported by the records",
+    "text": "重要阴性表现：无发热及消化道急性症状，无黄染，无浅表淋巴结肿大，脾不大，未触及腹部包块，肝肾功能正常。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "一、初步诊断：1. 结肠腺癌（结肠镜活检病理确诊）；2. 肝右前叶占位性病变，考虑结肠癌肝转移可能性大（临床拟诊，尚无病理证实）；3. 贫血（Hb 78g/L，中度贫血，病因待明确）。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "二、诊断依据：①中年男性，慢性病程1个月，以肝区胀痛、乏力、食欲不振为主要表现，偶有右中腹隐痛；②结肠镜见菜花样肿物突入肠腔、表面散在溃疡、局部肠黏膜僵硬，活检病理为结肠腺癌，结肠恶性肿瘤诊断明确；③血CEA>106ng/ml明显升高，符合消化道腺癌尤其结直肠癌的肿瘤标志物改变；④超声示右肝前叶8cm×9cm低回声肿块，周边及内部星芒状动脉频谱血流；CT平扫为低密度灶，增强动脉期边缘环形强化、瘤内密度不均，符合富血供、中心易坏死的转移性肝癌影像特点；⑤查体肝右肋缘下4cm，与肝内巨大占位相符；⑥Hb 78g/L、RBC 3.15×10^9/L（单位待核实）提示贫血，结合结肠肿物表面溃疡，考虑肿瘤慢性失血及消耗所致可能性大，但缺乏便血/黑便病史及便隐血等直接证据。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "records document '肝炎病' only as absent/denied, but it is stated here without negation",
+    "text": "三、鉴别诊断：①原发性肝细胞癌：亦可表现为肝区胀痛、肝大及肝内富血供肿块，但患者无肝炎病史，且已确诊结肠腺癌、CEA显著升高，肝内病灶增强呈边缘环形强化而非典型“快进快出”，倾向转移瘤；需查AFP、肝炎病毒标志物及必要时肝病灶穿刺活检鉴别。②肝血管瘤：多为边界清楚的高回声病灶，增强典型表现为周边结节状强化并向中心填充，与本例低回声、动脉期环形强化、瘤内密度不均不符，可能性小。③肝脓肿：常有发热、白细胞及中性粒细胞升高、肝区叩痛，本例无发热，WBC 6.02×10^9/L、N 70%，不支持。④肝囊肿：为无回声、无血流信号的囊性病变，与本例实性富血供肿块不符。⑤其他部位来源的肝转移癌：目前结肠已获病理证实为腺癌，其他原发灶尚无证据，需完善分期检查排除。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "records document '发热' only as absent/denied, but it is stated here without negation",
+    "text": "三、鉴别诊断：①原发性肝细胞癌：亦可表现为肝区胀痛、肝大及肝内富血供肿块，但患者无肝炎病史，且已确诊结肠腺癌、CEA显著升高，肝内病灶增强呈边缘环形强化而非典型“快进快出”，倾向转移瘤；需查AFP、肝炎病毒标志物及必要时肝病灶穿刺活检鉴别。②肝血管瘤：多为边界清楚的高回声病灶，增强典型表现为周边结节状强化并向中心填充，与本例低回声、动脉期环形强化、瘤内密度不均不符，可能性小。③肝脓肿：常有发热、白细胞及中性粒细胞升高、肝区叩痛，本例无发热，WBC 6.02×10^9/L、N 70%，不支持。④肝囊肿：为无回声、无血流信号的囊性病变，与本例实性富血供肿块不符。⑤其他部位来源的肝转移癌：目前结肠已获病理证实为腺癌，其他原发灶尚无证据，需完善分期检查排除。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "三、鉴别诊断：①原发性肝细胞癌：亦可表现为肝区胀痛、肝大及肝内富血供肿块，但患者无肝炎病史，且已确诊结肠腺癌、CEA显著升高，肝内病灶增强呈边缘环形强化而非典型“快进快出”，倾向转移瘤；需查AFP、肝炎病毒标志物及必要时肝病灶穿刺活检鉴别。②肝血管瘤：多为边界清楚的高回声病灶，增强典型表现为周边结节状强化并向中心填充，与本例低回声、动脉期环形强化、瘤内密度不均不符，可能性小。③肝脓肿：常有发热、白细胞及中性粒细胞升高、肝区叩痛，本例无发热，WBC 6.02×10^9/L、N 70%，不支持。④肝囊肿：为无回声、无血流信号的囊性病变，与本例实性富血供肿块不符。⑤其他部位来源的肝转移癌：目前结肠已获病理证实为腺癌，其他原发灶尚无证据，需完善分期检查排除。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-015",
+  "log": {
+   "case_id": "cmbclin-015",
+   "index": 1,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 100.758,
+   "latency": 100.779,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 0,
+    "low": 8
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 0,
+    "low": 8
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者男性，33岁，青年，因“头晕、视物模糊2月余”入院。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：2月余前无明显诱因出现头晕、视物模糊，就诊发现血压明显升高，最高达238/137mmHg；病程中无明显心慌、胸闷、气促，无黑矇，无双下肢水肿。曾予替米沙坦氢氯噻嗪等降压治疗，血压控制在160/105mmHg左右。否认高血压、糖尿病及冠心病家族史。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "体格检查：血压200/100mmHg；身高173cm，体重80.9kg，BMI 27.03kg/m2（超重），颈围42cm，腰围130cm，臀围129cm（腹型肥胖、颈围增粗）；心肺（-），心界不大，心率71次/分，律齐；肝脾肋下未触及，腹部可闻及血管杂音（重要阳性体征），无移动性浊音，双下肢无水肿。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：肝肾功能、血脂、电解质、ACTH、皮质醇（8:00、16:00）、肾素-血管紧张素-醛固酮均未见明显异常；多普勒超声示左肾动脉起始处血流束变细、呈花色，湍流处PSV>180cm/s，考虑狭窄可能；肾动脉造影证实左肾动脉狭窄。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "特点归纳：青年男性、重度血压升高、常规降压药疗效不佳、腹部血管杂音阳性，影像学（超声+造影）证实左肾动脉狭窄，常见内分泌性高血压筛查（ACTH、皮质醇、肾素-血管紧张素-醛固酮）及电解质、血脂、肝肾功能未见明显异常，提示肾血管性高血压可能性大。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 8,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "多普勒超声：左肾动脉起始处血流束变细、呈花色，湍流处PSV>180cm/s，考虑狭窄可能；肾动脉造影证实左肾动脉狭窄，为定位与确诊依据。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 12,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "原发性醛固酮增多症：电解质及肾素-血管紧张素-醛固酮未见明显异常，暂不支持；但患者正在服用替米沙坦氢氯噻嗪，ARB与利尿剂可干扰肾素-醛固酮检测结果，必要时在换用干扰小的降压药后复查并评估是否需确诊试验。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 22,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "先天性肾动脉发育异常等其他病因。"
+   },
+   {
+    "code": "unsupported_completed",
+    "severity": "high",
+    "section": "treatment_plan",
+    "index": 2,
+    "message": "plan describes an intervention as already done, without support in the records",
+    "text": "影像与功能评估：复查双肾及双肾动脉多普勒超声（明确左肾动脉狭窄程度、右肾动脉情况）；结合已行肾动脉造影结果，必要时行肾动脉CTA/MRA评估病变范围与主动脉情况；评估分肾功能（如肾动态显像）；测量四肢血压。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-016",
+  "log": {
+   "case_id": "cmbclin-016",
+   "index": 2,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 126.744,
+   "latency": 126.754,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 8
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 8
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "一般情况：患者陈XX，男，38岁，已婚14年，至今未育。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "主诉：发现左下腹包块渐大2年余。现病史：2年前发现左下腹包块伴隐痛不适，无发热，无恶心、呕吐，二便正常，近期包块增大明显。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "相关既往史：25年前在外院行双侧隐睾下降手术，术后左侧阴囊一直空虚，左侧腹股沟可触及小睾丸，右侧阴囊内可扪及睾丸。否认乙肝、结核、高血压、糖尿病、心脏病病史；否认食物药物过敏史；否认家族史。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "入院查体：T 36.6℃，P 88次/分，19次/分（原文未标注项目名称，据上下文考虑为呼吸频率，待核实），Bp 134/79mmHg。自主体位，神志清楚，全身皮肤及巩膜无黄染，全身浅表淋巴结无肿大；两肺呼吸音清晰，未闻及干湿啰音；心界不大，律齐，无杂音；双肾区、肝区无叩痛，肝脾未触及，移动性浊音阴性，肠鸣音正常；脊柱四肢无畸形。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "专科（外科）情况：双侧腹股沟区各见一长6cm手术瘢痕；左侧下腹明显隆起，原左侧腹股沟可触及小睾丸处可触及大小约5cm×6cm包块，质韧，边界欠清，活动度差，无压痛；阴毛分布无明显异常，阴茎发育尚可，左侧阴囊空虚，右侧阴囊内可扪及睾丸（门诊记录右侧睾丸体积稍小、质中）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：血常规 WBC 8.02×10^9/L，N 70%，Hb 78g/L；肝功能、肾功能均正常。人绒毛膜促性腺激素 110.3U/L，乳酸脱氢酶 160U/L，甲胎蛋白 6.67ng/ml，睾酮 4.72nmol/L。B超：左下腹不均囊实性混合包块，大小约4.9cm×5.8cm。CT：左下腹囊实性团块影，外侧与髂窝黏连，与左髂血管分界清楚，大小约4.9cm×5.9cm，增强扫描肿块轻度不规则强化。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "左下腹（髂窝区）囊实性占位：考虑左侧未降睾丸（隐睾）恶变、睾丸生殖细胞肿瘤可能性大，性质待病理确诊。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 19,
+    "message": "records document '结核' only as absent/denied, but it is stated here without negation",
+    "text": "结核性包块：否认结核病史，无发热等表现，暂不支持。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-017",
+  "log": {
+   "case_id": "cmbclin-017",
+   "index": 3,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 100.652,
+   "latency": 100.659,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 0,
+    "low": 5
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 0,
+    "low": 5
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "一般情况与主诉：唐xx，男，75岁，因“头痛伴左侧肢体乏力进行性加重2天”入院。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：2天前出现头痛、反应迟钝、左侧肢体乏力，症状逐渐加重，伴步行蹒跚，偶有言语不清；无意识障碍、四肢抽搐、大小便失禁。追问病史，1个月前头部碰撞衣柜，当时仅感轻微头痛，未作特殊治疗。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "体格检查：T 37.1℃，P 75次/分，R 20次/分，Bp 152/90mmHg。神志清楚，营养中等，GCS评分=E4V4～5M6=14～15分；双侧瞳孔等大等圆，直径约2.5mm，对光反射灵敏。左侧肢体肌力4级，右侧肢体肌力5级，四肢肌张力正常，左侧膝反射亢进；颈软，克氏征、布氏征阴性，病理征未引出。"
+   },
+   {
+    "code": "unit_mismatch",
+    "severity": "high",
+    "section": "case_features",
+    "index": 2,
+    "message": "'20次/分': records give this value with unit(s) ['mm']",
+    "text": "体格检查：T 37.1℃，P 75次/分，R 20次/分，Bp 152/90mmHg。神志清楚，营养中等，GCS评分=E4V4～5M6=14～15分；双侧瞳孔等大等圆，直径约2.5mm，对光反射灵敏。左侧肢体肌力4级，右侧肢体肌力5级，四肢肌张力正常，左侧膝反射亢进；颈软，克氏征、布氏征阴性，病理征未引出。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：血常规 WBC 8.02×10⁹/L，N 70%，RBC 3.15×10⁹/L（原文单位），Hb 107g/L；肝功能、肾功能均无明显异常。头颅CT：右侧额顶部颅板下弧形稍高密度影，最厚处约20mm，右侧侧脑室受压，中线左移。头颅MRI：右侧额顶部颅板下新月形短T1长T2信号灶，右侧侧脑室受压，中线左移。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "归纳：老年男性，明确头部外伤史（1个月前）后隐匿起病、近2天进行性加重，表现为头痛、反应迟钝、左侧肢体无力及步态不稳；查体左侧肌力下降伴左膝反射亢进，定位于右侧大脑半球；影像证实右侧额顶部颅板下新月形/弧形血肿样病灶，占位效应明显（侧脑室受压、中线左移）；伴轻度贫血（Hb 107g/L）及血压偏高（152/90mmHg）。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-021",
+  "log": {
+   "case_id": "cmbclin-021",
+   "index": 4,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 124.968,
+   "latency": 124.975,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 3,
+    "low": 6
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 3,
+    "low": 6
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者男性，69岁，急性起病，病程2天。主诉：发现左下肢红肿伴发热2天。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：2天前出现发热，最高38.3℃，伴畏寒；同时发现左下肢皮肤红肿，色鲜红，局部呈烧灼样疼痛、不敢触碰。近期无下肢骨折及外伤史。既往糖尿病病史10年，足癣病史30年。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "体格检查：T 38.3℃，P 87次/分，R 20次/分，Bp 135/70mmHg。发育正常，营养中等，自主体位，查体合作；全身皮肤及黏膜无黄染；左侧腹股沟可触及肿大淋巴结，质韧、伴触痛，其余部位浅表淋巴结未触及肿大。双肺呼吸音清，未闻及干湿啰音；心率87次/分，律齐，未闻及病理性杂音；腹平软，肝右肋缘下4cm，脾未触及，未触及腹部包块，肠鸣音活跃。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "专科所见：左小腿胫前皮肤片状微隆起红疹，色鲜红、边界清楚，可见散在水疱，局部烧灼样疼痛，患肢皮温升高；双足趾蹼可见皮屑及小水疱。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "实验室检查：血常规 WBC 16.93×10⁹/L、NEU 90.3%、RBC 3.15×10⁹/L（单位存疑，见核实项）、Hb 120g/L、PLT 302×10⁹/L；尿常规：尿糖+++；肝功能 ALT 25U/L、AST 22U/L、总胆红素10.1μmol/L、间接胆红素8.7μmol/L、直接胆红素5μmol/L；肾功能 BUN 4.47mmol/L、Cr 67μmol/L；血糖16.7mmol/L；糖化血红蛋白8.4%。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "重要阴性：无近期下肢骨折外伤史，皮肤黏膜无黄染，肺部无啰音，心律齐无病理性杂音，脾未触及，肝酶及胆红素、肾功能指标未见明显异常。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 5,
+    "message": "'近期下肢骨折外伤' is stated as absent but is not mentioned in the records",
+    "text": "重要阴性：无近期下肢骨折外伤史，皮肤黏膜无黄染，肺部无啰音，心律齐无病理性杂音，脾未触及，肝酶及胆红素、肾功能指标未见明显异常。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 5,
+    "message": "'重要' is stated as absent but is not mentioned in the records",
+    "text": "重要阴性：无近期下肢骨折外伤史，皮肤黏膜无黄染，肺部无啰音，心律齐无病理性杂音，脾未触及，肝酶及胆红素、肾功能指标未见明显异常。"
+   },
+   {
+    "code": "number_not_in_source",
+    "severity": "medium",
+    "section": "diagnostic_discussion",
+    "index": 26,
+    "message": "value '13.7μmol/L' does not appear in the records",
+    "text": "肝功能中直接胆红素5μmol/L+间接胆红素8.7μmol/L=13.7μmol/L，大于总胆红素10.1μmol/L，数据存在内部矛盾，需核实。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-024",
+  "log": {
+   "case_id": "cmbclin-024",
+   "index": 5,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 97.174,
+   "latency": 97.18,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 2,
+    "low": 8
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 2,
+    "low": 8
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者周XX，男，25岁。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "既往手术史：1年前因车祸致小肠损伤，行部分小肠切除吻合术，术中切除小肠约40cm，术后恢复良好，未诉特殊不适。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "本次起病及手术经过：1个月前无明显诱因突然出现腹痛、腹胀、停止排气排便，急诊就诊诊断为肠梗阻，急诊行剖腹探查术；术中见小肠与腹壁多处粘连带压迫小肠肠管，距屈氏韧带60cm以下至距回盲部约25cm之间小肠缺血坏死，遂切除坏死肠管，行空肠、回盲部端侧吻合。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "术后至今主要症状：每日大便10余次，为水样便，量较多，无脓血；无腹痛、腹胀。近1个月体重下降约4kg，睡眠质量差。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "查体：体温36.9℃，血压115/78mmHg，脉搏96次/分；腹部平坦，全腹无压痛、反跳痛，无肌紧张。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：大便常规WBC 0-1/HPF，潜血（-）；血常规WBC 5.5×10^9/L（原文记为5.5×109/L），Hb 102g/L，血小板计数192×10^9/L；血生化Na+ 134mmol/L，K+ 3.4mmol/L，Ca2+ 2.42mmol/L，Mg2+ 0.75mmol/L。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "重要阴性表现：无脓血便，无腹痛、腹胀，腹部无压痛、反跳痛及肌紧张，大便潜血阴性，大便白细胞极少（0-1/HPF），白细胞计数不高，体温不高。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 6,
+    "message": "'脓血便' is stated as absent but is not mentioned in the records",
+    "text": "重要阴性表现：无脓血便，无腹痛、腹胀，腹部无压痛、反跳痛及肌紧张，大便潜血阴性，大便白细胞极少（0-1/HPF），白细胞计数不高，体温不高。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 6,
+    "message": "'大便潜血' is stated as absent but is not mentioned in the records",
+    "text": "重要阴性表现：无脓血便，无腹痛、腹胀，腹部无压痛、反跳痛及肌紧张，大便潜血阴性，大便白细胞极少（0-1/HPF），白细胞计数不高，体温不高。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 12,
+    "message": "records document '脓血' only as absent/denied, but it is stated here without negation",
+    "text": "感染性腹泻（细菌性肠炎等）：多有发热、腹痛、脓血便，大便白细胞增多；本例体温36.9℃、无腹痛、无脓血便，大便WBC 0-1/HPF、潜血（-），血WBC不高，暂不支持，仍需大便病原学检查除外。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-029",
+  "log": {
+   "case_id": "cmbclin-029",
+   "index": 6,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 73.323,
+   "latency": 73.329,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 15
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 15
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者李XX，男，44岁，因发现颈前区包块1年、声音嘶哑1个月入院。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "1年前无意中扪及左侧颈前区包块，约鹌鹑蛋大小，随吞咽上下活动，不伴压痛、声嘶、饮水呛咳、吞咽困难，未予重视；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "近1年自诉包块进行性增大，1个月前出现声音嘶哑，仍无饮水呛咳、吞咽困难。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "查体：T 36.8℃，P 74次/分，R 20次/分，Bp 116/70mmHg；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "左侧颈前区可扪及约4cm×4cm包块，质地硬，边界欠清楚，形态尚规则，随吞咽上下活动；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "左侧颈侧区可扪及肿大淋巴结，最大约1cm×1cm，质韧，边界清楚，形态规则，活动度可。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：T3、T4、FT3、FT4、TSH、降钙素均正常；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "多普勒超声示右侧甲状腺中份低回声肿块，大小约3.5cm×3cm，形态不规则，内部可见强回声，纵横比＞1；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 8,
+    "message": "case-feature statement has no source reference",
+    "text": "纤维喉镜示左侧声带固定；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 9,
+    "message": "case-feature statement has no source reference",
+    "text": "FNAB结果为甲状腺乳头状癌。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 10,
+    "message": "case-feature statement has no source reference",
+    "text": "需特别注意：病史及查体所述包块位于左侧颈前区、左颈侧区淋巴结肿大、左侧声带固定，而超声描述病灶位于右侧甲状腺中份，病灶侧别存在矛盾；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 11,
+    "message": "case-feature statement has no source reference",
+    "text": "触诊大小（4cm×4cm）与超声大小（3.5cm×3cm）亦不一致，均待核实。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "statement content is weakly supported by the records (overlap 0.33)",
+    "text": "触诊大小（4cm×4cm）与超声大小（3.5cm×3cm）亦不一致，均待核实。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "一、初步诊断：1.甲状腺乳头状癌（FNAB细胞学确诊，病灶侧别待核实）；2.左侧声带固定（喉返神经受累可能）；3.左颈侧区淋巴结肿大（转移待排）。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "records document '声嘶' only as absent/denied, but it is stated here without negation",
+    "text": "二、诊断依据：①中年男性，颈前区无痛性包块1年、进行性增大，1个月前出现声音嘶哑，符合甲状腺恶性肿瘤渐进性生长并累及喉返神经的病程特点；②查体包块质地硬、边界欠清楚，随吞咽上下活动，提示来源于甲状腺；同侧颈侧区可扪及肿大淋巴结；③超声示甲状腺低回声肿块，形态不规则、内部强回声（钙化可能）、纵横比＞1，为可疑恶性征象；④纤维喉镜证实左侧声带固定，与声嘶相符；⑤FNAB明确为甲状腺乳头状癌；⑥T3、T4、FT3、FT4、TSH正常，提示甲状腺功能正常；降钙素正常。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "records document '声嘶' only as absent/denied, but it is stated here without negation",
+    "text": "三、鉴别诊断：①结节性甲状腺肿/甲状腺腺瘤：多为质中或偏软、边界清楚、病程长而变化缓慢，一般不引起声带固定及质硬固定的颈部淋巴结，超声多无纵横比＞1及形态不规则等征象，本例FNAB已提示乳头状癌，可资鉴别；②甲状腺髓样癌：可表现为质硬肿块伴颈淋巴结转移，但本例降钙素正常，且细胞学为乳头状癌，不支持；③甲状腺未分化癌：多见于老年人，短期内迅速增大、广泛侵犯并早期出现声嘶、呼吸/吞咽困难，本例病程1年、以乳头状癌细胞学为据，不支持；④慢性淋巴细胞性甲状腺炎（桥本甲状腺炎）：多表现为腺体弥漫性肿大、质地韧，常伴甲状腺功能及抗体异常，本例甲功正常、细胞学为癌，不支持，但可合并存在，需术后病理证实；⑤颈侧区淋巴结肿大另需与淋巴结结核、淋巴瘤及其他来源转移性淋巴结鉴别，需淋巴结超声评估±穿刺细胞学明确；⑥声音嘶哑还需与喉部本身病变、其他原因所致喉返神经麻痹鉴别，本例喉镜已示左侧声带固定，结合甲状腺恶性肿瘤，考虑肿瘤侵犯或压迫喉返神经可能性大，但尚缺乏影像学直接证据。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-032",
+  "log": {
+   "case_id": "cmbclin-032",
+   "index": 7,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 80.086,
+   "latency": 80.094,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 3,
+    "low": 5
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 3,
+    "low": 5
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者女性，60岁，慢性病程，进行性加重。主诉：上腹不适伴后背疼痛2个月，皮肤黄染1个月。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：2个月前无明显诱因出现中上腹不适，逐渐加重，伴后背部持续性疼痛；1个月前出现皮肤黄染，曾于当地医院就诊（具体诊治经过不详）。起病以来精神、食欲、睡眠欠佳，小便深黄，大便呈陶土色，体重下降7kg。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "体格检查：全身皮肤、巩膜黄染；甲状腺未见明显结节，双侧颈部未闻及血管杂音；胸廓对称，双肺呼吸动度及语颤对称，双肺呼吸音清，未闻及干湿啰音及胸膜摩擦音；心前区无隆起及凹陷，心界不大，心率88次/分，律齐，各瓣膜听诊区未闻及杂音，周围血管征（－）。腹部平坦，未见胃肠型及蠕动波，未见腹壁静脉曲张；全腹软，无压痛、反跳痛及肌紧张，未触及包块，肝脾肋下未触及，Murphy征（－），肾区无叩痛，移动性浊音（－），肠鸣音存在，5次/分，未闻及高调肠鸣音。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 2,
+    "message": "'murphy征' is stated as absent but is not mentioned in the records",
+    "text": "体格检查：全身皮肤、巩膜黄染；甲状腺未见明显结节，双侧颈部未闻及血管杂音；胸廓对称，双肺呼吸动度及语颤对称，双肺呼吸音清，未闻及干湿啰音及胸膜摩擦音；心前区无隆起及凹陷，心界不大，心率88次/分，律齐，各瓣膜听诊区未闻及杂音，周围血管征（－）。腹部平坦，未见胃肠型及蠕动波，未见腹壁静脉曲张；全腹软，无压痛、反跳痛及肌紧张，未触及包块，肝脾肋下未触及，Murphy征（－），肾区无叩痛，移动性浊音（－），肠鸣音存在，5次/分，未闻及高调肠鸣音。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：血常规记录为（－）（无具体数值）。生化：ALT 778U/L，AST 2108U/L，TBil 230.6μmol/L，DBil 200.3μmol/L，GGT 334U/L，ALP 183U/L，提示以直接胆红素升高为主的重度高胆红素血症伴转氨酶、胆管酶明显升高。腹部超声：胰头区低回声，大小3.9cm×2.1cm×2.3cm，边界模糊，形态不规则；肝内外胆管扩张，胆囊增大，主胰管扩张。CT：平扫呈等密度，动脉期呈低强化，大小约2.7cm×1.9cm，边界模糊不清，密度欠均匀；病变以远胰管扩张；病变累及胆总管下段，肝内外胆管略扩张，胆囊增大。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 3,
+    "message": "'具体数值' is stated as absent but is not mentioned in the records",
+    "text": "辅助检查：血常规记录为（－）（无具体数值）。生化：ALT 778U/L，AST 2108U/L，TBil 230.6μmol/L，DBil 200.3μmol/L，GGT 334U/L，ALP 183U/L，提示以直接胆红素升高为主的重度高胆红素血症伴转氨酶、胆管酶明显升高。腹部超声：胰头区低回声，大小3.9cm×2.1cm×2.3cm，边界模糊，形态不规则；肝内外胆管扩张，胆囊增大，主胰管扩张。CT：平扫呈等密度，动脉期呈低强化，大小约2.7cm×1.9cm，边界模糊不清，密度欠均匀；病变以远胰管扩张；病变累及胆总管下段，肝内外胆管略扩张，胆囊增大。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 3,
+    "message": "'血常规记录为' is stated as absent but is not mentioned in the records",
+    "text": "辅助检查：血常规记录为（－）（无具体数值）。生化：ALT 778U/L，AST 2108U/L，TBil 230.6μmol/L，DBil 200.3μmol/L，GGT 334U/L，ALP 183U/L，提示以直接胆红素升高为主的重度高胆红素血症伴转氨酶、胆管酶明显升高。腹部超声：胰头区低回声，大小3.9cm×2.1cm×2.3cm，边界模糊，形态不规则；肝内外胆管扩张，胆囊增大，主胰管扩张。CT：平扫呈等密度，动脉期呈低强化，大小约2.7cm×1.9cm，边界模糊不清，密度欠均匀；病变以远胰管扩张；病变累及胆总管下段，肝内外胆管略扩张，胆囊增大。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "重要阴性/缺失信息：查体无腹部压痛及包块、Murphy征阴性、无移动性浊音；资料中未提供体温、血压、呼吸等生命体征，未提供既往史、个人史、家族史、过敏史，未提供凝血功能、白蛋白、肿瘤标志物及病理学结果。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-036",
+  "log": {
+   "case_id": "cmbclin-036",
+   "index": 8,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 98.028,
+   "latency": 98.041,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 1,
+    "low": 7
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 1,
+    "low": 7
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者男性，70岁，急性起病，病程7天。主诉：颈左后部皮肤红肿7天，发热伴腐败臭味分泌物流出4天。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：7日前无意中发现颈左后部皮肤红肿，伴触痛，触摸表面不光滑、有多个凸点；4天前出现发热，最高38.5℃，伴畏寒，局部红肿皮肤破溃，有腐败臭味分泌物流出。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "既往史：糖尿病病史15年；高血压病病史20年，血压最高170/110mmHg。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "入院查体：T 38.6℃，P 89次/分，R 20次/分，Bp 140/100mmHg。发育正常，营养中等，自主体位，查体合作。专科情况：颈左后部皮肤红肿，局部皮肤破溃，伴脓性分泌物排出，触痛明显，可触及皮下波动感；颈左侧可触及多枚肿大淋巴结，最大约2.5cm×1.5cm，质韧，可推动，伴触痛。"
+   },
+   {
+    "code": "unit_mismatch",
+    "severity": "high",
+    "section": "case_features",
+    "index": 3,
+    "message": "'20次/分': records give this value with unit(s) ['u/l']",
+    "text": "入院查体：T 38.6℃，P 89次/分，R 20次/分，Bp 140/100mmHg。发育正常，营养中等，自主体位，查体合作。专科情况：颈左后部皮肤红肿，局部皮肤破溃，伴脓性分泌物排出，触痛明显，可触及皮下波动感；颈左侧可触及多枚肿大淋巴结，最大约2.5cm×1.5cm，质韧，可推动，伴触痛。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "重要阴性体征：全身皮肤及黏膜无黄染；两肺呼吸音清晰，未闻及干湿啰音；心率89次/分，律齐，未闻及病理性杂音；腹部平软，肝、胆、脾肋下未触及，未触及腹部包块，全腹无压痛及反跳痛，肠鸣音如常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：血常规 WBC 18.73×10^9/L，NEU 92.3%，RBC 3.65×10^9/L（单位待核实），Hb 110g/L，PLT 290×10^9/L；尿常规：尿比重1.025，尿糖+++；肝功能：ALT 27U/L，AST 20U/L，总胆红素11.7μmol/L，间接胆红素7.7μmol/L，直接胆红素4μmol/L；肾功能：BUN 4.47mmol/L，Cr 67μmol/L；血糖18.6mmol/L；糖化血红蛋白9.6%。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "特点归纳：老年男性，长期糖尿病基础上出现颈后部急性化脓性软组织感染，局部已成脓破溃并有腐败臭味分泌物，伴发热、白细胞及中性粒细胞比例显著升高、同侧颈部淋巴结肿大；同时血糖及糖化血红蛋白明显升高，提示近期血糖控制不佳；血红蛋白轻度降低。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 6,
+    "message": "statement content is weakly supported by the records (overlap 0.26)",
+    "text": "特点归纳：老年男性，长期糖尿病基础上出现颈后部急性化脓性软组织感染，局部已成脓破溃并有腐败臭味分泌物，伴发热、白细胞及中性粒细胞比例显著升高、同侧颈部淋巴结肿大；同时血糖及糖化血红蛋白明显升高，提示近期血糖控制不佳；血红蛋白轻度降低。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-037",
+  "log": {
+   "case_id": "cmbclin-037",
+   "index": 9,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 73.219,
+   "latency": 73.223,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 2,
+    "low": 13
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 2,
+    "low": 13
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者张XX，男，54岁。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "主诉：外伤致左膝关节疼痛、活动受限3小时。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：3小时前车祸伤后出现左膝疼痛、活动受限，既往体健（cmbclin-037-hpi）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "查体：神清语利，心肺（-）；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "脊柱生理弯曲存在，骨盆挤压分离试验阴性；"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 4,
+    "message": "'骨盆挤压分离试验' is stated as absent but is not mentioned in the records",
+    "text": "脊柱生理弯曲存在，骨盆挤压分离试验阴性；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "左膝关节肿胀，轻度外翻畸形，压痛，主动活动受限，被动活动疼痛加剧；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "左足感觉运动正常，足背动脉可触及，红白反应存在；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "双上肢及右下肢未见明显异常（cmbclin-037-exam）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 8,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：X线示左侧Schatzker分型II型；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 9,
+    "message": "case-feature statement has no source reference",
+    "text": "CT示外侧平台可见劈裂及塌陷，胫骨平台增宽；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 10,
+    "message": "case-feature statement has no source reference",
+    "text": "另有术前X线片示Schatzker II型、术前CT示外侧关节面塌陷（cmbclin-037-aux、cmbclin-037-aux2）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 11,
+    "message": "case-feature statement has no source reference",
+    "text": "重要阴性表现：骨盆挤压分离试验阴性，左足感觉运动及末梢血运（足背动脉可触及、红白反应存在）正常，双上肢与右下肢未见明显异常。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "'骨盆挤压分离试验' is stated as absent but is not mentioned in the records",
+    "text": "重要阴性表现：骨盆挤压分离试验阴性，左足感觉运动及末梢血运（足背动脉可触及、红白反应存在）正常，双上肢与右下肢未见明显异常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 12,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未提供生命体征、皮肤软组织条件、实验室及其他检查结果。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-045",
+  "log": {
+   "case_id": "cmbclin-045",
+   "index": 10,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 75.843,
+   "latency": 75.85,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 2,
+    "low": 19
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 2,
+    "low": 19
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者李XX，女性，31岁。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 0,
+    "message": "statement content is weakly supported by the records (overlap 0.33)",
+    "text": "患者李XX，女性，31岁。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "主诉：大便习惯改变伴黑便2月余。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：近两个月来大便次数增多，为稀烂便，偶有黑便，无腹痛、发热、恶心、呕吐，病史中记录无腹泻；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "既往病史无特殊。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "家族史：父亲及叔叔有结肠癌病史。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "入院查体：T 36.5℃，P 81次/分，R 20次/分，Bp 110/75mmHg；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "自主体位，神志清楚，全身皮肤及巩膜无黄染，全身浅表淋巴结无肿大；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "两肺呼吸音清晰，未闻及干湿啰音；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 8,
+    "message": "case-feature statement has no source reference",
+    "text": "心率81次/分，律齐，未闻及病理性杂音；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 9,
+    "message": "case-feature statement has no source reference",
+    "text": "腹部平软，肝、脾未触及，未触及腹部包块，肠鸣音活跃。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 10,
+    "message": "case-feature statement has no source reference",
+    "text": "直肠指检：肛周无皮肤红肿、溃疡、瘘口、痔，肛门括约功能可，入指扪及数枚大小约0.5～1.0cm质软结节，指套退出无血染。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 11,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：血常规 WBC 4.11×10^9/L，N 68%，Hb 108g/L；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 12,
+    "message": "case-feature statement has no source reference",
+    "text": "血CEA 5.03ng/ml；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 13,
+    "message": "case-feature statement has no source reference",
+    "text": "肝功能、肾功能均正常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 14,
+    "message": "case-feature statement has no source reference",
+    "text": "CT：全结直肠见数枚大小不等结节影，考虑结肠多发息肉可能性大。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 15,
+    "message": "case-feature statement has no source reference",
+    "text": "纤维结肠镜：全结直肠可见数百枚直径约0.2～2.5cm息肉，最大者位于乙状结肠，切除后病理示绒毛状-管状腺瘤。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 16,
+    "message": "case-feature statement has no source reference",
+    "text": "归纳特点：青年女性，慢性起病，以排便习惯改变、稀烂便及间断黑便为主要表现，伴血红蛋白降低（108g/L）；"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 16,
+    "message": "statement content is weakly supported by the records (overlap 0.24)",
+    "text": "归纳特点：青年女性，慢性起病，以排便习惯改变、稀烂便及间断黑便为主要表现，伴血红蛋白降低（108g/L）；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 17,
+    "message": "case-feature statement has no source reference",
+    "text": "查体腹部无阳性包块及压痛记录，直肠指检可扪及多枚质软结节；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 18,
+    "message": "case-feature statement has no source reference",
+    "text": "影像学及内镜证实全结直肠弥漫多发息肉，已获病理为腺瘤性（绒毛状-管状腺瘤），并有明确结直肠癌家族史（父亲、叔叔）。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-046",
+  "log": {
+   "case_id": "cmbclin-046",
+   "index": 11,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 76.005,
+   "latency": 76.01,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 12
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 12
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者张**，男性，32岁。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 0,
+    "message": "statement content is weakly supported by the records (overlap 0.33)",
+    "text": "患者张**，男性，32岁。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "主诉：突发头痛20天，再次发作头痛6天。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：20天前无明显诱因突发头痛，伴恶心、呕吐，无意识障碍及抽搐发作，就诊于当地医院，以“颅内出血”予保守治疗后症状缓解；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "6天前再次出现头痛发作，当地医院头颅CT提示“蛛网膜下腔出血”，CTA提示“多发颅内动脉瘤”，为进一步治疗经急诊收入我科。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "发病以来食欲差，睡眠可，二便如常，体重无明显变化。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "重要阴性表现：无意识障碍、无抽搐发作，起病无明显诱因（资料未记载外伤）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "入院查体：体温36.8℃，脉搏80次/分，呼吸20次/分，血压120/80mmHg，体重90kg；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "生命体征平稳，神清语利，双侧瞳孔左:右=2.5:2.5mm，对光反射灵敏，面纹对称，伸舌居中，心肺腹（-），四肢肌力、肌张力未见明显异常，四肢深浅反射未见明显异常，共济运动可，双侧病理征（-）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 8,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：血常规、血生化、肝肾功能、凝血功能等均正常；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 9,
+    "message": "case-feature statement has no source reference",
+    "text": "头颅CT示左侧脑内血肿，部分破入脑室，蛛网膜下腔出血（SAH）；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 10,
+    "message": "case-feature statement has no source reference",
+    "text": "头颅CTA示左侧大脑中动脉分叉处动脉瘤。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 11,
+    "message": "case-feature statement has no source reference",
+    "text": "需注意：现病史中当地医院CTA描述为“多发颅内动脉瘤”，而本次辅助检查记录CTA为“左侧大脑中动脉分叉处动脉瘤”，动脉瘤数目及部位描述不一致，有待核实。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-056",
+  "log": {
+   "case_id": "cmbclin-056",
+   "index": 12,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 103.082,
+   "latency": 103.088,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 9
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 9
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "一般情况：女性，52岁，慢性病程、逐渐进展。主诉：肢端肥大十余年，视力下降半年。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：十余年前无明显诱因出现手足粗大，伴面容宽大、下颌突出、鼻肥大、唇增厚、睡觉打鼾、多汗、多饮多尿；无停经泌乳，无向心性肥胖，无甲亢相关不适症状；一直未予重视及治疗。半年前开始出现双眼视力下降。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 1,
+    "message": "'甲亢相关不适症状' is stated as absent but is not mentioned in the records",
+    "text": "现病史：十余年前无明显诱因出现手足粗大，伴面容宽大、下颌突出、鼻肥大、唇增厚、睡觉打鼾、多汗、多饮多尿；无停经泌乳，无向心性肥胖，无甲亢相关不适症状；一直未予重视及治疗。半年前开始出现双眼视力下降。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "体格检查：体温36.3℃，血压148/96mmHg，体重75kg。神志清楚，对答切题；面容宽大，下颌突出，鼻肥大，唇厚，手足粗大肥厚；双瞳等大等圆，直径2.5mm，对光反射灵敏；左眼视力0.6，右眼视力1.0，左眼颞下部分缺损（视野）；颈软，无抵抗；心肺检查未见异常；四肢肌力、肌张力正常，生理反射存在，病理反射未引出。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：①内分泌：生长激素GH 7.01ng/ml（参考0~3），胰岛素样生长因子Ⅰ 507.0ng/ml（参考127~424），其他垂体激素水平正常。②生化：空腹血糖8.2mmol/L，餐后2小时血糖17mmol/L，肝肾基本功能正常。③超声心动图：主动脉瓣退行性改变；主动脉瓣轻度关闭不全；三尖瓣少量反流；左室舒张功能减低。④头部MRI：蝶鞍扩大，鞍底下陷，鞍区内团块状等T1等T2信号影，边界清，大小约19mm×27mm×26mm，增强扫描明显强化，视交叉受压上抬。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "【初步诊断】1. 鞍区占位：垂体生长激素腺瘤（大腺瘤）可能性大，肢端肥大症；2. 视交叉受压，视力下降伴左眼颞下部分视野缺损；3. 糖代谢异常（空腹血糖8.2mmol/L、餐后2小时血糖17mmol/L），考虑肢端肥大症相关继发性糖尿病可能，待确诊；4. 血压升高（148/96mmHg），高血压待明确；5. 主动脉瓣退行性改变伴轻度关闭不全、三尖瓣少量反流、左室舒张功能减低。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "【初步诊断】1. 鞍区占位：垂体生长激素腺瘤（大腺瘤）可能性大，肢端肥大症；2. 视交叉受压，视力下降伴左眼颞下部分视野缺损；3. 糖代谢异常（空腹血糖8.2mmol/L、餐后2小时血糖17mmol/L），考虑肢端肥大症相关继发性糖尿病可能，待确诊；4. 血压升高（148/96mmHg），高血压待明确；5. 主动脉瓣退行性改变伴轻度关闭不全、三尖瓣少量反流、左室舒张功能减低。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "【诊断依据】①典型肢端肥大表现：十余年进行性手足粗大、面容宽大、下颌突出、鼻肥大、唇增厚，伴多汗、打鼾、多饮多尿，查体见上述外貌及手足粗大肥厚体征；②生化证实GH-IGF-1轴异常：GH 7.01ng/ml高于参考上限3ng/ml，IGF-1 507.0ng/ml高于参考上限424ng/ml；③影像定位：头部MRI示蝶鞍扩大、鞍底下陷，鞍区约19mm×27mm×26mm等T1等T2团块，边界清、增强明显强化，符合垂体大腺瘤表现，且视交叉受压上抬；④视路受累证据：半年双眼视力下降病史，查体左眼视力0.6、左眼颞下部分视野缺损；⑤GH过多相关代谢/心血管改变：空腹及餐后血糖升高，血压148/96mmHg，超声心动图示瓣膜退行性改变、轻度主动脉瓣关闭不全及左室舒张功能减低。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "【鉴别诊断】①其他类型垂体腺瘤（无功能腺瘤、泌乳素瘤等）：本例无停经泌乳，资料示其他垂体激素水平正常，且GH、IGF-1升高伴典型肢端肥大外貌，不支持单纯无功能瘤或PRL瘤，但混合分泌腺瘤需术后病理及免疫组化鉴别。②其他鞍区病变（颅咽管瘤、Rathke囊肿、鞍区脑膜瘤等）：本例MRI为边界清楚的实性等T1等T2信号、明显强化伴蝶鞍扩大鞍底下陷，倾向垂体腺瘤，最终需病理确诊。③异位GH/GHRH分泌肿瘤所致肢端肥大：少见，本例鞍区已见明确占位，暂不支持，如术后激素不缓解需进一步排查。④库欣综合征、甲状腺功能亢进症：病史无向心性肥胖、无甲亢相关症状，资料示其他垂体激素水平正常，暂不支持，可行相应激素检查进一步除外。⑤原发性糖尿病及原发性高血压：本例血糖、血压升高出现于长期GH过多背景下，考虑继发可能大，但需内分泌评估与多次血压测量鉴别。⑥眼科疾病所致视力下降及视野缺损（如青光眼、视神经病变等）：需眼科视力、眼压、眼底及正规视野检查鉴别。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 3,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "【尚不明确之处】①尚未行口服葡萄糖耐量试验-生长激素抑制试验，GH自主分泌的确诊依据尚不完整；②“其他垂体激素水平正常”缺具体项目与数值，垂体前叶功能储备及有无肿瘤压迫所致功能低下不明；③肿瘤与海绵窦、颈内动脉关系及侵袭性（Knosp分级）、鞍上扩展范围资料未描述；④视野缺损仅记录左眼颞下部分缺损，与视交叉受压常见的双颞侧偏盲不完全一致，且主诉为双眼视力下降而右眼视力1.0，需正规视野检查核实；⑤糖尿病诊断、分型、病程及有无并发症（HbA1c、尿酮体、眼底、尿蛋白等）不明；⑥血压升高是否为持续性高血压未明；⑦打鼾是否合并阻塞性睡眠呼吸暂停未评估；⑧多饮多尿是否单纯血糖升高所致抑或合并尿崩症未明；⑨心脏改变系龄相关退变还是肢端肥大症心肌病所致尚难界定；⑩既往史、个人史、月经婚育史、家族史、用药史及过敏史资料缺如。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-060",
+  "log": {
+   "case_id": "cmbclin-060",
+   "index": 13,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 164.381,
+   "latency": 164.387,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 0,
+    "low": 6
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 0,
+    "low": 6
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "一般情况与病史：患者男性，28岁，既往体健。在田间干农活时左手致伤（现病史原文为“左手被”，致伤物记载不全；查体见左手拇指根部咬痕），伤后伤口流血不止，随后出现肿痛，曾就诊于当地卫生院行伤口消毒包扎处理，后转来我院。主诉为“左手被致肿痛24小时”。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "主要症状：左手肿痛、创口渗血不止；伴头昏、乏力、胸闷；牙龈出血；小便为血性尿；大便未解。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "体格检查：体温36.5℃，脉搏105次/min，呼吸20次/min，血压100/60mmHg。神志清楚、精神萎靡、面色萎黄，轮椅推入病房。左侧腋窝淋巴结肿痛。左手见布条敷扎伤口，掀开可见拇指根部咬痕，创口渗血不止；左手高度肿胀并上延至左前臂，患肢可见数个大小不等的血水疱，皮肤下见散在青紫斑。重要阴性体征：心肺听诊无异常，肝脾肋下未触及，生理反射存在，病理反射未引出。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：血常规：红细胞计数3.3×10^12/L，血红蛋白84g/L，血小板计数45×10^9/L，白细胞计数13.4×10^9/L；凝血功能：PT 19.7s，APTT 27.1s，纤维蛋白原0.79g/L；尿液分析：血（++++）。心电图示窦性心动过速；胸片未见明显异常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "特点归纳：青壮年男性，田间劳作后左手咬伤（主诉24小时），局部呈进行性高度肿胀、血水疱、皮下瘀斑伴同侧腋窝淋巴结肿痛；同时存在多部位出血（创口渗血不止、牙龈出血、血性尿）及凝血异常（PT延长、纤维蛋白原显著降低、血小板减少）与中度贫血（Hb 84g/L）；心率增快（105次/min）、血压偏低（100/60mmHg）、精神萎靡、面色萎黄，提示全身中毒/失血及循环受累可能。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "high",
+    "section": "case_features",
+    "index": 4,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "特点归纳：青壮年男性，田间劳作后左手咬伤（主诉24小时），局部呈进行性高度肿胀、血水疱、皮下瘀斑伴同侧腋窝淋巴结肿痛；同时存在多部位出血（创口渗血不止、牙龈出血、血性尿）及凝血异常（PT延长、纤维蛋白原显著降低、血小板减少）与中度贫血（Hb 84g/L）；心率增快（105次/min）、血压偏低（100/60mmHg）、精神萎靡、面色萎黄，提示全身中毒/失血及循环受累可能。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 12,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "手部急性重症软组织感染（蜂窝织炎、坏死性筋膜炎）继发脓毒症相关DIC：可出现高度肿胀、血疱及凝血异常，但本例有明确咬痕、伤后早期即渗血不止，且体温36.5℃正常，需结合创口探查、感染指标、影像及分泌物培养鉴别。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-064",
+  "log": {
+   "case_id": "cmbclin-064",
+   "index": 14,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 117.392,
+   "latency": 117.399,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 7
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 7
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者男性，52岁，主诉“突发上腹部疼痛2小时”。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "现病史：2小时前无明显诱因突发上腹部疼痛，呈刀割样持续性剧痛，逐渐扩展至全腹，活动时加重；伴发热（体温38.4℃）、恶心，无呕吐；不伴腹泻、黑便及便血。近半年反复出现腹正中剑突下持续性隐痛，多于餐后发生，可自行缓解，偶有反酸、嗳气；无进食哽咽感，无腹胀，无呕吐；未曾就诊，自行不规则口服奥美拉唑，症状可缓解。否认手术外伤史，否认药物过敏史。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "体格检查：T 38.4℃，P 98次/分，R 18次/分，BP 134/78 mmHg。神志清晰，痛苦面容，心肺未及明显异常；腹肌紧张，全腹散在压痛伴反跳痛，以中上腹及右上腹为重；移动性浊音阴性，肠鸣音减退；直肠指诊未及明显占位及包块。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：腹部CT示膈下多发游离气体，考虑胃窦部穿孔机会大。实验室：白细胞11.1×10^9/L，中性粒细胞百分比83.8%，C反应蛋白71.3 mg/L，降钙素原0.17 ng/ml，血小板423×10^9/L，淀粉酶79 U/L，肝肾功能及电解质正常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "归纳：中年男性，慢性餐后剑突下隐痛半年、不规则服用奥美拉唑，此次突发上腹刀割样剧痛并迅速波及全腹，伴发热与典型腹膜刺激征，影像学证实膈下游离气体，炎症指标升高，符合上消化道穿孔合并急性腹膜炎表现。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 4,
+    "message": "statement content is weakly supported by the records (overlap 0.30)",
+    "text": "归纳：中年男性，慢性餐后剑突下隐痛半年、不规则服用奥美拉唑，此次突发上腹刀割样剧痛并迅速波及全腹，伴发热与典型腹膜刺激征，影像学证实膈下游离气体，炎症指标升高，符合上消化道穿孔合并急性腹膜炎表现。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 20,
+    "message": "records document '药物过敏' only as absent/denied, but it is stated here without negation",
+    "text": "除手术外伤史与药物过敏史外，既往史、个人史、家族史及末次进食时间等资料缺失，影响病因判断与急诊手术麻醉评估。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 20,
+    "message": "records document '手术外伤' only as absent/denied, but it is stated here without negation",
+    "text": "除手术外伤史与药物过敏史外，既往史、个人史、家族史及末次进食时间等资料缺失，影响病因判断与急诊手术麻醉评估。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-066",
+  "log": {
+   "case_id": "cmbclin-066",
+   "index": 15,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 72.271,
+   "latency": 72.276,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 2,
+    "medium": 5,
+    "low": 21
+   },
+   "findings_final": {
+    "high": 2,
+    "medium": 5,
+    "low": 21
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者女性，28岁，因“右腰部疼痛半年”入院。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "半年前劳累后出现右腰部疼痛，呈持续性钝痛，半年来偶有心悸、乏力、失眠、眩晕；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "无尿频、尿急、尿痛，无肉眼血尿，无恶心、呕吐。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 2,
+    "message": "'肉眼血尿' is stated as absent but is not mentioned in the records",
+    "text": "无尿频、尿急、尿痛，无肉眼血尿，无恶心、呕吐。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "体格检查：体温36.8℃，脉搏90次/分，呼吸20次/分，血压90/60mmHg；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "身高170cm，体重45kg（体重明显偏低）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "腹部专科查体：立位及坐位时可于右侧髂窝上方触及肾脏，推之有牵扯痛，表面光滑；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "卧位时未触及肾脏。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "high",
+    "section": "case_features",
+    "index": 6,
+    "message": "'肾脏' is negated here but the records document it as present",
+    "text": "卧位时未触及肾脏。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查：尿常规示RBC（+），余未见异常；"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 8,
+    "message": "case-feature statement has no source reference",
+    "text": "血常规、肾功能、肝功能等未见异常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 9,
+    "message": "case-feature statement has no source reference",
+    "text": "多普勒超声：立位较卧位肾下极下降约6cm。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 10,
+    "message": "case-feature statement has no source reference",
+    "text": "静脉尿路造影：立位时肾盂位置较卧位时下降约6cm。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 11,
+    "message": "case-feature statement has no source reference",
+    "text": "特点归纳：年轻女性、体型消瘦，慢性右腰钝痛，肾脏可随体位上下移动（立位可触及、卧位不能触及），影像学两种方法均证实立位较卧位右肾下移约6cm，伴镜下血尿，无尿路刺激征及发热等感染表现，肝肾功能及血常规正常。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "high",
+    "section": "case_features",
+    "index": 11,
+    "message": "records document '血尿' only as absent/denied, but it is stated here without negation",
+    "text": "特点归纳：年轻女性、体型消瘦，慢性右腰钝痛，肾脏可随体位上下移动（立位可触及、卧位不能触及），影像学两种方法均证实立位较卧位右肾下移约6cm，伴镜下血尿，无尿路刺激征及发热等感染表现，肝肾功能及血常规正常。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "'尿路刺激征' is stated as absent but is not mentioned in the records",
+    "text": "特点归纳：年轻女性、体型消瘦，慢性右腰钝痛，肾脏可随体位上下移动（立位可触及、卧位不能触及），影像学两种方法均证实立位较卧位右肾下移约6cm，伴镜下血尿，无尿路刺激征及发热等感染表现，肝肾功能及血常规正常。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "'发热等感染表现' is stated as absent but is not mentioned in the records",
+    "text": "特点归纳：年轻女性、体型消瘦，慢性右腰钝痛，肾脏可随体位上下移动（立位可触及、卧位不能触及），影像学两种方法均证实立位较卧位右肾下移约6cm，伴镜下血尿，无尿路刺激征及发热等感染表现，肝肾功能及血常规正常。"
+   },
+   {
+    "code": "undocumented_normal",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "states a normal finding that is weakly supported by the records",
+    "text": "特点归纳：年轻女性、体型消瘦，慢性右腰钝痛，肾脏可随体位上下移动（立位可触及、卧位不能触及），影像学两种方法均证实立位较卧位右肾下移约6cm，伴镜下血尿，无尿路刺激征及发热等感染表现，肝肾功能及血常规正常。"
+   },
+   {
+    "code": "number_not_in_source",
+    "severity": "medium",
+    "section": "diagnostic_discussion",
+    "index": 3,
+    "message": "value '5cm' does not appear in the records",
+    "text": "③多普勒超声示立位较卧位肾下极下降约6cm，静脉尿路造影示立位肾盂位置较卧位下降约6cm，两项影像学检查互相印证，下移幅度超过肾下垂的常用判定标准（立位较卧位下移>5cm或超过一个椎体高度）；"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 4,
+    "message": "records document '血尿' only as absent/denied, but it is stated here without negation",
+    "text": "④尿常规RBC（+），可为肾脏位置异常致输尿管扭曲、静脉回流受阻引起的镜下血尿。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 4,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "④尿常规RBC（+），可为肾脏位置异常致输尿管扭曲、静脉回流受阻引起的镜下血尿。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 5,
+    "message": "records document '血尿' only as absent/denied, but it is stated here without negation",
+    "text": "二、鉴别诊断：①泌尿系结石：可表现为腰痛及镜下血尿，但本例为持续性钝痛而非绞痛，无放射痛及肉眼血尿，现有超声及静脉尿路造影资料未提示结石，需进一步核实影像有无结石及梗阻征象；"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '尿急' only as absent/denied, but it is stated here without negation",
+    "text": "②泌尿系感染（肾盂肾炎等）：多有发热、尿频尿急尿痛及尿白细胞升高，本例无尿路刺激征，体温36.8℃，血常规及尿常规除RBC（+）外未见异常，不支持；"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '尿频' only as absent/denied, but it is stated here without negation",
+    "text": "②泌尿系感染（肾盂肾炎等）：多有发热、尿频尿急尿痛及尿白细胞升高，本例无尿路刺激征，体温36.8℃，血常规及尿常规除RBC（+）外未见异常，不支持；"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '尿痛' only as absent/denied, but it is stated here without negation",
+    "text": "②泌尿系感染（肾盂肾炎等）：多有发热、尿频尿急尿痛及尿白细胞升高，本例无尿路刺激征，体温36.8℃，血常规及尿常规除RBC（+）外未见异常，不支持；"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 8,
+    "message": "records document '血尿' only as absent/denied, but it is stated here without negation",
+    "text": "④腰肌劳损、腰椎源性腰痛：劳累后起病可类似，但不能解释肾脏随体位下移及镜下血尿，需结合腰背部查体及必要的腰椎影像鉴别；"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 10,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "⑥心悸、乏力、失眠、眩晕的原因：血压90/60mmHg偏低，需鉴别低血压/体位性低血压、甲状腺功能异常、营养摄入不足及功能性因素；"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 13,
+    "message": "records document '血尿' only as absent/denied, but it is stated here without negation",
+    "text": "镜下血尿的确切来源（肾小球源性或非肾小球源性）；"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-069",
+  "log": {
+   "case_id": "cmbclin-069",
+   "index": 16,
+   "variant": "A0",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 68.743,
+   "latency": 68.749,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 2,
+    "low": 9
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 2,
+    "low": 9
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 0,
+    "message": "case-feature statement has no source reference",
+    "text": "患者王XX，女性，62岁。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 0,
+    "message": "statement content is weakly supported by the records (overlap 0.33)",
+    "text": "患者王XX，女性，62岁。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 1,
+    "message": "case-feature statement has no source reference",
+    "text": "主诉：上腹痛伴胸背部胀痛不适1个月，加重2天。病程中无明显黄疸，无发热，无恶心、呕吐、腹泻，无肝炎病史。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 2,
+    "message": "case-feature statement has no source reference",
+    "text": "入院查体：T 36.9℃，P 76次/分，R 18次/分，Bp 132/85mmHg。自主体位，神志清楚，皮肤巩膜无黄染，全身浅表淋巴结无肿大。两肺呼吸音清晰，未闻及干湿啰音；心率76次/分，律齐，未闻及病理性杂音。腹部平软，上腹压痛，肝脾脏未触及，未触及腹部包块，肠鸣音正常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 3,
+    "message": "case-feature statement has no source reference",
+    "text": "辅助检查："
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 4,
+    "message": "case-feature statement has no source reference",
+    "text": "（1）血常规：WBC 6.46×10^9/L，N 57.2%，RBC 4.2×10^9/L（原文单位如此，待核实），Hb 126g/L；肝肾功能正常（未见具体数值）。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 4,
+    "message": "'具体数值' is stated as absent but is not mentioned in the records",
+    "text": "（1）血常规：WBC 6.46×10^9/L，N 57.2%，RBC 4.2×10^9/L（原文单位如此，待核实），Hb 126g/L；肝肾功能正常（未见具体数值）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 5,
+    "message": "case-feature statement has no source reference",
+    "text": "（2）多普勒超声：胆囊大小约9cm×4cm，壁厚约0.2cm，囊内未见异常回声；肝左外叶萎缩，其内胆管扩张伴多发高回声结石影，最大直径1.5cm；胆总管管径未见异常，其内未见异常回声。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "（3）CT：肝左外叶萎缩，其内胆管扩张伴多发高回声结石影，最大直径1.5cm；CT提示左外叶肝内胆管多发结石（原报告结论部分文字不完整）。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "归纳：老年女性，慢性上腹痛伴胸背部胀痛、近期加重，查体仅有上腹压痛，无黄疸、无发热及腹膜刺激征描述，炎症指标不高，影像学一致提示肝左外叶萎缩伴该叶胆管扩张及多发结石（最大1.5cm），胆囊及胆总管未见异常。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 10,
+    "message": "records document '黄疸' only as absent/denied, but it is stated here without negation",
+    "text": "急性胆管炎（胆道感染）：典型表现为腹痛、寒战高热、黄疸，本例无发热、无黄疸，血象不高，暂不支持，需动态观察体温、黄疸及炎症指标。"
+   }
+  ]
+ }
+]

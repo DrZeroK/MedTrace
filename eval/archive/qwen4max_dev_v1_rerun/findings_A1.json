@@ -1,0 +1,1317 @@
+[
+ {
+  "case_id": "cmbclin-003",
+  "log": {
+   "case_id": "cmbclin-003",
+   "index": 0,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 123.697,
+   "latency": 123.708,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 0,
+    "low": 2
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 0,
+    "low": 2
+   }
+  },
+  "final_findings": [
+   {
+    "code": "negation_flip",
+    "severity": "high",
+    "section": "case_features",
+    "index": 3,
+    "message": "'体格检查' is negated here but the records document it as present",
+    "text": "体格检查阴性所见：双侧腹股沟未触及肿大淋巴结。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "首要问题为阴茎肿物性质待定，阴茎恶性肿瘤（鳞状细胞癌）可能性大：支持依据为发现阴茎肿物3个月、肿物呈菜花样3cm、质硬、不能推动、伴龟头及冠状沟糜烂出血及恶臭，CT示阴茎头软组织肿块平扫密度均匀、增强后呈明显不均匀强化；不支持或需权衡的依据为双侧腹股沟未触及肿大淋巴结，且尚无病理组织学证据。故目前只能判断为恶性可能性大，不能确诊。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 3,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "鉴别一：阴茎鳞状细胞癌。提示点为菜花样3cm肿物、质硬、不能推动、表面糜烂出血伴恶臭，以及CT阴茎头软组织肿块增强后明显不均匀强化；相对不支持点为双侧腹股沟未触及肿大淋巴结；确诊有赖于肿物活检病理，目前尚未获得。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-006",
+  "log": {
+   "case_id": "cmbclin-006",
+   "index": 1,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 102.671,
+   "latency": 102.676,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "创伤性脾破裂（迟发性/延迟发作）可能性大：支持依据为7天前车祸撞击左下胸部、左下胸皮肤瘀斑、伤后卧床休息2天、本次背重物用力后突发腹痛与晕厥，并出现腹腔积液征与休克；不支持或待证实之处为尚无影像学证据，未记录左季肋部叩痛、左肩牵涉痛及受伤当时的影像评估，故目前不能确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-008",
+  "log": {
+   "case_id": "cmbclin-008",
+   "index": 2,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 209.745,
+   "latency": 209.753,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 2
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 2
+   }
+  },
+  "final_findings": [
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 5,
+    "message": "records document '手术' only as absent/denied, but it is stated here without negation",
+    "text": "糖尿病控制情况：既往空腹血糖11mmol/L，口服二甲双胍0.25g，tid后空腹血糖控制在8mmol/L左右，提示既往控制不达标；本次尿糖4+、酮体2+，当前血糖值未记录，围手术期血糖管理方案需重新制定。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '手术' only as absent/denied, but it is stated here without negation",
+    "text": "腹膜外型膀胱破裂（分型鉴别）：同为外伤后膀胱破裂，但尿外渗多局限于膀胱周围间隙。本例超声为腹腔大量积液、双侧髂窝处均深约8.2cm，造影示造影剂自膀胱右侧顶壁漏出，更提示腹膜内型，故腹膜外型可能性小；可据CT膀胱造影或术中探查最终鉴别，分型直接决定手术修补还是持续导尿保守引流。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-009",
+  "log": {
+   "case_id": "cmbclin-009",
+   "index": 3,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 225.836,
+   "latency": 225.844,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "原发性醛固酮增多症（醛固酮瘤）：支持点为高血压合并单侧肾上腺占位；不支持点为肾素23.99pg/ml未见受抑、醛固酮113.93pg/ml、醛固酮/肾素浓度比值4.75不高，血钾3.7mmol/L、无低钾血症记录；因采血体位、时间及降压药物使用情况未记录，单次结果不能除外本病，需在规范条件下复查卧立位肾素-醛固酮并必要时行确诊试验。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-010",
+  "log": {
+   "case_id": "cmbclin-010",
+   "index": 4,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 186.265,
+   "latency": 186.273,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 5
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 5
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 9,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记录生命体征（体温、脉搏、呼吸、血压等），未记录药物过敏史，未记录当前用药情况，上述信息均按“未记录”处理，不能视为正常或无。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 10,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记录既往史、个人史、家族史、输血史及既往治疗经过，亦未记录溶血病因学检查（如抗人球蛋白试验、红细胞渗透脆性试验、血红蛋白电泳、红细胞酶活性）结果。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "慢性溶血性贫血可能性大：支持依据为活动后头晕、乏力、气促、心悸5年的慢性病程，中度贫血貌伴全身皮肤巩膜略黄染，HGB 80g/L、RBC 3.05×1012/L，RET 25%明显增高提示红系代偿增生，胆红素以间接胆红素为主（TBIL 54.10μmol/L，DBIL 3.04 μmol/L，IBIL 50.23umol/L），脾下极达脐水平线且超声与CT均示脾肿大，球形红细胞11%。尚不明确之处在于缺乏抗人球蛋白试验、红细胞渗透脆性/膜蛋白检测、LDH、结合珠蛋白、尿胆原及家族史等记录，故目前不能确诊具体病因。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "脾肿大诊断明确（查体脾下极达脐水平线、质软、无压痛，多普勒超声与CT均示脾肿大）；同时PLT 77×109/L、WBC 4.52×109/L，合并脾功能亢进所致血细胞减少可能，但不能除外骨髓造血异常等其他原因；相关阴性记录为肝肋下未触及、脾无压痛。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 3,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "遗传性球形红细胞增多症——可能性大：提示本病的记录所见为显微镜下球形红细胞11%、RET 25%、以间接胆红素升高为主的黄疸、脾下极达脐水平线的巨脾、儿童期起病且病程达5年。尚不支持确诊之处：家族史未记录，红细胞渗透脆性试验或伊红-5-马来酰亚胺（EMA）结合试验、膜蛋白基因检测均未做，且未行抗人球蛋白试验以排除获得性球形红细胞增多，故只能列为可能性大而非确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-013",
+  "log": {
+   "case_id": "cmbclin-013",
+   "index": 5,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 130.882,
+   "latency": 130.889,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 4
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 4
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 12,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记录体温、脉搏、呼吸、血压等生命体征，未记录当前用药情况，亦未记录患者年龄、性别；上述内容均不能按正常处理。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 13,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记录鞍区感觉、肛门括约肌张力及大小便功能，也未记录肝肾功能、凝血功能与妊娠状态。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 3,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "该诊断目前只能定为“可能性大”而非确诊：腰椎MRI结果在资料中未记录，突出节段、压迫程度及有无马尾受压尚不明确；且双侧踝反射未引出与L4、5椎旁压痛、L5分布的感觉与肌力改变在定位上不完全一致，不能除外多节段受累。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 7,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "尚不明确的关键信息：腰椎MRI结果未记录，无法完成定位与病因确诊；生命体征、当前用药（含抗凝/抗血小板药）、肝肾功能与凝血功能、妊娠状态均未记录，“血尿便常规等未见异常”不能推定上述项目正常；鞍区感觉与大小便功能未记录，马尾受压状态无法判定。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-020",
+  "log": {
+   "case_id": "cmbclin-020",
+   "index": 6,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 103.573,
+   "latency": 103.58,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-023",
+  "log": {
+   "case_id": "cmbclin-023",
+   "index": 7,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 140.346,
+   "latency": 140.353,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 3
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 3
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 10,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记录生命体征、既往史、月经婚育史及分娩史、药物过敏史与当前用药情况，亦无血常规、尿常规、凝血功能等实验室结果。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "压力性尿失禁（女性）可能性大：漏尿发生于剧烈活动、行走及咳嗽等腹压增高时，专科查体嘱咳嗽时可见尿液自尿道口溢出；尿流动力学膀胱灌注充盈期未见不自主收缩、逼尿肌收缩力正常，最大尿流率47.5ml/s，超声残余尿阴性。因报告未记录腹压漏尿点压及最大尿道闭合压，目前尚不能作确诊分型（尿道过度活动型或尿道内括约肌功能障碍型）。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 4,
+    "message": "records document '残余尿' only as absent/denied, but it is stated here without negation",
+    "text": "充盈性（溢出性）尿失禁：不支持点为无排尿困难，超声残余尿阴性，耻骨上膀胱区无充盈，逼尿肌收缩力正常，最大尿流率47.5ml/s；可复查排尿后残余尿测定进一步排除。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-028",
+  "log": {
+   "case_id": "cmbclin-028",
+   "index": 8,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 119.165,
+   "latency": 119.168,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "首要问题为二尖瓣中重度关闭不全，依据术前心脏超声明确记载，该瓣膜病变诊断明确；患者已接受常规开胸、体外循环及冷血4∶1心脏停搏液心肌保护，体外循环时间97分钟、升主动脉阻断时间64分钟后顺利停机。不支持或尚不明确之处在于：资料未记录任何生命体征、术后心律、血流动力学参数与超声复查结果，故当前心功能与循环状态无法判断，不能默认平稳。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-030",
+  "log": {
+   "case_id": "cmbclin-030",
+   "index": 9,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 129.667,
+   "latency": 129.673,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-031",
+  "log": {
+   "case_id": "cmbclin-031",
+   "index": 10,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 149.033,
+   "latency": 149.052,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": []
+ },
+ {
+  "case_id": "cmbclin-033",
+  "log": {
+   "case_id": "cmbclin-033",
+   "index": 11,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 151.886,
+   "latency": 151.894,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 3
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 3
+   }
+  },
+  "final_findings": [
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 6,
+    "message": "case-feature statement has no source reference",
+    "text": "本次资料未记录生命体征、体格检查（含腹部体征）、体重、尿量及出入量，上述项目均为“未记录”，不能视为正常。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 7,
+    "message": "case-feature statement has no source reference",
+    "text": "本次资料未记录药物过敏史、当前用药情况（含抗凝、抗血小板药物）、血常规、肝肾功能及凝血结果，均为“未记录”或结果待回报。"
+   },
+   {
+    "code": "missing_ref",
+    "severity": "low",
+    "section": "case_features",
+    "index": 8,
+    "message": "case-feature statement has no source reference",
+    "text": "资料中未记载入院前已实施的任何处置（如胃肠减压、补液、抑酸等），故不作为已完成事项陈述。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 8,
+    "message": "statement content is weakly supported by the records (overlap 0.00)",
+    "text": "资料中未记载入院前已实施的任何处置（如胃肠减压、补液、抑酸等），故不作为已完成事项陈述。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-035",
+  "log": {
+   "case_id": "cmbclin-035",
+   "index": 12,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 203.463,
+   "latency": 203.471,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 0,
+    "low": 3
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 0,
+    "low": 3
+   }
+  },
+  "final_findings": [
+   {
+    "code": "false_missing",
+    "severity": "high",
+    "section": "case_features",
+    "index": 14,
+    "message": "states that medication information is not documented, but the records contain it",
+    "text": "资料未记录药物过敏史、既往史、家族史、月经史与妊娠状态、抗凝或抗血小板用药情况，亦未记录尿量、心电图、血气分析、血氯与血镁结果，上述项目不能视为正常或阴性。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "最紧急问题为重度低钾血症伴肢体无力：辅助检查血钾2.0mmol/L，现病史记载多次查血钾低、最低1.6mmol/L，1周前出现肢体无力、最重时不能站立，低钾血症诊断明确且程度严重，属可危及生命、需即刻处理的情况，存在恶性心律失常及呼吸肌受累风险。目前查体心率81次/分、律齐，两肺呼吸音清晰、未闻及干湿啰音，但资料未记录心电图，不能据此排除心电异常。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "高血压诊断明确：1年前发现血压升高，最高170/110mmHg，口服拜新同期间血压控制于140/90mmHg，入院Bp155/110mmHg，提示当前治疗下血压未达标。31岁女性、高血压合并显著低钾及肾上腺结节，继发性高血压可能性大，原发性高血压不能作为默认诊断。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 3,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "原发性醛固酮增多症（可能性大）：支持点为高血压1年余伴血钾最低1.6mmol/L、本次血钾2.0mmol/L、血钠147mmol/L、醛固酮125.68pg/ml、肾素3.54pg/ml、醛固酮/肾素浓度比值35.50及肾上腺结节。不足与待完善之处：资料未提供该比值的单位与判断切点、采血体位与时间及干扰用药情况，未行确诊试验；且严重低钾本身可抑制醛固酮分泌，故目前只能判断为可能性大，不能确诊，需纠正低钾后复查并完善确诊试验。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-039",
+  "log": {
+   "case_id": "cmbclin-039",
+   "index": 13,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 215.319,
+   "latency": 215.326,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 0
+   }
+  },
+  "final_findings": [
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 2,
+    "message": "'特殊”' is stated as absent but is not mentioned in the records",
+    "text": "现病史中记载“既往病史无特殊”，同一资料的既往史项下另记载“抗结核治疗一月余”，两处内容并存。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-041",
+  "log": {
+   "case_id": "cmbclin-041",
+   "index": 14,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 171.129,
+   "latency": 171.136,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 3,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 3,
+    "low": 0
+   }
+  },
+  "final_findings": [
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "'合并动脉瘤' is stated as absent but is not mentioned in the records",
+    "text": "DSA检查报告为烟雾病；资料中未记载铃木分期、有无合并动脉瘤及出血来源的描述。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "'出血来源的描述' is stated as absent but is not mentioned in the records",
+    "text": "DSA检查报告为烟雾病；资料中未记载铃木分期、有无合并动脉瘤及出血来源的描述。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "statement content is weakly supported by the records (overlap 0.16)",
+    "text": "DSA检查报告为烟雾病；资料中未记载铃木分期、有无合并动脉瘤及出血来源的描述。"
+   },
+   {
+    "code": "false_missing",
+    "severity": "high",
+    "section": "case_features",
+    "index": 12,
+    "message": "states that medication information is not documented, but the records contain it",
+    "text": "既往史、个人史（吸烟、饮酒）、家族史及药物过敏史在本次资料中均未记录；除硝苯地平（拜新同）外，未记载其他用药，抗血小板或抗凝用药情况未记录。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-043",
+  "log": {
+   "case_id": "cmbclin-043",
+   "index": 15,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 129.18,
+   "latency": 129.189,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 5
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 5
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "首要问题为前列腺癌：诊断明确，依据为1月前我院前列腺系统穿刺病理提示前列腺癌，5/12针阳性，Gleason评分4+3=7分，同时tPSA 15.6ng/ml、fPSA 2.3ng/ml，超声及MR均示左侧叶病灶，MR考虑前列腺癌。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 5,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "慢性前列腺炎导致PSA升高：支持点为tPSA 15.6ng/ml升高及中央沟变浅；不支持点为穿刺病理已明确为前列腺癌，且指诊前列腺无压痛、尿道外口无红肿及分泌物、挤压无分泌物溢出；可通过尿常规、前列腺液相关检查（待完善）协鉴别，但不能解释本例病理确诊的癌灶。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '包膜' only as absent/denied, but it is stated here without negation",
+    "text": "前列腺癌局部进展或转移（包膜外侵犯、精囊侵犯、盆腔淋巴结或骨转移）：支持点为穿刺5/12针阳性、Gleason评分4+3=7分、tPSA 15.6ng/ml；不支持点为MR未见包膜及精囊侵犯、盆腔淋巴结无肿大，全身骨ECT未见明显转移；因骨ECT对早期骨髓内微小转移敏感性有限，微转移不能除外，可据多参数前列腺MR复核及必要时PSMA PET-CT等进一步鉴别。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '精囊侵犯' only as absent/denied, but it is stated here without negation",
+    "text": "前列腺癌局部进展或转移（包膜外侵犯、精囊侵犯、盆腔淋巴结或骨转移）：支持点为穿刺5/12针阳性、Gleason评分4+3=7分、tPSA 15.6ng/ml；不支持点为MR未见包膜及精囊侵犯、盆腔淋巴结无肿大，全身骨ECT未见明显转移；因骨ECT对早期骨髓内微小转移敏感性有限，微转移不能除外，可据多参数前列腺MR复核及必要时PSMA PET-CT等进一步鉴别。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '转移' only as absent/denied, but it is stated here without negation",
+    "text": "前列腺癌局部进展或转移（包膜外侵犯、精囊侵犯、盆腔淋巴结或骨转移）：支持点为穿刺5/12针阳性、Gleason评分4+3=7分、tPSA 15.6ng/ml；不支持点为MR未见包膜及精囊侵犯、盆腔淋巴结无肿大，全身骨ECT未见明显转移；因骨ECT对早期骨髓内微小转移敏感性有限，微转移不能除外，可据多参数前列腺MR复核及必要时PSMA PET-CT等进一步鉴别。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-044",
+  "log": {
+   "case_id": "cmbclin-044",
+   "index": 16,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 143.131,
+   "latency": 143.137,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "定位诊断为右上叶支气管腔内占位（纤维支气管镜直视所见，管腔完全阻塞）；病变性质尚未明确，资料中无病理或细胞学结果。结合59岁男性、吸烟30年每天1～2包、咳嗽3个月经口服抗炎止咳治疗无明显改善、近1个月痰中带血丝伴低热乏力、镜下新生物表面粗糙触之易出血，中央型支气管肺癌（右上叶）可能性大，但尚不能确诊，须以病理为准。"
+   },
+   {
+    "code": "unsupported_completed",
+    "severity": "high",
+    "section": "treatment_plan",
+    "index": 4,
+    "message": "plan describes an intervention as already done, without support in the records",
+    "text": "拟查血清肿瘤标志物作为辅助参考；若病理确诊为支气管肺癌，建议进一步完善头颅增强MRI、上腹部影像及骨扫描或PET-CT进行分期，并提请呼吸科、胸外科、肿瘤科多学科讨论确定治疗方案。分期检查在病理结果回报前不作为已完成事项。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-047",
+  "log": {
+   "case_id": "cmbclin-047",
+   "index": 17,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 119.82,
+   "latency": 119.826,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 6
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 6
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "首要问题为右侧睾丸实性占位：右侧睾丸质硬、较左侧明显增大、无明显触痛，透光试验阴性，超声示右侧睾丸增大至约5.5cm×5.3cm、椭圆形中低回声肿块，CT示密度均匀、CT值30-36Hu、边缘较清晰、增强轻度强化，结合4岁时右侧隐睾下降固定术史，右侧睾丸恶性肿瘤（生殖细胞肿瘤）可能性大，但尚无病理，不能确诊。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "现有资料未记录急性剧烈疼痛、发热或生命体征异常，未见明确提示需即刻抢救的危及生命情况；但恶性肿瘤不能除外，属需限期明确诊断与处理的问题，且生命体征未记录，全身状态尚无法评估。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "records document '疼痛' only as absent/denied, but it is stated here without negation",
+    "text": "现有资料未记录急性剧烈疼痛、发热或生命体征异常，未见明确提示需即刻抢救的危及生命情况；但恶性肿瘤不能除外，属需限期明确诊断与处理的问题，且生命体征未记录，全身状态尚无法评估。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "现有资料未记录急性剧烈疼痛、发热或生命体征异常，未见明确提示需即刻抢救的危及生命情况；但恶性肿瘤不能除外，属需限期明确诊断与处理的问题，且生命体征未记录，全身状态尚无法评估。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "精原细胞瘤：支持点为无痛性睾丸质硬增大、透光试验阴性、超声肿块轮廓整齐呈中低回声、CT密度均匀且仅轻度强化，并有右侧隐睾手术史；尚不明确处在于AFP 15ng/ml、β-HCG 3μmg/L、LDH 145U/L缺少参考区间无法判断是否升高，确诊须依靠睾丸切除标本病理。"
+   },
+   {
+    "code": "negation_flip",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "records document '异常' only as absent/denied, but it is stated here without negation",
+    "text": "肿瘤标志物判读存在不确定：AFP 15ng/ml、β-HCG 3μmg/L、LDH(乳酸脱氢酶）145U/L均未附参考区间，且β-HCG单位书写为“μmg/L”，是否异常及具体数值需核实后方可用于类型提示、危险分层与随访基线。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-048",
+  "log": {
+   "case_id": "cmbclin-048",
+   "index": 18,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 170.131,
+   "latency": 170.144,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 0,
+    "low": 0
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 0,
+    "low": 0
+   }
+  },
+  "final_findings": [
+   {
+    "code": "false_missing",
+    "severity": "high",
+    "section": "case_features",
+    "index": 17,
+    "message": "states that vitals information is not documented, but the records contain it",
+    "text": "资料中未记录入院时体温、脉搏、呼吸、血压等生命体征，未记录皮肤巩膜黄染情况，未记录当前用药明细及妊娠状态。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-051",
+  "log": {
+   "case_id": "cmbclin-051",
+   "index": 19,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 179.312,
+   "latency": 179.322,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "先天性胆总管囊肿（胆总管囊状扩张）合并急性胆管炎，可能性大：7岁男童，CT明确显示胆总管呈巨大囊样扩张、胆囊体积增大而无肝内胆管远端分支扩张，查体肝区肋弓下可触及形状规则、大小约3cm×2cm的肿物，临床表现为腹痛、寒战高热、黄疸。尚不明确的是囊肿分型、是否合并胰胆管合流异常及囊肿内有无胆泥结石，需MRCP与腹部超声进一步界定；目前尚不能写为确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-054",
+  "log": {
+   "case_id": "cmbclin-054",
+   "index": 20,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 190.209,
+   "latency": 190.215,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "最紧急问题为急性主动脉夹层（Stanford B型，DeBakey III型），依据现有资料诊断明确：突发胸背部撕裂样疼痛4小时，长期高血压且降压治疗不规律（最高血压200/120mmHg），主动脉CTA示降主动脉“双腔改变”、可见明显内膜片、破口位于左锁骨下动脉远端约1cm，心脏超声未见明显心内病变及升主动脉病变，支持病变局限于左锁骨下动脉以远的B型夹层。发病仅4小时，处于急性期，存在破裂、脏器及肢体灌注不良乃至猝死风险，属危及生命、需即刻处理的情况。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-061",
+  "log": {
+   "case_id": "cmbclin-061",
+   "index": 21,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 163.144,
+   "latency": 163.152,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 2
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 2
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 3,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "第二个问题为胃大弯侧粘膜下肿物（起源于胃壁肌层）性质待定：胃镜示粘膜下隆起、表面光滑、顶部溃疡样并易出血，内镜超声示起源于胃壁肌层、边界清楚的低回声，腹部增强CT示胃体部大弯侧软组织肿物、密度较均匀伴局部坏死、增强明显强化；综合上述所见，胃肠间质瘤可能性大，但资料无病理及免疫组化，不能确诊。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 5,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "胃肠间质瘤（可能性大）：提示点为内镜超声示肿物起源于胃壁肌层、边界清楚的低回声并突向腔外，胃镜见顶部中央溃疡样凹陷、覆血痂、触之易出血，CT增强明显强化且局部可见坏死，伴便潜血（+）与血红蛋白下降；尚缺病理及CD117、DOG-1等免疫组化，故只能定为可能性大，需病理确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-065",
+  "log": {
+   "case_id": "cmbclin-065",
+   "index": 22,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 134.319,
+   "latency": 134.328,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 3
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 3
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "不支持及尚缺的依据：无发热、无明确外伤史，WBC 6.20×109/L，腹部超声实质脏器未见明显异常；目前尚无局部MRI/CT、胸部影像及病理结果，故恶性性质仅为临床影像推测，不能确诊，须以活检病理为准。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 5,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "风险提示：病灶位于负重的股骨远端且X线示局部密度减低、界限不清，存在病理性骨折风险（资料未记载骨折征象），在明确骨质破坏范围前应视为时间敏感问题，尽快完成影像评估与病理确诊，避免因不当负重或不当活检路径影响后续保肢治疗。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 6,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "骨肉瘤：提示点为青年男性、股骨干骺端偏内侧、异常成骨占位合并密度减低、界限不清晰、夜间痛及进行性加重、局部肿胀伴皮温稍高；尚缺确诊依据，需局部增强MRI与CT评估髓内及软组织侵犯、胸部CT筛查肺转移，并以活检病理确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-070",
+  "log": {
+   "case_id": "cmbclin-070",
+   "index": 23,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 130.704,
+   "latency": 130.713,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 1,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 1,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 9,
+    "message": "'变性”' is stated as absent but is not mentioned in the records",
+    "text": "腹部CT血管成像：胰腺头部乏血供肿块，考虑胰腺癌，肠系膜上静脉可疑受侵犯（<180度），管腔无明显变形（另一份同一检查记录表述为“管腔无明显变性”）。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "胰头恶性肿瘤（胰腺癌）可能性大：支持点为80岁男性、无痛性进行性黄疸、CT示胰头乏血供肿块并“双管征”、CA19-9 6119U/ml及CEA 9.2ng/ml升高；不支持或尚缺的依据为无病理学证据，且查体未触及腹部包块、全身浅表淋巴结无肿大；在获得组织学或细胞学证据前不能写为确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-071",
+  "log": {
+   "case_id": "cmbclin-071",
+   "index": 24,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 118.817,
+   "latency": 118.821,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   },
+   "findings_final": {
+    "high": 0,
+    "medium": 0,
+    "low": 1
+   }
+  },
+  "final_findings": [
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 1,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "第二问题为闭合性腹部损伤伴腹腔内出血，可能性大，其中肝破裂可能性大：右侧季肋部瘀斑约5cm×8cm提示右上腹直接受力，右肩痛符合膈肌受刺激后的牵涉痛，腹部X线平片示右膈升高，腹膜刺激征阳性，血红蛋白80g/L并伴血压70/50mmHg。尚不明确之处：移动性浊音仅为可疑，资料中无腹部超声、CT或腹腔穿刺结果，出血部位与出血量均未获得直接证据，故目前不能写为确诊。"
+   }
+  ]
+ },
+ {
+  "case_id": "cmbclin-072",
+  "log": {
+   "case_id": "cmbclin-072",
+   "index": 25,
+   "variant": "A1",
+   "warnings": [],
+   "excluded_sources": [],
+   "redacted_statements": 0,
+   "raw_parse_retries": 0,
+   "status": "ok",
+   "calls": 1,
+   "http_attempts": 1,
+   "retries": 0,
+   "llm_latency": 130.572,
+   "latency": 130.579,
+   "llm_errors": [],
+   "findings_initial": {
+    "high": 1,
+    "medium": 4,
+    "low": 2
+   },
+   "findings_final": {
+    "high": 1,
+    "medium": 4,
+    "low": 2
+   }
+  },
+  "final_findings": [
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 1,
+    "message": "'乳头溢液等不适' is stated as absent but is not mentioned in the records",
+    "text": "现病史记载近1个月来感右乳无痛性肿块，无乳房疼痛、乳头溢液等不适。"
+   },
+   {
+    "code": "undocumented_negative",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 3,
+    "message": "'无法判定为阳性' is stated as absent but is not mentioned in the records",
+    "text": "现病史中关于家族史的原文为“如乳腺癌家族史”，该表述含义不明，无法判定为阳性或阴性，已列入需核实事项。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 3,
+    "message": "statement content is weakly supported by the records (overlap 0.21)",
+    "text": "现病史中关于家族史的原文为“如乳腺癌家族史”，该表述含义不明，无法判定为阳性或阴性，已列入需核实事项。"
+   },
+   {
+    "code": "value_label_mismatch",
+    "severity": "high",
+    "section": "case_features",
+    "index": 9,
+    "message": "'大小约2.5cm': the records give '大小约' as [2.2]; this value belongs to another item",
+    "text": "钼靶：右乳外上见一肿块，大小约2.5cm×2.0cm，见明显的边缘毛刺征和可疑钙化，BI-RADS 4c类。"
+   },
+   {
+    "code": "low_support",
+    "severity": "medium",
+    "section": "case_features",
+    "index": 11,
+    "message": "statement content is weakly supported by the records (overlap 0.29)",
+    "text": "同一肿块的大小在三项检查中记载不一致：查体约2cm、超声约2.2cm×1.8cm、钼靶约2.5cm×2.0cm；部位描述亦不一致（查体为右乳外象限，超声与钼靶均为右乳外上象限），此处并列记录，不作取舍。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 0,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "首要问题为右乳恶性肿瘤：B超引导下粗针穿刺活检病理提示浸润性导管癌，故“右乳浸润性导管癌”诊断明确。支持依据为右乳无痛性肿块1月余，查体肿块质硬、边界不清、活动度差，超声呈“蟹足样改变”、钼靶见明显边缘毛刺征，二者均评为BI-RADS 4c类。"
+   },
+   {
+    "code": "overconfident",
+    "severity": "low",
+    "section": "diagnostic_discussion",
+    "index": 2,
+    "message": "uses definitive diagnostic wording not present in the records",
+    "text": "关于紧迫程度：现有记录的生命体征为T36.9℃、P79次/分、R18次/分、Bp126/75mmHg，资料中未记载提示危及生命或需即刻抢救的情况；但病理已确诊浸润性癌，属需限期完成分期并启动抗肿瘤治疗的问题，不宜观察等待。"
+   }
+  ]
+ }
+]

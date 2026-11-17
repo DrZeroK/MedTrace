@@ -1,0 +1,222 @@
+{
+ "A2|cmbclin-003": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确写出'阴茎恶性肿瘤（阴茎癌）可能性大'"
+  ],
+  "gold": [
+   "阴茎癌"
+  ]
+ },
+ "A2|cmbclin-006": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确提出'延迟性脾破裂可能性大'，属最可能诊断"
+  ],
+  "gold": [
+   "脾破裂"
+  ]
+ },
+ "A2|cmbclin-009": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确表述'嗜铬细胞瘤可能性大'"
+  ],
+  "gold": [
+   "嗜铬细胞瘤"
+  ]
+ },
+ "A2|cmbclin-013": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确写出'腰椎间盘突出症（L4/5节段）可能性大'"
+  ],
+  "gold": [
+   "腰椎间盘突出症"
+  ]
+ },
+ "A2|cmbclin-020": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "全文以化脓性腱鞘炎、掌深间隙感染等为核心，明确指向急性化脓性细菌感染"
+  ],
+  "gold": [
+   "手部急性化脓性细菌感染"
+  ]
+ },
+ "A2|cmbclin-023": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确表述'压力性尿失禁可能性大'并支持依据充分"
+  ],
+  "gold": [
+   "女性压力性尿失禁"
+  ]
+ },
+ "A2|cmbclin-030": {
+  "labels": [
+   "differential"
+  ],
+  "reasons": [
+   "仅以'低级别胶质瘤等原发脑肿瘤可能'列为鉴别诊断"
+  ],
+  "gold": [
+   "大脑胶质瘤"
+  ]
+ },
+ "A2|cmbclin-031": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确列为第1条拟诊，称'重型颅脑创伤'，属同义规范表述"
+  ],
+  "gold": [
+   "重型颅脑损伤"
+  ]
+ },
+ "A2|cmbclin-033": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确诊断为代谢性碱中毒"
+  ],
+  "gold": [
+   "酸碱平衡失调"
+  ]
+ },
+ "A2|cmbclin-035": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确表述'可能性大'并列于拟诊首位"
+  ],
+  "gold": [
+   "原发性醛固酮增多症"
+  ]
+ },
+ "A2|cmbclin-039": {
+  "labels": [
+   "differential"
+  ],
+  "reasons": [
+   "仅表述为'肝衰竭可能性大，尚缺意识、白蛋白、血氨等依据'，属待证实的鉴别诊断"
+  ],
+  "gold": [
+   "急性肝衰竭"
+  ]
+ },
+ "A2|cmbclin-041": {
+  "labels": [
+   "differential"
+  ],
+  "reasons": [
+   "仅作为‘动脉瘤性蛛网膜下腔出血’的鉴别项提出，未将烟雾病列为出血直接原因"
+  ],
+  "gold": [
+   "烟雾病导致的蛛网膜下腔出血"
+  ]
+ },
+ "A2|cmbclin-044": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确考虑‘右上肺中央型肺癌可能性大’"
+  ],
+  "gold": [
+   "原发性肺癌"
+  ]
+ },
+ "A2|cmbclin-047": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确以'睾丸恶性肿瘤（生殖细胞肿瘤）可能性大'作为最可能诊断提出"
+  ],
+  "gold": [
+   "睾丸肿瘤"
+  ]
+ },
+ "A2|cmbclin-048": {
+  "labels": [
+   "differential"
+  ],
+  "reasons": [
+   "仅以'不能除外'提及，未作为初步诊断"
+  ],
+  "gold": [
+   "囊型肝包虫病合并胆瘘"
+  ]
+ },
+ "A2|cmbclin-051": {
+  "labels": [
+   "differential"
+  ],
+  "reasons": [
+   "仅作为先天性胆总管囊肿的影像学表现提及，未作为独立诊断提出"
+  ],
+  "gold": [
+   "胆管扩张"
+  ]
+ },
+ "A2|cmbclin-054": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确表述'诊断明确'并详述影像与临床依据"
+  ],
+  "gold": [
+   "急性Stanford B 型主动脉夹层"
+  ]
+ },
+ "A2|cmbclin-061": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确表述'胃肠间质瘤可能性大'"
+  ],
+  "gold": [
+   "胃间质瘤"
+  ]
+ },
+ "A2|cmbclin-065": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确提及'恶性成骨性骨肿瘤可能性大'，属标准诊断的规范上位概念"
+  ],
+  "gold": [
+   "骨肿瘤"
+  ]
+ },
+ "A2|cmbclin-071": {
+  "labels": [
+   "primary"
+  ],
+  "reasons": [
+   "明确表述'闭合性腹部损伤、肝破裂可能性大'"
+  ],
+  "gold": [
+   "肝破裂"
+  ]
+ }
+}
