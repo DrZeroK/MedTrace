@@ -1,37 +1,120 @@
 [
- {"id": "P1_baseline_lab_supplied", "base": "U02",
-  "edit": {"op": "replace", "source_id": "labs", "find": "No previous renal function results are available.", "with": "Previous result from the GP record dated 2025-09-10: creatinine 2.3 mg/dL."},
-  "expect_present": [["new baseline value reported", "2[.]3", "note"], ["chronic kidney disease now favoured", "(?i)chronic", "discussion"]],
-  "expect_absent": [["obsolete statement that no baseline exists", "(?i)no previous renal function|baseline[^.]{0,30}(unknown|not available|unavailable)", "note"]],
-  "may_drop": ["no_baseline"]},
- {"id": "P2_acute_evidence_added", "base": "U01",
-  "edit": {"op": "add", "source_id": "ix2", "content": "Repeat high-sensitivity troponin T at 22:10: 86 ng/L (reference <14 ng/L). Repeat ECG 22:15: new T-wave inversion in leads V2-V4.", "cutoff": "2026-03-24T23:00:00"},
-  "expect_present": [["new troponin reported", "86 ng/L", "note"], ["new ECG change reported", "(?i)T-wave inversion", "note"], ["assessment upgraded towards myocardial infarction", "(?i)NSTEMI|myocardial infarction", "discussion"]],
-  "expect_absent": [["obsolete: repeat troponin still awaited", "(?i)repeat troponin (is )?(due|awaited|pending)", "note"]],
-  "may_drop": ["repeat_due"]},
- {"id": "P3_missing_replaced_by_negative", "base": "X01",
-  "edit": {"op": "replace", "source_id": "tests", "find": "ECG: pending.", "with": "ECG at 14:20: sinus rhythm, no ST-segment deviation."},
-  "expect_present": [["ECG result reported", "(?i)no ST", "note"]],
-  "expect_absent": [["obsolete: ECG pending", "(?i)ECG[^.]{0,30}(is |remains )?pending", "features"], ["over-reach: ACS excluded on ECG alone", "(?i)(acute coronary syndrome|ACS) (is |has been )?(excluded|ruled out)", "note"]],
-  "may_drop": ["ecg_pending"]},
- {"id": "P4_positive_symptom_introduced", "base": "N01",
-  "edit": {"op": "replace", "source_id": "hx", "find": "Denies fever, neck stiffness, rash, and visual loss.", "with": "Denies fever, rash, and visual loss. Reports neck stiffness since this morning."},
-  "expect_present": [["neck stiffness reported as present", "(?i)(reports|has|with|new)[^.]{0,30}neck stiffness|neck stiffness since", "features"], ["meningitis/SAH reconsidered", "(?i)meningitis|subarachnoid", "discussion"], ["record conflict flagged (history vs 'neck supple')", "(?i)neck", "review"]],
-  "expect_absent": [["obsolete negative", "(?i)denies[^.]{0,40}neck stiffness", "features"]],
-  "may_drop": []},
- {"id": "P5_abnormal_measurement_added", "base": "C01",
-  "edit": {"op": "add", "source_id": "obs2", "content": "Repeat observations 2026-03-10 18:40: SpO2 86% on room air, RR 32 /min, new confusion."},
-  "expect_present": [["new saturation reported", "86 ?%", "note"], ["deterioration reflected in plan", "(?i)oxygen|escalat|critical care|high.dependency", "plan"]],
-  "expect_absent": [],
-  "may_drop": []},
- {"id": "P6_contradiction_created", "base": "M01",
-  "edit": {"op": "add", "source_id": "PHARM", "content": "Pharmacy medicines reconciliation: patient states she stopped apixaban 2 months ago because of nosebleeds."},
-  "expect_present": [["both versions reported", "(?i)stopped apixaban|apixaban[^.]{0,60}stopped", "note"], ["conflict surfaced for review", "(?i)apixaban", "review"]],
-  "expect_absent": [],
-  "may_drop": []},
- {"id": "P7_post_cutoff_result_added", "base": "C01",
-  "edit": {"op": "add", "source_id": "ct", "content": "2026-03-12 CT chest: 4 cm cavitating lesion in the right lower lobe consistent with lung abscess."},
-  "expect_present": [],
-  "expect_absent": [["post-cutoff result leaked", "(?i)abscess|cavitat", "note"]],
-  "may_drop": []}
+  {
+    "id": "P1_baseline_lab_supplied",
+    "base": "U02",
+    "edit": {
+      "op": "replace",
+      "source_id": "labs",
+      "find": "无既往肾功能结果可供比较。",
+      "with": "家庭医生记录显示，2025-09-10既往肌酐为2.3 mg/dL。"
+    },
+    "expect_present": [
+      ["报告新的基线数值", "2[.]3", "note"],
+      ["目前更支持慢性肾脏病", "慢性肾脏病|慢性肾功能", "discussion"]
+    ],
+    "expect_absent": [
+      ["过时的无基线表述", "无既往肾功能|无既往|基线[^。]{0,30}(未知|不详|未提供)", "note"]
+    ],
+    "may_drop": ["no_baseline"]
+  },
+  {
+    "id": "P2_acute_evidence_added",
+    "base": "U01",
+    "edit": {
+      "op": "add",
+      "source_id": "ix2",
+      "content": "22:10复查高敏肌钙蛋白T：86 ng/L（参考值<14 ng/L）。22:15复查心电图：V2–V4导联新发T波倒置。",
+      "cutoff": "2026-03-24T23:00:00"
+    },
+    "expect_present": [
+      ["报告新的肌钙蛋白结果", "86 ?ng/L", "note"],
+      ["报告新的心电图改变", "T波倒置", "note"],
+      ["评估升级为心肌梗死", "NSTEMI|非ST段抬高型心肌梗死|心肌梗死", "discussion"]
+    ],
+    "expect_absent": [
+      ["过时的复查肌钙蛋白待回报表述", "复查肌钙蛋白[^。]{0,30}(待|尚未|未)|定于22:10复查", "note"]
+    ],
+    "may_drop": ["repeat_due"]
+  },
+  {
+    "id": "P3_missing_replaced_by_negative",
+    "base": "X01",
+    "edit": {
+      "op": "replace",
+      "source_id": "tests",
+      "find": "心电图：待做。",
+      "with": "14:20心电图：窦性心律，无ST段偏移。"
+    },
+    "expect_present": [
+      ["报告心电图结果", "未见ST|无ST", "note"]
+    ],
+    "expect_absent": [
+      ["过时的心电图待做表述", "心电图[^。]{0,30}(待做|待查|未做|未行)", "features"],
+      ["仅凭心电图排除急性冠脉综合征", "(急性冠脉综合征|ACS)(已排除|明确排除)|明确排除[^。；]{0,20}(急性冠脉综合征|ACS)", "note"]
+    ],
+    "may_drop": ["ecg_pending"]
+  },
+  {
+    "id": "P4_positive_symptom_introduced",
+    "base": "N01",
+    "edit": {
+      "op": "replace",
+      "source_id": "hx",
+      "find": "否认发热、颈项强直、皮疹及视力丧失。",
+      "with": "否认发热、皮疹及视力丧失。自今晨起出现颈项强直。"
+    },
+    "expect_present": [
+      ["将颈项强直报告为阳性症状", "(出现|伴|有|新发)[^。]{0,20}颈项强直|颈项强直[^。]{0,10}(阳性|存在)", "features"],
+      ["重新考虑脑膜炎/蛛网膜下腔出血", "脑膜炎|蛛网膜下腔出血", "discussion"],
+      ["标记病史与颈软体征之间的冲突", "颈", "review"]
+    ],
+    "expect_absent": [
+      ["过时的颈项强直阴性表述", "否认[^。]{0,40}颈项强直", "features"]
+    ],
+    "may_drop": []
+  },
+  {
+    "id": "P5_abnormal_measurement_added",
+    "base": "C01",
+    "edit": {
+      "op": "add",
+      "source_id": "obs2",
+      "content": "2026-03-10 18:40复查生命体征：室内空气下SpO2 86%，呼吸32次/分，新出现意识模糊。"
+    },
+    "expect_present": [
+      ["报告新的血氧饱和度", "86 ?%", "note"],
+      ["在计划中体现病情恶化", "氧疗|升级|重症监护|高依赖|加强监护", "plan"]
+    ],
+    "expect_absent": [],
+    "may_drop": []
+  },
+  {
+    "id": "P6_contradiction_created",
+    "base": "M01",
+    "edit": {
+      "op": "add",
+      "source_id": "PHARM",
+      "content": "药房用药重整记录：患者自述2个月前因鼻出血已停用阿哌沙班。"
+    },
+    "expect_present": [
+      ["同时报告两种用药情况", "停用阿哌沙班|阿哌沙班[^。]{0,60}(停用|已停)|因鼻出血[^。]{0,30}阿哌沙班", "note"],
+      ["在待审核事项中提示冲突", "阿哌沙班", "review"]
+    ],
+    "expect_absent": [],
+    "may_drop": []
+  },
+  {
+    "id": "P7_post_cutoff_result_added",
+    "base": "C01",
+    "edit": {
+      "op": "add",
+      "source_id": "ct",
+      "content": "2026-03-12胸部CT：右肺下叶4 cm空洞性病变，符合肺脓肿。"
+    },
+    "expect_present": [],
+    "expect_absent": [
+      ["泄露截止时间后的结果", "肺脓肿|空洞性病变|空洞", "note"]
+    ],
+    "may_drop": []
+  }
 ]

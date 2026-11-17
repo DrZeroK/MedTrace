@@ -1,0 +1,29 @@
+{
+  "synthetic": true,
+  "clinician_reviewed": false,
+  "case_count": 100,
+  "source_count": 400,
+  "case_ids": "SYN001-SYN100",
+  "record_cutoff": "T0",
+  "schema_check": "passed",
+  "duplicate_case_ids": 0,
+  "duplicate_full_cases": 0,
+  "duplicate_source_contents": 0,
+  "medtrace_load_cases": "100 usable cases, zero errors, zero warnings",
+  "medtrace_warning": null,
+  "cutoff_note": "T0 is permitted by the PDF input specification. All supplied facts are authored as available by T0; this dataset does not test automatic date filtering.",
+  "model_called": false,
+  "topic_counts": {
+    "呼吸系统": 10,
+    "心血管系统": 10,
+    "消化系统": 10,
+    "肝胆胰系统": 10,
+    "肾脏泌尿系统": 10,
+    "血液系统": 10,
+    "内分泌代谢": 10,
+    "神经系统": 10,
+    "感染与免疫": 10,
+    "综合入院情境": 10
+  },
+  "input_sha256": "ffdfb4e8583ad32930d4664141245306f7d390c0d28f379ae6b1087fb903d675"
+}
