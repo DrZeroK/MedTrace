@@ -1,5 +1,7 @@
 # MedTrace — evidence-grounded initial progress notes
 
+**English** | [简体中文](README.zh-CN.md)
+
 Reads structured admission records (`input.json`), calls the configured (designated) LLM, and writes
 `output.json` with, per case: **Case Features**, **Diagnostic Discussion**, **Diagnostic and Treatment Plan**,
 **evidence** (statement → source ids) and **review items** (missing / conflicting / to-verify).
