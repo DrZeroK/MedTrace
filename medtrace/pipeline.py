@@ -20,13 +20,16 @@ from functools import lru_cache
 from pathlib import Path
 
 from . import verify as V
-from .config import PROMPT_VERSION
+from .config import prompt_version
 from .inputs import Case
 from .ledger import build_ledger, digest, Ledger
 from .llm import BudgetExceeded, CallStats, LLMError
 from .note import Note, ParseError, Statement, SECTIONS, note_from_model, parse_json_object, to_record
 
-PROMPT_DIR = Path(__file__).parent / "prompts" / PROMPT_VERSION
+
+def prompt_dir() -> Path:
+    return Path(__file__).parent / "prompts" / prompt_version()
+
 
 _I18N = {
     "en": {
@@ -71,15 +74,20 @@ _CORE_RX = {"allergy": r"(?i)allerg|过敏", "medication": r"(?i)medication|drug
 
 
 @lru_cache(maxsize=None)
+def _load_prompt(version: str, name: str, lang: str) -> str:
+    return (Path(__file__).parent / "prompts" / version / lang / f"{name}.txt").read_text("utf-8")
+
+
 def load_prompt(name: str, lang: str) -> str:
-    return (PROMPT_DIR / lang / f"{name}.txt").read_text("utf-8")
+    return _load_prompt(prompt_version(), name, lang)
 
 
 def prompt_fingerprint() -> str:
+    version = prompt_version()
     h = hashlib.sha256()
-    for p in sorted(PROMPT_DIR.rglob("*.txt")):
+    for p in sorted(prompt_dir().rglob("*.txt")):
         h.update(p.read_bytes())
-    return f"{PROMPT_VERSION}:{h.hexdigest()[:12]}"
+    return f"{version}:{h.hexdigest()[:12]}"
 
 
 def fill(template: str, **kw) -> str:

@@ -26,7 +26,25 @@ _SITE_DEPENDENT = set("扩张 肿大 压痛 增厚 异常 强化 积液 结节 �
 _TEST_NAME = re.compile(r"(?i)^(?:毒)?(?:病毒)?(?:标志物|抗体|抗原|指标|检测|筛查|系列|全套|谱|dna|rna)")
 _GENERIC_LABEL = re.compile(r"(?i)约|大小|直径|范围|长|宽|厚|高|共|为|about|approx|size|measur")   # "大小约 2.5cm" names no analyte
 _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
+_META_COMMENT = re.compile(r"(?i)not (?:be )?(?:assumed|considered|taken as|read as|interpreted)"
+                           r"|(?:不能|不可|不应|不得)(?:视为|认为|当作|作为)|(?:须|需|应|必须|请)(?:予以)?(?:核实|确认|复查)")
 _SHORT = {"case_features": "features", "diagnostic_discussion": "discussion", "treatment_plan": "plan"}
+
+
+def _assertive_text(text: str) -> tuple[str, str]:
+    """(checked content, positive view) for a statement. Clauses reporting information as missing/pending, and
+    clauses telling the reader how to treat such information, are statements about the record, not findings:
+    they are dropped before the negation and grounding checks. Sentences with nothing to drop are used verbatim,
+    so negation scope across commas ("Denies chest pain, hemoptysis.") is unchanged."""
+    asserted, positive = [], []
+    for sent in T.split_sentences(text):
+        clauses = re.split(r"[，,]", sent)
+        kept = [c.strip() for c in clauses if c.strip() and not T.has_missing_cue(c) and not _META_COMMENT.search(c)]
+        kept = sent if len(kept) == len([c for c in clauses if c.strip()]) else "，".join(kept)
+        if kept.strip():
+            asserted.append(kept)
+            positive.append(T.clearly_positive_text(kept))
+    return "\n".join(asserted), "\n".join(positive)
 
 
 @dataclass
@@ -86,9 +104,17 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                     f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
 
     # ---- negation
+    # A clause that reports something as not documented / pending is a statement ABOUT the record, not a
+    # negative finding: it is exempt from the negation and grounding checks. The rest of the statement is still
+    # checked, so a pending item cannot shield a clinical assertion in the same statement. (Seen on the first
+    # real-model run: "资料中未记录生命体征、药物过敏史" was flagged as an undocumented negative.)
     meta_missing = sec == "features" and T.has_missing_cue(text)
-    if sec in ("features", "discussion") and not meta_missing:
+    if sec == "features":
+        checked, pos = _assertive_text(text)
+    else:
+        checked = text
         pos = "\n".join(T.clearly_positive_text(s) for s in T.split_sentences(text))
+    if sec in ("features", "discussion") and checked.strip():
         for term in L.neg_only:
             if term in _SITE_DEPENDENT or len(term) < 2:
                 continue
@@ -97,17 +123,15 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             if i >= 0 and not _TEST_NAME.match(pos[i + len(term):]):
                 add("negation_flip", HIGH if sec == "features" else LOW,
                     f"records document {term!r} only as absent/denied, but it is stated here without negation")
-    # A statement that reports something as not documented / pending is a statement ABOUT the record, not a
-    # negative finding: it must not be read as "X is absent" or as weakly supported content. (Seen on the first
-    # real-model run: "资料中未记录生命体征、药物过敏史" was flagged as an undocumented negative.) What it must not
-    # do is claim a core item is undocumented when the records do document it.
+    # What a missing-information statement must not do is claim a core item is undocumented when the records
+    # do document it.
     if meta_missing and T.support(text, L.tokens_all) < 0.9:      # >= 0.9: the records' own sentence, quoted (e.g. "具体用药不详")
         clauses = re.split(r"[，,；;。.！？\n]", text)
         for key, rx in _CORE_DOC.items():
             if key not in {u["key"] for u in L.undocumented} and any(rx.search(c) and _SAYS_ABSENT.search(c) for c in clauses):
                 add("false_missing", HIGH, f"states that {key} information is not documented, but the records contain it")
-    if sec == "features" and not meta_missing:
-        for term in T.negated_terms(text):
+    if sec == "features" and checked.strip():
+        for term in T.negated_terms(checked):
             if term in L.neg_terms:
                 continue
             if term in _SITE_DEPENDENT:
@@ -120,15 +144,15 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records")
 
     # ---- lexical grounding of case features
-    if sec == "features" and not meta_missing:
+    if sec == "features" and checked.strip():
         cited = set().union(*[L.tokens_by_source.get(s, set()) for s in st.sources]) if st.sources else set()
-        s_all = T.support(text, L.tokens_all)
-        thr = 0.35 if T.detect_lang(text) == "zh" else 0.5
-        if T.has_normal_cue(text) and s_all < thr + 0.15:
+        s_all = T.support(checked, L.tokens_all)
+        thr = 0.35 if T.detect_lang(checked) == "zh" else 0.5
+        if T.has_normal_cue(checked) and s_all < thr + 0.15:
             add("undocumented_normal", MEDIUM, "states a normal finding that is weakly supported by the records")
         elif s_all < thr:
             add("low_support", MEDIUM, f"statement content is weakly supported by the records (overlap {s_all:.2f})")
-        elif cited and T.support(text, cited) < s_all - 0.3:
+        elif cited and T.support(checked, cited) < s_all - 0.3:
             add("weak_attribution", LOW, "the cited source supports this statement less well than other sources")
 
     # ---- proposed vs completed

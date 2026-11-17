@@ -8,11 +8,21 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass, field, asdict
+from functools import lru_cache
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PIPELINES = ("A0", "A1", "A2", "S2", "A3")  # A2 == strategy S1 (default), A3 == strategy S3
-PROMPT_VERSION = os.environ.get("PROMPT_VERSION", "v2")     # v1 = original long-form prompts (kept for comparison)
+DEFAULT_PROMPT_VERSION = "v2"
+
+
+@lru_cache(maxsize=1)
+def prompt_version() -> str:
+    """v2 concise (default) | v1 original long-form. Resolved on first use, after .env is read: evaluating this
+    at import time silently ignored a PROMPT_VERSION that lives only in .env (modules import before load_config).
+    Call .cache_clear() if the environment changes within one process."""
+    load_dotenv_files()
+    return str(_get("PROMPT_VERSION", default=DEFAULT_PROMPT_VERSION)).strip() or DEFAULT_PROMPT_VERSION
 
 
 def load_dotenv_files() -> None:

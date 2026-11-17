@@ -193,6 +193,13 @@ class Verifier(unittest.TestCase):
         two = {"case_id": 1, "sources": [{"source_id": "a", "content": "钼靶：肿块大小约2.2cm。超声：肿块大小约2.5cm。"}]}
         self.assertNotIn("value_label_mismatch", codes("钼靶示肿块，大小约2.5cm。", sources=("a",), case=two))
 
+    def test_missing_information_clause_does_not_shield_the_rest(self):
+        # regression (review P2): a pending clause used to exempt the whole statement from every check
+        self.assertIn("negation_flip", codes("Chest pain. Blood cultures pending."))
+        self.assertIn("negation_flip", codes("Chest pain, blood cultures pending."))
+        zh = {"case_id": 1, "sources": [{"source_id": "a", "content": "患者否认胸痛。血培养待回报。"}]}
+        self.assertIn("negation_flip", codes("胸痛。血培养待回报。", sources=("a",), case=zh))
+
     def test_no_false_alarm_on_faithful_paraphrase(self):
         self.assertEqual(codes("68-year-old man with 3 days of fever and cough; denies chest pain and hemoptysis.", sources=("S1",)), set())
         self.assertEqual(codes("Recommend repeat potassium in 6 hours and oxygen to keep SpO2 above 94%.", "treatment_plan"), set())
@@ -530,6 +537,29 @@ class EndToEnd(unittest.TestCase):
         self.assertEqual(p.returncode, 0, p.stderr)
         rec = json.loads((Path(d) / "output.json").read_text("utf-8"))[0]
         self.assertEqual(schema_errors(rec), [])
+
+    def test_prompt_version_resolved_after_dotenv(self):
+        # regression (review P2): PROMPT_VERSION was read at import time, before .env was loaded
+        from medtrace import config as C
+        from medtrace import pipeline as P
+        d = tempfile.mkdtemp()
+        (Path(d) / ".env").write_text("PROMPT_VERSION=v1\n", "utf-8")
+        before = set(os.environ)
+        old_cwd, old = os.getcwd(), os.environ.pop("PROMPT_VERSION", None)
+        try:
+            os.chdir(d)
+            C.prompt_version.cache_clear()
+            self.assertEqual(C.prompt_version(), "v1")
+            self.assertEqual(P.prompt_dir().name, "v1")
+            self.assertTrue((P.prompt_dir() / "en" / "a0.txt").is_file())
+            self.assertTrue(P.prompt_fingerprint().startswith("v1:"))
+        finally:
+            os.chdir(old_cwd)
+            C.prompt_version.cache_clear()
+            for k in set(os.environ) - before:
+                os.environ.pop(k, None)
+            if old is not None:
+                os.environ["PROMPT_VERSION"] = old
 
     def test_strict_exit_and_envelope(self):
         p, out, _ = self._run({"cases": [CASE]}, {"MOCK_FAULTS": "bad_json:1", "STRICT_EXIT": "1"})
