@@ -1,0 +1,58 @@
+[
+  {
+    "topic": "肺炎",
+    "source": "https://www.nice.org.uk/guidance/ng250/chapter/Recommendations",
+    "version_candidate": "NG250",
+    "license_status": "pending",
+    "clinical_review": "pending"
+  },
+  {
+    "topic": "慢阻肺急性加重",
+    "source": "https://goldcopd.org/2026-gold-report-and-pocket-guide/",
+    "version_candidate": "GOLD 2026",
+    "license_status": "pending",
+    "clinical_review": "pending"
+  },
+  {
+    "topic": "急性冠脉综合征",
+    "source": "https://www.nice.org.uk/guidance/ng185/chapter/Recommendations",
+    "version_candidate": "NG185",
+    "license_status": "pending",
+    "clinical_review": "pending"
+  },
+  {
+    "topic": "心力衰竭",
+    "source": "https://www.nice.org.uk/guidance/cg187",
+    "version_candidate": "CG187",
+    "license_status": "pending",
+    "clinical_review": "pending"
+  },
+  {
+    "topic": "糖尿病急性代谢问题",
+    "source": "https://doi.org/10.2337/dci24-0032",
+    "version_candidate": "2024 consensus",
+    "license_status": "pending",
+    "clinical_review": "pending"
+  },
+  {
+    "topic": "低血糖",
+    "source": "https://doi.org/10.2337/dc26-s006",
+    "version_candidate": "ADA 2026 section 6",
+    "license_status": "pending",
+    "clinical_review": "pending"
+  },
+  {
+    "topic": "急性肾损伤",
+    "source": "https://www.nice.org.uk/guidance/ng148/chapter/Recommendations",
+    "version_candidate": "NG148",
+    "license_status": "pending",
+    "clinical_review": "pending"
+  },
+  {
+    "topic": "电解质紊乱",
+    "source": "https://guidelines.ukkidney.org/hyperkalaemia/",
+    "version_candidate": "UKKA candidate; freeze exact version before approval",
+    "license_status": "pending",
+    "clinical_review": "pending"
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "batch_id": "2026-11-17-cn-review-01",
+  "checked_at": "2026-11-17T12:20:26.756116+00:00",
+  "review_kind": "AI source and content pre-review, not legal/clinical approval",
+  "counts": {
+    "textbook_fulltext_required": 300,
+    "analyte_method_review_required": 30,
+    "scope_revision_required": 9,
+    "version_and_fulltext_required": 3,
+    "source_alignment_checked": 9,
+    "fulltext_required": 3,
+    "blocked_placeholder": 10
+  },
+  "sources": 13,
+  "entries": 364,
+  "approved": 0,
+  "snapshots": {
+    "sources.json": "c6aac628573c981324f9b48da530d847a4c6568cf3344db801dc00d9ecc68579",
+    "entries.jsonl": "ac33a87883b367721d21168f17e01d0616599daf4e67f57e2143f328a78885c4"
+  },
+  "current_hashes": {
+    "entries.jsonl": "f02ba060fac1e2de20ff9874c2774b37cc9b574c9008d6aa37fbc7ae8ced8824",
+    "sources.json": "2084dfa1bdca9694e97aaae8ddf5daaa7c0315cdc237c84b70111c136097f742"
+  }
+}

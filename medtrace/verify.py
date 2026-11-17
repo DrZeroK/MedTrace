@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass, asdict
 
 from . import textutil as T
+from .knowledge import approved_quote
 from .inputs import Case
 from .ledger import Ledger, numerics
 from .note import Note, Statement, SECTIONS
@@ -26,6 +27,12 @@ _SITE_DEPENDENT = set("扩张 肿大 压痛 增厚 异常 强化 积液 结节 �
 # Record section headers, not clinical findings: a header on its own line ("个人史\n无特殊") is split from its
 # negation, so "个人史无特殊" must not be read as negating a positive finding. Section summaries are reviewer judgement.
 _SECTION_TERMS = {"个人", "个人史", "既往", "既往史", "家族", "家族史", "体格检查", "检查检验", "辅助检查", "专科检查", "婚育史", "月经史", "月经婚育史"}
+# Leading document-structure labels ("实验室检查：钾3.7") are formatting, not clinical content: they add
+# out-of-vocabulary bigrams that depressed lexical support and caused low_support false alarms. Strip only
+# a colon-suffixed, known section label at the very start; measurement labels such as "血压：…" are kept.
+_LABEL_PREFIX = re.compile(r"^\s*(?:实验室检查|检查检验|体格检查|辅助检查|专科检查|生命体征|既往史|现病史|个人史|家族史|"
+                           r"实验室|检验|检查|查体|病史|主诉|辅助|影像|心电图|一般情况|"
+                           r"history|physical exam|examination|vitals?|laboratory|labs?|investigations)\s*[：:]\s*", re.I)
 _TEST_NAME = re.compile(r"(?i)^(?:毒)?(?:病毒)?(?:标志物|抗体|抗原|指标|检测|筛查|系列|全套|谱|dna|rna)")
 _GENERIC_LABEL = re.compile(r"(?i)约|大小|直径|范围|长|宽|厚|高|共|为|右眼|左眼|双眼|左侧|右侧|about|approx|size|measur")   # "大小约 2.5cm" / "右眼" name no analyte
 _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
@@ -85,8 +92,19 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         elif sec == "features" and dt.date() not in L.dates:
             add("date_not_in_source", MEDIUM, f"date {dt:%Y-%m-%d} does not appear in the records")
 
+    quoted_knowledge = sec != "features" and approved_quote(st, L.knowledge_cards)
+    if L.knowledge_enabled:
+        if any(k not in L.knowledge_cards for k in st.knowledge_ids):
+            add("invalid_knowledge_ref", MEDIUM, "knowledge reference was not supplied for this case")
+        if sec == "features" and st.knowledge_ids:
+            add("knowledge_in_features", HIGH, "knowledge cannot establish patient facts")
+        if st.basis == "knowledge" and not st.knowledge_ids:
+            add("missing_knowledge_ref", MEDIUM, "knowledge statement has no knowledge citation")
+        if st.basis == "knowledge" and T.extract_numbers(text) and not quoted_knowledge:
+            add("unverified_knowledge_number", MEDIUM, "numeric knowledge must quote an approved supplied card exactly")
+
     # ---- numbers and units
-    if sec in ("features", "discussion"):
+    if sec in ("features", "discussion") and not quoted_knowledge:
         for val, unit, raw in T.extract_numbers(T.mask_dates(text, year or 2000)):
             if sec == "discussion" and unit is None:
                 continue      # reasoning text legitimately carries knowledge numbers (ages, scores, "24小时尿", "11β-…");
@@ -99,7 +117,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                     f"{raw!r}: records give this value with unit(s) {sorted(L.units[val])}")
 
     # ---- a knowledge statement must not carry patient-specific values from the records
-    if st.basis == "knowledge" and sec in ("discussion", "plan"):
+    if st.basis == "knowledge" and sec in ("discussion", "plan") and not quoted_knowledge:
         for val, unit, raw in T.extract_numbers(T.mask_dates(text, year or 2000)):
             if val in L.numbers:
                 add("knowledge_record_value", MEDIUM,
@@ -164,13 +182,14 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     # ---- lexical grounding of case features
     if sec == "features" and checked.strip():
         cited = set().union(*[L.tokens_by_source.get(s, set()) for s in st.sources]) if st.sources else set()
-        s_all = T.support(checked, L.tokens_all)
+        grounded = _LABEL_PREFIX.sub("", checked)   # ignore document-structure labels when scoring support
+        s_all = T.support(grounded, L.tokens_all)
         thr = 0.35 if T.detect_lang(checked) == "zh" else 0.5
         if T.has_normal_cue(checked) and s_all < thr + 0.15:
             add("undocumented_normal", MEDIUM, "states a normal finding that is weakly supported by the records")
         elif s_all < thr:
             add("low_support", MEDIUM, f"statement content is weakly supported by the records (overlap {s_all:.2f})")
-        elif cited and T.support(checked, cited) < s_all - 0.3:
+        elif cited and T.support(grounded, cited) < s_all - 0.3:
             add("weak_attribution", LOW, "the cited source supports this statement less well than other sources")
 
     # ---- proposed vs completed

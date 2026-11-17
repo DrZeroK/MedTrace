@@ -22,7 +22,8 @@ from medtrace.ledger import build_ledger                              # noqa: E4
 from medtrace.llm import CallStats, LLMClient, LLMError                # noqa: E402
 from medtrace.mock_llm import MockLLM                                 # noqa: E402
 from medtrace.mock_server import make_server                          # noqa: E402
-from medtrace.note import Note, ParseError, Statement, note_from_model, parse_json_object, schema_errors, to_record  # noqa: E402
+from medtrace.note import (Note, ParseError, Statement, note_from_model, parse_json_object,
+                           schema_errors, to_record, to_official_record, official_schema_errors)  # noqa: E402
 from medtrace.pipeline import Pipeline, apply_patches                 # noqa: E402
 from medtrace.update import diff_cases                                # noqa: E402
 
@@ -33,7 +34,7 @@ CASE = {"case_id": "T-1", "record_cutoff": "2026-03-02T18:00:00", "sources": [
 
 
 def cfg(**kw):
-    c = Config(api_base="mock://", pipeline="A2", max_calls_per_case=2)
+    c = Config(api_base="mock://", pipeline="A2", max_calls_per_case=2, output_protocol="legacy")
     for k, v in kw.items():
         setattr(c, k, v)
     return c
@@ -131,7 +132,9 @@ class Inputs(unittest.TestCase):
         self.assertGreaterEqual(len(c.warnings), 3)
 
     def test_envelopes_and_bad_files(self):
-        with tempfile.TemporaryDirectory() as d:
+        # Retain test artifacts: project policy forbids permanent exit cleanup.
+        from contextlib import nullcontext
+        with nullcontext(tempfile.mkdtemp(prefix="medtrace-test-")) as d:
             p = Path(d) / "in.json"
             for doc, env in (([CASE], "list"), ({"cases": [CASE]}, "cases"), (CASE, "single")):
                 p.write_text(json.dumps(doc), "utf-8")
@@ -587,7 +590,7 @@ class EndToEnd(unittest.TestCase):
         d = tempfile.mkdtemp()
         inp, out = Path(d) / "input.json", Path(d) / "output.json"
         inp.write_text(raw if raw is not None else json.dumps(doc, ensure_ascii=False), "utf-8")
-        e = {**os.environ, "LLM_API_BASE": "mock://", "LOG_DIR": str(Path(d) / "logs"), "INPUT_PATH": str(inp), "OUTPUT_PATH": str(out), **(env or {})}
+        e = {**os.environ, "LLM_API_BASE": "mock://", "OUTPUT_PROTOCOL": "legacy", "LOG_DIR": str(Path(d) / "logs"), "INPUT_PATH": str(inp), "OUTPUT_PATH": str(out), **(env or {})}
         p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=e, capture_output=True, text=True, timeout=120)
         return p, out, Path(d)
 
@@ -678,7 +681,7 @@ class EndToEnd(unittest.TestCase):
         p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=env, capture_output=True, text=True, timeout=120)
         self.assertEqual(p.returncode, 0, p.stderr)
         rec = json.loads((Path(d) / "output.json").read_text("utf-8"))[0]
-        self.assertEqual(schema_errors(rec), [])
+        self.assertEqual(official_schema_errors(rec), [])    # .env.example now defaults to the official protocol
 
     def test_prompt_version_resolved_after_dotenv(self):
         # regression (review P2): PROMPT_VERSION was read at import time, before .env was loaded
@@ -852,11 +855,160 @@ class Packaging(unittest.TestCase):
             zf.extractall(ext)
         env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "OUTPUT_", "PIPELINE", "MOCK_"))}
         env["LLM_API_BASE"] = "mock://"
-        p = subprocess.run([sys.executable, "main.py", "--input", "input.example.json", "--output", "output.json"],
+        p = subprocess.run([sys.executable, str(ext / "main.py"), "--input", str(ext / "input.example.json"), "--output", str(ext / "output.json")],
                            cwd=ext, env=env, capture_output=True, text=True, timeout=120)
         self.assertEqual(p.returncode, 0, p.stderr)
         recs = json.loads((ext / "output.json").read_text("utf-8"))
-        self.assertEqual(schema_errors(recs[0]), [])
+        self.assertEqual(official_schema_errors(recs[0]), [])   # package runs the default official protocol
+
+
+class VerifierFalseAlarmFixes(unittest.TestCase):
+    """Regressions for the two D5 false-alarm sources found on the 5-case scoring run."""
+
+    def test_section_label_prefix_not_low_support(self):
+        # "实验室检查：…" prefix once added out-of-vocabulary bigrams and tipped overlap below 0.35.
+        case = parse_case({"case_id": "X", "sources": [
+            {"source_id": "S1", "content": "钾3.7mmol/L，TSH结果待回报。"}]}, 0)
+        L = build_ledger(case)
+        st = Statement("实验室检查：钾3.7mmol/L，TSH结果待回报。", ["S1"])
+        self.assertNotIn("low_support", {f.code for f in V.check_statement("case_features", 0, st, case, L)})
+
+    def test_missing_cue_not_low_support(self):
+        # "未提及" was not a recognised missing cue, so an absence-report was scored as a weak finding.
+        case = parse_case({"case_id": "X", "sources": [
+            {"source_id": "S1", "content": "男性，68岁，心悸。"}]}, 0)
+        L = build_ledger(case)
+        st = Statement("药物过敏史及当前用药情况记录中未提及。", ["S1"])
+        self.assertTrue(T.has_missing_cue(st.text))
+        self.assertNotIn("low_support", {f.code for f in V.check_statement("case_features", 0, st, case, L)})
+
+    def test_knowledge_basis_normalised_to_inference(self):
+        # A statement labelled 'knowledge' that reasons over a patient value is reclassified by the
+        # pipeline so it neither fires knowledge_record_value nor mislabels the official evidence kind.
+        from medtrace.pipeline import _normalise_basis
+        from medtrace.note import SECTIONS
+        c = parse_case({"case_id": "X", "sources": [
+            {"source_id": "S1", "content": "肌酐132μmol/L。"}]}, 0)
+        L = build_ledger(c)
+        note = note_from_model({"case_features": ["肌酐132μmol/L"] ,
+                                "diagnostic_discussion": [{"text": "肌酐132μmol/L提示肾功能受损。",
+                                                            "basis": "knowledge", "sources": ["S1"]}],
+                                "treatment_plan": ["复查肾功能。"]})
+        self.assertEqual(note.sections["diagnostic_discussion"][0].basis, "knowledge")
+        changed = _normalise_basis(note, L)
+        self.assertEqual(changed, 1)
+        self.assertEqual(note.sections["diagnostic_discussion"][0].basis, "inference")
+        fs = V.check_statement("diagnostic_discussion", 0, note.sections["diagnostic_discussion"][0], c, L)
+        self.assertNotIn("knowledge_record_value", {f.code for f in fs})
+
+    def test_official_evidence_kind_by_section(self):
+        # Features -> fact; discussion/plan -> inference even when the model left basis empty or set 'record'.
+        n = note_from_model({"case_features": [{"text": "发热。", "sources": ["S1"]}],
+                             "diagnostic_discussion": [{"text": "考虑感染，病因待查。", "sources": ["S1"], "basis": "record"}],
+                             "treatment_plan": [{"text": "复查血常规。", "sources": ["S1"]}]})
+        rec = to_official_record(n, parse_case(CASE, 0), status="success")
+        kinds = {e["statement"]: e["kind"] for e in rec["medical_record"]["evidence"]}
+        self.assertEqual(kinds["发热。"], "fact")
+        self.assertEqual(kinds["考虑感染，病因待查。"], "inference")
+        self.assertEqual(kinds["复查血常规。"], "inference")
+        self.assertEqual(official_schema_errors(rec), [])
+
+
+class OfficialProtocol(EndToEnd):
+    """Provider-spec mode: MODEL_NAME/ENDPOINT, keyless, official output schema (Q3/Q8/Q9 + tech spec)."""
+
+    def test_config_dual_mode_defaults(self):
+        from medtrace.config import load_config
+        keys = ("ENDPOINT", "MODEL_NAME", "LLM_API_BASE", "LLM_API_KEY", "LLM_MODEL", "OUTPUT_PROTOCOL")
+        old = {k: os.environ.get(k) for k in keys}
+        try:
+            for k in keys:
+                os.environ.pop(k, None)
+            c = load_config()
+            self.assertTrue(c.official)                       # official is the default output protocol
+            self.assertEqual(c.output_protocol, "official")
+            os.environ["OUTPUT_PROTOCOL"] = "legacy"          # legacy remains available as an explicit opt-in
+            self.assertFalse(load_config().official)
+            os.environ["ENDPOINT"] = "http://host:8000/v1/chat/completions"
+            os.environ["MODEL_NAME"] = "qwen-official"
+            os.environ["OUTPUT_PROTOCOL"] = "official"
+            c = load_config()
+            self.assertTrue(c.official)
+            self.assertEqual(c.endpoint, "http://host:8000/v1/chat/completions")
+            self.assertEqual(c.model, "qwen-official")
+        finally:
+            for k, v in old.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
+    def test_endpoint_used_verbatim_no_auth_header(self):
+        # Official ENDPOINT is used verbatim (no path appended) and needs no key.
+        c = Config(endpoint="http://host:8000/v1/chat/completions", model="qwen", api_key="")
+        client = LLMClient(c)
+        self.assertEqual(client.url, "http://host:8000/v1/chat/completions")
+        self.assertFalse(client.cfg.api_key)
+        # Legacy base still appends the path.
+        c2 = Config(api_base="http://host:8000/v1", model="qwen")
+        self.assertEqual(LLMClient(c2).url, "http://host:8000/v1/chat/completions")
+
+    def test_endpoint_overrides_mock_base(self):
+        # PR#4 P1: an explicit ENDPOINT must reach the real service even when LLM_API_BASE=mock:// (copied .env.example).
+        c = Config(endpoint="http://host:8000/v1/chat/completions", api_base="mock://", model="qwen")
+        client = LLMClient(c)
+        self.assertIsNone(client.mock)
+        self.assertEqual(client.url, "http://host:8000/v1/chat/completions")
+
+    def test_endpoint_requires_model_name(self):
+        # PR#4 P2: ENDPOINT without MODEL_NAME is a config error (official runner exits 2), not an empty model value.
+        for bad in ("", "   "):
+            with self.assertRaises(LLMError):
+                LLMClient(Config(endpoint="http://host:8000/v1/chat/completions", model=bad))
+        LLMClient(Config(endpoint="http://host:8000/v1/chat/completions", model="qwen", api_key=""))  # keyless + model OK
+        self.assertIsNotNone(LLMClient(Config(api_base="mock://")).mock)                              # mock needs no model
+
+    def test_official_record_success_shape(self):
+        note = note_from_model({
+            "case_features": ["Fever and cough [[S1]]", "No chest pain [[S1]]", "Temp 38.5 [[S2]]"],
+            "diagnostic_discussion": ["Likely infection [[S2]]", "Uncertain source"],
+            "treatment_plan": ["Observe and recheck [[S2]]", "Recheck labs [[S3]]"],
+            "evidence": [{"statement": "Fever", "source_ids": ["S1"]}], "review_items": ["check allergy"]})
+        rec = to_official_record(note, parse_case(CASE, 0), status="success")
+        self.assertEqual(official_schema_errors(rec), [], official_schema_errors(rec))
+        self.assertEqual(rec["status"], "success")
+        self.assertIsNone(rec["error"])
+        mr = rec["medical_record"]
+        self.assertIn("plan", mr) and self.assertNotIn("treatment_plan", mr)
+        self.assertTrue(all(isinstance(x, str) for x in mr["review_items"]))
+        self.assertTrue(3 <= len(mr["evidence"]) <= 5)
+        self.assertTrue(all(e["kind"] in ("fact", "inference") for e in mr["evidence"]))
+
+    def test_official_record_failed_shape(self):
+        rec = to_official_record(Note(), parse_case(CASE, 0), status="failed",
+                                 error={"code": "MODEL_TIMEOUT", "message": "timed out"})
+        self.assertEqual(rec["status"], "failed")
+        self.assertIsNone(rec["medical_record"])
+        self.assertEqual(rec["error"]["code"], "MODEL_TIMEOUT")
+
+    def test_official_end_to_end(self):
+        # Mock model via legacy LLM_API_BASE still works; OUTPUT_PROTOCOL=official only changes the output shape.
+        p, out, d = self._run([CASE], {"OUTPUT_PROTOCOL": "official"})
+        self.assertEqual(p.returncode, 0, p.stderr)
+        recs = json.loads(out.read_text("utf-8"))
+        self.assertIsInstance(recs, list)
+        self.assertEqual(official_schema_errors(recs[0]), [], official_schema_errors(recs[0]))
+
+    def test_official_exit_code_config_missing(self):
+        d = tempfile.mkdtemp()
+        (Path(d) / "input.json").write_text(json.dumps([CASE]), "utf-8")
+        env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "ENDPOINT", "MODEL_NAME", "OUTPUT_"))}
+        # Blank every model-config key so the workspace .env fallback cannot supply one.
+        for k in ("ENDPOINT", "MODEL_NAME", "LLM_API_BASE", "LLM_API_KEY", "LLM_MODEL"):
+            env[k] = ""
+        env["OUTPUT_PROTOCOL"] = "official"
+        p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(p.returncode, 2, p.stderr)
 
 
 if __name__ == "__main__":

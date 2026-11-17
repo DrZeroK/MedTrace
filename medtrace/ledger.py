@@ -69,6 +69,8 @@ class Ledger:
     label_values: dict = field(default_factory=dict)    # measurement label -> {values recorded under that label}
     undocumented: list = field(default_factory=list)    # core elements with no mention at all
     lang: str = "en"
+    knowledge_cards: dict = field(default_factory=dict)
+    knowledge_enabled: bool = False
 
     def by_polarity(self, p):
         return [f for f in self.facts if f.polarity == p]

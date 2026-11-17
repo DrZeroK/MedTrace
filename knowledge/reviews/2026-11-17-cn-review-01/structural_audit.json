@@ -1,0 +1,15 @@
+{
+  "duplicate_term_titles": [],
+  "ambiguous_exact_aliases": {},
+  "terms_with_explicit_aliases": 14,
+  "lab_parser_issues": [
+    {
+      "id": "L029",
+      "title": "国际标准化比值",
+      "unit": "1",
+      "issue": "current measurement parser cannot reliably associate this unit; no clinical enablement"
+    }
+  ],
+  "draft_publish_guard": "no approved entries; obtain content review before publishing",
+  "knowledge_tests": "15 passed on 2026-11-17"
+}
