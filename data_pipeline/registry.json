@@ -178,6 +178,23 @@
    "relevance": "KUAKE: none (search queries, not clinical records). Lymph-IE&AC: low as-is - each text states the diagnosis, treatment and outcome, so it cannot serve as admission-time input without a clinician cutting each report at admission; single disease family",
    "limits": "Lymph-IE&AC would need manual, clinician-reviewed truncation per case to avoid leaking the final diagnosis",
    "status": "inspected, not used"
+  },
+  {
+   "id": "cblue_batch5",
+   "name": "MedDG, MedLit-PICOS, TCM-syndrome, TCMBench",
+   "rank": 11,
+   "url": "https://tianchi.aliyun.com/dataset/dataDetail?dataId=95414",
+   "paper": "ACL 2022, aclanthology.org/2022.acl-long.544",
+   "content": "MedDG: 17.8K online gastroenterology consultations (next-reply generation). MedLit-PICOS: PICOS spans in Chinese paper titles and abstracts. TCM-syndrome: 250 classical TCM case vignettes, 200 with expert-listed core clinical information, pathomechanism and syndrome answers. TCMBench: TCM licensing-exam questions and NLI",
+   "provenance": "online chat, journal abstracts, published TCM case collections, exam questions; none is a hospital admission record",
+   "license": "Tianchi terms accepted by the downloader; the accompanying README gives citations only, no licence",
+   "verified": "team-supplied archives and README inspected 2026-11-17",
+   "access": "Tianchi account",
+   "redistribution": "not permitted",
+   "permitted_use_here": [],
+   "relevance": "MedDG, MedLit-PICOS, TCMBench: none. TCM-syndrome: low - the only upload with expert-listed key clinical facts per case (verbatim phrases), so it could serve as a small external key-fact-coverage check for Case Features, but the cases are TCM vignettes (pulse, tongue, syndrome reasoning) rather than modern admission records",
+   "limits": "TCM reasoning targets do not correspond to the diagnostic discussion expected in an initial progress note",
+   "status": "inspected, not used; TCM-syndrome noted as an optional key-fact-coverage check"
   }
  ]
 }
