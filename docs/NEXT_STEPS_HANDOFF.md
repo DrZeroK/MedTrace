@@ -194,15 +194,18 @@ Legend: **[ORG]** needs organizer clarification · **[MODEL]** needs designated-
 - Acceptance: reported high-severity precision on the second, untouched sample; no regression on CHIP-CDEE dev F1 (0.982) or the verbatim zero-false-alarm checks.
 
 #### WP-9 Final held-out comparison and clinician review **[CLIN]**
+**In progress — materials ready, awaiting clinicians + designated model.** A proxy A0 vs A2 comparison (prompts v2) was run on the CMB-Clin **validation** split (17 cases, commercial qwen3.5-27b, public data) and a two-reviewer blinded packet exported to `eval/results/cmbclin_val_proxy/review/` (packet.md, scores_R1/R2.csv, sealed key.json). Automatic proxies: A0 dx_hit 53.8% / coverage 86.2% / 2 notes with high findings; A2 dx_hit 46.2% / coverage 90.8% / 1 note (n=13 eligible; not significant). The **test split (30 cases) is deliberately preserved** for the final comparison on the designated model. Clinician scoring/adjudication, rubric sign-off, and the 716+1 `review_required` case decisions are outstanding human tasks.
 - Run the pre-registered comparison once on the CMB-Clin test split (30 cases): baseline A0 vs default A2 (prompts v2). Export with `python -m eval.blind_review export <run>` for two reviewers using `docs/CLINICAL_RUBRIC.md`; score and adjudicate. A clinician must also decide the 716 TypicalCase-DC cases and 1 CMB-Clin case held as `review_required`, and sign off the rubric.
 
 #### WP-10 Mark knowledge-derived statements
+**Done.** Optional `basis` (record/knowledge/inference) on discussion/plan statements, carried into evidence when set; verifier flags `knowledge_record_value`; prompts v2 a1 and mock updated; off-enum basis dropped at parse. Validated on the real-model holdout (WP-8).
 *Depends on: nothing; prompt change needs WP-7 or another model run to validate.*
 - Files: `medtrace/prompts/v2/*/a1.txt`, `medtrace/note.py`, `medtrace/verify.py`, tests.
 - Steps: add an optional per-statement field `basis: "record" | "knowledge" | "inference"` for discussion and plan statements; carry it into `evidence` entries; require `sources` for `record`, forbid patient-specific numbers in `knowledge` statements (verifier check). Keep the three text fields unchanged.
 - Acceptance: schema still validates; mock updated; a test shows a `knowledge` statement containing a record value is flagged.
 
 #### WP-11 Python 3.11 and continuous checks
+**Done.** `.github/workflows/ci.yml` runs the unittest suite (incl. the package smoke test) on Python 3.10/3.11/3.13 with `requirements.txt`, mock only; all green (actions on Node 24). No 3.11-specific breakage.
 - Add a GitHub Actions workflow running the unit tests on Python 3.10, 3.11 and 3.13 with only `requirements.txt` installed, plus the WP-4 package smoke test. Fix whatever 3.11 surfaces.
 
 ### P2 — optional improvements, only with measured benefit
