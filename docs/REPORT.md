@@ -5,7 +5,7 @@
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic
 fact ledger and verifier, an offline mock model with fault injection, an evaluation set of 16 annotated synthetic
 cases (11 development, 5 held out; 12 English, 4 Chinese; two per category), 7 one-fact perturbation tests,
-ablation / perturbation / blinded-review tooling, and 70 automated tests.
+ablation / perturbation / blinded-review tooling, and 83 automated tests.
 
 ## 2. What has been measured — and what has not
 
@@ -169,6 +169,45 @@ across all real runs it fired 4 times, every time on a false alarm. Findings are
 
 Not yet done with the real model: validation/test splits, TypicalCase-DC, the synthetic set's `must_not` checks,
 perturbation tests, S2 and A3, any blinded clinician review.
+
+### 2.7 Verifier precision on unseen prose (WP-8, TypicalCase-DC, real qwen3.5-27b)
+
+Method: generate notes on a 20-case tier-A dev sample, hand-check every high-severity finding against the source
+record, fix only patterns seen at least twice, replay (`eval.reverify`), then measure once on a **disjoint**
+40-case tier-A dev sample (`--offset 20 --limit 40`, zero overlap with the tuning sample). Public data only.
+
+Tuning sample (20 cases): A0 raised 13 high-severity findings, A2 raised 9. On reading the records, **all 22 were
+false alarms**, in six recurring patterns:
+1. number_not_in_source — the record glues an analyte subscript to its value (`PCO232.4 mmHg`, `维生素B12766.49pg/ml`);
+   the permissive source extractor read 232.4 / 12766.49, hiding the true 32.4 / 766.49. Fixed by admitting the
+   suffix values after 1–2 leading digits (source superset).
+2. number_not_in_source — `×10^6/L` was not a recognised unit, so the exponent digits 10 and 6 were flagged.
+   Fixed by a general scientific-notation unit pattern and superscript normalisation (`×106/L` ≡ `×10^6/L`).
+3. value_label_mismatch — serial results over time, the same analyte under a Chinese name vs an abbreviation
+   (NT-proBNP / 氨基末端脑钠肽前体), and side labels (右眼) were flagged as swaps. Now fires only for an
+   unambiguous swap: a single-valued label whose value is positively recorded under a different single-valued analyte.
+4. negation_flip — `不会` was not a negation cue (`不会注视及追视` read as positive). Added.
+5. negation_flip — postfix absence predicates negate the preceding subject (`家族史均无特殊`, `病理征未引出`,
+   `检查检验结果暂无`, `家族史无`); the conservative positive view kept the subject. Added postfix cues.
+6. negation_flip — record section headers on their own line (`个人史\n无特殊`) are split from their negation, so
+   `个人史无特殊` looked like negating a positive finding. Section-header terms (个人/家族/体格检查/检查检验…) are
+   not clinical findings and are skipped; section summaries remain reviewer judgement.
+
+A seventh pattern (test name vs result, `大便培养及病毒检测阴性`) occurred once and was left to the reviewer per the
+"fix only patterns seen ≥2×" rule. After the fixes, replay on the tuning sample: A0 13→1 high, A2 9→0.
+
+Held-out measurement (disjoint 40 cases, A2, prompts v2): **0 high-severity findings** (28 medium, 34 low), 100%
+completed, mean latency 29 s. With no high-severity positives raised, there were no high-severity false alarms on
+unseen prose (precision is undefined at 0 positives; the result is zero false alarms, not a measured rate).
+
+Regression guards held throughout: CHIP-CDEE held-out dev F1 0.9818 (baseline 0.982), CMB-Clin 1,629 verbatim
+record sentences 0 high/medium findings, and the unit suite (83 tests) green.
+
+Caveats: zero high findings does **not** mean the notes are error-free — the lexical verifier cannot catch wrong
+inferences or omissions; diagnosis hit (strict verbatim) was 27.5% and measurement coverage 68.5% on this sample,
+and the 28 medium findings are not yet hand-labelled. One holdout note was schema-invalid because the model emitted
+an off-enum `basis` value (`conflict`); parsing now drops off-enum basis values (auxiliary field) so schema validity
+no longer depends on the model's basis wording.
 
 ## 3. Known limitations
 

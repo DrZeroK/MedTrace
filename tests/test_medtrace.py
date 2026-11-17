@@ -724,10 +724,16 @@ class BasisField(unittest.TestCase):
         self.assertNotIn("basis", feat[0])
 
     def test_invalid_basis_schema_error(self):
-        obj = json.loads(json.dumps(self.OBJ))
-        obj["diagnostic_discussion"][0]["basis"] = "bogus"
-        rec = to_record(note_from_model(obj), parse_case(CASE, 0), cfg())
+        rec = to_record(note_from_model(self.OBJ), parse_case(CASE, 0), cfg())
+        rec["evidence"][0]["basis"] = "bogus"      # the schema guard still rejects an off-enum basis in a record
         self.assertTrue(schema_errors(rec))
+
+    def test_off_enum_basis_dropped_at_parse(self):
+        obj = json.loads(json.dumps(self.OBJ))
+        obj["diagnostic_discussion"][0]["basis"] = "conflict"   # real model occasionally emits off-enum values
+        n = note_from_model(obj)
+        self.assertEqual(n.sections["diagnostic_discussion"][0].basis, "")
+        self.assertEqual(schema_errors(to_record(n, parse_case(CASE, 0), cfg())), [])
 
     def test_knowledge_statement_with_record_value_flagged(self):
         c = parse_case(CASE, 0)
@@ -745,6 +751,42 @@ class BasisField(unittest.TestCase):
         ev = [e for e in r.record["evidence"] if e["section"] in ("diagnostic_discussion", "treatment_plan")]
         self.assertTrue(ev)
         self.assertTrue(all(e.get("basis") == "record" for e in ev))
+
+
+class Wp8FalseAlarms(unittest.TestCase):
+    """Regression guards for the false-alarm patterns fixed in WP-8 (real TypicalCase-DC prose)."""
+
+    def test_glued_analyte_number_in_source(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "动脉血气：PCO232.4 mmHg，PO246 mmHg，SO270%。维生素B12766.49pg/ml。"}]}
+        self.assertEqual(codes("动脉血气：PCO2 32.4 mmHg，PO2 46 mmHg，SO2 70%。", sources=("a",), case=case) - {"missing_ref"}, set())
+        self.assertNotIn("number_not_in_source", codes("维生素B12 766.49pg/ml。", sources=("a",), case=case))
+
+    def test_scientific_notation_unit(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "白细胞计数 1.0×106/L。"}]}
+        self.assertEqual(codes("白细胞1.0×10^6/L。", sources=("a",), case=case) - {"missing_ref"}, set())
+
+    def test_serial_and_side_labels_not_mismatch(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "血常规：白细胞 36.81×10⁹/L，血红蛋白 77g/L。现病史：白细胞（WBC）13.93×10⁹/L，血红蛋白（HBG）104g/L。眼压：右眼 19.3 mmHg。眼轴右眼 25.02 mm。"}]}
+        self.assertNotIn("value_label_mismatch", codes("白细胞13.93×10⁹/L，血红蛋白104g/L。", sources=("a",), case=case))
+        self.assertNotIn("value_label_mismatch", codes("眼轴右眼 25.02 mm。", sources=("a",), case=case))
+
+    def test_single_swap_still_flagged(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "血钾 3.1 mmol/L，血钠 138 mmol/L。"}]}
+        self.assertIn("value_label_mismatch", codes("血钾 138 mmol/L。", sources=("a",), case=case))
+
+    def test_buhui_negation(self):
+        self.assertEqual(T.negated_terms("不会注视及追视"), ["注视", "追视"])
+
+    def test_postfix_negation_scope(self):
+        self.assertNotIn("家族", T.clearly_positive_text("家族史均无特殊"))
+        self.assertNotIn("家族", T.clearly_positive_text("家族史无"))
+        self.assertNotIn("病理征", T.clearly_positive_text("病理征未引出"))
+        self.assertNotIn("检查检验", T.clearly_positive_text("检查检验结果暂无"))
+
+    def test_section_header_not_finding(self):
+        case = {"case_id": 1, "sources": [{"source_id": "a", "content": "个人史\n无特殊。\n体格检查\n无特殊。"}]}
+        self.assertNotIn("negation_flip", codes("个人史无特殊。", sources=("a",), case=case))
+        self.assertNotIn("negation_flip", codes("体格检查无特殊。", sources=("a",), case=case))
 
 
 class Docs(unittest.TestCase):

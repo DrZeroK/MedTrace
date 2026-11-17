@@ -87,7 +87,9 @@ def _stmt(item) -> Statement | None:
         text = item.get("text") or item.get("statement") or item.get("content") or item.get("description") or ""
         src = _ids(item.get("sources", item.get("source_ids", item.get("source"))))
         kind = str(item.get("kind") or item.get("type") or "")
-        basis = str(item.get("basis") or "")
+        basis = str(item.get("basis") or "").strip().lower()
+        if basis not in ("record", "knowledge", "inference"):   # auxiliary field: drop off-enum values rather than fail schema
+            basis = ""
     else:
         return None
     if not isinstance(text, str):

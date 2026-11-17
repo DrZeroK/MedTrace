@@ -28,7 +28,7 @@ Commands were run from the repository root with Python 3.13.
 
 | Check | Command | Result |
 |---|---|---|
-| Unit / integration tests | `env -u LLM_API_BASE python -m unittest discover -s tests` | 70 tests, all pass (about 10 s) |
+| Unit / integration tests | `env -u LLM_API_BASE python -m unittest discover -s tests` | 83 tests, all pass (about 10 s) |
 | End-to-end on mock | `LLM_API_BASE=mock:// python main.py --input input.example.json --output /tmp/out.json` | exit 0, 1 case, schema-valid |
 | Runtime import chain | import `medtrace.runner` and list loaded project modules | only `medtrace.*`; `eval/` and `data_pipeline/` are not imported at run time |
 | Request payload | local HTTP capture of one `LLMClient.chat` call | `POST {base}/chat/completions` with `model, messages, temperature, stream=false`; `response_format` only if `LLM_JSON_MODE=1`; anything in `LLM_EXTRA_BODY` is merged at top level (so `seed` and `chat_template_kwargs` *can* be sent, but only through that generic JSON option) |
@@ -182,6 +182,7 @@ Legend: **[ORG]** needs organizer clarification · **[MODEL]** needs designated-
 - Only public or self-authored cases unless the organizer states that practice cases may be sent to that service (it is the designated one, so they presumably may; confirm).
 
 #### WP-8 Verifier precision on unseen prose
+**Done (see `docs/REPORT.md` §2.7).** Tuned on a 20-case tier-A dev sample (22 high findings, all false alarms, six recurring patterns fixed); held-out disjoint 40-case A2 sample raised 0 high-severity findings. CHIP-CDEE dev F1 0.9818 and CMB-Clin verbatim 0 false alarms held. MedCT regression not re-run (raw data not on this machine). Medium findings still unlabelled; the lexical verifier cannot catch true clinical errors.
 *Depends on: a model endpoint permitted for the data used (owner's commercial endpoint is acceptable for public datasets only).*
 - Files: `medtrace/verify.py`, `medtrace/textutil.py`, tests, `docs/REPORT.md`.
 - Steps: generate notes for a 40-case TypicalCase-DC tier-A dev sample (`--tier A --limit 40`); hand-label every high-severity finding as true or false; fix only patterns seen at least twice; replay with `python -m eval.reverify`; then measure once on a *different* 40-case sample and report precision without further tuning. Re-run the CHIP-CDEE and MedCT regression scripts after each rule change.

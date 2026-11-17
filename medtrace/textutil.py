@@ -156,8 +156,11 @@ _UNITS = ["mmHg", "mmol/L", "µmol/L", "μmol/L", "umol/L", "mg/dL", "g/dL", "g/
           "cmH2O", "/μL", "/µL", "/uL", "mV", "mIU/mL", "IU/mL", "U/mL", "AU/mL", "nmol/L", "pmol/L", "copies/mL",
           "次/天", "次/日", "h", "min", "s", "IU", "U"]
 _UNIT_ALT = "|".join(re.escape(u) for u in sorted(_UNITS, key=len, reverse=True))
+_UNIT_ALT += r"|[×xX*]10(?:\^\d+|\d+|[⁰¹²³⁴⁵⁶⁷⁸⁹]+)/[Ll]"   # scientific-notation counts (×10^6/L, ×106/L, ×10⁶/L …)
 _NUM_STRICT = re.compile(r"(?<![A-Za-z0-9_.\-])(\d+(?:\.\d+)?)(?:\s*(" + _UNIT_ALT + r")(?![A-Za-z]))?", re.I)
 _NUM_ANY = re.compile(r"\d+(?:\.\d+)?")
+_GLUED_NUM = re.compile(r"(?<=[A-Za-z])(\d+(?:\.\d+)?)")     # analyte label glued to its value ("PCO232.4", "B12766.49")
+_SUPER = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 
 
 _ZH_NUM = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
@@ -167,8 +170,9 @@ def norm_unit(u: str | None) -> str | None:
     if not u:
         return None
     u = u.lower().replace(" ", "").replace("μ", "u").replace("µ", "u")
-    u = u.replace("x10", "×10").replace("*10", "×10").replace("⁹", "^9").replace("¹²", "^12")
-    u = {"×109/l": "×10^9/l", "×1012/l": "×10^12/l"}.get(u, u)      # superscript lost in the source text
+    u = u.translate(_SUPER)                                  # superscript digits -> ascii
+    u = u.replace("x10", "×10").replace("*10", "×10")
+    u = re.sub(r"×10\^?(\d+)", r"×10^\1", u)                 # ×109 / ×10^9 / ×10⁹ -> ×10^9 (superscript lost in source)
     if u.startswith("10^"):
         u = "×" + u
     return {"℃": "°c", "次/分": "/min", "bpm": "/min"}.get(u, u)
@@ -194,7 +198,18 @@ def all_number_units(text: str) -> dict:
 
 def all_number_values(text: str) -> set[float]:
     """Permissive extraction for *source* text (superset => fewer false alarms)."""
-    vals = {float(x) for x in _NUM_ANY.findall(fw(text))}
+    t = fw(text)
+    vals = {float(x) for x in _NUM_ANY.findall(t)}
+    # Records glue an analyte subscript to its value ("PCO232.4 mmHg", "维生素B12766.49pg/ml"): the digit run
+    # reads as 232.4 / 12766.49, hiding the true 32.4 / 766.49. Also admit the suffixes after 1-2 leading digits.
+    for m in _GLUED_NUM.finditer(t):
+        s = m.group(1)
+        for k in (1, 2):
+            if len(s) > k and s[k] != "." and s[k].isdigit():
+                try:
+                    vals.add(float(s[k:]))
+                except ValueError:
+                    pass
     vals |= {float(_ZH_NUM[ch]) for ch in set(text or "") if ch in _ZH_NUM}
     return vals
 
@@ -206,9 +221,10 @@ _NEG_PRE = re.compile(
     # Chinese cues, tuned on CHIP-CDEE train (real EMR sentences with polarity labels):
     #  - "无明显诱因出现咳嗽" is a fixed phrase (no obvious precipitant); it does not negate what follows
     #  - "无尿" alone is anuria (a positive finding) but "无尿频、尿急、尿痛" is a negated list
-    r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触)|不伴|没有"
+    r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触)|不伴|不会|没有"
     r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
-_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)")
+_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)"
+                       r"|未引出|(?:均|暂|尚)?无特殊|暂无|无殊|(?<=[\u4e00-\u9fff])史无(?=[。；;，,、]|$)")   # postfix absence predicates negate the preceding subject ("病理征未引出", "家族史均无特殊")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
                      r"reported|has|had|presents?|complains?|with|positive|present)\b")
 _END_ZH = re.compile(r"[，,；;。！？（(]|但|伴有")

@@ -23,8 +23,11 @@ HIGH, MEDIUM, LOW = "high", "medium", "low"
 _CORE_DOC = {"allergy": re.compile(r"(?i)allerg|过敏")}
 _SITE_DEPENDENT = set("扩张 肿大 压痛 增厚 异常 强化 积液 结节 占位 肿物 包块 肿块 水肿 出血 狭窄 梗阻 充血 渗出 增大 缩小 畸形 触痛 叩痛 "
                       "叩击痛 红肿 溃疡 糜烂 杂音 啰音 疼痛 肿胀 破溃 改变 病变 转移 复发 钙化 坏死 swelling tenderness mass lesion".split())
+# Record section headers, not clinical findings: a header on its own line ("个人史\n无特殊") is split from its
+# negation, so "个人史无特殊" must not be read as negating a positive finding. Section summaries are reviewer judgement.
+_SECTION_TERMS = {"个人", "个人史", "既往", "既往史", "家族", "家族史", "体格检查", "检查检验", "辅助检查", "专科检查", "婚育史", "月经史", "月经婚育史"}
 _TEST_NAME = re.compile(r"(?i)^(?:毒)?(?:病毒)?(?:标志物|抗体|抗原|指标|检测|筛查|系列|全套|谱|dna|rna)")
-_GENERIC_LABEL = re.compile(r"(?i)约|大小|直径|范围|长|宽|厚|高|共|为|about|approx|size|measur")   # "大小约 2.5cm" names no analyte
+_GENERIC_LABEL = re.compile(r"(?i)约|大小|直径|范围|长|宽|厚|高|共|为|右眼|左眼|双眼|左侧|右侧|about|approx|size|measur")   # "大小约 2.5cm" / "右眼" name no analyte
 _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
 _META_COMMENT = re.compile(r"(?i)not (?:be )?(?:assumed|considered|taken as|read as|interpreted)"
                            r"|(?:不能|不可|不应|不得)(?:视为|认为|当作|作为)|(?:须|需|应|必须|请)(?:予以)?(?:核实|确认|复查)")
@@ -107,9 +110,16 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     if sec == "features":
         for num in numerics(text, year):
             known = L.label_values.get(num["label"])
-            if known and not _GENERIC_LABEL.search(num["label"]) and num["value"] not in known and num["value"] in L.numbers:
-                add("value_label_mismatch", HIGH,
-                    f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
+            # Only flag an unambiguous swap: this label has a single recorded value, and the stated value is
+            # positively recorded under a DIFFERENT single-valued analyte. Serial results (one label, many values
+            # over time) and analyte aliases cannot be disambiguated by rule, so they are left to the reviewer.
+            if (known and len(known) == 1 and not _GENERIC_LABEL.search(num["label"])
+                    and num["value"] not in known and num["value"] in L.numbers):
+                other = any(len(v) == 1 and num["value"] in v for lab, v in L.label_values.items()
+                            if lab != num["label"] and not _GENERIC_LABEL.search(lab))
+                if other:
+                    add("value_label_mismatch", HIGH,
+                        f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
 
     # ---- negation
     # A clause that reports something as not documented / pending is a statement ABOUT the record, not a
@@ -124,7 +134,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         pos = "\n".join(T.clearly_positive_text(s) for s in T.split_sentences(text))
     if sec in ("features", "discussion") and checked.strip():
         for term in L.neg_only:
-            if term in _SITE_DEPENDENT or len(term) < 2:
+            if term in _SITE_DEPENDENT or term in _SECTION_TERMS or len(term) < 2:
                 continue
             i = pos.find(term)
             # "否认肝炎病史" is not contradicted by "肝炎病毒标志物": skip the term inside a test name
@@ -142,8 +152,8 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         for term in T.negated_terms(checked):
             if term in L.neg_terms:
                 continue
-            if term in _SITE_DEPENDENT:
-                continue        # "无扩张" at one site does not contradict "扩张" at another; left to the reviewer
+            if term in _SITE_DEPENDENT or term in _SECTION_TERMS:
+                continue        # "无扩张" at one site does not contradict "扩张" at another; section headers are not findings
             if term in L.clear_pos_text:
                 add("negation_flip", HIGH, f"{term!r} is negated here but the records document it as present")
             elif term in L.pos_text:

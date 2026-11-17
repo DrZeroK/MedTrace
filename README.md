@@ -93,7 +93,7 @@ medtrace/inputs.py      A  input + cutoff              medtrace/mock_llm.py     
 medtrace/ledger.py      B  fact ledger                 medtrace/mock_server.py        HTTP mock (500s, timeouts, garbage)
 medtrace/pipeline.py    C–E orchestration, guards      medtrace/update.py             incremental record updates
 medtrace/verify.py      E1 deterministic checks        eval/                          cases, ablation, perturbation, blinded review
-medtrace/llm.py         model client, retries          tests/                         70 regression / fault-injection tests
+medtrace/llm.py         model client, retries          tests/                         83 regression / fault-injection tests
 medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report, datasets
 data_pipeline/          dataset audit, acquisition, QC, standardisation        data/standardized/   standardized external cases
 ```
