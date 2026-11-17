@@ -14,7 +14,12 @@ from .inputs import Case
 from .ledger import Ledger, numerics
 from .note import Note, Statement, SECTIONS
 
+import re
+
 HIGH, MEDIUM, LOW = "high", "medium", "low"
+_CORE_DOC = {"allergy": re.compile(r"(?i)allerg|过敏"), "medication": re.compile(r"(?i)medication|用药"),
+             "vitals": re.compile(r"(?i)vital signs|生命体征")}
+_SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
 _SHORT = {"case_features": "features", "diagnostic_discussion": "discussion", "treatment_plan": "plan"}
 
 
@@ -80,7 +85,16 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             if term in pos:
                 add("negation_flip", HIGH if sec == "features" else LOW,
                     f"records document {term!r} only as absent/denied, but it is stated here without negation")
-    if sec == "features":
+    # A statement that reports something as not documented / pending is a statement ABOUT the record, not a
+    # negative finding: it must not be read as "X is absent" or as weakly supported content. (Seen on the first
+    # real-model run: "资料中未记录生命体征、药物过敏史" was flagged as an undocumented negative.) What it must not
+    # do is claim a core item is undocumented when the records do document it.
+    meta_missing = sec == "features" and T.has_missing_cue(text)
+    if meta_missing:
+        for key, rx in _CORE_DOC.items():
+            if rx.search(text) and key not in {u["key"] for u in L.undocumented} and _SAYS_ABSENT.search(text):
+                add("false_missing", HIGH, f"states that {key} information is not documented, but the records contain it")
+    if sec == "features" and not meta_missing:
         for term in T.negated_terms(text):
             if term in L.neg_terms:
                 continue
@@ -90,7 +104,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records")
 
     # ---- lexical grounding of case features
-    if sec == "features":
+    if sec == "features" and not meta_missing:
         cited = set().union(*[L.tokens_by_source.get(s, set()) for s in st.sources]) if st.sources else set()
         s_all = T.support(text, L.tokens_all)
         thr = 0.35 if T.detect_lang(text) == "zh" else 0.5

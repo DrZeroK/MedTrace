@@ -180,6 +180,15 @@ class Verifier(unittest.TestCase):
         self.assertIn("unsupported_completed", codes("Bronchoscopy was performed and antibiotics were started.", "treatment_plan"))
         self.assertIn("overconfident", codes("Pneumonia is confirmed.", "diagnostic_discussion"))
 
+    def test_statements_about_missing_information(self):
+        # reporting that something is not documented is not a negative finding ...
+        self.assertEqual(codes("Current medications are not documented and must not be assumed normal.", sources=()) - {"missing_ref"}, set())
+        zh = {"case_id": 1, "sources": [{"source_id": "a", "content": "患者男，50岁，发现肿物3个月。青霉素过敏。"}]}
+        self.assertEqual(codes("资料中未记录生命体征及当前用药情况，不能视为正常。", sources=("a",), case=zh), set())
+        # ... unless the records do document it
+        self.assertIn("false_missing", codes("药物过敏史未记录。", sources=("a",), case=zh))
+        self.assertIn("false_missing", codes("Allergy status is not documented.", sources=("S1",)))
+
     def test_no_false_alarm_on_faithful_paraphrase(self):
         self.assertEqual(codes("68-year-old man with 3 days of fever and cough; denies chest pain and hemoptysis.", sources=("S1",)), set())
         self.assertEqual(codes("Recommend repeat potassium in 6 hours and oxygen to keep SpO2 above 94%.", "treatment_plan"), set())
@@ -462,6 +471,17 @@ class EndToEnd(unittest.TestCase):
         self.assertFalse(out.exists())
         p, _, _ = self._run([CASE], {"LLM_API_BASE": ""})
         self.assertEqual(p.returncode, 1)
+
+    def test_env_example_parses_to_defaults(self):
+        # regression: `KEY=   # comment` is read by python-dotenv as the comment text, which once dropped output fields
+        d = tempfile.mkdtemp()
+        (Path(d) / ".env").write_text((ROOT / ".env.example").read_text("utf-8"), "utf-8")
+        (Path(d) / "input.json").write_text(json.dumps([CASE]), "utf-8")
+        env = {k: v for k, v in os.environ.items() if not k.startswith(("LLM_", "OUTPUT_", "PIPELINE", "MOCK_"))}
+        p = subprocess.run([sys.executable, str(ROOT / "main.py")], cwd=d, env=env, capture_output=True, text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, p.stderr)
+        rec = json.loads((Path(d) / "output.json").read_text("utf-8"))[0]
+        self.assertEqual(schema_errors(rec), [])
 
     def test_strict_exit_and_envelope(self):
         p, out, _ = self._run({"cases": [CASE]}, {"MOCK_FAULTS": "bad_json:1", "STRICT_EXIT": "1"})

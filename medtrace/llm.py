@@ -85,6 +85,7 @@ class LLMClient:
             payload["max_tokens"] = self.cfg.max_tokens
         if self.cfg.json_mode:
             payload["response_format"] = {"type": "json_object"}
+        payload.update(self.cfg.extra_body or {})
         headers = {"Content-Type": "application/json"}
         if self.cfg.api_key:
             headers["Authorization"] = f"Bearer {self.cfg.api_key}"

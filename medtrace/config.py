@@ -33,7 +33,7 @@ def load_dotenv_files() -> None:
 def _get(*names, default=None):
     for n in names:
         v = os.environ.get(n)
-        if v is not None and v != "":
+        if v is not None and v.strip() != "" and not v.lstrip().startswith("#"):
             return v
     return default
 
@@ -63,6 +63,7 @@ class Config:
     temperature: float = 0.0
     max_tokens: int = 0             # 0 => omit, use server default
     json_mode: bool = False         # send response_format=json_object if the endpoint supports it
+    extra_body: dict = field(default_factory=dict)   # merged into every request (provider-specific switches)
     pipeline: str = "A2"
     max_calls_per_case: int = 2     # logical model calls (generation + optional repair/review)
     case_timeout: float = 0.0       # 0 => unlimited
@@ -116,10 +117,12 @@ def load_config(**overrides) -> Config:
         checkpoint=_flag("CHECKPOINT", default=True),
         strict_exit=_flag("STRICT_EXIT"),
     )
-    try:
-        c.output_field_map = json.loads(_get("OUTPUT_FIELD_MAP", default="{}"))
-    except ValueError:
-        c.output_field_map = {}
+    for attr, var in (("output_field_map", "OUTPUT_FIELD_MAP"), ("extra_body", "LLM_EXTRA_BODY")):
+        try:
+            val = json.loads(_get(var, default="{}"))
+        except ValueError:
+            val = {}
+        setattr(c, attr, val if isinstance(val, dict) else {})
     c.output_fields = [f.strip() for f in str(_get("OUTPUT_FIELDS", default="")).split(",") if f.strip()]
     for k, v in overrides.items():
         if v is not None:

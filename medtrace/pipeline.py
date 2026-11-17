@@ -65,6 +65,7 @@ _MSG_ZH = {
     "overconfident": "诊断表述过于肯定", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
     "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
+    "false_missing": "资料中已有记录，却被表述为未记录",
 }
 _CORE_RX = {"allergy": r"(?i)allerg|过敏", "medication": r"(?i)medication|drug|用药|药物", "vitals": r"(?i)vital|生命体征"}
 

@@ -21,6 +21,7 @@ import re
 import statistics as st
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from medtrace.config import load_config
@@ -59,6 +60,7 @@ def main(argv=None) -> int:
     ap.add_argument("--variants", default="A0,A1,A2")
     ap.add_argument("--name", default=time.strftime("ext_%Y%m%d_%H%M%S"))
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--workers", type=int, default=1, help="cases in parallel (mind the provider's rate limits)")
     a = ap.parse_args(argv)
     cfg0 = load_config()
     if not cfg0.api_base:
@@ -67,12 +69,13 @@ def main(argv=None) -> int:
     items = load_dataset(a.dataset, a.split)
     items = items[:a.limit] if a.limit else items
     variants = [v.strip().upper() for v in a.variants.split(",") if v.strip()]
-    rows, outputs = [], {v: [] for v in variants}
+    rows, outputs, debug = [], {v: [] for v in variants}, {v: [] for v in variants}
     for v in variants:
         cfg = copy.copy(cfg0)
         cfg.pipeline, cfg.max_calls_per_case = v, BUDGET[v]
         cfg.output_field_map, cfg.output_fields, cfg.include_meta = {}, [], False
-        for i, (raw, ref) in enumerate(items):
+        def one(job):
+            i, (raw, ref) = job
             pipe = Pipeline(cfg, LLMClient(cfg, mock=MockLLM() if is_mock else None))
             case = parse_case(raw, i, cfg.cutoff_mode)
             res = pipe.run_case(case)
@@ -82,17 +85,25 @@ def main(argv=None) -> int:
             hit, tot = V.measurement_coverage(res.note, build_ledger(case))
             ddx = der["reference_differentials"]
             ok_refs, n_refs = M.refs_valid(rec, raw)
-            rows.append({
+            row = {
                 "variant": v, "case_id": case.case_id, "tier": ref["quality"]["tier"], "chapter": ref["classification"]["specialty_chapter"],
                 "complexity": ref["classification"]["complexity"], "status": res.status, "schema_valid": int(not schema_errors(rec)),
                 "dx_eligible": int(der["dx_metric_eligible"]),
                 "dx_hit": int(name_hit(ref["classification"]["disease_label"], disc)) if der["dx_metric_eligible"] else "",
                 "ddx_named": sum(name_hit(n, disc) for n in ddx), "ddx_total": len(ddx),
                 "meas_hit": hit, "meas_total": tot, "refs_valid": ok_refs, "refs_total": n_refs,
+                "verifier_high_initial": res.log["findings_initial"]["high"],
                 "verifier_high": res.log["findings_final"]["high"], "verifier_medium": res.log["findings_final"]["medium"],
-                "review_items": len(rec["review_items"]), "calls": res.log["calls"], "latency": res.log["latency"],
-            })
-            outputs[v].append(rec)
+                "review_items": len(rec["review_items"]), "note_chars": sum(len(rec[k]) for k in ("case_features", "diagnostic_discussion", "treatment_plan")),
+                "calls": res.log["calls"], "retries": res.log["retries"], "latency": res.log["latency"],
+            }
+            return row, rec, {"case_id": case.case_id, "log": res.log, "final_findings": [f.as_dict() for f in res.final_findings]}
+
+        with ThreadPoolExecutor(max(1, a.workers)) as ex:
+            for row, rec, dbg in ex.map(one, list(enumerate(items))):
+                rows.append(row)
+                outputs[v].append(rec)
+                debug[v].append(dbg)
     summary = []
     for v in variants:
         r = [x for x in rows if x["variant"] == v]
@@ -107,6 +118,7 @@ def main(argv=None) -> int:
             "refs_valid_%": pct(sum(x["refs_valid"] for x in r), sum(x["refs_total"] for x in r)),
             "notes_with_verifier_high": sum(x["verifier_high"] > 0 for x in r),
             "mean_review_items": round(st.mean(x["review_items"] for x in r), 1),
+            "mean_note_chars": round(st.mean(x["note_chars"] for x in r)),
             "mean_calls": round(st.mean(x["calls"] for x in r), 2), "mean_latency_s": round(st.mean(x["latency"] for x in r), 2),
             "max_latency_s": round(max(x["latency"] for x in r), 2)})
     out = ROOT / "eval" / "results" / a.name
@@ -117,6 +129,7 @@ def main(argv=None) -> int:
         w.writerows(rows)
     for v, recs in outputs.items():
         (out / f"outputs_{v}.json").write_text(json.dumps(recs, ensure_ascii=False, indent=2), "utf-8")
+        (out / f"findings_{v}.json").write_text(json.dumps(debug[v], ensure_ascii=False, indent=1, default=str), "utf-8")
     # for eval.blind_review: the records each reviewer needs, plus the dataset's expert reference answers
     (out / "cases_used.json").write_text(json.dumps([{"case": raw, "annotation": {"reference": ref["reference"]}} for raw, ref in items],
                                                    ensure_ascii=False, indent=1), "utf-8")
