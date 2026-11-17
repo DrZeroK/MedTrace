@@ -49,6 +49,7 @@ def run(variants, cases, faults, seed, budget=None, workers=1, mock=False):
         cfg = copy.copy(cfg0)
         cfg.pipeline, cfg.max_calls_per_case = v, (budget or BUDGET[v])
         cfg.output_field_map, cfg.output_fields, cfg.include_meta = {}, [], False
+        cfg.repair_call = True     # the ablation's A2/S2 are defined with the repair call (production default is off)
         def one(job, v=v, cfg=cfg):
             i, item = job
             mock = MockLLM(faults, seed) if is_mock else None

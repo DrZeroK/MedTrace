@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PIPELINES = ("A0", "A1", "A2", "S2", "A3")  # A2 == strategy S1 (default), A3 == strategy S3
-PROMPT_VERSION = os.environ.get("PROMPT_VERSION", "v1")     # v2 = concise variant under evaluation
+PROMPT_VERSION = os.environ.get("PROMPT_VERSION", "v2")     # v1 = original long-form prompts (kept for comparison)
 
 
 def load_dotenv_files() -> None:
@@ -65,7 +65,9 @@ class Config:
     json_mode: bool = False         # send response_format=json_object if the endpoint supports it
     extra_body: dict = field(default_factory=dict)   # merged into every request (provider-specific switches)
     pipeline: str = "A2"
-    max_calls_per_case: int = 2     # logical model calls (generation + optional repair/review)
+    max_calls_per_case: int = 2     # logical model calls (generation, one regeneration on unparseable output, optional repair/review)
+    repair_call: bool = True        # A2: targeted repair call on high-severity findings. load_config() defaults it OFF:
+                                    # on real qwen4-max output it fired only on verifier false alarms (docs/REPORT.md 2.6)
     case_timeout: float = 0.0       # 0 => unlimited
     total_timeout: float = 0.0      # 0 => unlimited
     workers: int = 1
@@ -104,6 +106,7 @@ def load_config(**overrides) -> Config:
         json_mode=_flag("LLM_JSON_MODE"),
         pipeline=str(_get("PIPELINE", default="A2")).upper(),
         max_calls_per_case=_num(int, "MAX_CALLS_PER_CASE", default=2),
+        repair_call=_flag("REPAIR_CALL"),
         case_timeout=_num(float, "CASE_TIMEOUT", default=0.0),
         total_timeout=_num(float, "TOTAL_TIMEOUT", default=0.0),
         workers=max(1, _num(int, "WORKERS", default=1)),

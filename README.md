@@ -55,11 +55,12 @@ input.json ─ A input processing ─ B fact ledger ─ D generation (LLM) ─ E
 |---|---|---|
 | `A0` | direct structured prompt (baseline) | 1 |
 | `A1` | fact ledger in the prompt, hard evidence rules, statement-level attribution | 1 |
-| `A2` *(default, strategy S1)* | deterministic verification; drops non-existent source ids; one targeted repair call only if a high-severity finding exists; everything unresolved goes to `review_items` | 1–2 |
+| `A2` *(default, strategy S1)* | deterministic verification; drops non-existent source ids; everything unresolved goes to `review_items`. `REPAIR_CALL=1` adds one targeted repair call when a high-severity finding exists (off by default) | 1 (2 with repair) |
 | `S2` | model problem-list extraction with verbatim-quote check, then A2 | 2–3 |
 | `A3` *(strategy S3)* | semantic review call returning patches; each patch must pass the deterministic verifier or it is rejected | 2 |
 
-`MAX_CALLS_PER_CASE=1` gives a strict single-call run (findings are flagged instead of repaired).
+Prompts: `PROMPT_VERSION=v2` (concise, default) or `v1` (original long form). A second call is otherwise used only to
+regenerate unparseable output; `MAX_CALLS_PER_CASE=1` forbids even that.
 
 Reliability properties (all covered by tests): a complete, valid `output.json` exists from the first second
 (seeded with verbatim-extract notes, replaced case by case, atomic rename); a case can never abort the batch;
@@ -74,7 +75,7 @@ medtrace/inputs.py      A  input + cutoff              medtrace/mock_llm.py     
 medtrace/ledger.py      B  fact ledger                 medtrace/mock_server.py        HTTP mock (500s, timeouts, garbage)
 medtrace/pipeline.py    C–E orchestration, guards      medtrace/update.py             incremental record updates
 medtrace/verify.py      E1 deterministic checks        eval/                          cases, ablation, perturbation, blinded review
-medtrace/llm.py         model client, retries          tests/                         51 regression / fault-injection tests
+medtrace/llm.py         model client, retries          tests/                         50 regression / fault-injection tests
 medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report, datasets
 data_pipeline/          dataset audit, acquisition, QC, standardisation        data/standardized/   standardized external cases
 ```

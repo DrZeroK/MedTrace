@@ -109,6 +109,8 @@ def build_ledger(case: Case) -> Ledger:
     for src in case.sources:
         L.tokens_by_source[src.sid] = T.tokens(src.content)
         L.numbers |= T.all_number_values(src.content)
+        for val, units in T.all_number_units(src.content).items():
+            L.units.setdefault(val, set()).update(units)
         for dt, _, _, _ in T.find_dates(src.content, year):
             L.dates.add(dt.date())
         for sent in T.split_sentences(src.content):

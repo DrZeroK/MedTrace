@@ -23,6 +23,7 @@ HIGH, MEDIUM, LOW = "high", "medium", "low"
 _CORE_DOC = {"allergy": re.compile(r"(?i)allerg|过敏")}
 _SITE_DEPENDENT = set("扩张 肿大 压痛 增厚 异常 强化 积液 结节 占位 肿物 包块 肿块 水肿 出血 狭窄 梗阻 充血 渗出 增大 缩小 畸形 触痛 叩痛 "
                       "叩击痛 红肿 溃疡 糜烂 杂音 啰音 疼痛 肿胀 破溃 改变 病变 转移 复发 钙化 坏死 swelling tenderness mass lesion".split())
+_TEST_NAME = re.compile(r"(?i)^(?:毒)?(?:病毒)?(?:标志物|抗体|抗原|指标|检测|筛查|系列|全套|谱|dna|rna)")
 _GENERIC_LABEL = re.compile(r"(?i)约|大小|直径|范围|长|宽|厚|高|共|为|about|approx|size|measur")   # "大小约 2.5cm" names no analyte
 _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
 _SHORT = {"case_features": "features", "diagnostic_discussion": "discussion", "treatment_plan": "plan"}
@@ -85,17 +86,21 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                     f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
 
     # ---- negation
-    if sec in ("features", "discussion"):
+    meta_missing = sec == "features" and T.has_missing_cue(text)
+    if sec in ("features", "discussion") and not meta_missing:
         pos = "\n".join(T.clearly_positive_text(s) for s in T.split_sentences(text))
         for term in L.neg_only:
-            if term in pos:
+            if term in _SITE_DEPENDENT or len(term) < 2:
+                continue
+            i = pos.find(term)
+            # "否认肝炎病史" is not contradicted by "肝炎病毒标志物": skip the term inside a test name
+            if i >= 0 and not _TEST_NAME.match(pos[i + len(term):]):
                 add("negation_flip", HIGH if sec == "features" else LOW,
                     f"records document {term!r} only as absent/denied, but it is stated here without negation")
     # A statement that reports something as not documented / pending is a statement ABOUT the record, not a
     # negative finding: it must not be read as "X is absent" or as weakly supported content. (Seen on the first
     # real-model run: "资料中未记录生命体征、药物过敏史" was flagged as an undocumented negative.) What it must not
     # do is claim a core item is undocumented when the records do document it.
-    meta_missing = sec == "features" and T.has_missing_cue(text)
     if meta_missing and T.support(text, L.tokens_all) < 0.9:      # >= 0.9: the records' own sentence, quoted (e.g. "具体用药不详")
         clauses = re.split(r"[，,；;。.！？\n]", text)
         for key, rx in _CORE_DOC.items():

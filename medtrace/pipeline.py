@@ -177,7 +177,8 @@ class Pipeline:
         log["refs_dropped"] = V.safe_repair(note, case)
         findings = V.verify_note(note, case, L)
         actionable = [f for f in findings if f.severity in (V.HIGH, V.MEDIUM) and f.section in SECTIONS and f.index >= 0]
-        mode = "review" if variant == "A3" else "repair" if any(f.severity == V.HIGH for f in findings) else None
+        mode = ("review" if variant == "A3" else
+                "repair" if self.cfg.repair_call and any(f.severity == V.HIGH for f in findings) else None)
         if mode:
             try:
                 user = fill(load_prompt(mode, lang), draft=_draft_json(note),

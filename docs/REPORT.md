@@ -5,7 +5,7 @@
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic
 fact ledger and verifier, an offline mock model with fault injection, an evaluation set of 16 annotated synthetic
 cases (11 development, 5 held out; 12 English, 4 Chinese; two per category), 7 one-fact perturbation tests,
-ablation / perturbation / blinded-review tooling, and 51 automated tests.
+ablation / perturbation / blinded-review tooling, and 50 automated tests.
 
 ## 2. What has been measured — and what has not
 
@@ -141,6 +141,31 @@ What this run changed in the system: request timeout default (120 s → 600 s); 
 dropped Case Features; about twenty negation-scope, numeral and "not documented" rules in the verifier (high-severity
 false alarms on the saved A0 notes: about 21 of 24 before, 0 of 2 after — tuned on these same notes, so to be
 confirmed on fresh output); judge-based diagnosis scoring; prompt v2.
+
+**Prompt v2 (concise) and held-out confirmation.** v2 adds a length budget and removes repeated caveats; it was
+written from the dev notes, then checked on the validation split (17 cases, 13 eligible for diagnosis scoring),
+which neither prompt had seen. Runs `qwen4max_dev_v2`, `qwen4max_val_v1_A0`, `qwen4max_val_v2_A2`.
+
+| | dev: v1 A2 | dev: v2 A2 | validation: v1 A0 | validation: v2 A2 |
+|---|---|---|---|---|
+| Cases completed, schema-valid | 26/26 | 26/26 | 17/17 | 17/17 |
+| Gold diagnosis as working diagnosis (judge) | 16/20 | 15/20 | 12/13 | 13/13 |
+| …as working diagnosis or differential | 20/20 | 20/20 | 13/13 | 13/13 |
+| Mean note length (characters) | 3,786 | 1,605 | 2,673 | 1,646 |
+| Median / max latency (s) | 151 / 385 | 98 / 209 | 97 / 164 | 111 / 173 |
+| High / medium verifier findings (current rules) | 0 / 11 | 0 / 4 | 3 / 27 | 0 / 0 |
+| Record measurements present in the note | 100% | 99.5% | 100% | 99.4% |
+
+Decision, following the pre-registered rule: v2 A2 is no worse than the baseline on held-out diagnosis scoring
+(13/13 vs 12/13), far shorter than v1 A2, and produced no statement the verifier could not ground. **v2 is now the
+default prompt version**; v1 remains selectable (`PROMPT_VERSION=v1`). The test split (30 cases) is still untouched.
+
+The validation notes were also the first *fresh* test of the verifier rules tuned on dev: 7 high-severity findings
+on them, and on reading them none was a real error (a record writing "R20次/分" with no space, so the unit was
+missed; a denied "肝炎病史" matched inside "肝炎病毒标志物"; a kidney palpable standing but not lying). Four of those
+causes are fixed; 3 findings remain on the A0 notes, also false, and none on v2. So the verifier's precision on unseen prose is still not established: each new batch has
+surfaced new false-alarm patterns. For that reason the **repair call is now off by default** (`REPAIR_CALL=0`):
+across all real runs it fired 4 times, every time on a false alarm. Findings are still surfaced as review items.
 
 Not yet done with the real model: validation/test splits, TypicalCase-DC, the synthetic set's `must_not` checks,
 perturbation tests, S2 and A3, any blinded clinician review.

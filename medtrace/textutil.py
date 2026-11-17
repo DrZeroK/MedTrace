@@ -180,6 +180,18 @@ def extract_numbers(text: str) -> list[tuple[float, str | None, str]]:
             for m in _NUM_STRICT.finditer(fw(text))]
 
 
+_NUM_UNIT_ANY = re.compile(r"(\d+(?:\.\d+)?)\s*(" + _UNIT_ALT + r")(?![A-Za-z])", re.I)
+
+
+def all_number_units(text: str) -> dict:
+    """Permissive value -> {units} map for *source* text. Records often glue the label to the number ("R20次/分"),
+    which the strict extractor skips; missing that unit made a correct "R 20次/分" look like a unit mismatch."""
+    out: dict = {}
+    for m in _NUM_UNIT_ANY.finditer(fw(text)):
+        out.setdefault(float(m.group(1)), set()).add(norm_unit(m.group(2)))
+    return out
+
+
 def all_number_values(text: str) -> set[float]:
     """Permissive extraction for *source* text (superset => fewer false alarms)."""
     vals = {float(x) for x in _NUM_ANY.findall(fw(text))}

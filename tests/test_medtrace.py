@@ -246,6 +246,11 @@ class ChineseAndNewChecks(unittest.TestCase):
         self.assertEqual(codes("资料中未提供体温、血压等生命体征。", sources=("a",), case=src), set())     # 高血压病史 is not a reading
         self.assertEqual(codes("本次资料中无体格检查记录，亦无血常规等化验结果。", sources=("a",), case=src), set())
         self.assertEqual(T.negated_terms("重要阴性表现：体温正常"), [])
+        # found on fresh validation output: glued label+number in the record, and a denied history inside a test name
+        glued = {"case_id": 1, "sources": [{"source_id": "a", "content": "T37.1℃，P75次/分，R20次/分。血肿最厚处约20mm。否认肝炎病史。"}]}
+        self.assertEqual(codes("R 20次/分，P 75次/分。", sources=("a",), case=glued), set())
+        self.assertEqual(codes("肝炎病毒标志物等资料未记录。", sources=("a",), case=glued), set())
+        self.assertIn("unit_mismatch", codes("R 20mm。", sources=("a",), case={"case_id": 1, "sources": [{"source_id": "a", "content": "R20次/分。"}]}))
         self.assertEqual(codes("骨巨细胞瘤好发于20~40岁，需完善24小时尿检查。", "diagnostic_discussion", sources=("a",), case=src), set())
         self.assertIn("number_not_in_source", codes("直接胆红素约占总胆红素68%。", "diagnostic_discussion", sources=("a",), case=src))
 
