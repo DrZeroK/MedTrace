@@ -16,8 +16,8 @@ jobs:
     env:
       LLM_API_BASE: mock://        # offline mock only; CI has no .env and never reaches a real endpoint
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
