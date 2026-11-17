@@ -48,7 +48,7 @@ def main(argv=None) -> int:
     ap.add_argument("--name", default="perturb")
     ap.add_argument("--mock", action="store_true", help="force the offline mock model even if .env configures a real endpoint")
     a = ap.parse_args(argv)
-    cfg = load_config()
+    cfg = load_config(development=True)
     if a.mock or not cfg.api_base:
         cfg.api_base = "mock://"
     cfg.pipeline, cfg.max_calls_per_case = a.variant.upper(), BUDGET[a.variant.upper()]

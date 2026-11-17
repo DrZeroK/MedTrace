@@ -71,12 +71,13 @@ def parse_json_object(text: str) -> dict:
 def _ids(v) -> list[str]:
     if v is None:
         return []
-    if not isinstance(v, (list, tuple)):
+    literal_ids = isinstance(v, (list, tuple))
+    if not literal_ids:
         v = re.split(r"[,;，；]", str(v))
     out = []
     for x in v:
-        x = str(x).strip().strip("[]")
-        if x and x not in out:
+        x = str(x) if literal_ids else str(x).strip().strip("[]")
+        if x.strip() and x not in out:
             out.append(x)
     return out
 
@@ -103,11 +104,19 @@ def _stmt(item) -> Statement | None:
     return Statement(text, src, kind, basis, _ids(item.get("knowledge_ids")) if isinstance(item, dict) else []) if text else None
 
 
-def note_from_model(obj: dict) -> Note:
+def note_from_model(obj: dict, require_complete: bool = False) -> Note:
     note = Note()
     found = False
     for sec, names in _ALIASES.items():
         val = next((obj[n] for n in names if n in obj), None)
+        if require_complete:
+            items_to_check = val if isinstance(val, list) else [val]
+            if not items_to_check or any(not isinstance(i, (str, dict)) for i in items_to_check):
+                raise ParseError(f"missing or malformed required section: {sec}")
+            for item in items_to_check:
+                text = item if isinstance(item, str) else next((item[k] for k in ("text", "statement", "content", "description") if k in item), None)
+                if not isinstance(text, str) or not text.strip():
+                    raise ParseError(f"empty or malformed required section: {sec}")
         if val is None:
             continue
         found = True
@@ -123,6 +132,8 @@ def note_from_model(obj: dict) -> Note:
         else:
             items = [str(val)]
         note.sections[sec] = [s for s in (_stmt(i) for i in items) if s]
+        if require_complete and not note.sections[sec]:
+            raise ParseError(f"empty required section: {sec}")
     if not found:
         raise ParseError("model JSON has none of the required sections")
     for r in obj.get("review_items") or []:
@@ -276,56 +287,84 @@ def _select_evidence(candidates: list[dict], low: int = 3, high: int = 5) -> lis
 
 OFFICIAL_SCHEMA = {
     "type": "object",
+    "additionalProperties": False,
     "required": ["case_id", "status", "medical_record", "error"],
     "properties": {
-        "case_id": {},
+        "case_id": {"type": "string", "minLength": 1, "pattern": r"\S"},
         "status": {"enum": ["success", "failed"]},
         "medical_record": {
             "type": ["object", "null"],
+            "additionalProperties": False,
             "required": ["case_features", "diagnostic_discussion", "plan", "evidence", "review_items"],
             "properties": {
-                "case_features": {"type": "string", "minLength": 1},
-                "diagnostic_discussion": {"type": "string", "minLength": 1},
-                "plan": {"type": "string", "minLength": 1},
+                "case_features": {"type": "string", "minLength": 1, "pattern": r"\S"},
+                "diagnostic_discussion": {"type": "string", "minLength": 1, "pattern": r"\S"},
+                "plan": {"type": "string", "minLength": 1, "pattern": r"\S"},
                 "evidence": {"type": "array", "maxItems": 5, "items": {   # 3-5 recommended; fewer (even 0) listed as-is per spec
-                    "type": "object", "required": ["statement", "source_ids", "kind"],
-                    "properties": {"statement": {"type": "string", "minLength": 1},
-                                   "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+                    "type": "object", "additionalProperties": False, "required": ["statement", "source_ids", "kind"],
+                    "properties": {"statement": {"type": "string", "minLength": 1, "pattern": r"\S"},
+                                   "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "pattern": r"\S"}},
                                    "kind": {"enum": ["fact", "inference"]}}}},
-                "review_items": {"type": "array", "items": {"type": "string"}},
+                "review_items": {"type": "array", "items": {"type": "string", "minLength": 1, "pattern": r"\S"}},
             },
         },
-        "error": {"type": ["object", "null"]},
+        "error": {"type": ["object", "null"], "additionalProperties": False, "required": ["code", "message"],
+                  "properties": {k: {"type": "string", "minLength": 1, "pattern": r"\S"} for k in ("code", "message")}},
     },
+    "allOf": [{"if": {"properties": {"status": {"const": "success"}}},
+               "then": {"properties": {"medical_record": {"type": "object"}, "error": {"type": "null"}}},
+               "else": {"properties": {"medical_record": {"type": "null"}, "error": {"type": "object"}}}}],
 }
 
 
-def official_schema_errors(rec: dict) -> list[str]:
-    """Validate an official-protocol record. jsonschema when available, else an equivalent manual check."""
-    try:
-        import jsonschema
-        return [e.message for e in jsonschema.Draft7Validator(OFFICIAL_SCHEMA).iter_errors(rec)]
-    except ImportError:
-        errs = [f"missing {k}" for k in OFFICIAL_SCHEMA["required"] if k not in rec]
-        if rec.get("status") not in ("success", "failed"):
-            errs.append("bad status")
-        mr = rec.get("medical_record")
-        if rec.get("status") == "success":
-            if not isinstance(mr, dict):
-                errs.append("medical_record must be an object on success")
-            else:
-                for k in ("case_features", "diagnostic_discussion", "plan"):
-                    if not isinstance(mr.get(k), str) or not mr[k]:
-                        errs.append(f"{k} must be a non-empty string")
-                for k in ("evidence", "review_items"):
-                    if not isinstance(mr.get(k), list):
-                        errs.append(f"{k} must be a list")
-                for e in mr.get("evidence", []):
-                    if not isinstance(e, dict) or not all(k in e for k in ("statement", "source_ids", "kind")):
-                        errs.append("bad evidence entry")
-                    elif e.get("kind") not in ("fact", "inference") or not e.get("source_ids"):
-                        errs.append("bad evidence kind/source_ids")
+def official_schema_errors(rec: dict, valid_ids: set[str] | None = None) -> list[str]:
+    """Validate structure, success/failure consistency and case-local references without optional dependencies."""
+    nonempty = lambda v: isinstance(v, str) and bool(v.strip())
+    if not isinstance(rec, dict):
+        return ["record must be an object"]
+    errs = []
+    if set(rec) != set(OFFICIAL_SCHEMA["required"]):
+        errs.append("record must contain exactly case_id, status, medical_record, error")
+    if not nonempty(rec.get("case_id")):
+        errs.append("case_id must be a non-empty string")
+    status, mr, error = rec.get("status"), rec.get("medical_record"), rec.get("error")
+    if status == "failed":
+        if mr is not None:
+            errs.append("medical_record must be null on failure")
+        if not isinstance(error, dict) or set(error) != {"code", "message"} or not all(nonempty(error[k]) for k in error):
+            errs.append("failure requires error.code and error.message strings")
         return errs
+    if status != "success":
+        return errs + ["bad status"]
+    if error is not None:
+        errs.append("error must be null on success")
+    if not isinstance(mr, dict):
+        return errs + ["medical_record must be an object on success"]
+    if set(mr) != {"case_features", "diagnostic_discussion", "plan", "evidence", "review_items"}:
+        errs.append("medical_record must contain exactly the five official fields")
+    for key in ("case_features", "diagnostic_discussion", "plan"):
+        if not nonempty(mr.get(key)):
+            errs.append(f"{key} must be a non-empty string")
+    reviews = mr.get("review_items")
+    if not isinstance(reviews, list) or any(not nonempty(r) for r in reviews):
+        errs.append("review_items must be an array of non-empty strings")
+    evidence = mr.get("evidence")
+    if not isinstance(evidence, list) or len(evidence) > 5:
+        return errs + ["evidence must be an array of at most five entries"]
+    if valid_ids and not evidence:
+        errs.append("generated record has no traceable evidence")
+    for e in evidence:
+        if not isinstance(e, dict) or set(e) != {"statement", "source_ids", "kind"}:
+            errs.append("bad evidence entry")
+            continue
+        if not nonempty(e["statement"]) or e["kind"] not in ("fact", "inference"):
+            errs.append("bad evidence statement/kind")
+        ids = e["source_ids"]
+        if not isinstance(ids, list) or not ids or any(not nonempty(s) for s in ids):
+            errs.append("evidence source_ids must be a non-empty array of strings")
+        elif valid_ids is not None and any(s not in valid_ids for s in ids):
+            errs.append("evidence cites a source outside the current case")
+    return errs
 
 
 OUTPUT_SCHEMA = {
