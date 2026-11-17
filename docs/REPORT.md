@@ -5,12 +5,12 @@
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic
 fact ledger and verifier, an offline mock model with fault injection, an evaluation set of 16 annotated synthetic
 cases (11 development, 5 held out; 12 English, 4 Chinese; two per category), 7 one-fact perturbation tests,
-ablation / perturbation / blinded-review tooling, and 48 automated tests.
+ablation / perturbation / blinded-review tooling, and 51 automated tests.
 
 ## 2. What has been measured — and what has not
 
-**Nothing below is evidence of clinical quality.** No designated-model credentials were available, so every number
-comes from the mock model, which copies record sentences and adds template reasoning. The mock results answer two
+Sections 2.1–2.5 use the mock model or no model at all; section 2.6 has the first results with the designated
+model. In 2.1–2.4 every number comes from the mock model, which copies record sentences and adds template reasoning. The mock results answer two
 engineering questions only: does the software hold up under failures, and does the deterministic verifier catch
 known error types?
 
@@ -102,6 +102,48 @@ The two systematic errors were "无明显诱因出现咳嗽" (a fixed phrase wro
 `python -m eval.run_external` reports diagnosis hit (61 eligible cases), differential recall against the expert
 answer, measurement coverage and verifier findings per variant. It has only been run with the mock (mechanics:
 26/26 dev cases completed, schema-valid); the mock does not reason, so there are **no model results yet**.
+
+### 2.6 First results with the designated model (qwen4-max)
+
+Setting: CMB-Clin dev split, 26 cases (20 eligible for diagnosis scoring), prompts v1, temperature 0, one run per
+variant, model default reasoning on. Run directories `eval/results/qwen4max_dev_v1` (A0) and
+`qwen4max_dev_v1_rerun` (A1, A2). The first A1/A2 attempt is void: 14 and 17 of 26 cases fell back because calls
+exceeded a 120 s request timeout (since raised to 600 s).
+
+| | A0 baseline | A1 grounded | A2 grounded + verified |
+|---|---|---|---|
+| Cases completed, schema-valid | 26/26 | 26/26 | 26/26 |
+| Gold diagnosis given as working diagnosis (judge model) | 16/20 | 16/20 | 16/20 |
+| Gold diagnosis given as working diagnosis or differential | 20/20 | 20/20 | 20/20 |
+| Notes with a high-severity verifier finding (current rules) | 2 | 1 | 0 |
+| High / medium verifier findings, total | 2 / 46 | 1 / 5 | 0 / 11 |
+| Mean note length (characters) | 2,576 | 3,655 | 3,786 |
+| Median / max latency per case (s) | 88 / 230 | 142 / 226 | 151 / 385 |
+| Model calls per case | 1.00 | 1.00 | 1.12 |
+
+Reading:
+- **No difference in diagnostic accuracy** between variants at this sample size. The four non-primary cases are
+  the same hard ones in every variant (for example a brain lesion described as "占位，性质待查" where the textbook
+  answer is glioma).
+- **A1 removes the one real error type A0 showed**: A0 wrote ratios it had computed itself ("DB/TB约68%") in two
+  notes; A1 and A2 did not. A1/A2 also have far fewer statements the verifier cannot ground (5–11 versus 46),
+  though part of that gap is A0's free-prose summary sentences, which the lexical check penalises by design.
+- **A1/A2 cost more**: notes about 45% longer and about 60% slower. A read of the notes shows why: repeated
+  "conditional because X is not documented" clauses, checks that do not apply (pregnancy status in a man), and
+  trivial wording differences reported as conflicts. Prompt v2 (opt-in) targets exactly this.
+- **A2's repair call fired in 3 of 26 cases, each time on a verifier false alarm** (since fixed). On this evidence
+  the repair call has shown no benefit yet; `MAX_CALLS_PER_CASE=1` remains the safer setting.
+- Diagnosis accuracy by verbatim name match read 39% for the same A0 notes: that metric is unusable on free text
+  and is kept only as a lower bound. The judge scores (qwen-plus) were all read by hand for A0 and look sound, but
+  remain a proxy.
+
+What this run changed in the system: request timeout default (120 s → 600 s); an `.env.example` bug that silently
+dropped Case Features; about twenty negation-scope, numeral and "not documented" rules in the verifier (high-severity
+false alarms on the saved A0 notes: about 21 of 24 before, 0 of 2 after — tuned on these same notes, so to be
+confirmed on fresh output); judge-based diagnosis scoring; prompt v2.
+
+Not yet done with the real model: validation/test splits, TypicalCase-DC, the synthetic set's `must_not` checks,
+perturbation tests, S2 and A3, any blinded clinician review.
 
 ## 3. Known limitations
 

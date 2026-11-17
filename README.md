@@ -4,9 +4,9 @@ Reads structured admission records (`input.json`), calls the configured (designa
 `output.json` with, per case: **Case Features**, **Diagnostic Discussion**, **Diagnostic and Treatment Plan**,
 **evidence** (statement → source ids) and **review items** (missing / conflicting / to-verify).
 
-> **Status.** The software is complete and tested end to end against a *mock* model. It has **not yet been run
-> against the designated model**, and the I/O contract below is an assumption until checked against the official
-> technical instructions. See `docs/REQUIREMENTS.md` (what must be confirmed) and `docs/REPORT.md` (what has and
+> **Status.** Tested end to end against a mock model and, on 26 development cases, against the designated model
+> (qwen4-max): all cases completed with valid output; see `docs/REPORT.md` §2.6 for what that run does and does not
+> show. The I/O contract below is still an assumption until checked against the official technical instructions. See `docs/REQUIREMENTS.md` (what must be confirmed) and `docs/REPORT.md` (what has and
 > has not been measured). This is a research/competition system, not a medical device; every note requires clinician review.
 
 ## Run
@@ -74,7 +74,7 @@ medtrace/inputs.py      A  input + cutoff              medtrace/mock_llm.py     
 medtrace/ledger.py      B  fact ledger                 medtrace/mock_server.py        HTTP mock (500s, timeouts, garbage)
 medtrace/pipeline.py    C–E orchestration, guards      medtrace/update.py             incremental record updates
 medtrace/verify.py      E1 deterministic checks        eval/                          cases, ablation, perturbation, blinded review
-medtrace/llm.py         model client, retries          tests/                         48 regression / fault-injection tests
+medtrace/llm.py         model client, retries          tests/                         51 regression / fault-injection tests
 medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report, datasets
 data_pipeline/          dataset audit, acquisition, QC, standardisation        data/standardized/   standardized external cases
 ```
