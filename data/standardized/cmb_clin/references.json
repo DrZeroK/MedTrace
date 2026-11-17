@@ -165,7 +165,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 1320,
-   "n_measurements": 14,
+   "n_measurements": 16,
    "n_negative_statements": 4
   },
   "quality": {
@@ -217,6 +217,18 @@
    "label_status": "rule_derived_unreviewed",
    "dx_metric_eligible": true,
    "measurements": [
+    {
+     "source_id": "cmbclin-001-hpi",
+     "raw": "睡眠时床头抬高及、服用“耐信 20mg",
+     "value": 20.0,
+     "unit": "mg"
+    },
+    {
+     "source_id": "cmbclin-001-hpi",
+     "raw": "调整耐信 40mg",
+     "value": 40.0,
+     "unit": "mg"
+    },
     {
      "source_id": "cmbclin-001-exam",
      "raw": "Bp136/80mmHg",
@@ -1226,7 +1238,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 606,
-   "n_measurements": 10,
+   "n_measurements": 11,
    "n_negative_statements": 3
   },
   "quality": {
@@ -1289,6 +1301,12 @@
      "raw": "空腹血糖11mmol/L",
      "value": 11.0,
      "unit": "mmol/l"
+    },
+    {
+     "source_id": "cmbclin-008-exam",
+     "raw": "口服二甲双胍0.25g",
+     "value": 0.25,
+     "unit": "g"
     },
     {
      "source_id": "cmbclin-008-exam",
@@ -1385,7 +1403,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 782,
-   "n_measurements": 23,
+   "n_measurements": 24,
    "n_negative_statements": 4
   },
   "quality": {
@@ -1568,6 +1586,12 @@
      "raw": "g/ml、醛固酮/肾素浓度比值4.75、促肾上腺皮质激素2.22pg/ml",
      "value": 2.22,
      "unit": "pg/ml"
+    },
+    {
+     "source_id": "cmbclin-009-aux",
+     "raw": "比值4.75、促肾上腺皮质激素2.22pg/ml、皮质醇27.47nmol/L",
+     "value": 27.47,
+     "unit": "nmol/l"
     },
     {
      "source_id": "cmbclin-009-aux",
@@ -2530,9 +2554,9 @@
     },
     {
      "source_id": "cmbclin-015-aux",
-     "raw": "湍流处PSV>180cm",
+     "raw": "湍流处PSV>180cm/s",
      "value": 180.0,
-     "unit": "cm"
+     "unit": "cm/s"
     }
    ],
    "negatives": [
@@ -2586,7 +2610,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 762,
-   "n_measurements": 18,
+   "n_measurements": 19,
    "n_negative_statements": 12
   },
   "quality": {
@@ -2713,6 +2737,12 @@
      "raw": "甲胎蛋白6.67ng/ml",
      "value": 6.67,
      "unit": "ng/ml"
+    },
+    {
+     "source_id": "cmbclin-016-aux",
+     "raw": "睾酮4.72nmol/L",
+     "value": 4.72,
+     "unit": "nmol/l"
     },
     {
      "source_id": "cmbclin-016-aux",
@@ -5464,7 +5494,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 581,
-   "n_measurements": 8,
+   "n_measurements": 9,
    "n_negative_statements": 4
   },
   "quality": {
@@ -5572,6 +5602,12 @@
      "raw": "GGT 824U/L",
      "value": 824.0,
      "unit": "u/l"
+    },
+    {
+     "source_id": "cmbclin-034-aux",
+     "raw": "CA19-9 983.7U/ml",
+     "value": 983.7,
+     "unit": "u/ml"
     }
    ],
    "negatives": [
@@ -5617,9 +5653,9 @@
     "hpi"
    ],
    "completeness": "complete",
-   "complexity": "medium",
+   "complexity": "high",
    "n_chars": 556,
-   "n_measurements": 15,
+   "n_measurements": 16,
    "n_negative_statements": 4
   },
   "quality": {
@@ -5760,6 +5796,12 @@
      "raw": "/ml、醛固酮/肾素浓度比值35.50、促肾上腺皮质激素29.95pg/ml",
      "value": 29.95,
      "unit": "pg/ml"
+    },
+    {
+     "source_id": "cmbclin-035-aux",
+     "raw": "35.50、促肾上腺皮质激素29.95pg/ml、皮质醇217.30nmol/L",
+     "value": 217.3,
+     "unit": "nmol/l"
     },
     {
      "source_id": "cmbclin-035-aux",
@@ -6129,7 +6171,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 821,
-   "n_measurements": 7,
+   "n_measurements": 8,
    "n_negative_statements": 13
   },
   "quality": {
@@ -6206,6 +6248,12 @@
      "raw": "CEA：12.3ng/mL",
      "value": 12.3,
      "unit": "ng/ml"
+    },
+    {
+     "source_id": "cmbclin-038-aux2",
+     "raw": "CA19-9: 25.6U/mL",
+     "value": 25.6,
+     "unit": "u/ml"
     },
     {
      "source_id": "cmbclin-038-aux2",
@@ -9249,7 +9297,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 787,
-   "n_measurements": 11,
+   "n_measurements": 12,
    "n_negative_statements": 12
   },
   "quality": {
@@ -9347,6 +9395,12 @@
      "raw": "空腹静脉血糖及餐后2小时血糖分别为2.63mmol/L和4.45mmol/L",
      "value": 4.45,
      "unit": "mmol/l"
+    },
+    {
+     "source_id": "cmbclin-057-aux",
+     "raw": "外院3h",
+     "value": 3.0,
+     "unit": "h"
     },
     {
      "source_id": "cmbclin-057-aux",
@@ -9967,7 +10021,7 @@
    "completeness": "complete",
    "complexity": "medium",
    "n_chars": 468,
-   "n_measurements": 7,
+   "n_measurements": 9,
    "n_negative_statements": 2
   },
   "quality": {
@@ -10055,6 +10109,18 @@
     },
     {
      "source_id": "cmbclin-060-aux",
+     "raw": "凝血功能：PT 19.7s",
+     "value": 19.7,
+     "unit": "s"
+    },
+    {
+     "source_id": "cmbclin-060-aux",
+     "raw": "APTT 27.1s",
+     "value": 27.1,
+     "unit": "s"
+    },
+    {
+     "source_id": "cmbclin-060-aux",
      "raw": "纤维蛋白原 0.79g/L",
      "value": 0.79,
      "unit": "g/l"
@@ -10097,7 +10163,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 645,
-   "n_measurements": 7,
+   "n_measurements": 8,
    "n_negative_statements": 11
   },
   "quality": {
@@ -10198,6 +10264,12 @@
      "raw": "CEA：4.3ng/mL",
      "value": 4.3,
      "unit": "ng/ml"
+    },
+    {
+     "source_id": "cmbclin-061-aux2",
+     "raw": "CA19-9: 11.7U/mL",
+     "value": 11.7,
+     "unit": "u/ml"
     },
     {
      "source_id": "cmbclin-061-aux2",
@@ -11352,7 +11424,7 @@
    "completeness": "complete",
    "complexity": "medium",
    "n_chars": 703,
-   "n_measurements": 12,
+   "n_measurements": 13,
    "n_negative_statements": 6
   },
   "quality": {
@@ -11439,6 +11511,12 @@
      "raw": "空腹血糖12mmol/L",
      "value": 12.0,
      "unit": "mmol/l"
+    },
+    {
+     "source_id": "cmbclin-068-aux",
+     "raw": "方法：病人服用西地那非片100mg",
+     "value": 100.0,
+     "unit": "mg"
     },
     {
      "source_id": "cmbclin-068-aux",
@@ -11709,7 +11787,7 @@
    "completeness": "complete",
    "complexity": "high",
    "n_chars": 522,
-   "n_measurements": 12,
+   "n_measurements": 13,
    "n_negative_statements": 6
   },
   "quality": {
@@ -11831,6 +11909,12 @@
      "raw": "GGT 900U/L",
      "value": 900.0,
      "unit": "u/l"
+    },
+    {
+     "source_id": "cmbclin-070-aux",
+     "raw": "CA19-9 6119U/ml",
+     "value": 6119.0,
+     "unit": "u/ml"
     },
     {
      "source_id": "cmbclin-070-aux",

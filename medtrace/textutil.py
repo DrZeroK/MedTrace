@@ -46,7 +46,7 @@ def strip_enum(text: str) -> str:
 _MON = "jan feb mar apr may jun jul aug sep oct nov dec".split()
 _MON_RE = "(" + "|".join(_MON) + ")"
 _HM = r"(?:\s*T?\s*(\d{1,2})\s*[:：时]\s*(\d{2})(?::\d{2})?)?"
-_ISO = re.compile(r"(?<!\d)(\d{4})\s*[-/.年]\s*(\d{1,2})\s*[-/.月]\s*(\d{1,2})\s*日?" + _HM)
+_ISO = re.compile(r"(?<!\d)(\d{4})\s*[-/.年]\s*(\d{1,2})\s*[-/.月]\s*(\d{1,2})(?!\d)\s*日?" + _HM)   # (?!\d): "2023.9-2023.12" is a range, not a date
 _MD_ZH = re.compile(r"(?<![\d年])(\d{1,2})月(\d{1,2})日" + _HM)
 _EN1 = re.compile(r"\b" + _MON_RE + r"[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})"
                   r"(?:[,\s]+(?:at\s+)?(\d{1,2}):(\d{2}))?", re.I)
@@ -150,7 +150,11 @@ _UNITS = ["mmHg", "mmol/L", "µmol/L", "μmol/L", "umol/L", "mg/dL", "g/dL", "g/
           "pg/mL", "ng/L", "µg/L", "μg/L", "ug/L", "mIU/L", "IU/L", "U/L", "mEq/L", "mOsm/kg",
           "×10^9/L", "x10^9/L", "*10^9/L", "10^9/L", "×10^12/L", "x10^12/L", "*10^12/L", "10^12/L",
           "×10⁹/L", "×10¹²/L", "×109/L", "×1012/L", "X109/L", "X1012/L", "L/min", "/min", "次/分", "bpm", "kPa", "%", "℃", "°C", "°F",
-          "cm", "mm", "kg", "mL", "fL", "ms"]
+          "cm", "mm", "kg", "mL", "fL", "ms",
+          # added after profiling real Chinese notes (MedCT-clinical-notes): doses, rates, immunoassay and pressure units
+          "mg/kg", "mg/g", "mg/d", "mg", "μg", "µg", "ug", "g", "mL/kg/h", "mL/kg", "mL/min", "m/s", "cm/s", "mm/h",
+          "cmH2O", "/μL", "/µL", "/uL", "mV", "mIU/mL", "IU/mL", "U/mL", "AU/mL", "nmol/L", "pmol/L", "copies/mL",
+          "次/天", "次/日", "h", "min", "s", "IU", "U"]
 _UNIT_ALT = "|".join(re.escape(u) for u in sorted(_UNITS, key=len, reverse=True))
 _NUM_STRICT = re.compile(r"(?<![A-Za-z0-9_.\-])(\d+(?:\.\d+)?)(?:\s*(" + _UNIT_ALT + r")(?![A-Za-z]))?", re.I)
 _NUM_ANY = re.compile(r"\d+(?:\.\d+)?")

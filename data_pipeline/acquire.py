@@ -30,6 +30,14 @@ AUTO = {
         # pinned content hash of the extracted file (audit date in registry.json); a mismatch means upstream changed
         "sha256": {"CMB-Clin-qa.json": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"},
     },
+    # Real hospital note fragments. Apache-2.0 per the dataset card, but REAL PATIENT TEXT: raw files stay under
+    # data/raw/ (git-ignored) and nothing derived from them except aggregate statistics may be committed.
+    "medct_clinical_notes": {
+        "card": "https://huggingface.co/api/datasets/TigerResearch/MedCT-clinical-notes",
+        "expect_card_license": "apache-2.0",
+        "plain": {f: f"https://huggingface.co/datasets/TigerResearch/MedCT-clinical-notes/resolve/fd55ae21c542f410753a65114db2300d6630b0bf/{f}"
+                  for f in ("medct_ner_notes.csv", "medct_ner_annotations.csv", "README.md")},
+    },
 }
 
 
@@ -58,6 +66,18 @@ def acquire(dataset: str) -> Path:
     out = RAW / dataset
     out.mkdir(parents=True, exist_ok=True)
     prov = {"dataset": dataset, "retrieved_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "files": {}}
+    if "plain" in spec:      # files fetched as-is from a pinned revision, after re-checking the card's licence and gate
+        card = json.loads(_get(spec["card"]).decode("utf-8"))
+        lic = (card.get("cardData") or {}).get("license")
+        if lic != spec["expect_card_license"] or card.get("gated") or card.get("private"):
+            raise SystemExit(f"dataset card changed (license={lic!r}, gated={card.get('gated')!r}) - stop and re-audit")
+        for name, url in spec["plain"].items():
+            data = _get(url)
+            (out / name).write_bytes(data)
+            prov["files"][name] = {"source": url, "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data)}
+        (out / "provenance.json").write_text(json.dumps(prov, indent=1), "utf-8")
+        print(f"{dataset}: {', '.join(prov['files'])} -> {out}")
+        return out
     blobs = {name: _get(url) for name, url in spec["files"].items()}
     if spec["expect_license"] not in blobs["LICENSE"].decode("utf-8", "replace")[:400]:
         raise SystemExit("licence file no longer matches the audited licence - stop and re-audit before using this dataset")

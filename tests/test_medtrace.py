@@ -202,6 +202,13 @@ class ChineseAndNewChecks(unittest.TestCase):
         self.assertEqual([(v, u) for v, u, _ in T.extract_numbers("WBC 12.5×109／L，N 85％")], [(12.5, "×10^9/l"), (85.0, "%")])
         self.assertEqual(T.norm_unit("×109/L"), T.norm_unit("×10^9/L"))
 
+    def test_units_and_date_ranges_seen_in_real_notes(self):
+        got = [(v, u) for v, u, _ in T.extract_numbers("泼尼松25mg 每日一次，PT 12.3s，流速1.2m/s，尿量0.5ml/kg/h，HBV-DNA 500 IU/ml")]
+        self.assertEqual(got, [(25.0, "mg"), (12.3, "s"), (1.2, "m/s"), (0.5, "ml/kg/h"), (500.0, "iu/ml")])
+        self.assertEqual(T.find_dates("2023.9-2023.12住院"), [])                     # a year.month range is not a date
+        self.assertEqual(codes("2023.9-2023.12至外院住院治疗。", sources=("a",),
+                               case={"case_id": 1, "sources": [{"source_id": "a", "content": "2023.9-2023.12至外院住院治疗。"}]}), set())
+
     def test_only_denied_history_counts_as_conflict(self):
         L = build_ledger(parse_case(self.ZH, 0))
         self.assertEqual([(c["kind"], c["term"]) for c in L.conflicts], [("polarity", "糖尿病")])   # not 头晕 (time-specific negative)

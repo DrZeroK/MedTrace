@@ -5,7 +5,7 @@
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic
 fact ledger and verifier, an offline mock model with fault injection, an evaluation set of 16 annotated synthetic
 cases (11 development, 5 held out; 12 English, 4 Chinese; two per category), 7 one-fact perturbation tests,
-ablation / perturbation / blinded-review tooling, and 44 automated tests.
+ablation / perturbation / blinded-review tooling, and 45 automated tests.
 
 ## 2. What has been measured — and what has not
 
@@ -78,6 +78,17 @@ What this real-format Chinese text showed about the deterministic layer (no mode
 | Ledger "conflict" flags | 38 before, 3 after | 35 were negative findings tied to a site or time ("无头晕" earlier, "头晕" now) — essentially all false. Conflicts are now raised only for an explicitly denied history that another source asserts. Cost: contradictions phrased as plain negatives are left to the model/reviewer |
 | New check: value reported under the wrong measurement | 86/86 synthetic swaps of two values inside one sentence caught; 0 false alarms on verbatim text | Mechanical test by construction; closes the "right number, wrong analyte" gap for labelled values only |
 | New check: allergy / pending-result content missing from the note | 0 false alarms on verbatim text | Surfaced as review items; general completeness remains a reviewer judgement |
+
+Real hospital language (MedCT-clinical-notes, Apache-2.0; 5,554 unique real note fragments, 23,380 sentences;
+`data/standardized/medct_clinical_notes/stress_report.md`, aggregates only):
+
+| Finding on real text | Action | After |
+|---|---|---|
+| A year.month range (`2023.9-2023.12`) was read as a date, leaving a stray number that the verifier flagged | date pattern tightened | 0 false alarms on 23,380 verbatim sentences |
+| Dose, rate, immunoassay and pressure units (mg, μg, ml/kg/h, m/s, IU/ml, nmol/L, cmH2O …) were not recognised, so those values escaped unit-mismatch checking | 30 units added | recognised measurements 4,970 → 6,035 |
+
+This shows the rules do not misfire on faithful real text. It does not show that negation polarity is assigned
+correctly (no polarity labels in that dataset) — an external labelled test (CHIP-CDEE or IMCS-21) is still needed.
 
 `python -m eval.run_external` reports diagnosis hit (61 eligible cases), differential recall against the expert
 answer, measurement coverage and verifier findings per variant. It has only been run with the mock (mechanics:

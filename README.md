@@ -74,7 +74,7 @@ medtrace/inputs.py      A  input + cutoff              medtrace/mock_llm.py     
 medtrace/ledger.py      B  fact ledger                 medtrace/mock_server.py        HTTP mock (500s, timeouts, garbage)
 medtrace/pipeline.py    C–E orchestration, guards      medtrace/update.py             incremental record updates
 medtrace/verify.py      E1 deterministic checks        eval/                          cases, ablation, perturbation, blinded review
-medtrace/llm.py         model client, retries          tests/                         44 regression / fault-injection tests
+medtrace/llm.py         model client, retries          tests/                         45 regression / fault-injection tests
 medtrace/runner.py      F  batch, logs, exit codes     docs/                          requirements, rubric, report, datasets
 data_pipeline/          dataset audit, acquisition, QC, standardisation        data/standardized/   standardized external cases
 ```
@@ -101,6 +101,7 @@ python -m data_pipeline.acquire cmb_clin               # download (Apache-2.0), 
 python -m data_pipeline.cmb_clin                       # standardize + QC -> data/standardized/cmb_clin/
 python main.py --input data/standardized/cmb_clin/cases.json --output out.json   # the standardized cases are valid input
 python -m eval.run_external --dataset cmb_clin --split dev --variants A0,A1,A2  # diagnosis hit, differential recall, coverage
+python -m data_pipeline.acquire medct_clinical_notes && python -m data_pipeline.medct_stress   # real-note stress test (aggregates only)
 ```
 Audit and ranking: `docs/DATASETS.md`. Labelling rules: `docs/ANNOTATION_GUIDELINES.md`. QC report:
 `data/standardized/cmb_clin/qc_report.md`.

@@ -41,8 +41,8 @@ A = admission-time content only. B = usable, but the record states a diagnosis a
 
 | level | cases |
 |---|---|
-| medium | 35 |
-| high | 25 |
+| medium | 34 |
+| high | 26 |
 | low | 14 |
 
 ## Specialty (textbook chapter)
