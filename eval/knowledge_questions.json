@@ -1,0 +1,742 @@
+{
+  "version": "draft-2026-11-17",
+  "annotation_status": "self-authored provisional; clinical annotation pending; not a validated benchmark",
+  "questions": [
+    {
+      "id": "Q010",
+      "split": "dev",
+      "query": "50岁，肺炎可能，如何组织检查计划？",
+      "relevant_ids": [
+        "K011",
+        "K012",
+        "K013"
+      ]
+    },
+    {
+      "id": "Q011",
+      "split": "dev",
+      "query": "65岁，需鉴别肺炎。",
+      "relevant_ids": [
+        "K011",
+        "K012",
+        "K013"
+      ]
+    },
+    {
+      "id": "Q012",
+      "split": "dev",
+      "query": "成年患者45岁，记录提到CAP。",
+      "relevant_ids": [
+        "K011",
+        "K012",
+        "K013"
+      ]
+    },
+    {
+      "id": "Q013",
+      "split": "dev",
+      "query": "70岁，拟诊社区获得性肺炎，补充评估。",
+      "relevant_ids": [
+        "K011",
+        "K012",
+        "K013"
+      ]
+    },
+    {
+      "id": "Q014",
+      "split": "dev",
+      "query": "8岁，肺炎，是否适用成人资料？",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q015",
+      "split": "heldout",
+      "query": "42岁，肺炎不能除外，有哪些复核事项？",
+      "relevant_ids": [
+        "K011",
+        "K012",
+        "K013"
+      ]
+    },
+    {
+      "id": "Q016",
+      "split": "heldout",
+      "query": "55岁，既往CAP，目前需要进一步分析。",
+      "relevant_ids": [
+        "K011",
+        "K012",
+        "K013"
+      ]
+    },
+    {
+      "id": "Q017",
+      "split": "heldout",
+      "query": "60岁，否认肺炎病史，需要保留否定状态。",
+      "relevant_ids": [
+        "K011",
+        "K012",
+        "K013"
+      ]
+    },
+    {
+      "id": "Q018",
+      "split": "heldout",
+      "query": "36岁，社区获得性肺炎尚未明确，需有条件讨论。",
+      "relevant_ids": [
+        "K011",
+        "K012",
+        "K013"
+      ]
+    },
+    {
+      "id": "Q019",
+      "split": "heldout",
+      "query": "50岁，仅有牙齿松动，无其他病史。问题编号1。",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q020",
+      "split": "dev",
+      "query": "50岁，慢阻肺急性加重可能，如何组织检查计划？",
+      "relevant_ids": [
+        "K021",
+        "K022",
+        "K023"
+      ]
+    },
+    {
+      "id": "Q021",
+      "split": "dev",
+      "query": "65岁，需鉴别慢阻肺急性加重。",
+      "relevant_ids": [
+        "K021",
+        "K022",
+        "K023"
+      ]
+    },
+    {
+      "id": "Q022",
+      "split": "dev",
+      "query": "成年患者45岁，记录提到AECOPD。",
+      "relevant_ids": [
+        "K021",
+        "K022",
+        "K023"
+      ]
+    },
+    {
+      "id": "Q023",
+      "split": "dev",
+      "query": "70岁，拟诊慢阻肺，补充评估。",
+      "relevant_ids": [
+        "K021",
+        "K022",
+        "K023"
+      ]
+    },
+    {
+      "id": "Q024",
+      "split": "dev",
+      "query": "8岁，慢阻肺急性加重，是否适用成人资料？",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q025",
+      "split": "heldout",
+      "query": "42岁，慢阻肺急性加重不能除外，有哪些复核事项？",
+      "relevant_ids": [
+        "K021",
+        "K022",
+        "K023"
+      ]
+    },
+    {
+      "id": "Q026",
+      "split": "heldout",
+      "query": "55岁，既往AECOPD，目前需要进一步分析。",
+      "relevant_ids": [
+        "K021",
+        "K022",
+        "K023"
+      ]
+    },
+    {
+      "id": "Q027",
+      "split": "heldout",
+      "query": "60岁，否认慢阻肺急性加重病史，需要保留否定状态。",
+      "relevant_ids": [
+        "K021",
+        "K022",
+        "K023"
+      ]
+    },
+    {
+      "id": "Q028",
+      "split": "heldout",
+      "query": "36岁，慢阻肺尚未明确，需有条件讨论。",
+      "relevant_ids": [
+        "K021",
+        "K022",
+        "K023"
+      ]
+    },
+    {
+      "id": "Q029",
+      "split": "heldout",
+      "query": "50岁，仅有牙齿松动，无其他病史。问题编号2。",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q030",
+      "split": "dev",
+      "query": "50岁，急性冠脉综合征可能，如何组织检查计划？",
+      "relevant_ids": [
+        "K031",
+        "K032",
+        "K033"
+      ]
+    },
+    {
+      "id": "Q031",
+      "split": "dev",
+      "query": "65岁，需鉴别急性冠脉综合征。",
+      "relevant_ids": [
+        "K031",
+        "K032",
+        "K033"
+      ]
+    },
+    {
+      "id": "Q032",
+      "split": "dev",
+      "query": "成年患者45岁，记录提到ACS。",
+      "relevant_ids": [
+        "K031",
+        "K032",
+        "K033"
+      ]
+    },
+    {
+      "id": "Q033",
+      "split": "dev",
+      "query": "70岁，拟诊心肌梗死，补充评估。",
+      "relevant_ids": [
+        "K031",
+        "K032",
+        "K033"
+      ]
+    },
+    {
+      "id": "Q034",
+      "split": "dev",
+      "query": "8岁，急性冠脉综合征，是否适用成人资料？",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q035",
+      "split": "heldout",
+      "query": "42岁，急性冠脉综合征不能除外，有哪些复核事项？",
+      "relevant_ids": [
+        "K031",
+        "K032",
+        "K033"
+      ]
+    },
+    {
+      "id": "Q036",
+      "split": "heldout",
+      "query": "55岁，既往ACS，目前需要进一步分析。",
+      "relevant_ids": [
+        "K031",
+        "K032",
+        "K033"
+      ]
+    },
+    {
+      "id": "Q037",
+      "split": "heldout",
+      "query": "60岁，否认急性冠脉综合征病史，需要保留否定状态。",
+      "relevant_ids": [
+        "K031",
+        "K032",
+        "K033"
+      ]
+    },
+    {
+      "id": "Q038",
+      "split": "heldout",
+      "query": "36岁，心肌梗死尚未明确，需有条件讨论。",
+      "relevant_ids": [
+        "K031",
+        "K032",
+        "K033"
+      ]
+    },
+    {
+      "id": "Q039",
+      "split": "heldout",
+      "query": "50岁，仅有牙齿松动，无其他病史。问题编号3。",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q040",
+      "split": "dev",
+      "query": "50岁，心力衰竭可能，如何组织检查计划？",
+      "relevant_ids": [
+        "K041",
+        "K042",
+        "K043"
+      ]
+    },
+    {
+      "id": "Q041",
+      "split": "dev",
+      "query": "65岁，需鉴别心力衰竭。",
+      "relevant_ids": [
+        "K041",
+        "K042",
+        "K043"
+      ]
+    },
+    {
+      "id": "Q042",
+      "split": "dev",
+      "query": "成年患者45岁，记录提到心衰。",
+      "relevant_ids": [
+        "K041",
+        "K042",
+        "K043"
+      ]
+    },
+    {
+      "id": "Q043",
+      "split": "dev",
+      "query": "70岁，拟诊急性心力衰竭，补充评估。",
+      "relevant_ids": [
+        "K041",
+        "K042",
+        "K043"
+      ]
+    },
+    {
+      "id": "Q044",
+      "split": "dev",
+      "query": "8岁，心力衰竭，是否适用成人资料？",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q045",
+      "split": "heldout",
+      "query": "42岁，心力衰竭不能除外，有哪些复核事项？",
+      "relevant_ids": [
+        "K041",
+        "K042",
+        "K043"
+      ]
+    },
+    {
+      "id": "Q046",
+      "split": "heldout",
+      "query": "55岁，既往心衰，目前需要进一步分析。",
+      "relevant_ids": [
+        "K041",
+        "K042",
+        "K043"
+      ]
+    },
+    {
+      "id": "Q047",
+      "split": "heldout",
+      "query": "60岁，否认心力衰竭病史，需要保留否定状态。",
+      "relevant_ids": [
+        "K041",
+        "K042",
+        "K043"
+      ]
+    },
+    {
+      "id": "Q048",
+      "split": "heldout",
+      "query": "36岁，急性心力衰竭尚未明确，需有条件讨论。",
+      "relevant_ids": [
+        "K041",
+        "K042",
+        "K043"
+      ]
+    },
+    {
+      "id": "Q049",
+      "split": "heldout",
+      "query": "50岁，仅有牙齿松动，无其他病史。问题编号4。",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q050",
+      "split": "dev",
+      "query": "50岁，糖尿病急性代谢问题可能，如何组织检查计划？",
+      "relevant_ids": [
+        "K051",
+        "K052",
+        "K053"
+      ]
+    },
+    {
+      "id": "Q051",
+      "split": "dev",
+      "query": "65岁，需鉴别糖尿病急性代谢问题。",
+      "relevant_ids": [
+        "K051",
+        "K052",
+        "K053"
+      ]
+    },
+    {
+      "id": "Q052",
+      "split": "dev",
+      "query": "成年患者45岁，记录提到DKA。",
+      "relevant_ids": [
+        "K051",
+        "K052",
+        "K053"
+      ]
+    },
+    {
+      "id": "Q053",
+      "split": "dev",
+      "query": "70岁，拟诊HHS，补充评估。",
+      "relevant_ids": [
+        "K051",
+        "K052",
+        "K053"
+      ]
+    },
+    {
+      "id": "Q054",
+      "split": "dev",
+      "query": "8岁，糖尿病急性代谢问题，是否适用成人资料？",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q055",
+      "split": "heldout",
+      "query": "42岁，糖尿病急性代谢问题不能除外，有哪些复核事项？",
+      "relevant_ids": [
+        "K051",
+        "K052",
+        "K053"
+      ]
+    },
+    {
+      "id": "Q056",
+      "split": "heldout",
+      "query": "55岁，既往DKA，目前需要进一步分析。",
+      "relevant_ids": [
+        "K051",
+        "K052",
+        "K053"
+      ]
+    },
+    {
+      "id": "Q057",
+      "split": "heldout",
+      "query": "60岁，否认糖尿病急性代谢问题病史，需要保留否定状态。",
+      "relevant_ids": [
+        "K051",
+        "K052",
+        "K053"
+      ]
+    },
+    {
+      "id": "Q058",
+      "split": "heldout",
+      "query": "36岁，HHS尚未明确，需有条件讨论。",
+      "relevant_ids": [
+        "K051",
+        "K052",
+        "K053"
+      ]
+    },
+    {
+      "id": "Q059",
+      "split": "heldout",
+      "query": "50岁，仅有牙齿松动，无其他病史。问题编号5。",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q060",
+      "split": "dev",
+      "query": "50岁，低血糖可能，如何组织检查计划？",
+      "relevant_ids": [
+        "K061",
+        "K062",
+        "K063"
+      ]
+    },
+    {
+      "id": "Q061",
+      "split": "dev",
+      "query": "65岁，需鉴别低血糖。",
+      "relevant_ids": [
+        "K061",
+        "K062",
+        "K063"
+      ]
+    },
+    {
+      "id": "Q062",
+      "split": "dev",
+      "query": "成年患者45岁，记录提到低血糖症。",
+      "relevant_ids": [
+        "K061",
+        "K062",
+        "K063"
+      ]
+    },
+    {
+      "id": "Q063",
+      "split": "dev",
+      "query": "70岁，拟诊低血糖，补充评估。",
+      "relevant_ids": [
+        "K061",
+        "K062",
+        "K063"
+      ]
+    },
+    {
+      "id": "Q064",
+      "split": "dev",
+      "query": "8岁，低血糖，是否适用成人资料？",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q065",
+      "split": "heldout",
+      "query": "42岁，低血糖不能除外，有哪些复核事项？",
+      "relevant_ids": [
+        "K061",
+        "K062",
+        "K063"
+      ]
+    },
+    {
+      "id": "Q066",
+      "split": "heldout",
+      "query": "55岁，既往低血糖症，目前需要进一步分析。",
+      "relevant_ids": [
+        "K061",
+        "K062",
+        "K063"
+      ]
+    },
+    {
+      "id": "Q067",
+      "split": "heldout",
+      "query": "60岁，否认低血糖病史，需要保留否定状态。",
+      "relevant_ids": [
+        "K061",
+        "K062",
+        "K063"
+      ]
+    },
+    {
+      "id": "Q068",
+      "split": "heldout",
+      "query": "36岁，低血糖尚未明确，需有条件讨论。",
+      "relevant_ids": [
+        "K061",
+        "K062",
+        "K063"
+      ]
+    },
+    {
+      "id": "Q069",
+      "split": "heldout",
+      "query": "50岁，仅有牙齿松动，无其他病史。问题编号6。",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q070",
+      "split": "dev",
+      "query": "50岁，急性肾损伤可能，如何组织检查计划？",
+      "relevant_ids": [
+        "K071",
+        "K072",
+        "K073"
+      ]
+    },
+    {
+      "id": "Q071",
+      "split": "dev",
+      "query": "65岁，需鉴别急性肾损伤。",
+      "relevant_ids": [
+        "K071",
+        "K072",
+        "K073"
+      ]
+    },
+    {
+      "id": "Q072",
+      "split": "dev",
+      "query": "成年患者45岁，记录提到AKI。",
+      "relevant_ids": [
+        "K071",
+        "K072",
+        "K073"
+      ]
+    },
+    {
+      "id": "Q073",
+      "split": "dev",
+      "query": "70岁，拟诊急性肾损伤，补充评估。",
+      "relevant_ids": [
+        "K071",
+        "K072",
+        "K073"
+      ]
+    },
+    {
+      "id": "Q074",
+      "split": "dev",
+      "query": "8岁，急性肾损伤，是否适用成人资料？",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q075",
+      "split": "heldout",
+      "query": "42岁，急性肾损伤不能除外，有哪些复核事项？",
+      "relevant_ids": [
+        "K071",
+        "K072",
+        "K073"
+      ]
+    },
+    {
+      "id": "Q076",
+      "split": "heldout",
+      "query": "55岁，既往AKI，目前需要进一步分析。",
+      "relevant_ids": [
+        "K071",
+        "K072",
+        "K073"
+      ]
+    },
+    {
+      "id": "Q077",
+      "split": "heldout",
+      "query": "60岁，否认急性肾损伤病史，需要保留否定状态。",
+      "relevant_ids": [
+        "K071",
+        "K072",
+        "K073"
+      ]
+    },
+    {
+      "id": "Q078",
+      "split": "heldout",
+      "query": "36岁，急性肾损伤尚未明确，需有条件讨论。",
+      "relevant_ids": [
+        "K071",
+        "K072",
+        "K073"
+      ]
+    },
+    {
+      "id": "Q079",
+      "split": "heldout",
+      "query": "50岁，仅有牙齿松动，无其他病史。问题编号7。",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q080",
+      "split": "dev",
+      "query": "50岁，电解质紊乱可能，如何组织检查计划？",
+      "relevant_ids": [
+        "K081",
+        "K082",
+        "K083"
+      ]
+    },
+    {
+      "id": "Q081",
+      "split": "dev",
+      "query": "65岁，需鉴别电解质紊乱。",
+      "relevant_ids": [
+        "K081",
+        "K082",
+        "K083"
+      ]
+    },
+    {
+      "id": "Q082",
+      "split": "dev",
+      "query": "成年患者45岁，记录提到高钾血症。",
+      "relevant_ids": [
+        "K081",
+        "K082",
+        "K083"
+      ]
+    },
+    {
+      "id": "Q083",
+      "split": "dev",
+      "query": "70岁，拟诊低钾血症，补充评估。",
+      "relevant_ids": [
+        "K081",
+        "K082",
+        "K083"
+      ]
+    },
+    {
+      "id": "Q084",
+      "split": "dev",
+      "query": "8岁，电解质紊乱，是否适用成人资料？",
+      "relevant_ids": []
+    },
+    {
+      "id": "Q085",
+      "split": "heldout",
+      "query": "42岁，电解质紊乱不能除外，有哪些复核事项？",
+      "relevant_ids": [
+        "K081",
+        "K082",
+        "K083"
+      ]
+    },
+    {
+      "id": "Q086",
+      "split": "heldout",
+      "query": "55岁，既往高钾血症，目前需要进一步分析。",
+      "relevant_ids": [
+        "K081",
+        "K082",
+        "K083"
+      ]
+    },
+    {
+      "id": "Q087",
+      "split": "heldout",
+      "query": "60岁，否认电解质紊乱病史，需要保留否定状态。",
+      "relevant_ids": [
+        "K081",
+        "K082",
+        "K083"
+      ]
+    },
+    {
+      "id": "Q088",
+      "split": "heldout",
+      "query": "36岁，低钾血症尚未明确，需有条件讨论。",
+      "relevant_ids": [
+        "K081",
+        "K082",
+        "K083"
+      ]
+    },
+    {
+      "id": "Q089",
+      "split": "heldout",
+      "query": "50岁，仅有牙齿松动，无其他病史。问题编号8。",
+      "relevant_ids": []
+    }
+  ]
+}

@@ -67,12 +67,15 @@ def _tri_flag(*names):
 
 @dataclass
 class Config:
+    kb_path: str = ""
     input_path: str = "input.json"
     output_path: str = "output.json"
     log_dir: str = "logs"
-    api_base: str = ""
-    api_key: str = field(default="", repr=False)
+    api_base: str = ""              # legacy: base URL; client appends /chat/completions
+    endpoint: str = ""              # official spec: full request URL, used verbatim (MODEL_NAME/ENDPOINT in .env)
+    api_key: str = field(default="", repr=False)   # legacy external providers only; official service is keyless
     model: str = ""
+    output_protocol: str = "official"  # official (provider spec: status/medical_record/error, default) | legacy (old contract, opt-in)
     timeout: float = 600.0          # seconds per HTTP request (reasoning models need minutes, see .env.example)
     max_retries: int = 2            # HTTP-level retries per model call (transient errors only)
     retry_backoff: float = 2.0
@@ -105,6 +108,11 @@ class Config:
     checkpoint: bool = True
     strict_exit: bool = False
 
+    @property
+    def official(self) -> bool:
+        """True when the output must follow the provider's status/medical_record/error protocol."""
+        return self.output_protocol == "official"
+
     def public(self) -> dict:
         d = asdict(self)
         d["api_key"] = "<set>" if self.api_key else "<empty>"
@@ -114,12 +122,15 @@ class Config:
 def load_config(**overrides) -> Config:
     load_dotenv_files()
     c = Config(
+        kb_path=_get("KB_PATH", default=""),
         input_path=_get("INPUT_PATH", default="input.json"),
         output_path=_get("OUTPUT_PATH", default="output.json"),
         log_dir=_get("LOG_DIR", default="logs"),
         api_base=_get("LLM_API_BASE", "OPENAI_API_BASE", "OPENAI_BASE_URL", "API_BASE", "BASE_URL", default=""),
+        endpoint=_get("ENDPOINT", default=""),
         api_key=_get("LLM_API_KEY", "OPENAI_API_KEY", "API_KEY", default=""),
-        model=_get("LLM_MODEL", "MODEL_NAME", "MODEL", default=""),
+        model=_get("MODEL_NAME", "LLM_MODEL", "MODEL", default=""),
+        output_protocol=str(_get("OUTPUT_PROTOCOL", default="official")).lower(),
         timeout=_num(float, "LLM_TIMEOUT", default=600.0),
         max_retries=_num(int, "LLM_MAX_RETRIES", default=2),
         retry_backoff=_num(float, "LLM_RETRY_BACKOFF", default=2.0),
@@ -163,4 +174,6 @@ def load_config(**overrides) -> Config:
         c.pipeline = "A3"
     if c.pipeline not in PIPELINES:
         c.pipeline = "A2"
+    if c.output_protocol not in ("legacy", "official"):
+        c.output_protocol = "official"
     return c

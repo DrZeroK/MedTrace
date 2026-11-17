@@ -18,6 +18,15 @@ The document records the supplied answers; it does not certify the current imple
 
 ## Run
 
+User-supplied textbook PDFs are available through a separate local full-text index;
+see [textbook search](docs/TEXTBOOK_SEARCH.md) for keyword queries with source pages.
+
+Offline knowledge support is implemented but disabled by default. The first content
+catalog is **draft, not clinically approved**. See [knowledge deployment](docs/KNOWLEDGE_BASE.md)
+for review, build, evaluation, packaging and rollback. Set `KB_PATH` to an approved
+SQLite release's absolute path to enable it. Citations are written to a separate
+`<output>.knowledge_audit.json`; the result JSON schema stays compatible.
+
 ```bash
 pip install -r requirements.txt    # requests, python-dotenv, jsonschema (identical to requires.txt; Python >= 3.10)
 cp .env.example .env               # set LLM_API_BASE / LLM_API_KEY / LLM_MODEL
@@ -37,8 +46,9 @@ python scripts/build_submission.py            # whitelist-only ZIP -> dist/submi
 
 The archive contains only runtime material (`main.py`, `medtrace/` with prompts, `requirements.txt`,
 `requires.txt`, `.env.example`, `README.md`, `docs/RESOURCE_REGISTRATION.md`, `input.example.json`) — never
-`.env`, `data/`, `eval/`, `data_pipeline/` or `tests/`. Resource registration (knowledge bases: None;
-dependencies and their stdlib fallbacks) is in `docs/RESOURCE_REGISTRATION.md`; the organiser's template is pending.
+`.env`, `data/`, `eval/`, `data_pipeline/` or `tests/`. Optional `--knowledge /absolute/path/knowledge.sqlite`
+bundles a validated approved release and manifest. Resource registration is in
+`docs/RESOURCE_REGISTRATION.md`; no clinical knowledge release is approved yet, and the organiser's template is pending.
 
 ## Input / output (assumed contract — configurable)
 
@@ -131,7 +141,7 @@ Audit and ranking: `docs/DATASETS.md`. Labelling rules: `docs/ANNOTATION_GUIDELI
 
 ## Declarations
 
-- Model: only the endpoint configured in `.env`. No other model, external service, retrieval or internet access is used at run time.
+- Model: only the endpoint configured in `.env`. Optional retrieval is entirely local via `KB_PATH`; no online retrieval or embedding is used.
 - Data: `eval/cases.json` contains 16 synthetic teaching cases written for this project; no patient data.
   `data/standardized/cmb_clin/` is derived from CMB-Clin (Apache-2.0, textbook cases; see its `NOTICE.md`) and is used for evaluation only.
 - Method: prompts in `medtrace/prompts/`, rules in `medtrace/verify.py`; no fine-tuning, no hidden reference answers.

@@ -1,8 +1,10 @@
 """Module F - non-interactive batch execution: python main.py
 
-Exit codes (official values to be confirmed): 0 = output.json written and valid;
-1 = fatal (input unreadable / output unwritable / no model configured);
-2 = only with STRICT_EXIT=1, when at least one case fell back.
+Exit codes. In official mode (OUTPUT_PROTOCOL=official) they follow the provider spec:
+  0 = all cases processed and a protocol-valid output.json written (per-record failures allowed);
+  1 = task-level runtime error (output could not be completed / unwritable);
+  2 = necessary configuration missing or input violates the basic protocol.
+Legacy mode keeps the previous behaviour: 0 ok; 1 fatal; 2 only with STRICT_EXIT=1 on a fallback.
 """
 from __future__ import annotations
 
@@ -15,6 +17,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
@@ -23,6 +26,7 @@ from .config import ROOT, load_config
 from .inputs import InputError, load_cases
 from .llm import LLMClient, LLMError
 from .pipeline import Pipeline, prompt_fingerprint
+from .knowledge import KnowledgeError, digest_file, write_audit
 
 log = logging.getLogger("medtrace")
 
@@ -40,10 +44,7 @@ def atomic_write_json(path: str, obj) -> None:
             os.fsync(f.fileno())
         os.replace(tmp, path)
     except BaseException:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
+        log.error("write failed; retained recoverable temporary file: %s", tmp)
         raise
 
 
@@ -85,19 +86,32 @@ def main(argv=None) -> int:
             run_log.flush()
 
     started = time.monotonic()
+    audit_run_id = str(uuid.uuid4())
     emit({"event": "run_start", "time": datetime.now(timezone.utc).isoformat(), "config": cfg.public(),
           "prompt": prompt_fingerprint(), "git": _git_rev(), "python": sys.version.split()[0]})
     try:
         cases, envelope = load_cases(cfg.input_path, cfg.cutoff_mode)
+        if cfg.official:
+            _validate_official_input(cases, envelope)
     except InputError as e:
         log.error("FATAL: %s", e)
         emit({"event": "fatal", "error": str(e)})
-        return 1
+        if run_log:
+            run_log.close()
+        return 2 if cfg.official else 1
     try:
         pipe = Pipeline(cfg, LLMClient(cfg))
     except LLMError as e:
         log.error("FATAL: %s", e)
         emit({"event": "fatal", "error": str(e)})
+        if run_log:
+            run_log.close()
+        return 2 if cfg.official else 1
+    except KnowledgeError as e:
+        log.error("FATAL: %s", e)
+        emit({"event": "fatal", "error": str(e)})
+        if run_log:
+            run_log.close()
         return 1
     log.info("%d case(s), pipeline=%s, model=%s", len(cases), cfg.pipeline, cfg.model or "<mock>")
 
@@ -109,6 +123,8 @@ def main(argv=None) -> int:
     def write():
         obj = wrap([r.record for r in results], envelope, cfg)
         atomic_write_json(cfg.output_path, obj)
+        if pipe.kb:
+            write_audit(cfg.output_path, results, pipe.kb, digest_file(cfg.input_path), audit_run_id)
         out_dir = os.path.dirname(os.path.abspath(cfg.output_path))
         seen = {os.path.basename(cfg.output_path)}
         for alias in cfg.output_aliases:
@@ -119,6 +135,8 @@ def main(argv=None) -> int:
             atomic_write_json(os.path.join(out_dir, name), obj)
 
     try:
+        if pipe.kb:
+            write_audit(cfg.output_path, [], pipe.kb, digest_file(cfg.input_path), audit_run_id)
         if cfg.checkpoint and cases:
             # Seed the output with conservative extract-only notes so that a valid, complete file exists
             # from the first second, whatever happens to the model service or the process later.
@@ -160,6 +178,8 @@ def main(argv=None) -> int:
     except OSError as e:
         log.error("FATAL: cannot write output %r: %s", cfg.output_path, e)
         emit({"event": "fatal", "error": str(e)})
+        if run_log:
+            run_log.close()
         return 1
 
     n_fb = sum(r.status != "ok" for r in results)
@@ -169,7 +189,25 @@ def main(argv=None) -> int:
     log.info("wrote %s: %d case(s), %d not ok, %.1fs", cfg.output_path, len(cases), n_fb, time.monotonic() - started)
     if run_log:
         run_log.close()
+    if cfg.official:
+        return 0
     return 2 if (cfg.strict_exit and n_fb) else 0
+
+
+def _validate_official_input(cases, envelope):
+    """Official protocol: top level must be a JSON array; case_id non-empty and unique.
+    Malformed per-case sources are still isolated (recorded as failed) rather than aborting the batch.
+    """
+    if envelope != "list":
+        raise InputError("official protocol requires a top-level JSON array of cases")
+    seen = set()
+    for c in cases:
+        key = json.dumps(c.case_id, ensure_ascii=False, sort_keys=True, default=str)
+        if c.case_id is None or (isinstance(c.case_id, str) and not c.case_id.strip()):
+            raise InputError(f"case at index {c.index} has a missing or empty case_id")
+        if key in seen:
+            raise InputError(f"duplicate case_id: {c.case_id}")
+        seen.add(key)
 
 
 class _Unavailable:

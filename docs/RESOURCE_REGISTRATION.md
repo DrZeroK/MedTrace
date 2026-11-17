@@ -8,11 +8,16 @@ prints that commit and the prompt fingerprint at build time.
 
 ## Knowledge bases
 
-**None.** No external knowledge base, corpus or retrieval index is bundled or queried at run time.
+**No approved clinical release yet.** Optional SQLite knowledge support is implemented;
+`KB_PATH` is empty by default. Draft content under `knowledge/` is not shipped.
+When an approved release is supplied to `build_submission.py --knowledge`, its database
+and manifest ship under `resources/`. The manifest registers each entry's source,
+version, purpose/type, scope, permission and reviewer, plus total size, SHA-256 and
+dependencies (Python >=3.10, SQLite FTS5). See `docs/KNOWLEDGE_BASE.md`.
 
 ## Rule bases
 
-**None beyond program code.** The deterministic verifier is ordinary Python (`medtrace/verify.py`,
+**No approved external rule release yet.** The deterministic verifier is ordinary Python (`medtrace/verify.py`,
 `medtrace/textutil.py`, `medtrace/ledger.py`); its negation/uncertainty cue lists were tuned on public
 datasets (CHIP-CDEE train split) but no labelled data is shipped or loaded at run time.
 

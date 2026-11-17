@@ -20,11 +20,14 @@ from functools import lru_cache
 from pathlib import Path
 
 from . import verify as V
+from . import textutil as T
+from .knowledge import KnowledgeBase, knowledge_block
 from .config import prompt_version
 from .inputs import Case
 from .ledger import build_ledger, digest, Ledger
 from .llm import BudgetExceeded, CallStats, LLMError
-from .note import Note, ParseError, Statement, SECTIONS, note_from_model, parse_json_object, to_record
+from .note import (Note, ParseError, Statement, SECTIONS, note_from_model, parse_json_object,
+                   to_record, to_official_record, _stmt)
 
 
 def prompt_dir() -> Path:
@@ -101,6 +104,25 @@ def sources_block(case: Case) -> str:
     return "\n".join(f'<source id="{s.sid}">\n{s.content}\n</source>' for s in case.sources)
 
 
+def _normalise_basis(note: Note, L) -> int:
+    """Reclassify a statement the model labelled 'knowledge' but which actually reasons over a patient
+    value from the records. Such text is patient-grounded inference, not book knowledge; leaving it as
+    'knowledge' both fires the knowledge_record_value verifier false alarm and mislabels the official
+    evidence kind. Count is logged for audit. Approved quoted knowledge (with knowledge_ids) is kept.
+    """
+    year = None
+    changed = 0
+    for sec in SECTIONS:
+        for st in note.sections[sec]:
+            if st.basis != "knowledge" or st.knowledge_ids or sec == "case_features":
+                continue
+            nums = T.extract_numbers(T.mask_dates(st.text, year or 2000))
+            if any(val in L.numbers for val, _, _ in nums):
+                st.basis = "inference"
+                changed += 1
+    return changed
+
+
 @dataclass
 class CaseResult:
     record: dict
@@ -115,6 +137,7 @@ class Pipeline:
     def __init__(self, cfg, client):
         self.cfg = cfg
         self.client = client
+        self.kb = KnowledgeBase(cfg.kb_path) if cfg.kb_path else None
 
     # ------------------------------------------------------------------ public
     def run_case(self, case: Case, variant: str | None = None, deadline: float | None = None,
@@ -137,6 +160,18 @@ class Pipeline:
                 L = None
             else:
                 L = build_ledger(case)
+                if self.kb and variant != "A0":
+                    audit = {"case_id": case.case_id, "index": case.index, "status": "ok", "retrieved": [], "rules": []}
+                    log["knowledge"] = audit
+                    L.knowledge_enabled = True
+                    try:
+                        cards = self.kb.retrieve(case.text)
+                        L.knowledge_cards = {e["id"]: e for e in cards}
+                        audit.update(retrieved=cards, normalized=[{"fact_id": f.fid, "source_id": f.sid, "polarity": f.polarity,
+                                      "matches": self.kb.normalize(f.text)} for f in L.facts], rules=self.kb.check_rules(L))
+                    except Exception as e:
+                        L.knowledge_cards = {}
+                        audit.update(status="degraded", error=str(e))
                 try:
                     note, initial, final = self._generate_and_verify(case, L, variant, lang, stats, deadline, changes, log)
                 except (LLMError, ParseError) as e:
@@ -150,6 +185,21 @@ class Pipeline:
             log["error"] = f"internal {type(e).__name__}: {e}"
             note = Note()
             note.review_items.append({"type": "verify", "description": tr["fb_review"].format(reason="internal error"), "source_ids": []})
+        audit = log.get("knowledge")
+        if audit is not None:
+            if audit["status"] == "degraded":
+                note.review_items.append({"type": "verify", "description": "知识检索失败，本例已退回原生成流程，需复核。", "source_ids": []})
+            for rule in audit["rules"]:
+                if rule["state"] != "not_triggered":
+                    note.review_items.append({"type": "verify", "description": rule["message"], "source_ids": rule["source_ids"]})
+            audit["citations"] = [{"section": sec, "index": i, "statement": st.text, "knowledge_ids": st.knowledge_ids,
+                "valid_ids": all(k in (L.knowledge_cards if L else {}) for k in st.knowledge_ids),
+                "clinical_support": "requires_clinician_review"}
+                for sec in SECTIONS for i, st in enumerate(note.sections[sec]) if st.knowledge_ids]
+            audit["citation_findings"] = [f.as_dict() for f in final if "knowledge" in f.code]
+            if variant == "A1":
+                for finding in audit["citation_findings"]:
+                    note.review_items.append({"type": "verify", "description": finding["message"], "source_ids": []})
         for sec in SECTIONS:
             if not note.sections[sec]:
                 note.sections[sec] = [Statement(tr["fb_disc"] if status != "ok" and sec == "diagnostic_discussion" else
@@ -159,7 +209,15 @@ class Pipeline:
                    llm_latency=round(stats.latency, 3), latency=round(time.monotonic() - t0, 3),
                    llm_errors=stats.errors[-3:], findings_initial=V.counts(initial), findings_final=V.counts(final))
         meta = {"status": status, "pipeline": variant, "prompt": prompt_fingerprint(), "calls": stats.calls}
-        return CaseResult(to_record(note, case, self.cfg, meta), note, status, initial, final, log)
+        if self.cfg.official:
+            if status == "ok":
+                record = to_official_record(note, case, meta, status="success")
+            else:
+                record = to_official_record(note, case, meta, status="failed",
+                                            error={"code": status.upper(), "message": str(log.get("error", status))})
+        else:
+            record = to_record(note, case, self.cfg, meta)
+        return CaseResult(record, note, status, initial, final, log)
 
     # ---------------------------------------------------------------- internals
     def _generate_and_verify(self, case, L, variant, lang, stats, deadline, changes, log):
@@ -168,6 +226,7 @@ class Pipeline:
         skip = lambda step: log.setdefault("time_budget_skipped", []).append(step)
         common = dict(lang=tr["lang"], cutoff=case.cutoff_raw if case.cutoff_raw not in (None, "") else tr["no_cutoff"],
                       sources=sources_block(case))
+        kb_context = knowledge_block(list(L.knowledge_cards.values()))
         system = load_prompt("system", lang)
         if variant == "S2" and low_time():
             skip("extract")
@@ -178,6 +237,7 @@ class Pipeline:
             user = fill(load_prompt("a0", lang), **common)
         else:
             user = fill(load_prompt("a1", lang), ledger=digest(L), problems=problems, changes=changes, **common)
+        user += kb_context
         note = None
         for attempt in (1, 2):
             raw = self.client.chat(system, user, stats, deadline)
@@ -192,6 +252,7 @@ class Pipeline:
                     skip("regenerate")
                     raise
         log["raw_parse_retries"] = len(log.get("parse_errors", []))
+        log["basis_normalised"] = _normalise_basis(note, L)
         initial = V.verify_note(note, case, L)
         if variant in ("A0", "A1"):
             return note, initial, initial
@@ -208,6 +269,7 @@ class Pipeline:
                 user = fill(load_prompt(mode, lang), draft=_draft_json(note),
                             findings=json.dumps([{"section": f.section, "index": f.index, "issue": f.message} for f in actionable],
                                                 ensure_ascii=False, indent=1), **common)
+                user += kb_context
                 obj = parse_json_object(self.client.chat(system, user, stats, deadline))
                 log["patches"] = apply_patches(note, obj.get("patches") or [], case, L, mode,
                                                {(f.section, f.index) for f in actionable})
@@ -297,7 +359,7 @@ class Pipeline:
 
 
 def _draft_json(note: Note) -> str:
-    return json.dumps({sec: [{"index": i, "text": s.text, "sources": s.sources} for i, s in enumerate(note.sections[sec])]
+    return json.dumps({sec: [{"index": i, "text": s.text, "sources": s.sources, "basis": s.basis, "knowledge_ids": s.knowledge_ids} for i, s in enumerate(note.sections[sec])]
                        for sec in SECTIONS}, ensure_ascii=False, indent=1)
 
 
@@ -334,7 +396,8 @@ def apply_patches(note: Note, patches: list, case: Case, L: Ledger, mode: str, f
                 reject("replace: statement was not flagged")
             else:
                 old = stmts[idx]
-                new = Statement(text.strip(), srcs or old.sources, old.kind, old.basis)
+                new = _stmt({"text": text.strip(), "sources": srcs or old.sources, "kind": old.kind,
+                             "basis": p.get("basis", old.basis), "knowledge_ids": p.get("knowledge_ids", [])})
                 f_new, f_old = V.check_statement(sec, idx, new, case, L), V.check_statement(sec, idx, old, case, L)
                 if high(f_new) or bad(f_new) > bad(f_old):
                     reject("replace: new text fails verification")
@@ -342,8 +405,9 @@ def apply_patches(note: Note, patches: list, case: Case, L: Ledger, mode: str, f
                     stmts[idx] = new
                     res["applied"] += 1
         elif action == "add" and mode == "review":
-            new = Statement(text.strip(), srcs, str(p.get("kind") or ""))
-            if not new.text or (sec == "case_features" and not srcs) or bad(V.check_statement(sec, len(stmts), new, case, L)):
+            new = _stmt({"text": text.strip(), "sources": srcs, "kind": p.get("kind"),
+                         "basis": p.get("basis"), "knowledge_ids": p.get("knowledge_ids")})
+            if new is None or (sec == "case_features" and not srcs) or bad(V.check_statement(sec, len(stmts), new, case, L)):
                 reject("add: unsupported or unattributed statement")
             else:
                 stmts.append(new)

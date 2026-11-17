@@ -63,10 +63,16 @@ class LLMClient:
         if self.mock is None and cfg.api_base.lower().startswith("mock"):
             from .mock_llm import MockLLM
             self.mock = MockLLM.from_env()
-        if self.mock is None and not cfg.api_base:
-            raise LLMError("LLM_API_BASE is not configured (set it in .env, or use mock:// for offline runs)")
-        base = cfg.api_base.rstrip("/")
-        self.url = base if base.endswith("/chat/completions") else base + "/chat/completions"
+        if self.mock is None and not cfg.endpoint and not cfg.api_base:
+            raise LLMError("neither ENDPOINT nor LLM_API_BASE is configured (set MODEL_NAME/ENDPOINT in .env, "
+                           "or LLM_API_BASE for legacy providers, or use mock:// for offline runs)")
+        if cfg.endpoint:
+            # Official provider spec: ENDPOINT is the complete request address (includes its path).
+            # Use it verbatim - do not append /v1 or /chat/completions.
+            self.url = cfg.endpoint
+        else:
+            base = cfg.api_base.rstrip("/")
+            self.url = base if base.endswith("/chat/completions") else base + "/chat/completions"
 
     def chat(self, system: str, user: str, stats: CallStats, deadline: float | None = None) -> str:
         if stats.calls >= self.cfg.max_calls_per_case:

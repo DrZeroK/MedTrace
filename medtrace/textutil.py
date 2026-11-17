@@ -355,7 +355,8 @@ _DONE = re.compile(r"(?i)\b(?:was|were|has been|have been|had been)\s+(?:\w+ly\s
 _CERTAIN = re.compile(r"(?i)\b(?:confirmed|definite(?:ly)?|definitive|diagnostic of|certainly)\b|确诊|明确诊断|诊断明确")
 _MISSING = re.compile(r"(?i)\b(?:pending|not (?:yet )?(?:available|done|performed|obtained|documented|resulted|known|recorded)|"
                       r"unknown|unavailable|awaiting|unable to (?:obtain|recall)|not on file|to be (?:obtained|confirmed))\b"
-                      r"|未查|未做|未提供|不详|未测|待查|结果未回|未回报|待回报|未记录|未记载|无法提供|待完善|缺少|缺失|尚缺|暂缺"
+                      r"|未查|未做|未提供|不详|未测|待查|结果未回|未回报|待回报|未记录|未记载|未提及|未说明|未描述|未载|未问及"
+                      r"|无法提供|待完善|缺少|缺失|尚缺|暂缺"
                       r"|(?:无|未见|未获得|没有)[^，,。；;]{0,30}(?:记录|资料|结果|报告|信息|描述)")
 _UNCERTAIN = re.compile(r"(?i)\b(?:possibl[ey]|probabl[ey]|suspected|suspicious|likely|cannot (?:be )?exclude[d]?|"
                         r"rule out|r/o|query|questionable|appears?|may (?:be|represent)|\?)\b|\?|？|可能|考虑|疑似|待排|不除外|可疑")

@@ -1,0 +1,326 @@
+[
+  {
+    "id": "PMPH-IM10",
+    "title": "内科学（第10版）",
+    "source": "https://rwjc.ipmph.com/c/2026-05-29/80094.shtml",
+    "version_candidate": "第10版",
+    "kind": "textbook",
+    "topics": [
+      "术语",
+      "成人常见内科"
+    ],
+    "authority": "人民卫生出版社",
+    "verification_level": "official_search_metadata_only",
+    "locator": "章节/页码须以合法取得的实体或电子版核对",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "isbn": "9787117365710",
+    "editors": [
+      "葛均波",
+      "王辰",
+      "王建安"
+    ],
+    "access_note": "出版社页面检索到元数据；打开超时。未取得教材正文。"
+  },
+  {
+    "id": "PMPH-DX10",
+    "title": "诊断学（第10版）",
+    "source": "https://medu.pmph.com/readdetail/todetail.action?id=32419",
+    "version_candidate": "第10版",
+    "kind": "textbook",
+    "topics": [
+      "术语",
+      "检查",
+      "检验"
+    ],
+    "authority": "人民卫生出版社",
+    "verification_level": "official_search_metadata_only",
+    "locator": "实验诊断等章节页码未核对",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "isbn": "9787117363631",
+    "isbn_evidence": "https://wap.pmphmall.com/gdsdetail/653058-331655?adid=53367&linktype=1",
+    "access_note": "官方目录/商城检索元数据；正文未取得。"
+  },
+  {
+    "id": "CMA-CAP2016",
+    "title": "中国成人社区获得性肺炎诊断和治疗指南（2016年版）",
+    "source": "https://seleguide.yiigle.com/uploads/guide_html/中国成人社区获得性肺炎诊断和治疗指南(2016年版).html",
+    "version_candidate": "2016",
+    "kind": "guideline",
+    "topics": [
+      "肺炎"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "official_text_partial_checked",
+    "locator": "适用范围；后续诊断、治疗章节仍需逐条定位",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "doi": "10.3760/cma.j.issn.1001-0939.2016.04.005",
+    "population": "成年、非免疫缺陷CAP；不能外推到全部肺炎",
+    "access_note": "官方HTML打开成功，后续定位请求超时。版本新旧仍待补检。"
+  },
+  {
+    "id": "CMA-COPD2026",
+    "title": "慢性阻塞性肺疾病诊治指南（2026年修订版）",
+    "source": "https://cs.medjournals.cn/article/doi/full/10.3760/cma.j.cn112147-20260817-00487",
+    "version_candidate": "2026年修订版",
+    "kind": "guideline",
+    "topics": [
+      "慢阻肺急性加重"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "official_search_metadata_only",
+    "locator": "急性加重章节须取得正文并核对",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "doi": "10.3760/cma.j.cn112147-20260817-00487",
+    "access_note": "期刊检索记录可见；直接打开为Page Not Found模板，不算全文。最新候选，未冻结版本。"
+  },
+  {
+    "id": "CONS-AECOPD2023",
+    "title": "慢性阻塞性肺疾病急性加重诊治中国专家共识（2023年修订版）",
+    "source": "https://rs.yiigle.com/cmaid/1448571",
+    "version_candidate": "2023年修订版",
+    "kind": "consensus",
+    "topics": [
+      "慢阻肺急性加重"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "official_search_metadata_only",
+    "locator": "定义、鉴别及呼吸支持章节待全文定位",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "authoring_body": "慢性阻塞性肺疾病急性加重诊治专家组；不因刊于中华系列期刊就改写为中华医学会制定",
+    "access_note": "文章页显示订阅/权限提示；未取得全文。与2026修订版的异同待复核。"
+  },
+  {
+    "id": "CMA-NSTEACS2024",
+    "title": "非ST段抬高型急性冠脉综合征诊断和治疗指南（2024）",
+    "source": "https://csc.cma.org.cn/attach/0/46bfbba77f4249aebc2ae9b70eef5377.pdf",
+    "version_candidate": "2024",
+    "kind": "guideline",
+    "topics": [
+      "急性冠脉综合征"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "official_search_text_snippets_only",
+    "locator": "诊断；有创治疗/表8（原始PDF直开超时）",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "doi": null,
+    "population": "NSTE-ACS；不能据此覆盖STEMI",
+    "access_note": "仅官方PDF搜索片段核对。未把同一期其他文章DOI误配给本指南。"
+  },
+  {
+    "id": "CMA-HF2024",
+    "title": "中国心力衰竭诊断和治疗指南2024",
+    "source": "https://csc.cma.org.cn/art/2024/4/18/art_619_56220.html",
+    "version_candidate": "2024 + 勘误待合并",
+    "kind": "guideline",
+    "topics": [
+      "心力衰竭"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "official_section_checked",
+    "locator": "心衰的诊断与评估：常规检查、胸部影像学",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "doi": "10.3760/cma.j.cn112148-20231101-00405",
+    "journal": "中华心血管病杂志 2024;52(3):235-275",
+    "alternate_url": "https://rs.yiigle.com/cmaid/1495488",
+    "erratum_id": "CMA-HF2024-ERR",
+    "access_note": "学会公开页面已读相关章节，文章权限页另行核验。"
+  },
+  {
+    "id": "CMA-HF2024-ERR",
+    "title": "中国心力衰竭诊断和治疗指南2024相关更正",
+    "source": "https://cs.medjournals.cn/cn/zhxxgbzz/toc/63917",
+    "version_candidate": "2024年第52卷第6期",
+    "kind": "erratum",
+    "topics": [
+      "心力衰竭"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "official_search_text_snippets_only",
+    "locator": "原文254页表9、表10剂量相关更正，须核对完整更正",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "access_note": "检索摘要明确存在剂量单位更正；页面直开未能定位全文。禁止据原始未校正表格生成剂量规则。"
+  },
+  {
+    "id": "CMA-DM2024",
+    "title": "中国糖尿病防治指南（2024版）",
+    "source": "https://diab.cma.org.cn/cn/zhinangongshi.aspx",
+    "version_candidate": "2024版（期刊2025年发表）",
+    "kind": "guideline",
+    "topics": [
+      "糖尿病急性代谢问题",
+      "低血糖"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "official_linked_pdf_section_checked",
+    "locator": "第十二章（印刷页49–52）、第十七章（印刷页76–78）",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "doi": "10.3760/cma.j.cn115791-20241203-00705",
+    "fulltext_url": "https://files.sciconf.cn/master/50/33230/202501/20250120111901_47273.pdf",
+    "journal": "中华糖尿病杂志 2025;17(1)",
+    "population": "本库仅使用成人相应章节；妊娠等特殊人群另审核",
+    "access_note": "由糖尿病学分会页面直链PDF。核验指定章节，不算全书逐条审核。"
+  },
+  {
+    "id": "CN-AKI2023",
+    "title": "中国急性肾损伤临床实践指南",
+    "source": "https://pubmed.ncbi.nlm.nih.gov/37963734/",
+    "version_candidate": "2023",
+    "kind": "guideline",
+    "topics": [
+      "急性肾损伤"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "bibliographic_metadata_only",
+    "locator": "诊断、监测、预防治疗章节待合法全文核对",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "doi": "10.3760/cma.j.cn112137-20230802-00133",
+    "pmid": "37963734",
+    "authoring_body": "国家慢性肾病临床医学研究中心、中国医师协会肾脏内科医师分会等",
+    "access_note": "PubMed检索元数据可见；直接打开未返回正文，期刊直开模板异常。不使用第三方镜像替代审核。"
+  },
+  {
+    "id": "CN-HYPERK2026",
+    "title": "高钾血症多学科管理专家共识",
+    "source": "https://rs.yiigle.com/cmaid/1690603",
+    "version_candidate": "2026",
+    "kind": "consensus",
+    "topics": [
+      "电解质紊乱"
+    ],
+    "authority": "中华医学会/期刊原始来源",
+    "verification_level": "official_search_metadata_only",
+    "locator": "高钾血症相关章节；其他电解质不在其覆盖内",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "doi": "10.3760/cma.j.cn114656-20260430-00379",
+    "journal": "中华急诊医学杂志 2026;35(7)",
+    "authoring_body": "待全文核验，不能将期刊归属当作制定组织",
+    "access_note": "原期刊检索记录可见，文章页为权限提示。不能作为低钾、钠、钙、镁、磷的通用依据。"
+  },
+  {
+    "id": "NHC-REF2024",
+    "title": "临床实验室定量检验项目参考区间的制定",
+    "source": "https://www.nhc.gov.cn/wjw/s9492/202407/c69784a165424889bedb36d854e61554.shtml",
+    "version_candidate": "WS/T 402—2024",
+    "kind": "standard",
+    "topics": [
+      "检验"
+    ],
+    "authority": "国家卫生健康委员会",
+    "verification_level": "official_metadata_previous_check",
+    "locator": "参考区间建立/转移的方法学，不是全部项目的数值表",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "access_note": "沿用上一轮已核验官方来源；本轮不声称重读全文。"
+  },
+  {
+    "id": "NHC-CRP2026",
+    "title": "临床常用生化检验项目参考区间 第9部分",
+    "source": "https://www.nhc.gov.cn/fzs/c100048/202606/1d8e67475848413cb4447e1b49037888/files/WST%20404.9%E2%80%942026.pdf",
+    "version_candidate": "WS/T 404.9—2026",
+    "kind": "standard",
+    "topics": [
+      "检验"
+    ],
+    "authority": "国家卫生健康委员会",
+    "verification_level": "official_search_metadata_only",
+    "locator": "C反应蛋白等；实施日期和适用方法待正文核对",
+    "checked_at": "2026-11-17T12:20:26.756116+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "access_note": "仅元数据候选，不把已发布直接认定为已实施或适用于所有实验室。"
+  },
+  {
+    "id": "PKU-AIMD-SERVICE",
+    "title": "AIMD智能医学博士（补充资料发现渠道）",
+    "source": "http://aimd.bjmu.edu.cn",
+    "version_candidate": "新版官方上线通知2025-06-12；当前应用版本未核验",
+    "kind": "research_service",
+    "topics": [
+      "教材书目定位",
+      "补充资料发现"
+    ],
+    "authority": "北京大学基础医学院；官方介绍的早期教材来自北京大学医学出版社",
+    "verification_level": "official_descriptions_checked_application_unreachable",
+    "locator": "官方工具介绍及上线通知；未取得登录后的应用界面",
+    "checked_at": "2026-11-17T12:28:43.463644+00:00",
+    "license_status": "not_granted",
+    "clinical_review": "not_applicable_service_not_primary_evidence",
+    "permission_evidence": [],
+    "runtime_use": "disabled",
+    "primary_clinical_source": false,
+    "access_results": {
+      "http": "browser net::ERR_BLOCKED_BY_CLIENT",
+      "https": "browser net::ERR_CONNECTION_CLOSED",
+      "logged_in": false
+    },
+    "official_description": "https://ai4e.pku.edu.cn/szgj/c56edc34989e4d12b562db7a3a93b0b1.htm",
+    "official_new_entry_notice": "https://its.pku.edu.cn/announce/tz20250612163809.jsp",
+    "textbook_publisher_evidence": "https://sbms.bjmu.edu.cn/xyxw/7fbdd1ba44af4bdda92e5fa0532f4b29.htm",
+    "access_note": "用户报告已在新版chat页成功登录；代理getTab两次/getState一次超时，尚未获取界面。原域名失败记录仅是先前尝试，不代表当前用户无法访问。",
+    "current_application_url": "https://aimd.pku.edu.cn/chat",
+    "user_reported_login": {
+      "confirmed": true,
+      "date": "2026-11-17",
+      "agent_observed": false
+    }
+  },
+  {
+    "id": "QIANWEN-PMPH-SERVICE",
+    "title": "千问（用户报告已接入人卫知识库，待会话命中核验）",
+    "source": "https://www.qianwen.com/",
+    "version_candidate": "当前网页端，应用和知识库版本未知",
+    "kind": "research_service",
+    "topics": [
+      "教材书目定位",
+      "知识卡候选提炼"
+    ],
+    "authority": "千问服务；具体人卫引用尚未读取",
+    "verification_level": "user_report_and_tab_metadata_only",
+    "checked_at": "2026-11-17T12:48:29.054599+00:00",
+    "locator": "已发现登录对话标签页；正文/引用尚未读到",
+    "license_status": "not_granted",
+    "clinical_review": "not_applicable_service_not_primary_evidence",
+    "permission_evidence": [],
+    "runtime_use": "disabled",
+    "primary_clinical_source": false,
+    "pmph_product_reference": "https://inside.pmphai.com/inside/application/knowInside",
+    "partnership_primary_verification": false,
+    "access_note": "用户明确授权在已登录网页提炼知识卡。控制连接失败，未发送问题；不能将准备的问题登记为实际问答或可发布知识。"
+  }
+]

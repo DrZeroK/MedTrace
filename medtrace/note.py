@@ -29,6 +29,7 @@ class Statement:
     sources: list = field(default_factory=list)
     kind: str = ""
     basis: str = ""             # record | knowledge | inference (optional; discussion/plan)
+    knowledge_ids: list = field(default_factory=list)
 
 
 @dataclass
@@ -39,7 +40,7 @@ class Note:
     structured: bool = True                              # False when the model returned free prose
 
     def copy(self) -> "Note":
-        return Note({k: [Statement(s.text, list(s.sources), s.kind, s.basis) for s in v] for k, v in self.sections.items()},
+        return Note({k: [Statement(s.text, list(s.sources), s.kind, s.basis, list(s.knowledge_ids)) for s in v] for k, v in self.sections.items()},
                     [dict(r) for r in self.review_items], [dict(e) for e in self.extra_evidence], self.structured)
 
     def text(self, section=None) -> str:
@@ -99,7 +100,7 @@ def _stmt(item) -> Statement | None:
             if i not in src:
                 src.append(i)
     text = strip_enum(_MARK.sub("", text))
-    return Statement(text, src, kind, basis) if text else None
+    return Statement(text, src, kind, basis, _ids(item.get("knowledge_ids")) if isinstance(item, dict) else []) if text else None
 
 
 def note_from_model(obj: dict) -> Note:
@@ -178,6 +179,153 @@ def to_record(note: Note, case, cfg, meta: dict | None = None) -> dict:
     if cfg.output_field_map:
         rec = {cfg.output_field_map.get(k, k): v for k, v in rec.items()}
     return rec
+
+
+def to_official_record(note: Note, case, meta: dict | None = None, status: str = "success",
+                       error: dict | None = None) -> dict:
+    """Serialise to the provider's official output protocol.
+
+    Top level: {case_id, status, medical_record, error}. On failure medical_record is null and
+    error is {code, message}. On success medical_record holds case_features / diagnostic_discussion /
+    plan / evidence[{statement, source_ids, kind}] / review_items[str]. Evidence is capped at 3-5
+    entries (the spec's recommended range); review_items are plain strings.
+    """
+    rid = case.raw_id
+    if status != "success":
+        return {
+            "case_id": case.case_id,
+            "status": "failed",
+            "medical_record": None,
+            "error": {"code": str((error or {}).get("code", "GENERATION_ERROR")),
+                      "message": str((error or {}).get("message", "generation failed"))},
+        }
+    sections = {sec: render_section(note.sections[sec], True, False) for sec in SECTIONS}
+
+    def _kind(sec: str, basis: str) -> str:
+        """Official 'fact' = content stated in the records; 'inference' = reasoning over them.
+        Case features are record facts; every discussion/plan entry is clinical reasoning (judgement,
+        differential, uncertainty, plan) regardless of the model's often-unreliable 'basis' tag. The
+        rubric's own example marks the diagnostic-boundary statement in discussion as inference."""
+        return "fact" if sec == "case_features" else "inference"
+
+    # evidence: derive from statements carrying source ids, map section + basis -> kind, cap to 3-5.
+    candidates = []
+    for sec in SECTIONS:
+        for s in note.sections[sec]:
+            if not s.sources:
+                continue
+            candidates.append({"statement": s.text, "source_ids": [rid(i) for i in s.sources],
+                               "kind": _kind(sec, s.basis)})
+    candidates += [{"statement": e["statement"], "source_ids": [rid(i) for i in e["source_ids"]],
+                    "kind": _kind(e.get("section", ""), e.get("basis", ""))}
+                   for e in note.extra_evidence if e["source_ids"]]
+    evidence = _select_evidence(candidates)
+    review = [r["description"] for r in note.review_items if r.get("description")]
+    return {
+        "case_id": case.case_id,
+        "status": "success",
+        "medical_record": {
+            "case_features": sections["case_features"],
+            "diagnostic_discussion": sections["diagnostic_discussion"],
+            "plan": sections["treatment_plan"],
+            "evidence": evidence,
+            "review_items": review,
+        },
+        "error": None,
+    }
+
+
+def _select_evidence(candidates: list[dict], low: int = 3, high: int = 5) -> list[dict]:
+    """Keep 3-5 evidence entries. Cover distinct sources and reserve at least one `inference` when
+    the note contains one, so the official 'fact vs inference' distinction is actually represented."""
+    if not candidates:
+        return []
+    facts = [e for e in candidates if e["kind"] == "fact"]
+    infers = [e for e in candidates if e["kind"] == "inference"]
+
+    def distinct(items):
+        out, seen = [], set()
+        for e in items:
+            key = tuple(e["source_ids"])
+            if key not in seen:
+                seen.add(key)
+                out.append(e)
+        return out
+
+    facts_d, infers_d = distinct(facts), distinct(infers)
+    picked: list[dict] = []
+    if infers_d:
+        picked.append(infers_d[0])                       # guarantee one inference boundary
+    for e in facts_d:                                    # then facts across distinct sources
+        if len(picked) >= high:
+            break
+        if e not in picked:
+            picked.append(e)
+    for e in facts + infers:                             # fill from all remaining to reach `low`
+        if len(picked) >= min(low, len(candidates)):
+            break
+        if e not in picked:
+            picked.append(e)
+    for e in infers_d + facts_d:                         # top up toward `high` with distinct entries
+        if len(picked) >= high:
+            break
+        if e not in picked:
+            picked.append(e)
+    return picked[:high]
+
+
+OFFICIAL_SCHEMA = {
+    "type": "object",
+    "required": ["case_id", "status", "medical_record", "error"],
+    "properties": {
+        "case_id": {},
+        "status": {"enum": ["success", "failed"]},
+        "medical_record": {
+            "type": ["object", "null"],
+            "required": ["case_features", "diagnostic_discussion", "plan", "evidence", "review_items"],
+            "properties": {
+                "case_features": {"type": "string", "minLength": 1},
+                "diagnostic_discussion": {"type": "string", "minLength": 1},
+                "plan": {"type": "string", "minLength": 1},
+                "evidence": {"type": "array", "maxItems": 5, "items": {   # 3-5 recommended; fewer (even 0) listed as-is per spec
+                    "type": "object", "required": ["statement", "source_ids", "kind"],
+                    "properties": {"statement": {"type": "string", "minLength": 1},
+                                   "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+                                   "kind": {"enum": ["fact", "inference"]}}}},
+                "review_items": {"type": "array", "items": {"type": "string"}},
+            },
+        },
+        "error": {"type": ["object", "null"]},
+    },
+}
+
+
+def official_schema_errors(rec: dict) -> list[str]:
+    """Validate an official-protocol record. jsonschema when available, else an equivalent manual check."""
+    try:
+        import jsonschema
+        return [e.message for e in jsonschema.Draft7Validator(OFFICIAL_SCHEMA).iter_errors(rec)]
+    except ImportError:
+        errs = [f"missing {k}" for k in OFFICIAL_SCHEMA["required"] if k not in rec]
+        if rec.get("status") not in ("success", "failed"):
+            errs.append("bad status")
+        mr = rec.get("medical_record")
+        if rec.get("status") == "success":
+            if not isinstance(mr, dict):
+                errs.append("medical_record must be an object on success")
+            else:
+                for k in ("case_features", "diagnostic_discussion", "plan"):
+                    if not isinstance(mr.get(k), str) or not mr[k]:
+                        errs.append(f"{k} must be a non-empty string")
+                for k in ("evidence", "review_items"):
+                    if not isinstance(mr.get(k), list):
+                        errs.append(f"{k} must be a list")
+                for e in mr.get("evidence", []):
+                    if not isinstance(e, dict) or not all(k in e for k in ("statement", "source_ids", "kind")):
+                        errs.append("bad evidence entry")
+                    elif e.get("kind") not in ("fact", "inference") or not e.get("source_ids"):
+                        errs.append("bad evidence kind/source_ids")
+        return errs
 
 
 OUTPUT_SCHEMA = {

@@ -10,12 +10,14 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import uuid
 
 from .config import load_config
 from .inputs import Case, load_cases
 from .ledger import build_ledger
 from .llm import LLMClient
 from .pipeline import Pipeline
+from .knowledge import digest_file, write_audit
 from .runner import atomic_write_json, wrap
 
 _norm = lambda s: " ".join(s.lower().split())
@@ -74,13 +76,19 @@ def main(argv=None) -> int:
     new_cases, envelope = load_cases(a.new, cfg.cutoff_mode)
     prev_by_id = {json.dumps(c.case_id, default=str): c for c in prev_cases}
     pipe = Pipeline(cfg, LLMClient(cfg))
-    records, changes = [], []
+    records, changes, results = [], [], []
+    audit_run_id = str(uuid.uuid4())
+    if pipe.kb:
+        write_audit(a.output, [], pipe.kb, digest_file(a.new), audit_run_id)
     for c in new_cases:
         res, d = run_update(pipe, prev_by_id.get(json.dumps(c.case_id, default=str)), c)
         records.append(res.record)
+        results.append(res)
         changes.append({"case_id": c.case_id, "status": res.status, "diff": d})
     atomic_write_json(a.output, wrap(records, envelope, cfg))
     atomic_write_json(a.output + ".changes.json", changes)
+    if pipe.kb:
+        write_audit(a.output, results, pipe.kb, digest_file(a.new), audit_run_id)
     return 0
 
 
