@@ -32,8 +32,27 @@ class CallStats:
     prompt_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
+    usage_missing: int = 0    # successful HTTP responses with no usable "usage" object
     errors: list = field(default_factory=list)
     attempts: list = field(default_factory=list)
+
+    def add_usage(self, usage) -> None:
+        """Accumulate server-reported usage; malformed or missing objects are only counted, never fatal."""
+        if not isinstance(usage, dict):
+            self.usage_missing += 1
+            return
+
+        def num(key):
+            v = usage.get(key)
+            return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+
+        p, c, t = num("prompt_tokens"), num("completion_tokens"), num("total_tokens")
+        if p is None and c is None and t is None:
+            self.usage_missing += 1
+            return
+        self.prompt_tokens += int(p or 0)
+        self.completion_tokens += int(c or 0)
+        self.total_tokens += int(t if t is not None else (p or 0) + (c or 0))
 
 
 def _post(url, headers, payload, timeout):
@@ -64,6 +83,14 @@ def _post(url, headers, payload, timeout):
             return e.code, e.read().decode("utf-8", "replace")
     except Exception as e:
         raise ConnectionError(f"{type(e).__name__}: {e}") from e
+
+
+def _usage(body: str):
+    try:
+        obj = json.loads(body)
+    except ValueError:
+        return None
+    return obj.get("usage") if isinstance(obj, dict) else None
 
 
 class LLMClient:
@@ -146,7 +173,7 @@ class LLMClient:
                 status, body = self.transport(self.url, headers, payload, timeout)
                 detail["status_code"] = status
                 if status == 200:
-                    self._usage(body, stats)
+                    stats.add_usage(_usage(body))
                     return self._content(body, detail)
                 last = f"HTTP {status}: {body[:200]}"
                 retryable = status in _RETRY_STATUS
@@ -166,20 +193,6 @@ class LLMClient:
                 pause = max(0.0, min(pause, deadline - time.monotonic() - 1))
             time.sleep(pause)
         raise LLMError(f"model call failed: {last}")
-
-    @staticmethod
-    def _usage(body: str, stats: CallStats) -> None:
-        """Accumulate token usage from a successful response when present; a missing/odd usage never fails the call."""
-        try:
-            usage = json.loads(body).get("usage")
-        except (ValueError, AttributeError):
-            return
-        if not isinstance(usage, dict):
-            return
-        for key in ("prompt_tokens", "completion_tokens", "total_tokens"):
-            v = usage.get(key)
-            if isinstance(v, int):
-                setattr(stats, key, getattr(stats, key) + v)
 
     @staticmethod
     def _content(body: str, detail: dict | None = None) -> str:

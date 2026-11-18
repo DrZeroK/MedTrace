@@ -102,6 +102,8 @@ def main(argv=None) -> int:
             run_log.flush()
 
     started = time.monotonic()
+    for w in cfg.warnings:
+        log.warning("config: %s", w)
     emit({"event": "run_start", "time": datetime.now(timezone.utc).isoformat(), "config": cfg.public(),
           "prompt": prompt_fingerprint(cfg.prompt_version), "git": _git_rev(), "python": sys.version.split()[0]})
     try:
@@ -131,7 +133,7 @@ def main(argv=None) -> int:
     log.info("%d case(s), pipeline=%s, model=%s", len(cases), cfg.pipeline, cfg.model or "<mock>")
 
     results: list = [None] * len(cases)
-    totals = {k: 0 for k in ("prompt_tokens", "completion_tokens", "total_tokens", "calls", "http_attempts", "retries")}
+    totals = {k: 0 for k in ("prompt_tokens", "completion_tokens", "total_tokens", "usage_missing", "calls", "http_attempts", "retries")}
     latencies: list = []
     deadline_all = started + cfg.total_timeout if cfg.total_timeout > 0 else None
 

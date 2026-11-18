@@ -59,10 +59,30 @@ def _flag(*names, default=False):
     return str(_get(*names, default="1" if default else "0")).strip().lower() in ("1", "true", "yes", "on")
 
 
-def _tri_flag(*names):
-    """None when unset (omit the field, server default); otherwise a bool."""
-    v = _get(*names)
-    return None if v is None else str(v).strip().lower() in ("1", "true", "yes", "on")
+def _tristate(name, warnings):
+    """None when unset/empty or invalid (omit the field, server default); otherwise a bool."""
+    v = _get(name)
+    if v is None:
+        return None
+    v = str(v).strip().lower()
+    if v in ("1", "true", "yes", "on"):
+        return True
+    if v in ("0", "false", "no", "off"):
+        return False
+    warnings.append(f"{name}={v!r} is not true/false; ignored (server default applies)")
+    return None
+
+
+def _opt_int(name, warnings, *, default=None):
+    """default when unset/empty; an int otherwise; invalid values warn and fall back to default."""
+    v = _get(name)
+    if v is None:
+        return default
+    try:
+        return int(str(v).strip())
+    except ValueError:
+        warnings.append(f"{name}={v!r} is not an integer; ignored (using {default!r})")
+        return default
 
 
 @dataclass
@@ -111,6 +131,7 @@ class Config:
     on_unresolved: str = "flag"     # flag | drop
     checkpoint: bool = True
     strict_exit: bool = False
+    warnings: list = field(default_factory=list)   # ignored/odd configuration values, logged at run start
 
     @property
     def official(self) -> bool:
@@ -174,7 +195,9 @@ def load_config(*, development: bool = False, **overrides) -> Config:
                       log_dir=str(ROOT / "logs"), endpoint=endpoint, model=values["MODEL_NAME"].strip(),
                       kb_path=str(kb) if kb.is_file() else "", repair_call=False)
     load_dotenv_files()
+    warnings: list = []
     c = Config(
+        warnings=warnings,
         development=True,
         context_mode=str(_get("CONTEXT_MODE", default="legacy")),
         prompt_candidate_path=str(_get("PROMPT_CANDIDATE_PATH", default="")),
@@ -194,8 +217,8 @@ def load_config(*, development: bool = False, **overrides) -> Config:
         temperature=_num(float, "LLM_TEMPERATURE", default=0.0),
         max_tokens=_num(int, "LLM_MAX_TOKENS", default=0),
         json_mode=_flag("LLM_JSON_MODE"),
-        seed=_num(int, "LLM_SEED", default=42),
-        enable_thinking=_tri_flag("LLM_ENABLE_THINKING"),
+        seed=_opt_int("LLM_SEED", warnings, default=42),
+        enable_thinking=_tristate("LLM_ENABLE_THINKING", warnings),
         pipeline=str(_get("PIPELINE", default="A2")).upper(),
         max_calls_per_case=_num(int, "MAX_CALLS_PER_CASE", default=2),
         max_requests_per_case=max(0, _num(int, "MAX_REQUESTS_PER_CASE", default=0)),

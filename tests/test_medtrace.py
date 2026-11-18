@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from medtrace import textutil as T                                    # noqa: E402
 from medtrace import verify as V                                      # noqa: E402
-from medtrace.config import Config                                    # noqa: E402
+from medtrace.config import Config, load_config                  # noqa: E402
 from medtrace.inputs import InputError, load_cases, parse_case         # noqa: E402
 from medtrace.ledger import build_ledger                              # noqa: E402
 from medtrace.llm import CallStats, LLMClient, LLMError                # noqa: E402
@@ -497,6 +497,39 @@ class Update(unittest.TestCase):
         self.assertEqual([a["text"] for a in d["removed"]], ["Blood cultures pending."])
 
 
+class ConfigParsing(unittest.TestCase):
+    def _load(self, **env):
+        d = tempfile.mkdtemp()
+        old_cwd = os.getcwd()
+        keys = ("LLM_SEED", "LLM_ENABLE_THINKING")
+        old = {k: os.environ.get(k) for k in keys}
+        os.chdir(d)
+        try:
+            for k in keys:
+                if k in env:
+                    os.environ[k] = env[k]
+                else:
+                    os.environ.pop(k, None)
+            return load_config(development=True)
+        finally:
+            os.chdir(old_cwd)
+            for k, v in old.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+
+    def test_invalid_seed_and_thinking_are_ignored_with_warning(self):
+        c = self._load(LLM_SEED="abc", LLM_ENABLE_THINKING="maybe")
+        self.assertEqual(c.seed, 42)
+        self.assertIsNone(c.enable_thinking)
+        self.assertEqual(len(c.warnings), 2)
+
+    def test_valid_seed_and_thinking_parse(self):
+        c = self._load(LLM_SEED="7", LLM_ENABLE_THINKING="false")
+        self.assertEqual((c.seed, c.enable_thinking, c.warnings), (7, False, []))
+
+
 class Http(unittest.TestCase):
     def _serve(self, **faults):
         srv = make_server(0, mock=MockLLM(), http_faults=faults, seed=3)
@@ -569,6 +602,15 @@ class Http(unittest.TestCase):
         self.assertEqual(r.status, "ok")
         n = r.log["calls"]
         self.assertEqual((r.log["prompt_tokens"], r.log["completion_tokens"], r.log["total_tokens"]), (5 * n, 7 * n, 12 * n))
+        self.assertEqual(r.log["usage_missing"], 0)
+
+    def test_partial_usage_derives_total(self):
+        srv = self._srv(usage={"prompt_tokens": 3, "completion_tokens": 4})
+        c = cfg(api_base=self._url(srv))
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        n = r.log["calls"]
+        self.assertEqual((r.log["prompt_tokens"], r.log["completion_tokens"], r.log["total_tokens"]), (3 * n, 4 * n, 7 * n))
+        self.assertEqual(r.log["usage_missing"], 0)
 
     def test_missing_usage_still_succeeds(self):
         srv = self._srv()
@@ -576,7 +618,14 @@ class Http(unittest.TestCase):
         r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
         self.assertEqual(r.status, "ok")
         self.assertEqual(r.log["total_tokens"], 0)
+        self.assertEqual(r.log["usage_missing"], r.log["http_attempts"])
         self.assertEqual(schema_errors(r.record), [])
+
+    def test_unusable_usage_counts_missing(self):
+        srv = self._srv(usage={"prompt_tokens": "n/a"})
+        c = cfg(api_base=self._url(srv))
+        r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
+        self.assertEqual((r.log["total_tokens"], r.log["usage_missing"]), (0, r.log["http_attempts"]))
 
     def test_request_budget_counts_retries(self):
         srv = self._srv(http_faults={"http500": 1.0})
@@ -663,7 +712,7 @@ class EndToEnd(unittest.TestCase):
         events = [json.loads(l) for l in (d / "logs" / "run_log.jsonl").read_text("utf-8").splitlines()]
         end = [e for e in events if e["event"] == "run_end"][-1]
         cases = [e for e in events if e["event"] == "case"]
-        for k in ("prompt_tokens", "completion_tokens", "total_tokens", "calls", "http_attempts", "retries"):
+        for k in ("prompt_tokens", "completion_tokens", "total_tokens", "usage_missing", "calls", "http_attempts", "retries"):
             self.assertEqual(end[k], sum(c.get(k, 0) for c in cases))
         self.assertGreater(end["total_tokens"], 0)
 

@@ -55,6 +55,8 @@ def main(argv=None) -> int:
     cfg = copy.copy(load_config(development=True))
     cfg.model = os.environ.get("JUDGE_MODEL", "qwen-plus")
     cfg.max_calls_per_case, cfg.extra_body = 1, {}
+    cfg.seed = None             # the judge runs on a different model; do not forward generator request settings
+    cfg.enable_thinking = None
     client = LLMClient(cfg)
     gold = {}
     for item in json.loads((run / "cases_used.json").read_text("utf-8")):

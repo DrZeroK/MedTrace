@@ -238,7 +238,8 @@ class Pipeline:
                 note.sections[sec] = [Statement(tr["fb_disc"] if status != "ok" and sec == "diagnostic_discussion" else
                                                 tr["fb_plan"] if status != "ok" and sec == "treatment_plan" else tr["empty"])]
         log.update(status=status, calls=stats.calls, http_attempts=stats.http_attempts, retries=stats.retries,
-                   prompt_tokens=stats.prompt_tokens, completion_tokens=stats.completion_tokens, total_tokens=stats.total_tokens,
+                   prompt_tokens=stats.prompt_tokens, completion_tokens=stats.completion_tokens,
+                   total_tokens=stats.total_tokens, usage_missing=stats.usage_missing,
                    llm_latency=round(stats.latency, 3), latency=round(time.monotonic() - t0, 3),
                    llm_errors=stats.errors[-3:], findings_initial=V.counts(initial), findings_final=V.counts(final))
         log.update(started_at=started_at, finished_at=datetime.now(timezone.utc).isoformat(), attempts=stats.attempts)
