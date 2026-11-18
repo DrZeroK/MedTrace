@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "kind": "textbook-typed-knowledge-store",
+  "state": "draft",
+  "created_at": "2026-11-18T22:35:47+0800",
+  "source_cards_sha256": "071223ee7996f4cb20e773767330aab1ade5a91424136450609d19f3b12c75c8",
+  "typed_sha256": "4b28f77a9c89ab619ef4d79df21eb2edf5921120fc68b748897b29dcc7a942ab",
+  "counts": {
+    "cards": 4493,
+    "term": 326,
+    "lab": 118,
+    "rule": 7,
+    "typed_total": 451,
+    "total": 4944
+  },
+  "by_book": {
+    "内科学第10版": 270,
+    "诊断学第10版": 181
+  },
+  "validation": {
+    "validate_entry": "passed",
+    "duplicate_ids": 0,
+    "approved": 0,
+    "draft": 4944
+  },
+  "typed_audit_sha256": "12fe6d770f958ef03d8c4a00d6f43a36ab39c91426555f8eecf8a52486e97ad1",
+  "rights": "not granted; drafts only; local research, not a release"
+}

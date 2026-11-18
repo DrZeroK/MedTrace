@@ -1,0 +1,5367 @@
+{
+  "schema": 1,
+  "kind": "textbook-typed-outline",
+  "books": [
+    {
+      "book": "内科学第10版",
+      "source_id": "PMPH-IM10",
+      "cards": [],
+      "children": [
+        {
+          "level": "part",
+          "label": "第二篇 呼吸系统疾病",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第二章 急性上呼吸道感染和急性气管支气管炎",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 急性上呼吸道感染",
+                  "cards": [
+                    "TB-T-IM10-0001",
+                    "TB-T-IM10-0002"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 急性气管支气管炎",
+                  "cards": [
+                    "TB-T-IM10-0003"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 慢性阻塞性肺疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 慢性支气管炎",
+                  "cards": [
+                    "TB-T-IM10-0004",
+                    "TB-T-IM10-0005"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 慢性阻塞性肺疾病",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【诊断与稳定期病情严重程度评估】",
+                      "cards": [
+                        "TB-R-IM10-0002"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 支气管哮喘",
+              "cards": [
+                "TB-T-IM10-0006"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 支气管扩张症",
+              "cards": [
+                "TB-T-IM10-0007"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 肺部感染性疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 肺炎概述",
+                  "cards": [
+                    "TB-T-IM10-0008"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 细菌性肺炎",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、肺炎链球菌肺炎",
+                      "cards": [
+                        "TB-T-IM10-0009"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 病毒性肺炎",
+                  "cards": [
+                    "TB-T-IM10-0010"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 肺炎支原体肺炎、 衣原体肺炎与肺军团病",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、肺炎支原体肺炎",
+                      "cards": [
+                        "TB-T-IM10-0011"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 肺真菌病",
+                  "cards": [
+                    "TB-T-IM10-0012"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 肺脓肿",
+              "cards": [
+                "TB-T-IM10-0013"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第八章 肺结核",
+              "cards": [
+                "TB-T-IM10-0014"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第九章 肺癌",
+              "cards": [
+                "TB-T-IM10-0015"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十章 间质性肺疾病",
+              "cards": [
+                "TB-T-IM10-0016"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第二节 特发性肺纤维化",
+                  "cards": [
+                    "TB-T-IM10-0017"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 结节病",
+                  "cards": [
+                    "TB-T-IM10-0018"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十一章 肺血栓栓塞症",
+              "cards": [
+                "TB-T-IM10-0019"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十二章 肺动脉高压",
+              "cards": [
+                "TB-T-IM10-0020"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第二节 特发性肺动脉高压",
+                  "cards": [
+                    "TB-T-IM10-0021"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 慢性肺源性心脏病",
+                  "cards": [
+                    "TB-T-IM10-0022"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十三章 胸膜疾病",
+              "cards": [
+                "TB-T-IM10-0023"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 胸腔积液",
+                  "cards": [
+                    "TB-T-IM10-0024"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 气胸",
+                  "cards": [
+                    "TB-T-IM10-0025"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十四章 睡眠呼吸障碍",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 概述",
+                  "cards": [
+                    "TB-T-IM10-0026"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 阻塞性睡眠呼吸暂停",
+                  "cards": [
+                    "TB-T-IM10-0027"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十五章 急性呼吸窘迫综合征",
+              "cards": [
+                "TB-T-IM10-0028"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十六章 呼吸衰竭与呼吸支持技术",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第二节 急性呼吸衰竭",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【病因】",
+                      "cards": [
+                        "TB-T-IM10-0029"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 慢性呼吸衰竭",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【病因】",
+                      "cards": [
+                        "TB-T-IM10-0030"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第三篇 循环系统疾病",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第二章 心力衰竭",
+              "cards": [
+                "TB-T-IM10-0031"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第二节 慢性心力衰竭",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【流行病学】",
+                      "cards": [
+                        "TB-T-IM10-0032"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 急性心力衰竭",
+                  "cards": [
+                    "TB-T-IM10-0033"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 心律失常",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 概述",
+                  "cards": [
+                    "TB-T-IM10-0034"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 窦性心律失常",
+                  "cards": [
+                    "TB-T-IM10-0035"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 房性心律失常",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、房性期前收缩",
+                      "cards": [
+                        "TB-T-IM10-0036"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 房室交界性心律失常",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、房室交界性期前收缩",
+                      "cards": [
+                        "TB-T-IM10-0037"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 室性心律失常",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、室性期前收缩",
+                      "cards": [
+                        "TB-T-IM10-0038"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第六节 心脏传导阻滞",
+                  "cards": [
+                    "TB-T-IM10-0039"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 动脉粥样硬化和冠状动脉粥样硬化性心脏病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 动脉粥样硬化",
+                  "cards": [
+                    "TB-T-IM10-0040",
+                    "TB-T-IM10-0041"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 慢性冠状动脉综合征",
+                  "cards": [
+                    "TB-T-IM10-0042"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 急性冠脉综合征",
+                  "cards": [
+                    "TB-T-IM10-0043"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 高血压",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 原发性高血压",
+                  "cards": [
+                    "TB-T-IM10-0044",
+                    "TB-T-IM10-0045"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 继发性高血压",
+                  "cards": [
+                    "TB-T-IM10-0046"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 心肌疾病",
+              "cards": [
+                "TB-T-IM10-0047"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 肥厚型心肌病",
+                  "cards": [
+                    "TB-T-IM10-0048"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 扩张型心肌病",
+                  "cards": [
+                    "TB-T-IM10-0049"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 非扩张型左心室心肌病",
+                  "cards": [
+                    "TB-T-IM10-0050"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 致心律失常性右心室心肌病",
+                  "cards": [
+                    "TB-T-IM10-0051"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 限制型心肌病",
+                  "cards": [
+                    "TB-T-IM10-0052"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第六节 心肌炎",
+                  "cards": [
+                    "TB-T-IM10-0053"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 先天性心血管病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 成人常见先天性心血管病",
+                  "cards": [
+                    "TB-T-IM10-0054",
+                    "TB-T-IM10-0055"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第八章 心脏瓣膜病",
+              "cards": [
+                "TB-T-IM10-0056"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 主动脉瓣狭窄",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【病因】",
+                      "cards": [
+                        "TB-T-IM10-0057"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 主动脉瓣反流",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【病因】",
+                      "cards": [
+                        "TB-T-IM10-0058"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 二尖瓣狭窄",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【病因】",
+                      "cards": [
+                        "TB-T-IM10-0059"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 二尖瓣反流",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【病因和病理】",
+                      "cards": [
+                        "TB-T-IM10-0060"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 多瓣膜病",
+                  "cards": [
+                    "TB-T-IM10-0061"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第六节 风湿热",
+                  "cards": [
+                    "TB-T-IM10-0062"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第九章 心包疾病",
+              "cards": [
+                "TB-T-IM10-0063"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 急性心包炎",
+                  "cards": [
+                    "TB-T-IM10-0064"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 心包积液及心脏压塞",
+                  "cards": [
+                    "TB-T-IM10-0065"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 缩窄性心包炎",
+                  "cards": [
+                    "TB-T-IM10-0066"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十章 感染性心内膜炎",
+              "cards": [
+                "TB-T-IM10-0067"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十一章 心脏骤停与心脏性猝死",
+              "cards": [
+                "TB-T-IM10-0068"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十二章 主动脉和周围血管病",
+              "cards": [
+                "TB-T-IM10-0069"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 主动脉夹层",
+                  "cards": [
+                    "TB-T-IM10-0070"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 下肢动脉硬化闭塞症",
+                  "cards": [
+                    "TB-T-IM10-0071"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 静脉血栓症",
+                  "cards": [
+                    "TB-T-IM10-0072"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十三章 心血管神经症",
+              "cards": [
+                "TB-T-IM10-0073"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十四章 肿瘤心脏病学",
+              "cards": [
+                "TB-T-IM10-0074"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十五章 其他心血管疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 糖尿病与高血压",
+                  "cards": [
+                    "TB-T-IM10-0075"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 糖尿病与冠心病",
+                  "cards": [
+                    "TB-T-IM10-0076"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 糖尿病与心力衰竭",
+                  "cards": [
+                    "TB-T-IM10-0077"
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第四篇 消化系统疾病",
+          "cards": [],
+          "children": [
+            {
+              "level": "section",
+              "label": "第一节 常见疾病相关的消化生理、 生化功能",
+              "cards": [],
+              "children": [
+                {
+                  "level": "label",
+                  "label": "【生理性食管抗反流防御机制】",
+                  "cards": [
+                    "TB-T-IM10-0078"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第二章 胃食管反流病",
+              "cards": [
+                "TB-T-IM10-0079"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 食管癌",
+              "cards": [
+                "TB-T-IM10-0080"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 胃炎",
+              "cards": [
+                "TB-T-IM10-0081"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 急性胃炎",
+                  "cards": [
+                    "TB-T-IM10-0082"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 慢性胃炎",
+                  "cards": [
+                    "TB-T-IM10-0083"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 特殊类型的胃炎或胃病",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【腐蚀性胃炎】",
+                      "cards": [
+                        "TB-T-IM10-0084"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 消化性溃疡",
+              "cards": [
+                "TB-T-IM10-0085"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 胃癌",
+              "cards": [
+                "TB-T-IM10-0086"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 肠结核和结核性腹膜炎",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 肠结核",
+                  "cards": [
+                    "TB-T-IM10-0087",
+                    "TB-T-IM10-0088"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 结核性腹膜炎",
+                  "cards": [
+                    "TB-T-IM10-0089"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第八章 炎症性肠病",
+              "cards": [
+                "TB-T-IM10-0090"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 溃疡性结肠炎",
+                  "cards": [
+                    "TB-T-IM10-0091"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 克罗恩病",
+                  "cards": [
+                    "TB-T-IM10-0092"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第九章 结直肠癌",
+              "cards": [
+                "TB-T-IM10-0093"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十章 功能性胃肠病",
+              "cards": [
+                "TB-T-IM10-0094"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 功能性消化不良",
+                  "cards": [
+                    "TB-T-IM10-0095"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 肠易激综合征",
+                  "cards": [
+                    "TB-T-IM10-0096"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十一章 病毒性肝炎",
+              "cards": [
+                "TB-T-IM10-0097"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十二章 脂肪性肝病",
+              "cards": [
+                "TB-T-IM10-0098"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 非酒精性脂肪性肝病",
+                  "cards": [
+                    "TB-T-IM10-0099"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 酒精性肝病",
+                  "cards": [
+                    "TB-T-IM10-0100"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十三章 自身免疫性肝病",
+              "cards": [
+                "TB-T-IM10-0101"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 自身免疫性肝炎",
+                  "cards": [
+                    "TB-T-IM10-0102"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 原发性胆汁性胆管炎",
+                  "cards": [
+                    "TB-T-IM10-0103"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 原发性硬化性胆管炎",
+                  "cards": [
+                    "TB-T-IM10-0104"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 IgG4 相关肝胆疾病",
+                  "cards": [
+                    "TB-T-IM10-0105"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十四章 药物性肝病",
+              "cards": [
+                "TB-T-IM10-0106"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十五章 肝硬化",
+              "cards": [
+                "TB-T-IM10-0107"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十六章 原发性肝癌",
+              "cards": [
+                "TB-T-IM10-0108"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十七章 急性肝衰竭",
+              "cards": [
+                "TB-T-IM10-0109"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十八章 肝外胆系结石及炎症",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 胆囊结石及胆囊炎",
+                  "cards": [
+                    "TB-T-IM10-0110",
+                    "TB-T-IM10-0111"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 肝外胆管结石及胆管炎",
+                  "cards": [
+                    "TB-T-IM10-0112"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十九章 胆道系统肿瘤",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 胆道系统良性肿瘤",
+                  "cards": [
+                    "TB-T-IM10-0113",
+                    "TB-T-IM10-0114"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 胆道系统恶性肿瘤",
+                  "cards": [
+                    "TB-T-IM10-0115"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第二十章 胰腺炎",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 急性胰腺炎",
+                  "cards": [
+                    "TB-T-IM10-0116",
+                    "TB-T-IM10-0117"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 慢性胰腺炎",
+                  "cards": [
+                    "TB-T-IM10-0118"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第二十一章 胰腺癌",
+              "cards": [
+                "TB-T-IM10-0119"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第二十二章 腹痛",
+              "cards": [
+                "TB-T-IM10-0120"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第二十三章 慢性腹泻",
+              "cards": [
+                "TB-T-IM10-0121"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第二十四章 便秘",
+              "cards": [
+                "TB-T-IM10-0122"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第二十五章 消化道出血",
+              "cards": [
+                "TB-T-IM10-0123"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第五篇 泌尿系统疾病",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第二章 原发性肾小球疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 肾小球疾病概述",
+                  "cards": [
+                    "TB-T-IM10-0124"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 急性肾小球肾炎",
+                  "cards": [
+                    "TB-T-IM10-0125"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 急进性肾小球肾炎",
+                  "cards": [
+                    "TB-T-IM10-0126"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 IgA 肾病",
+                  "cards": [
+                    "TB-T-IM10-0127"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 肾病综合征",
+                  "cards": [
+                    "TB-T-IM10-0128"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第六节 无症状性血尿和 / 或蛋白尿",
+                  "cards": [
+                    "TB-T-IM10-0129"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第七节 慢性肾小球肾炎",
+                  "cards": [
+                    "TB-T-IM10-0130"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 继发性肾病",
+              "cards": [
+                "TB-T-IM10-0131"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 狼疮性肾炎",
+                  "cards": [
+                    "TB-T-IM10-0132"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 糖尿病肾脏病",
+                  "cards": [
+                    "TB-T-IM10-0133"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 血管炎肾损害",
+                  "cards": [
+                    "TB-T-IM10-0134"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 高尿酸肾损害",
+                  "cards": [
+                    "TB-T-IM10-0135",
+                    "TB-R-IM10-0003",
+                    "TB-R-IM10-0004"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 间质性肾炎",
+              "cards": [
+                "TB-T-IM10-0136"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 急性间质性肾炎",
+                  "cards": [
+                    "TB-T-IM10-0137"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 慢性间质性肾炎",
+                  "cards": [
+                    "TB-T-IM10-0138"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 尿路感染",
+              "cards": [
+                "TB-T-IM10-0139"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 肾小管疾病",
+              "cards": [
+                "TB-T-IM10-0140"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 肾小管性酸中毒",
+                  "cards": [
+                    "TB-T-IM10-0141"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 Fanconi 综合征",
+                  "cards": [
+                    "TB-T-IM10-0142"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 肾血管疾病",
+              "cards": [
+                "TB-T-IM10-0143"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 肾动脉狭窄",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【病因及病理生理】",
+                      "cards": [
+                        "TB-T-IM10-0144"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 肾动脉栓塞和血栓形成",
+                  "cards": [
+                    "TB-T-IM10-0145"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 小动脉性肾硬化症",
+                  "cards": [
+                    "TB-T-IM10-0146"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 肾静脉血栓形成",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【流行病学和发病机制】",
+                      "cards": [
+                        "TB-T-IM10-0147"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第八章 遗传性肾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 常染色体显性遗传性多囊肾病",
+                  "cards": [
+                    "TB-T-IM10-0148"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 Alport 综合征",
+                  "cards": [
+                    "TB-T-IM10-0149"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第九章 急性肾损伤",
+              "cards": [
+                "TB-T-IM10-0150"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十章 慢性肾衰竭",
+              "cards": [
+                "TB-T-IM10-0151"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第六篇 血液系统疾病",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第三章 缺铁性贫血",
+              "cards": [
+                "TB-T-IM10-0152"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 巨幼细胞贫血",
+              "cards": [
+                "TB-T-IM10-0153"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 再生障碍性贫血",
+              "cards": [
+                "TB-T-IM10-0154"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 溶血性贫血",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 概述",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【定义】",
+                      "cards": [
+                        "TB-T-IM10-0155"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 遗传性球形红细胞增多症",
+                  "cards": [
+                    "TB-T-IM10-0156"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 血红蛋白病",
+                  "cards": [
+                    "TB-T-IM10-0157"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 自身免疫性溶血性贫血",
+                  "cards": [
+                    "TB-T-IM10-0158"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第六节 阵发性睡眠性血红蛋白尿症",
+                  "cards": [
+                    "TB-T-IM10-0159"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 白细胞减少和粒细胞缺乏症",
+              "cards": [
+                "TB-T-IM10-0160"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第八章 骨髓增生异常性肿瘤",
+              "cards": [
+                "TB-T-IM10-0161"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第九章 白血病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 概述",
+                  "cards": [
+                    "TB-T-IM10-0162"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 急性白血病",
+                  "cards": [
+                    "TB-T-IM10-0163"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 慢性髓系白血病",
+                  "cards": [
+                    "TB-T-IM10-0164"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 慢性淋巴细胞白血病",
+                  "cards": [
+                    "TB-T-IM10-0165"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十章 淋巴瘤",
+              "cards": [
+                "TB-T-IM10-0166"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 霍奇金淋巴瘤",
+                  "cards": [
+                    "TB-T-IM10-0167"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 非霍奇金淋巴瘤",
+                  "cards": [
+                    "TB-T-IM10-0168"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十一章 多发性骨髓瘤",
+              "cards": [
+                "TB-T-IM10-0169"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十二章 骨髓增殖性肿瘤",
+              "cards": [
+                "TB-T-IM10-0170"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 真性红细胞增多症",
+                  "cards": [
+                    "TB-T-IM10-0171"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 原发性血小板增多症",
+                  "cards": [
+                    "TB-T-IM10-0172"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 原发性骨髓纤维化",
+                  "cards": [
+                    "TB-T-IM10-0173"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十三章 脾功能亢进",
+              "cards": [
+                "TB-T-IM10-0174"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十五章 紫癜性疾病",
+              "cards": [
+                "TB-T-IM10-0175"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 过敏性紫癜",
+                  "cards": [
+                    "TB-T-IM10-0176"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 原发免疫性血小板减少症",
+                  "cards": [
+                    "TB-T-IM10-0177"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 血栓性血小板减少性紫癜",
+                  "cards": [
+                    "TB-T-IM10-0178"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十六章 凝血障碍性疾病",
+              "cards": [
+                "TB-T-IM10-0179"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 血友病",
+                  "cards": [
+                    "TB-T-IM10-0180"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 血管性血友病",
+                  "cards": [
+                    "TB-T-IM10-0181"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十七章 弥散性血管内凝血",
+              "cards": [
+                "TB-T-IM10-0182"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十八章 血栓性疾病",
+              "cards": [
+                "TB-T-IM10-0183"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十九章 输血和输血反应",
+              "cards": [
+                "TB-T-IM10-0184"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第二十章 造血干细胞移植",
+              "cards": [
+                "TB-T-IM10-0185"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第七篇 内分泌和代谢性疾病",
+          "cards": [],
+          "children": [
+            {
+              "level": "section",
+              "label": "第一节 内分泌学原理",
+              "cards": [],
+              "children": [
+                {
+                  "level": "topic",
+                  "label": "一、内分泌系统",
+                  "cards": [
+                    "TB-T-IM10-0186"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第二章 下丘脑疾病",
+              "cards": [
+                "TB-T-IM10-0187"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 垂体前叶疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 垂体瘤",
+                  "cards": [
+                    "TB-T-IM10-0188",
+                    "TB-T-IM10-0189"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 肢端肥大症和巨人症",
+                  "cards": [
+                    "TB-T-IM10-0190"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 腺垂体功能减退症",
+                  "cards": [
+                    "TB-T-IM10-0191"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 生长激素缺乏性矮小症",
+                  "cards": [
+                    "TB-T-IM10-0192"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 垂体后叶疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 尿崩症",
+                  "cards": [
+                    "TB-T-IM10-0193",
+                    "TB-T-IM10-0194"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 抗利尿不适当综合征",
+                  "cards": [
+                    "TB-T-IM10-0195"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 甲状腺疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 甲状腺功能亢进症",
+                  "cards": [
+                    "TB-T-IM10-0196",
+                    "TB-T-IM10-0197"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 甲状腺功能减退症",
+                  "cards": [
+                    "TB-T-IM10-0198"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 甲状腺炎",
+                  "cards": [
+                    "TB-T-IM10-0199"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 甲状腺肿",
+                  "cards": [
+                    "TB-T-IM10-0200"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 甲状腺结节和甲状腺癌",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、甲状腺结节",
+                      "cards": [
+                        "TB-T-IM10-0201"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 甲状旁腺疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 甲状旁腺功能亢进症",
+                  "cards": [
+                    "TB-T-IM10-0202",
+                    "TB-T-IM10-0203"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 甲状旁腺功能减退症",
+                  "cards": [
+                    "TB-T-IM10-0204"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 肾上腺疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 库欣综合征",
+                  "cards": [
+                    "TB-T-IM10-0205",
+                    "TB-T-IM10-0206"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 原发性醛固酮增多症",
+                  "cards": [
+                    "TB-T-IM10-0207"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 原发性慢性肾上腺皮质功能减退症",
+                  "cards": [
+                    "TB-T-IM10-0208"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 先天性肾上腺皮质增生症",
+                  "cards": [
+                    "TB-T-IM10-0209"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 嗜铬细胞瘤",
+                  "cards": [
+                    "TB-T-IM10-0210"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第八章 糖尿病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 糖尿病",
+                  "cards": [
+                    "TB-T-IM10-0211"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 糖尿病酮症酸中毒",
+                  "cards": [
+                    "TB-T-IM10-0212"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 高渗高血糖综合征",
+                  "cards": [
+                    "TB-T-IM10-0213"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第九章 低血糖症与胰岛素瘤",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 低血糖症",
+                  "cards": [
+                    "TB-T-IM10-0214",
+                    "TB-T-IM10-0215"
+                  ],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【临床表现】",
+                      "cards": [
+                        "TB-R-IM10-0005"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 胰岛素瘤",
+                  "cards": [
+                    "TB-T-IM10-0216"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十章 血脂异常性疾病",
+              "cards": [
+                "TB-T-IM10-0217"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十一章 肥胖症",
+              "cards": [
+                "TB-T-IM10-0218"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十二章 水、电解质代谢和酸碱平衡失常",
+              "cards": [
+                "TB-T-IM10-0219"
+              ],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 水、 钠代谢失常",
+                  "cards": [
+                    "TB-T-IM10-0220"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 钾代谢失常",
+                  "cards": [
+                    "TB-T-IM10-0221"
+                  ],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【诊断与鉴别诊断】",
+                      "cards": [
+                        "TB-R-IM10-0001"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 酸碱平衡失常",
+                  "cards": [
+                    "TB-T-IM10-0222"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十三章 高尿酸血症",
+              "cards": [
+                "TB-T-IM10-0223"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十四章 骨质疏松症",
+              "cards": [
+                "TB-T-IM10-0224"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十五章 性发育异常疾病",
+              "cards": [
+                "TB-T-IM10-0225"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十六章 多内分泌腺体疾病",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 多发性内分泌腺瘤病",
+                  "cards": [
+                    "TB-T-IM10-0226",
+                    "TB-T-IM10-0227"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 自身免疫性多内分泌腺综合征",
+                  "cards": [
+                    "TB-T-IM10-0228"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第十七章 神经内分泌肿瘤",
+              "cards": [
+                "TB-T-IM10-0229"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十八章 异位激素分泌综合征",
+              "cards": [
+                "TB-T-IM10-0230"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第八篇 风湿免疫病",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第二章 类风湿关节炎",
+              "cards": [
+                "TB-T-IM10-0231"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 系统性红斑狼疮",
+              "cards": [
+                "TB-T-IM10-0232"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十二章 抗磷脂综合征 ）",
+              "cards": [
+                "TB-T-IM10-0233"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 干燥综合征",
+              "cards": [
+                "TB-T-IM10-0234"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 脊柱关节炎",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 总论",
+                  "cards": [
+                    "TB-T-IM10-0235"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 强直性脊柱炎",
+                  "cards": [
+                    "TB-T-IM10-0236"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 系统性血管炎",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 概论",
+                  "cards": [
+                    "TB-T-IM10-0237",
+                    "TB-T-IM10-0238"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 大动脉炎",
+                  "cards": [
+                    "TB-T-IM10-0239"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 巨细胞动脉炎",
+                  "cards": [
+                    "TB-T-IM10-0240"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 结节性多动脉炎",
+                  "cards": [
+                    "TB-T-IM10-0241"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 ANCA 相关血管炎",
+                  "cards": [
+                    "TB-T-IM10-0242"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第六节 贝赫切特病",
+                  "cards": [
+                    "TB-T-IM10-0243"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 特发性炎症性肌病",
+              "cards": [
+                "TB-T-IM10-0244"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第八章 系统性硬化症",
+              "cards": [
+                "TB-T-IM10-0245"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第九章 痛风",
+              "cards": [
+                "TB-T-IM10-0246"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十章 骨关节炎",
+              "cards": [
+                "TB-T-IM10-0247"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十一章 IgG4 相关性疾病",
+              "cards": [
+                "TB-T-IM10-0248"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十三章 成人斯蒂尔病",
+              "cards": [
+                "TB-T-IM10-0249"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十四章 复发性多软骨炎",
+              "cards": [
+                "TB-T-IM10-0250"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第十六章 纤维肌痛综合征",
+              "cards": [
+                "TB-T-IM10-0251"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第九篇 理化因素所致疾病",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第二章 中毒",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 概述",
+                  "cards": [
+                    "TB-T-IM10-0252"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 农药中毒",
+                  "cards": [
+                    "TB-T-IM10-0253"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 急性毒品中毒",
+                  "cards": [
+                    "TB-T-IM10-0254"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 急性乙醇中毒",
+                  "cards": [
+                    "TB-T-IM10-0255"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 镇静催眠药中毒",
+                  "cards": [
+                    "TB-T-IM10-0256"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第六节 急性一氧化碳中毒",
+                  "cards": [
+                    "TB-T-IM10-0257"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第七节 急性亚硝酸盐中毒",
+                  "cards": [
+                    "TB-T-IM10-0258"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第八节 有机溶剂中毒",
+                  "cards": [
+                    "TB-T-IM10-0259"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第九节 毒蛇咬伤中毒",
+                  "cards": [
+                    "TB-T-IM10-0260"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 中暑",
+              "cards": [
+                "TB-T-IM10-0261"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 冻僵",
+              "cards": [
+                "TB-T-IM10-0262"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 高原病",
+              "cards": [
+                "TB-T-IM10-0263"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 淹溺",
+              "cards": [
+                "TB-T-IM10-0264"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 电击",
+              "cards": [
+                "TB-T-IM10-0265"
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "book": "诊断学第10版",
+      "source_id": "PMPH-DX10",
+      "cards": [],
+      "children": [
+        {
+          "level": "part",
+          "label": "第一篇 常见症状",
+          "cards": [],
+          "children": [
+            {
+              "level": "section",
+              "label": "第一节 发热",
+              "cards": [
+                "TB-T-DX10-0001"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二节 皮肤黏膜出血",
+              "cards": [
+                "TB-T-DX10-0002"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第三节 水肿",
+              "cards": [
+                "TB-T-DX10-0003"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第四节 咳嗽与咳痰",
+              "cards": [
+                "TB-T-DX10-0004"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第五节 咯血",
+              "cards": [
+                "TB-T-DX10-0005"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第六节 发绀",
+              "cards": [
+                "TB-T-DX10-0006"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第七节 呼吸困难",
+              "cards": [
+                "TB-T-DX10-0007"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第八节 胸痛",
+              "cards": [
+                "TB-T-DX10-0008"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第九节 心悸",
+              "cards": [
+                "TB-T-DX10-0009"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第十节 恶心与呕吐",
+              "cards": [
+                "TB-T-DX10-0010"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第十一节 烧心与反流",
+              "cards": [
+                "TB-T-DX10-0011"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第十二节 吞咽困难",
+              "cards": [
+                "TB-T-DX10-0012"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第十三节 呕血",
+              "cards": [
+                "TB-T-DX10-0013"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第十四节 便血",
+              "cards": [
+                "TB-T-DX10-0014"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第十六节 腹泻",
+              "cards": [
+                "TB-T-DX10-0015"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第十八节 黄疸",
+              "cards": [
+                "TB-T-DX10-0016"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第十九节 腰背痛",
+              "cards": [
+                "TB-T-DX10-0017"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十节 关节痛",
+              "cards": [
+                "TB-T-DX10-0018"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十一节 血尿",
+              "cards": [
+                "TB-T-DX10-0019"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十二节 尿频、 尿急与尿痛",
+              "cards": [
+                "TB-T-DX10-0020"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十三节 少尿、 无尿与多尿",
+              "cards": [
+                "TB-T-DX10-0021"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十四节 尿失禁",
+              "cards": [
+                "TB-T-DX10-0022"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十五节 排尿困难",
+              "cards": [
+                "TB-T-DX10-0023"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十六节 阴道流血",
+              "cards": [
+                "TB-T-DX10-0024"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十七节 肥胖",
+              "cards": [
+                "TB-T-DX10-0025"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十八节 消瘦",
+              "cards": [
+                "TB-T-DX10-0026"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第二十九节 头痛",
+              "cards": [
+                "TB-T-DX10-0027"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第三十节 眩晕",
+              "cards": [
+                "TB-T-DX10-0028"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第三十一节 晕厥",
+              "cards": [
+                "TB-T-DX10-0029"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第三十二节 抽搐与惊厥",
+              "cards": [
+                "TB-T-DX10-0030"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第三十三节 意识障碍",
+              "cards": [
+                "TB-T-DX10-0031"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第三十四节 睡眠障碍",
+              "cards": [
+                "TB-T-DX10-0032"
+              ],
+              "children": []
+            },
+            {
+              "level": "section",
+              "label": "第三十五节 情感症状",
+              "cards": [
+                "TB-T-DX10-0033"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第三篇 体格检查",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第一章 基本方法",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 视诊",
+                  "cards": [
+                    "TB-T-DX10-0034"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 触诊",
+                  "cards": [
+                    "TB-T-DX10-0035"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 叩诊",
+                  "cards": [
+                    "TB-T-DX10-0036"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 听诊",
+                  "cards": [
+                    "TB-T-DX10-0037"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 嗅诊",
+                  "cards": [
+                    "TB-T-DX10-0038"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第二章 一般检查",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第二节 皮肤",
+                  "cards": [
+                    "TB-T-DX10-0039"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 淋巴结",
+                  "cards": [
+                    "TB-T-DX10-0040"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 头部检查",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 头发和头皮",
+                  "cards": [
+                    "TB-T-DX10-0041"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 头颅",
+                  "cards": [
+                    "TB-T-DX10-0042"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 颜面及其器官",
+                  "cards": [
+                    "TB-T-DX10-0043"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 胸部检查",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 胸部的体表标志",
+                  "cards": [
+                    "TB-T-DX10-0044"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 胸壁、 胸廓与乳房",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、胸壁",
+                      "cards": [
+                        "TB-T-DX10-0045"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 肺和胸膜",
+                  "cards": [
+                    "TB-T-DX10-0046"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 呼吸系统常见疾病的主要症状和体征",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、大叶性肺炎",
+                      "cards": [
+                        "TB-T-DX10-0047"
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第七节 循环系统常见疾病的主要症状和体征",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "label",
+                      "label": "【概述】",
+                      "cards": [
+                        "TB-T-DX10-0048"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 腹部检查",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 腹部的体表标志与分区",
+                  "cards": [
+                    "TB-T-DX10-0049"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第六节 腹部常见疾病的主要症状和体征",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、消化性溃疡",
+                      "cards": [
+                        "TB-T-DX10-0050"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第五篇 辅助检查",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第一章 心电图",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 临床心电学的基本知识",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、心电图产生原理",
+                      "cards": [
+                        "TB-T-DX10-0051",
+                        "TB-T-DX10-0052"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第二章 其他常用心电学检查",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 动态心电图",
+                  "cards": [
+                    "TB-T-DX10-0053"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第四章 内镜检查",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 基本原理简介",
+                  "cards": [
+                    "TB-T-DX10-0054"
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 肺功能检查",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第四节 血气分析",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、血气分析的指标",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（五）动脉血氧含量",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0112"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（八）标准碳酸氢盐",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0113"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（九）实际碳酸氢盐",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0114"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（十）缓冲碱",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0115"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（十一）剩余碱",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0116"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（十二）血浆 CO2 含量",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0117"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（十三）阴离子间隙",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0118"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第六篇 病历书写",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第二章 病历书写格式及内容",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 住院期间病历",
+                  "cards": [
+                    "TB-T-DX10-0055"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 门（急）诊病历",
+                  "cards": [
+                    "TB-T-DX10-0056"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 表格式住院病历",
+                  "cards": [
+                    "TB-T-DX10-0057"
+                  ],
+                  "children": []
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 电子病历",
+                  "cards": [
+                    "TB-T-DX10-0058"
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第七篇 诊断疾病的步骤和临床思维方法",
+          "cards": [],
+          "children": [
+            {
+              "level": "section",
+              "label": "第一节 搜集临床资料",
+              "cards": [
+                "TB-T-DX10-0059"
+              ],
+              "children": []
+            },
+            {
+              "level": "chapter",
+              "label": "第二章 临床思维方法",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 临床思维的两大要素及应注意的问题",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、临床思维的两大要素",
+                      "cards": [
+                        "TB-T-DX10-0060"
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第八篇 临床常用诊断技术",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第一章 导尿术",
+              "cards": [
+                "TB-T-DX10-0061"
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "level": "part",
+          "label": "第四篇 实验诊断",
+          "cards": [],
+          "children": [
+            {
+              "level": "chapter",
+              "label": "第二章 临床血液学检测",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 血液一般检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "二、白细胞的检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）白细胞计数",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0001"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）白细胞的分类计数",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【临床意义】",
+                              "cards": [
+                                "TB-R-DX10-0001",
+                                "TB-R-DX10-0002"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "四、血小板的检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）血小板计数",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0002"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "五、红细胞沉降率测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0003"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第三章 血栓与止血检测",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 血管壁检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "二、诊断试验",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（三）6- 酮 - 前列腺素 F1α 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0004"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）血浆凝血酶调节蛋白抗原测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0005"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 血小板检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "subtopic",
+                      "label": "（四）血小板 P 选择素测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0006"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "subtopic",
+                      "label": "（六）血浆血栓烷 B2 测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0007"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 凝血因子检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "二、诊断试验",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（三）血浆纤维蛋白原测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0008"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）可溶性纤维蛋白单体复合物测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0009"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 抗凝系统检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、生理性抗凝因子检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（四）血浆凝血酶- 抗凝血酶复合物测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0010"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 纤溶活性检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、筛检试验",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）血浆纤维蛋白 （ 原 ） 降解产物测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0011"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）血浆 D- 二聚体测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0012"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、诊断试验",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）血浆组织型纤溶酶原激活物活性测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0013"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）血浆纤溶酶原激活物抑制物-1 活性测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0014"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）血浆纤溶酶- 抗纤溶酶复合物测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0015"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第五章 常用肾脏功能实验室检测",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 肾小球功能检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、血肌酐测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0016"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、内生肌酐清除率测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0017"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、血尿素测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0018"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "四、肾小球滤过率测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0019"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "五、血β2- 微球蛋白测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0020"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "六、血清胱抑素 C 测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0021"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "七、尿液总蛋白",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0022"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 肾小管功能检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、近端肾小管功能检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）尿 β2- 微球蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0023"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）α1- 微球蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0024"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）视黄醇结合蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0025"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第六章 常用肝脏功能实验室检测",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 蛋白质代谢功能检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "二、血清α1- 抗胰蛋白酶",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0026"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、铜蓝蛋白",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0027"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "五、血清前白蛋白测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0028"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第二节 血清酶检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、血清氨基转移酶及其同工酶测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）血清氨基转移酶",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0029"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、碱性磷酸酶及其同工酶测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）碱性磷酸酶",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0030"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、γ- 谷氨酰转移酶及同工酶测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）γ- 谷氨酰转移酶",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0031"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "五、α-L- 岩藻糖苷酶",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0032"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "六、5′- 核苷酸酶",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0033"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "七、单胺氧化酶",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0034"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "八、脯氨酰羟化酶测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0035"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 胆红素与胆汁酸代谢检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、胆红素代谢检查",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）血清总胆红素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0036"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第七章 临床常用生物化学检测",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 血糖及相关指标检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、空腹血糖检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0037"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、口服葡萄糖耐量试验",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0038"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "四、血清 C- 肽检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0039"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第二节",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、血清脂质检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）总胆固醇测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0040"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）甘油三酯测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0041"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、血清脂蛋白检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（二）高密度脂蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0042"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）低密度脂蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0043"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）脂蛋白（a）测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0044"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、血清载脂蛋白检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）载脂蛋白 AⅠ测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0045"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）载脂蛋白 B 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0046"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、血清阳离子检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）血钾测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0047"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）血钠测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0048"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）血钙测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0049"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、血清阴离子检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）血氯测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0050"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）血磷测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0051"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第四节",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、血清铁检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0052"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、血清转铁蛋白检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0053"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、血清总铁结合力检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0054"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "五、血清铁蛋白检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0055"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "六、红细胞内游离原卟啉检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0056"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第五节",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、心肌蛋白检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）心肌肌钙蛋白 T 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0057"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）心肌肌钙蛋白 I 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0058"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）肌红蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0059"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）脂肪酸结合蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0060"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、心肌酶检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）肌酸激酶测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0061"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）乳酸脱氢酶测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0062"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第六节",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、甲状腺激素及相关指标检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（三）反三碘甲状腺原氨酸测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0063"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）甲状腺素结合球蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0064"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）甲状腺球蛋白测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0065"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、甲状旁腺素与调节钙、 磷代谢激素检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）甲状旁腺素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0066"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）降钙素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0067"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）维生素 D",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0068"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、肾上腺激素检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（四）尿液 17- 羟皮质类固醇测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0069"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）尿液 17- 酮类固醇测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0070"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（七）尿液香草扁桃酸测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0071"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "四、性腺激素检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（二）雌二醇测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0072"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）睾酮测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0073"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "五、垂体激素检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）促甲状腺激素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0074"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）促肾上腺皮质激素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0075"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）生长激素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0076"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）催乳素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0077"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）抗利尿激素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0078"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "六、人绒毛膜促性腺激素检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0079"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第七节",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、淀粉酶检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0080"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、脂肪酶检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0081"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、胆碱酯酶检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0082"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第八章 临床常用免疫学检测",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第一节 固有免疫应答检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "二、补体系统",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）总补体溶血活性检测",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0083"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）补体 C1q",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0084"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）补体 C3",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0085"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）补体 C4",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0086"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）补体旁路 B 因子",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0087"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、细胞因子检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（二）肿瘤坏死因子测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0088"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）干扰素测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0089"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）集落刺激因子测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0090"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）生长因子测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0091"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（六）趋化因子测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0092"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第三节 肿瘤标志物检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、蛋白质类肿瘤标志物检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）甲胎蛋白及其异质体测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0093"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）异常凝血酶原测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0094"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）癌胚抗原测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0095"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）前列腺特异抗原测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0096"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）鳞状细胞癌抗原测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0097"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（六）细胞角蛋白 19 片段测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0098"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（七）胃泌素释放肽前体测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0099"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "二、糖类肿瘤标志物检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）糖类抗原 72-4 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0100"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（二）糖类抗原 19-9 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0101"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（三）糖类抗原 125 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0102"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（四）糖类抗原 242 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0103"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "level": "subtopic",
+                          "label": "（五）糖类抗原 15-3 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0104"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第四节 自身抗体检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、类风湿因子检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0105"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、抗组织细胞抗体检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（三）甲状腺抗体测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0106"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "四、其他抗体检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（六）冷球蛋白检测",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0107"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第五节 感染免疫检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、细菌感染免疫检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）血清抗链球菌溶血素 “O” 试验",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0108"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "level": "section",
+                  "label": "第七节 超敏反应性疾病检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "topic",
+                      "label": "一、Ⅰ型超敏反应检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（三）血清总 IgE 检测",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0109"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "level": "chapter",
+              "label": "第九章 临床常见病原体检测",
+              "cards": [],
+              "children": [
+                {
+                  "level": "section",
+                  "label": "第五节 病毒性肝炎检测",
+                  "cards": [],
+                  "children": [
+                    {
+                      "level": "subtopic",
+                      "label": "（四）乙型肝炎病毒 DNA 测定",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "label",
+                          "label": "【参考区间】",
+                          "cards": [
+                            "TB-L-DX10-0110"
+                          ],
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "level": "topic",
+                      "label": "三、丙型肝炎病毒检测",
+                      "cards": [],
+                      "children": [
+                        {
+                          "level": "subtopic",
+                          "label": "（一）丙型肝炎病毒 RNA 测定",
+                          "cards": [],
+                          "children": [
+                            {
+                              "level": "label",
+                              "label": "【参考区间】",
+                              "cards": [
+                                "TB-L-DX10-0111"
+                              ],
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

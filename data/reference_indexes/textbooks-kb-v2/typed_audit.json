@@ -1,0 +1,213 @@
+{
+  "pdf_extractor": "scripts/pdf_text.swift (PDFKit page.string)",
+  "pdf_audit_files": [
+    {
+      "book": "内科学第10版",
+      "file": "im10.json",
+      "sha256": "a11661678ff2bb567191028215147810720e929d54d7aa26a99cd771b7dbf5d4",
+      "pages": 982
+    },
+    {
+      "book": "诊断学第10版",
+      "file": "dx10.json",
+      "sha256": "6c1ef2cc2e60983f7f3d7111a25a307b36a8a8f5b89ed85a686c787cc17a122c",
+      "pages": 626
+    }
+  ],
+  "pdf_sources": [
+    {
+      "book": "内科学第10版",
+      "pdf_name": "02《内科学（第10版）》.pdf",
+      "pdf_sha256": "4b7c447e3059e404fe1939b8304f329d8a689c2bb1c9e05990b10186227a6116",
+      "pdf_pages": 982
+    },
+    {
+      "book": "诊断学第10版",
+      "pdf_name": "09《诊断学（第10版）》.pdf",
+      "pdf_sha256": "5c5198d99664db5bfe46029702d5e67f6be4b0fac8fe4f6ca986754b2c46b96d",
+      "pdf_pages": 626
+    }
+  ],
+  "terms": {
+    "candidates": 327,
+    "matched": 326,
+    "skipped": [
+      {
+        "title": "红细胞葡萄糖 -6- 磷酸脱氢酶缺乏症",
+        "card_id": "TB-IM10-1608",
+        "reason": "heading not found in PDF window"
+      }
+    ]
+  },
+  "labs": {
+    "candidates": 150,
+    "matched": 118,
+    "skipped": [
+      {
+        "title": "白细胞的检测",
+        "card_id": "TB-DX10-0548",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "网织红细胞测定",
+        "card_id": "TB-DX10-0556",
+        "reason": "manual exclusion: ambiguous/group unit"
+      },
+      {
+        "title": "红细胞体积分布宽度测定",
+        "card_id": "TB-DX10-0577",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "中性粒细胞碱性磷酸酶染色",
+        "card_id": "TB-DX10-0660",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "铁染色",
+        "card_id": "TB-DX10-0669",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血管性血友病因子抗原测定",
+        "card_id": "TB-DX10-0691",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血管性血友病因子活性测定",
+        "card_id": "TB-DX10-0693",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血块收缩试验",
+        "card_id": "TB-DX10-0700",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血小板黏附试验",
+        "card_id": "TB-DX10-0705",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血小板促凝活性测定",
+        "card_id": "TB-DX10-0712",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血浆抗凝血酶活性测定",
+        "card_id": "TB-DX10-0734",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血浆蛋白 C 活性测定",
+        "card_id": "TB-DX10-0736",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血浆蛋白 S 抗原测定",
+        "card_id": "TB-DX10-0738",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "血浆纤溶酶原活性测定",
+        "card_id": "TB-DX10-0761",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "碳酸氢根离子重吸收排泄试验 （ 碱负荷试验 ）",
+        "card_id": "TB-DX10-0945",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "碱性磷酸酶同工酶",
+        "card_id": "TB-DX10-0979",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "糖化血红蛋白检测",
+        "card_id": "TB-DX10-1028",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "糖化白蛋白检测",
+        "card_id": "TB-DX10-1031",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "肌酸激酶同工酶 CK-MB 测定",
+        "card_id": "TB-DX10-1114",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "乳酸脱氢酶同工酶测定",
+        "card_id": "TB-DX10-1120",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "自然杀伤细胞免疫检测",
+        "card_id": "TB-DX10-1208",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "抗体依赖性细胞介导的细胞毒测定",
+        "card_id": "TB-DX10-1211",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "IL-2 及其受体测定",
+        "card_id": "TB-DX10-1232",
+        "reason": "manual exclusion: ambiguous/group unit"
+      },
+      {
+        "title": "B 细胞分化抗原检测",
+        "card_id": "TB-DX10-1251",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "免疫球蛋白",
+        "card_id": "TB-DX10-1254",
+        "reason": "manual exclusion: ambiguous/group unit"
+      },
+      {
+        "title": "细胞免疫检测",
+        "card_id": "TB-DX10-1267",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "人附睾蛋白 4 测定",
+        "card_id": "TB-DX10-1296",
+        "reason": "title/units not found in PDF window"
+      },
+      {
+        "title": "酶类肿瘤标志物检测",
+        "card_id": "TB-DX10-1314",
+        "reason": "manual exclusion: ambiguous/group unit"
+      },
+      {
+        "title": "激素类肿瘤标志物检测",
+        "card_id": "TB-DX10-1317",
+        "reason": "manual exclusion: ambiguous/group unit"
+      },
+      {
+        "title": "其他免疫检测",
+        "card_id": "TB-DX10-1399",
+        "reason": "manual exclusion: ambiguous/group unit"
+      },
+      {
+        "title": "梅毒螺旋体抗体测定",
+        "card_id": "TB-DX10-1439",
+        "reason": "manual exclusion: ambiguous/group unit"
+      },
+      {
+        "title": "pH",
+        "card_id": "TB-DX10-1646",
+        "reason": "manual exclusion: ambiguous/group unit"
+      }
+    ]
+  },
+  "rules": {
+    "candidates": 7,
+    "matched": 7,
+    "skipped": []
+  }
+}
