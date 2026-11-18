@@ -53,6 +53,42 @@ class PhaseOneTests(unittest.TestCase):
             finally:
                 experiment.close()
 
+    def test_failed_generation_has_zero_coverage_and_consumes_both_attempts(self):
+        directory = Path(tempfile.mkdtemp(prefix="medtrace-phase1-failure-"))
+        cfg = Config(development=True, api_base="http://127.0.0.1/v1", model="test")
+        body = json.dumps({"choices": [{"message": {"content": "invalid JSON"}}]})
+        experiment = Experiment(directory, cfg)
+        try:
+            with patch("medtrace.llm._post", return_value=(200, body)) as post:
+                result = experiment.generate(experiment.splits["selection"][0], "legacy")
+                self.assertFalse(result["metrics"]["valid"])
+                self.assertEqual(result["metrics"]["measurement_coverage"], 0)
+                self.assertEqual(result["metrics"]["score"], 0)
+                self.assertIn("生成失败", result["record"]["case_features"])
+                self.assertEqual(result["record"]["diagnostic_discussion"], "")
+                self.assertEqual(result["record"]["evidence"], [])
+                self.assertEqual(post.call_count, 2)
+                self.assertEqual(experiment.budget.used(), 2)
+        finally:
+            experiment.close()
+
+    def test_malformed_judge_is_cached_as_error_without_retry(self):
+        directory = Path(tempfile.mkdtemp(prefix="medtrace-phase1-judge-"))
+        cfg = Config(development=True, api_base="http://127.0.0.1/v1", model="test")
+        body = json.dumps({"choices": [{"message": {"content": "invalid JSON"}}]})
+        experiment = Experiment(directory, cfg)
+        experiment.budget.stage = "confirmation"
+        try:
+            with patch("medtrace.llm._post", return_value=(200, body)) as post:
+                cid = experiment.splits["confirmation"][0]
+                result = experiment.judge("A", cid, {"diagnostic_discussion": "原因待查。"})
+                self.assertEqual(result["error"], "ParseError")
+                self.assertEqual(result, experiment.judge("A", cid, {}))
+                self.assertEqual(post.call_count, 1)
+                self.assertEqual(experiment.budget.used(), 1)
+        finally:
+            experiment.close()
+
     @unittest.skipUnless(importlib.util.find_spec("dspy"), "optional DSPy development dependency is absent")
     def test_real_mipro_uses_only_budgeted_transport_and_selection_cases(self):
         from eval.optimize_prompt import optimize
@@ -73,8 +109,11 @@ class PhaseOneTests(unittest.TestCase):
             calls.append(cid)
             return {"metrics": {"score": 0.5}, "record": {}}
         try:
-            with patch("medtrace.llm._post", side_effect=post) as transport, patch.object(experiment, "generate", side_effect=generate):
+            import dspy
+            with patch("medtrace.llm._post", side_effect=post) as transport, patch.object(experiment, "generate", side_effect=generate), \
+                    patch("dspy.ChatAdapter", wraps=dspy.ChatAdapter) as adapter:
                 result = optimize(experiment)
+                self.assertFalse(adapter.call_args.kwargs["use_json_adapter_fallback"])
                 self.assertTrue(result)
                 self.assertTrue(calls)
                 self.assertGreater(transport.call_count, 0)

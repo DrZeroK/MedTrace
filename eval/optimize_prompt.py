@@ -73,7 +73,7 @@ def optimize(experiment):
     examples = lambda split: [dspy.Example(case_id=cid, admission=json.dumps(experiment.items[cid][0], ensure_ascii=False))
                              .with_inputs("case_id", "admission") for cid in experiment.splits[split]]
     lm = dspy.BaseLM(model=experiment.cfg.model, engine=BudgetEngine(), cache=False, num_retries=0)
-    with dspy.context(lm=lm, adapter=dspy.ChatAdapter()):
+    with dspy.context(lm=lm, adapter=dspy.ChatAdapter(use_json_adapter_fallback=False)):
         optimizer = InstructionOnlyMIPRO(metric=lambda example, prediction, trace=None: prediction.score,
                                 prompt_model=lm, task_model=lm, auto=None, num_candidates=3,
                                 max_bootstrapped_demos=0, max_labeled_demos=0, num_threads=1,

@@ -32,4 +32,6 @@ DSPy 固定为 `dspy[optuna,numpy]==3.5.0`。使用 MIPROv2、seed42、3 个指�
 
 产物包括 `experiment.json`、`splits.json`、追加式 `requests.jsonl`、候选 JSON、生成缓存、`optimization.json`、冻结的 `selection.json`、确认汇总和 JSON/Markdown 报告快照。来源文件改变、预算耗尽或服务失败会保留已完成工作；不要绕过身份检查。`JUDGE_MODEL` 若显式指定则纳入实验身份，否则使用生成模型，并在评审结果标明同模型评审。
 
-`confirmation/review/packet.md` 与空白 `scores_R1.csv`、`scores_R2.csv` 供临床独立盲评；`key.json` 是揭盲映射，评分前不提供给评审者。须完成严重错误、事实准确率、来源支持、推理和计划评分及分歧裁决，才讨论推广。工具不填造专家评分、不自动改正式默认值。
+`confirmation/review/packet.md` 与空白 `scores_R1.csv`、`scores_R2.csv` 供临床独立盲评；`key.json` 是揭盲映射，评分前不提供给评审者。技术失败明确标记为无有效记录，不展示内部回退草稿。须完成严重错误、事实准确率、来源支持、推理和计划评分及分歧裁决，才讨论推广。工具不填造专家评分、不自动改正式默认值。
+
+本轮冻结实验的结果和最终盲评路径见[结果报告](PHASE1_RESULTS.md)。原始快照保留；错误处理补丁后的源码与原实验身份不同，不能直接续跑旧目录。

@@ -18,7 +18,7 @@ from medtrace.config import Config, load_config
 from medtrace.inputs import parse_case
 from medtrace.ledger import build_ledger
 from medtrace.llm import BudgetExceeded, CallStats, LLMClient, LLMError
-from medtrace.note import official_schema_errors, parse_json_object, to_record
+from medtrace.note import ParseError, official_schema_errors, parse_json_object, to_record
 from medtrace.pipeline import Pipeline, prompt_fingerprint
 from medtrace.verify import measurement_coverage
 from eval.experiment import RequestBudget, fingerprint, write_new
@@ -143,8 +143,11 @@ class Experiment:
             raise LLMError("development service failed; attempt retained, stop before spending further requests")
         flat = to_record(result.note, case, transport_cfg)
         valid = result.status == "ok" and not official_schema_errors(result.record, {s.raw_id for s in case.sources})
+        if not valid:
+            flat.update(case_features="生成失败：无有效记录，不能进行临床内容评分。", diagnostic_discussion="", treatment_plan="",
+                        evidence=[], review_items=[{"type": "verify", "description": "生成失败，按技术失败单独统计。", "source_ids": []}])
         hits, total = measurement_coverage(result.note, build_ledger(case))
-        coverage = hits / total if total else 1.0
+        coverage = (hits / total if total else 1.0) if valid else 0.0
         dx_hit = int(any(name_hit(g, flat["diagnostic_discussion"]) for g in gold_diagnoses(ref))) if ref["derived"]["dx_metric_eligible"] else None
         score = (statistics.mean([coverage, dx_hit]) if dx_hit is not None else coverage) if valid else 0.0
         data = {"record": flat, "official_record": result.record, "log": result.log,
@@ -207,7 +210,7 @@ class Experiment:
             verdict = {"model": cfg.model, "same_as_generator": cfg.model == self.cfg.model, "verdicts": rows}
         except BudgetExceeded:
             raise
-        except (LLMError, ValueError) as e:
+        except (LLMError, ParseError, ValueError) as e:
             verdict = {"model": cfg.model, "error": type(e).__name__, "verdicts": None}
         finally:
             self.budget.purpose = "generation"
