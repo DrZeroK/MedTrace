@@ -77,6 +77,7 @@ _MSG_ZH = {
     "context_assertion": "来源中的不确定或缺失信息被写成确定事实",
     "context_experiencer": "来源中的家属信息被写成患者信息",
     "context_temporality": "来源中的既往信息被写成当前信息",
+    "context_scope_ambiguous": "来源中的否定范围不明确，需核实原文意图",
 }
 _CORE_RX = {"allergy": r"(?i)allerg|过敏", "medication": r"(?i)medication|drug|用药|药物", "vitals": r"(?i)vital|生命体征"}
 
@@ -294,6 +295,14 @@ class Pipeline:
                 if low_time():
                     skip("regenerate")
                     raise
+                # Repeating the identical request cannot teach the model which formatting rule it broke.
+                user += ("\n格式纠正：上一响应未通过JSON结构检查。请重新生成完整JSON对象，三部分须齐全。"
+                         "字符串内部的英文双引号必须用反斜杠转义，或使用中文引号；不要混用而破坏JSON字符串。"
+                         "仅纠正输出格式，保持上述原始事实、截止时间、来源编号和固定字段约束。不要输出代码围栏或解释。"
+                         if lang == "zh" else
+                         "\nFormatting correction: the previous response failed JSON validation. Regenerate one complete JSON object "
+                         "with all three sections. Escape double quotes inside strings with a backslash. Do not output fences or commentary. "
+                         "Correct the format while preserving the original facts, cutoff, source IDs and fixed fields above.")
         log["raw_parse_retries"] = len(log.get("parse_errors", []))
         log["basis_normalised"] = _normalise_basis(note, L)
         initial = V.verify_note(note, case, L)

@@ -4,6 +4,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import time
@@ -146,7 +147,7 @@ class LLMClient:
                 detail["status_code"] = status
                 if status == 200:
                     self._usage(body, stats)
-                    return self._content(body)
+                    return self._content(body, detail)
                 last = f"HTTP {status}: {body[:200]}"
                 retryable = status in _RETRY_STATUS
             except ConnectionError as e:
@@ -181,12 +182,21 @@ class LLMClient:
                 setattr(stats, key, getattr(stats, key) + v)
 
     @staticmethod
-    def _content(body: str) -> str:
+    def _content(body: str, detail: dict | None = None) -> str:
+        if detail is not None:
+            detail["response_sha256"] = hashlib.sha256(body.encode("utf-8")).hexdigest()
         try:
-            msg = json.loads(body)["choices"][0]["message"]
+            choice = json.loads(body)["choices"][0]
+            msg = choice["message"]
             content = msg.get("content")
         except (ValueError, KeyError, IndexError, TypeError, AttributeError) as e:
             raise LLMError(f"unexpected response shape: {body[:200]}") from e
+        if detail is not None:
+            finish = choice.get("finish_reason")
+            detail["finish_reason"] = finish if finish in ("stop", "length", "content_filter", "tool_calls", "function_call") else "unknown"
+            detail["content_type"] = type(content).__name__
+            if isinstance(content, str):
+                detail["content_characters"] = len(content)
         if isinstance(content, list):
             content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
         if not isinstance(content, str) or not content.strip():

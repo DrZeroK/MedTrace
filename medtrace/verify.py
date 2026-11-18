@@ -176,6 +176,11 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 continue
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS:
                 continue        # "无扩张" at one site does not contradict "扩张" at another; section headers are not findings
+            if enhanced:
+                source_states = [s for f in L.facts for s in C.term_attributes(f.text, term)]
+                if source_states and all(s["assertion"] == "unknown" for s in source_states):
+                    add("context_scope_ambiguous", MEDIUM, f"{term!r}: the source assertion scope is ambiguous; review required")
+                    continue
             if term in L.clear_pos_text:
                 add("negation_flip", HIGH, f"{term!r} is negated here but the records document it as present")
             elif term in L.pos_text:

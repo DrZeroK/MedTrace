@@ -24,6 +24,7 @@ _PSEUDO = re.compile(r"不能否认|并非没有|并非无|不是没有|不是�
 _EXCLUSION = re.compile(r"(?:已|明确)排除|(?<!为)排除")
 _POST_UNCERTAIN = re.compile(r"待排(?:除)?|不除外|尚未明确|不能除外|可能|[?？]")
 _POST_MISSING = re.compile(r"不详|未知|未提供|未记录|未查|未做|待回报|未回报|结果未回")
+_COMMA_ASSERTIVE = re.compile(r"明显|显著|[轻中重]度|加重|缓解|减轻|持续|反复|出现|触及|闻及|测得")
 
 
 @dataclass(frozen=True)
@@ -90,6 +91,26 @@ def analyze(text: str) -> list[ContextSpan]:
         end = m.end() + stop.start() if stop else len(text)
         dim, val = ("experiencer", "family") if m.group(1) == "家族史" else ("temporality", "historical")
         add(m.start(), end, dim, val, "section_heading", m.start(), m.end())
+    # Bare fragments after a comma may continue a negative list; do not infer either polarity.
+    for m in re.finditer(r"[，,]([^，,。；;！？!?\n]+)", text):
+        raw = m.group(1)
+        fragment = raw.strip()
+        start = m.start(1) + len(raw) - len(raw.lstrip())
+        end = start + len(fragment)
+        if (not re.fullmatch(r"[一-鿿、]{2,12}", fragment) or T._POS_ITEM.search(fragment)
+                or (fragment.startswith("无") and not T._NEG_PRE.match(fragment))
+                or T._NEG_PRE.search(fragment) or T._NEG_POST.search(fragment)
+                or _UNCERTAIN.search(fragment) or _MISSING.search(fragment)
+                or _COMMA_ASSERTIVE.search(fragment) or _PATIENT.search(fragment) or _FAMILY.search(fragment)
+                or _HISTORY.search(fragment) or _CURRENT.search(fragment) or _HYPOTHETICAL.search(fragment)):
+            continue
+        if attributes(text, start, end, spans)["assertion"] != "affirmed":
+            continue
+        previous = [s for s in spans if s.dimension == "assertion" and s.end == m.start()
+                    and s.rule_id in ("legacy_negation", "comma_scope")]
+        if any(s.rule_id == "comma_scope" or attributes(text, s.start, s.end, spans)["assertion"] == "negated"
+               for s in previous):
+            add(start, end, "assertion", "unknown", "comma_scope", m.start(), m.start() + 1)
     return sorted(set(spans), key=lambda s: (s.start, s.end, s.dimension, s.rule_id))
 
 

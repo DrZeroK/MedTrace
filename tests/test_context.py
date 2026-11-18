@@ -81,6 +81,38 @@ class ContextTests(unittest.TestCase):
                                        ("发热", "temporality", "hypothetical")):
             self.assertEqual(C.term_attributes(text, term)[0][dimension], value)
 
+    def test_bare_comma_continuations_are_ambiguous_not_inferred_negative(self):
+        cases = [("否认哮喘，高脂血症史，否认手术史。", "高脂血症", "unknown"),
+                 ("不伴胸痛，恶心呕吐。", "恶心呕吐", "unknown"),
+                 ("无胸痛，咳嗽，咳痰。", "咳痰", "unknown"),
+                 ("否认胸痛，咳嗽3天。", "咳嗽", "affirmed"),
+                 ("无发热，咳嗽明显。", "咳嗽", "affirmed"),
+                 ("无发热，但有咳嗽。", "咳嗽", "affirmed"),
+                 ("无发热，患者咳嗽。", "咳嗽", "affirmed"),
+                 ("无皮疹，巩膜中度黄染。", "巩膜", "affirmed"),
+                 ("无腹痛，左上腹可触及肿块。", "肿块", "affirmed"),
+                 ("否认胸痛，无尿。", "无尿", "affirmed"),
+                 ("无发热，无痛性包块。", "包块", "affirmed"),
+                 ("无胸痛，无咳嗽。", "咳嗽", "negated"),
+                 ("无发热，否认咳嗽史。", "咳嗽", "negated"),
+                 ("无发热，双肺未闻及啰音。", "啰音", "negated"),
+                 ("未见肺炎，未提供培养结果。", "培养", "missing"),
+                 ("未见胸痛记录，咳嗽。", "咳嗽", "affirmed"),
+                 ("无发热；咳嗽。", "咳嗽", "affirmed")]
+        for text, term, expected in cases:
+            with self.subTest(text=text):
+                self.assertEqual(C.term_attributes(text, term)[0]["assertion"], expected)
+
+    def test_ambiguous_source_yields_review_instead_of_definite_flip(self):
+        for source, statement in (("否认哮喘，高脂血症史，否认手术史。", "否认哮喘、高脂血症及手术史。"),
+                                  ("不伴胸痛，恶心呕吐。", "不伴胸痛、恶心呕吐。")):
+            case = parse_case({"case_id": "T", "record_cutoff": "T0", "sources": [{"source_id": "S", "content": source}]}, 0)
+            L = build_ledger(case, context_mode=C.VERSION)
+            findings = check_statement("case_features", 0, Statement(statement, ["S"]), case, L)
+            self.assertNotIn("negation_flip", {f.code for f in findings})
+            self.assertIn("context_scope_ambiguous", {f.code for f in findings})
+            self.assertTrue(all(f.severity != "high" for f in findings))
+
     def test_legacy_is_unchanged_and_new_scopes_are_traceable(self):
         case = parse_case({"case_id": "T", "record_cutoff": "T0", "sources": [{"source_id": "S", "content": "父亲有糖尿病。患者未见肺炎相关记录。"}]}, 0)
         legacy = build_ledger(case)

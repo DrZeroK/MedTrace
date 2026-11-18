@@ -58,14 +58,18 @@ def parse_json_object(text: str) -> dict:
     if 0 <= i < j:
         candidates.append(t[i:j + 1])
         candidates.append(re.sub(r",\s*([}\]])", r"\1", t[i:j + 1]))
+    last_error = None
     for c in candidates:
         try:
             obj = json.loads(c)
             if isinstance(obj, dict):
                 return obj
-        except ValueError:
+        except ValueError as error:
+            if isinstance(error, json.JSONDecodeError):
+                last_error = error
             continue
-    raise ParseError("model response is not a JSON object")
+    location = (f" ({last_error.msg}; line {last_error.lineno}, column {last_error.colno})" if last_error else "")
+    raise ParseError("model response is not a JSON object" + location)
 
 
 def _ids(v) -> list[str]:
