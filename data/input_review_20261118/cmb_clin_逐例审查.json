@@ -1,0 +1,2425 @@
+[
+ {
+  "case_id": "cmbclin-000",
+  "source_sha256": "4468a102b229486bae38e4fb571773e1400d642d6385ce86482c5d4b7ec6798e",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-000-aux",
+    "疑似指数丢失",
+    25,
+    "×109／L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "0",
+   "title": "案例分析-腹外疝",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-001",
+  "source_sha256": "f10100fa06731f40d05b922db854f192534f37a452cb98f0794080e990b3111a",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 7,
+  "flags": [
+   [
+    "cmbclin-001-hpi",
+    "括号或引号待核",
+    null,
+    "“”"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "1",
+   "title": "食管疾病 案例分析-胃食管反流病",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-002",
+  "source_sha256": "36ce833c46e02b84a9e6d5ad994a9b8aab352c3805de14ed82a6add64f02c2b9",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-002-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ],
+   [
+    "cmbclin-002-aux",
+    "疑似指数丢失",
+    47,
+    "×109/L"
+   ],
+   [
+    "cmbclin-002-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    39,
+    "RBC 3.15×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "2",
+   "title": "结、直肠与肛管疾病 案例分析-痔",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-003",
+  "source_sha256": "73ef4b4ce9a2101af7edc0481a80d283072e4f6387766ed0d32ab3787ee8cce5",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "3",
+   "title": "泌尿、男生殖系统肿瘤 案例分析-阴茎癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-004",
+  "source_sha256": "80021ad45449330a732d9e74e79dded75e7246823b4daee7033c933b52ca2264",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "4",
+   "title": "颈部疾病 案例分析-甲状旁腺功能亢进",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-005",
+  "source_sha256": "9286ad41367288b9f4d321d564ffa0e61c99d60e106de2cab0160e4681b5a574",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-005-aux",
+    "疑似指数丢失",
+    24,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "5",
+   "title": "泌尿、男生殖系统肿瘤 案例分析-肾母细胞瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-006",
+  "source_sha256": "77d010b8e6adc4e87ffce1bd34ff54a283297c2c148fe94a4da092513525917a",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 2,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "6",
+   "title": "腹部损伤 案例分析-脾破裂",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-007",
+  "source_sha256": "b394cd4831597084b530d80c4d6a0735eab337b69c07aff9c46495bb673725be",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-007-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ],
+   [
+    "cmbclin-007-aux",
+    "疑似指数丢失",
+    48,
+    "×109/L"
+   ],
+   [
+    "cmbclin-007-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    41,
+    "RBC 4.1×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "7",
+   "title": "胆道疾病 案例分析-肝外胆管结石",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-008",
+  "source_sha256": "00e41e28264f6366aaef9f46a7b0b5fed91cc868016ee41d0dac42d1db058409",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-008-aux",
+    "疑似指数丢失",
+    68,
+    "X109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "8",
+   "title": "案例分析-膀胱破裂",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-009",
+  "source_sha256": "467aeb326e469d616113290854941621448aef2f21e982f5024f3ac682097cf2",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-009-aux",
+    "疑似指数丢失",
+    25,
+    "×109/L"
+   ],
+   [
+    "cmbclin-009-aux",
+    "疑似指数丢失",
+    39,
+    "×1012/L"
+   ],
+   [
+    "cmbclin-009-aux",
+    "疑似指数丢失",
+    64,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "9",
+   "title": "案例分析-嗜铬细胞瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-010",
+  "source_sha256": "c296ab0e4787b2a35844afeff342d66e31322375c00807accb2879e62abc50f4",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-010-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ],
+   [
+    "cmbclin-010-aux",
+    "疑似指数丢失",
+    41,
+    "×1012/L"
+   ],
+   [
+    "cmbclin-010-aux",
+    "疑似指数丢失",
+    74,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "10",
+   "title": "脾疾病 案例分析-脾相关性疾病",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "title_is_not_a_diagnosis"
+  ],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-011",
+  "source_sha256": "a630b4f07cab7406325b3983ccaec24b137bf73582af2992efb14207a86e1819",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-011-aux",
+    "疑似指数丢失",
+    25,
+    "×109/L"
+   ],
+   [
+    "cmbclin-011-aux",
+    "疑似指数丢失",
+    66,
+    "×1012/L"
+   ],
+   [
+    "cmbclin-011-aux",
+    "疑似指数丢失",
+    92,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "11",
+   "title": "食管疾病 案例分析-食管癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-012",
+  "source_sha256": "f4f91c0dfa59b13098c69edb771d7eaa011abc1b5302c2e2ee57a9eb6c902301",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "12",
+   "title": "案例分析-颅内动静脉畸形破裂导致的蛛网膜下腔出血",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-013",
+  "source_sha256": "37bace67712cacfef930e705da3f0a7c90182465dce3a30bee94b22dec4fc521",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "13",
+   "title": "颈、腰椎退行性疾病 案例分析-腰椎间盘突出症",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-014",
+  "source_sha256": "34a6e0fcdb6adcc16d891905ca2ebcbb261090f3712941eb5a2088e182dc51d5",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-014-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ],
+   [
+    "cmbclin-014-aux",
+    "疑似指数丢失",
+    47,
+    "×109/L"
+   ],
+   [
+    "cmbclin-014-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    39,
+    "RBC 3.15×109/L"
+   ],
+   [
+    "cmbclin-014-aux",
+    "解剖位置矛盾",
+    208,
+    "升结肠脾区"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "14",
+   "title": "结、直肠与肛管疾病 案例分析-结肠癌肝转移",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-015",
+  "source_sha256": "36e0dfed56d0a351d390c42e95eaa352809aefe0c99a2b8c0ffc5f007aa54de9",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "15",
+   "title": "案例分析-肾血管性高血压",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-016",
+  "source_sha256": "41c422db8cc45415996d198b357d9677fe90859122abc8ba1b0feb4ee6b12302",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-016-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "16",
+   "title": "案例分析-隐睾癌变",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-017",
+  "source_sha256": "03e17a431a546c390c14280a98db970f2c58d94f4e69a8b25292b9f24906f847",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-017-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ],
+   [
+    "cmbclin-017-aux",
+    "疑似指数丢失",
+    47,
+    "×109/L"
+   ],
+   [
+    "cmbclin-017-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    39,
+    "RBC 3.15×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "17",
+   "title": "颅脑损伤 案例分析-慢性硬膜下血肿",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-018",
+  "source_sha256": "5213bfee20f9f197edf5cf7559d548b24e78e1333eed8df989b1032d92eb7846",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-018-aux",
+    "疑似指数丢失",
+    25,
+    "×109/L"
+   ],
+   [
+    "cmbclin-018-aux",
+    "疑似指数丢失",
+    47,
+    "×109/L"
+   ],
+   [
+    "cmbclin-018-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    40,
+    "RBC 3.7×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "18",
+   "title": "胆道疾病 案例分析-胆囊结石",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-019",
+  "source_sha256": "2e5a6af0ee0d2cfcdbad14444c1b9e87c43b30fb44ce49f7017e024ea32cafa1",
+  "files": [
+   "data/standardized/cmb_clin/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-019-aux",
+    "疑似指数丢失",
+    25,
+    "x109/L"
+   ],
+   [
+    "cmbclin-019-aux",
+    "疑似指数丢失",
+    40,
+    "x109/L"
+   ],
+   [
+    "cmbclin-019-aux",
+    "疑似指数丢失",
+    64,
+    "x109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "19",
+   "title": "泌尿、男生殖系统肿瘤 案例分析-肾癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-020",
+  "source_sha256": "69fac605fffef81eb5fccdd3a0d6f53f6e710c1f152520a1c32604fc1a369ad8",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-020-lab",
+    "疑似指数丢失",
+    18,
+    "×109/L"
+   ],
+   [
+    "cmbclin-020-lab",
+    "疑似指数丢失",
+    41,
+    "×109/L"
+   ],
+   [
+    "cmbclin-020-lab",
+    "血细胞计数量纲待核（须先确认标本）",
+    33,
+    "RBC 4.16×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "20",
+   "title": "案例分析-手部急性化脓性细菌感染",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-021",
+  "source_sha256": "4efeed8ebd290df50c82aaa1b2349fa8674e06c43e433bb3215436ff4f3659a9",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-021-lab",
+    "疑似指数丢失",
+    20,
+    "×109/L"
+   ],
+   [
+    "cmbclin-021-lab",
+    "疑似指数丢失",
+    45,
+    "×109/L"
+   ],
+   [
+    "cmbclin-021-lab",
+    "疑似指数丢失",
+    70,
+    "×109/L"
+   ],
+   [
+    "cmbclin-021-lab",
+    "血细胞计数量纲待核（须先确认标本）",
+    37,
+    "RBC 3.15×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "21",
+   "title": "案例分析-丹毒",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-022",
+  "source_sha256": "e78063b4c3a56964b4be4ce2cfa5ed94a07ef37875925ef132032f59cada29df",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 2,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "22",
+   "title": "原发性纵隔肿瘤 案例分析-纵隔畸胎瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-023",
+  "source_sha256": "123547446e4c578854f19875d2ed8cc8a38c0551de54c8915cc5bc8f9095cf16",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "23",
+   "title": "案例分析-女性压力性尿失禁",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-024",
+  "source_sha256": "3e1385793fdeb82d336c359b514af10b5f18803a305c9e137051dc06ffd6134d",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 1,
+  "flags": [
+   [
+    "cmbclin-024-hpi",
+    "疑似指数丢失",
+    323,
+    "×109/L"
+   ],
+   [
+    "cmbclin-024-hpi",
+    "疑似指数丢失",
+    349,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "24",
+   "title": "小肠疾病 案例分析-短肠综合征",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-025",
+  "source_sha256": "d69e995a75025a8efafa3f1d176d85b6b161b6e0bb288ef4dd3e2c19fcad7051",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-025-hpi",
+    "疑似指数丢失",
+    76,
+    "×109/L"
+   ],
+   [
+    "cmbclin-025-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "25",
+   "title": "胸壁、胸膜疾病 案例分析-急性脓胸",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-026",
+  "source_sha256": "4eb3531a807303876d2f60b771d42eb319e0bf8fc03a3978a0815a5185498a21",
+  "files": [
+   "data/standardized/cmb_clin/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-026-lab",
+    "疑似指数丢失",
+    19,
+    "×109/L"
+   ],
+   [
+    "cmbclin-026-lab",
+    "疑似指数丢失",
+    45,
+    "×109/L"
+   ],
+   [
+    "cmbclin-026-lab",
+    "疑似指数丢失",
+    70,
+    "×109/L"
+   ],
+   [
+    "cmbclin-026-lab",
+    "血细胞计数量纲待核（须先确认标本）",
+    37,
+    "RBC 3.65×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "26",
+   "title": "胆道疾病 案例分析-胆道闭锁",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-027",
+  "source_sha256": "9bdc4c03985dfc418ebc3fd1bf1fab5a0de57bb63403136ebf73b1c9812c38bb",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-027-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ],
+   [
+    "cmbclin-027-aux",
+    "疑似指数丢失",
+    49,
+    "×109/L"
+   ],
+   [
+    "cmbclin-027-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    41,
+    "RBC：5.55×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "27",
+   "title": "案例分析-矢状缝早闭",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-028",
+  "source_sha256": "f2026b23bc6ae097ec6ec49de27cc6bd62939377c2548865d69f2a0f3a2a5203",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 1,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "28",
+   "title": "心脏疾病 案例分析-二尖瓣置换的体外循环管理",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "title_is_not_a_diagnosis",
+   "post_admission_sections_withheld"
+  ],
+  "prior_tier": "B",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-029",
+  "source_sha256": "9223ef9da164763b1629714f07e9e597e0991f4137c874f11224f78d308abe18",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "29",
+   "title": "颈部疾病 案例分析-甲状腺癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-030",
+  "source_sha256": "a3bb86ad58feb3193e48024754f33b9e91001c075e5c0d4db6cd674d23c53cbd",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "30",
+   "title": "案例分析-大脑胶质瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-031",
+  "source_sha256": "9f56c560726aa6859cd1bc250b0f03db0b6eeca465f80708ee2b529388dd8cff",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "31",
+   "title": "颅脑损伤 案例分析-重型颅脑损伤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-032",
+  "source_sha256": "a636f54e9a987bde6b34037191e2a08ae955300c48c723faf616ff67eab09dec",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "32",
+   "title": "胰腺疾病 案例分析-胰腺癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-033",
+  "source_sha256": "90ead69425b6a54fbbf78903f7e6ec9d2841e0ed8ab5353d088b969ee76f8598",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 2,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "33",
+   "title": "案例分析-酸碱平衡失调",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-034",
+  "source_sha256": "438cec4abc5602975f8e734684b032ecb98e015719611a92fadc74c0c5d8825b",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-034-aux2",
+    "疑似字符损坏",
+    12,
+    "\u000b"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "34",
+   "title": "外科休克 案例分析-肝胆胰术后失血性休克一例",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "corruption:control_chars",
+   "title_is_not_a_diagnosis",
+   "post_admission_sections_withheld"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-035",
+  "source_sha256": "3886ad6db6e57c1f31c0b0e95d3df27fa283ca77dd806ef7884bac053939518c",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "35",
+   "title": "案例分析-原发性醛固酮增多症",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-036",
+  "source_sha256": "180cb0030c46778ca2d84a67445248b84722d1eb0b7792cbfe2778e687bb7556",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-036-lab",
+    "疑似指数丢失",
+    20,
+    "×109/L"
+   ],
+   [
+    "cmbclin-036-lab",
+    "疑似指数丢失",
+    46,
+    "×109/L"
+   ],
+   [
+    "cmbclin-036-lab",
+    "疑似指数丢失",
+    71,
+    "×109/L"
+   ],
+   [
+    "cmbclin-036-lab",
+    "血细胞计数量纲待核（须先确认标本）",
+    38,
+    "RBC 3.65×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "36",
+   "title": "案例分析-痈",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-037",
+  "source_sha256": "9025466aa7a4e9b7ad33dd46c5acb1b637298aa41da6437254655897c24d10ad",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "37",
+   "title": "下肢骨、关节损伤 案例分析-胫骨平台骨折",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-038",
+  "source_sha256": "66662fd3c87f005a4488af31d6a167c9d8ef01881876c3268e59f91faaf5d305",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-038-aux2",
+    "疑似指数丢失",
+    26,
+    "X109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "38",
+   "title": "胃十二指肠疾病 案例分析-胃癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-039",
+  "source_sha256": "099ecb562a4b05d84c7c7315247b3ed6f945052087670a749a42b91294cb766e",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-039-aux",
+    "疑似指数丢失",
+    93,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "39",
+   "title": "案例分析-急性肝衰竭",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-040",
+  "source_sha256": "f8d134d4da356bbe878f4d83e8c19fe68b1a7c9613ceaa7e2cf85aacd5bca04d",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-040-aux",
+    "疑似指数丢失",
+    27,
+    "×109/L"
+   ],
+   [
+    "cmbclin-040-aux",
+    "疑似指数丢失",
+    50,
+    "×109/L"
+   ],
+   [
+    "cmbclin-040-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    42,
+    "RBC 3.66×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "40",
+   "title": "案例分析-脑疝",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-041",
+  "source_sha256": "49d1a5e3b59b8ea9fc3e670d5ac3e461a2def92da876a2dea48731a986de5f60",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "41",
+   "title": "案例分析-烟雾病导致的蛛网膜下腔出血",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-042",
+  "source_sha256": "69cf88d015c5792c98c332215fe03879d96d65c30d47f19275588d5ea2109a18",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "42",
+   "title": "案例分析-手外伤及断肢（指）再植",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "title_is_not_a_diagnosis"
+  ],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-043",
+  "source_sha256": "7c87d022b2806de14130789e8d050bac6a528aaa0cf3c62c86512f269bc15b6f",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "43",
+   "title": "泌尿、男生殖系统肿瘤 案例分析-前列腺癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-044",
+  "source_sha256": "a2d94f33d4640359babc26a4d1986b8c291a61d0e0859188f2dca4a8a82a251b",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "44",
+   "title": "肺部疾病 案例分析-原发性肺癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-045",
+  "source_sha256": "b4b402d2fdf05e45daa835158b90908667158f9cad54178bd96af1630bb3676c",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-045-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "45",
+   "title": "结、直肠与肛管疾病 案例分析-家族性腺瘤性息肉病",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-046",
+  "source_sha256": "d86c8de130468da69b16a33c6fd644cc295ef7d48b535551a7c353b5fe761db5",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "46",
+   "title": "案例分析-颅内动脉瘤破裂导致的蛛网膜下腔出血",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-047",
+  "source_sha256": "3c79ee09a6d16ba3480080bcf4235a646dc6eb924562822009e37badb1b69599",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "47",
+   "title": "泌尿、男生殖系统肿瘤 案例分析-睾丸肿瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-048",
+  "source_sha256": "07fff5cf0dff278566c7a9dd716832f9df1e87a72cb1fb0182cf3990ea5346b4",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 5,
+  "flags": [
+   [
+    "cmbclin-048-aux",
+    "疑似指数丢失",
+    31,
+    "×109/L"
+   ],
+   [
+    "cmbclin-048-aux",
+    "疑似指数丢失",
+    73,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "48",
+   "title": "肝疾病 案例分析-囊型肝包虫病合并胆瘘的诊疗",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "corruption:long_char_run"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-049",
+  "source_sha256": "3ede919e4a19e41c87917a2928e82853ce0c710c3ffa0cb50593745aeb732ff0",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "49",
+   "title": "案例分析-精索静脉曲张",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-050",
+  "source_sha256": "3c4c8a54949dc4a9421e373df78dbffa4d9b88e37399b4ed4d56f6cbe3717b5a",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-050-aux",
+    "疑似指数丢失",
+    69,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "50",
+   "title": "急性化脓性腹膜炎 案例分析-膈下脓肿",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-051",
+  "source_sha256": "21c9a185847830d22818f576422286e2c37043d1f39a7e3a738ac7720a137d19",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-051-lab",
+    "疑似指数丢失",
+    20,
+    "×109/L"
+   ],
+   [
+    "cmbclin-051-lab",
+    "疑似指数丢失",
+    46,
+    "×109/L"
+   ],
+   [
+    "cmbclin-051-lab",
+    "疑似指数丢失",
+    71,
+    "×109/L"
+   ],
+   [
+    "cmbclin-051-lab",
+    "血细胞计数量纲待核（须先确认标本）",
+    38,
+    "RBC 3.74×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "51",
+   "title": "胆道疾病 案例分析-胆管扩张",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-052",
+  "source_sha256": "b29b02cefe6444ee53d52ed18e438387de12b473319577eaa188e014e6487d9d",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-052-aux2",
+    "疑似指数丢失",
+    28,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "52",
+   "title": "急腹症的诊断与鉴别诊断 案例分析-胆管炎",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-053",
+  "source_sha256": "9df79ca71fe29e53ef1778191a64d7e334009545aae04be6da0f68b193c1be68",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-053-aux",
+    "疑似指数丢失",
+    22,
+    "x109/L"
+   ],
+   [
+    "cmbclin-053-aux",
+    "疑似指数丢失",
+    38,
+    "x1012/L"
+   ],
+   [
+    "cmbclin-053-aux",
+    "疑似指数丢失",
+    64,
+    "x109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "53",
+   "title": "急性化脓性腹膜炎 案例分析-腹腔间隔室综合征",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "possible_post_admission_content:术中见",
+   "post_admission_sections_withheld"
+  ],
+  "prior_tier": "review_required",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-054",
+  "source_sha256": "5c807512719ad019bb179d5212111abe4fc80db18402c8269f7e07a81df1f005",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-054-aux",
+    "疑似指数丢失",
+    27,
+    "×109/L"
+   ],
+   [
+    "cmbclin-054-aux",
+    "疑似指数丢失",
+    48,
+    "×109/L"
+   ],
+   [
+    "cmbclin-054-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    40,
+    "RBC 3.15×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "54",
+   "title": "胸主动脉疾病 案例分析-急性Stanford B 型主动脉夹层",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-055",
+  "source_sha256": "57a3560a10d20d7c8dfbaa04846478346c2fc31d31dcce45217d3849d9f9d86d",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "55",
+   "title": "案例分析-全身麻醉术前评估和准备",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "title_is_not_a_diagnosis"
+  ],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-056",
+  "source_sha256": "940d996064f27476473d07e3fe3c2c63b604b3ca704ad5e6ee617c490d5d6476",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "56",
+   "title": "案例分析-垂体腺瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-057",
+  "source_sha256": "a91f88542fcd88b5b74f88c84e01f50f068b2ad294f35cc26b52b5254488c35b",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "57",
+   "title": "胰腺疾病 案例分析-胰岛素瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-058",
+  "source_sha256": "fb34f4677ae85b04e5061ca636c77c5b64fbdc9fc75a6cf64963e8741c0f09ce",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 6,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "58",
+   "title": "泌尿、男生殖系统肿瘤 案例分析-膀胱癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-059",
+  "source_sha256": "bc6083794ca4e62a79977c70933ede8f7dacde85c6e18f28c3d782bfeee499cb",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "59",
+   "title": "案例分析-肥胖症",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-060",
+  "source_sha256": "0f71a77822c8f714ad318695cdbe28844703d8a7ab69a439512910c1eae85d5a",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-060-aux",
+    "疑似指数丢失",
+    28,
+    "×1012/L"
+   ],
+   [
+    "cmbclin-060-aux",
+    "疑似指数丢失",
+    55,
+    "×109/L"
+   ],
+   [
+    "cmbclin-060-aux",
+    "疑似指数丢失",
+    72,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "60",
+   "title": "烧伤、冻伤、蛇咬伤、犬咬伤、虫蛰伤 案例分析-蛇咬伤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-061",
+  "source_sha256": "98b56731d7d4e7718989aebbfc2ae062f9c7c919e61379ee13214a5cf25c2971",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-061-aux2",
+    "疑似指数丢失",
+    26,
+    "X109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "61",
+   "title": "胃十二指肠疾病 案例分析-胃间质瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "post_admission_sections_withheld"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-062",
+  "source_sha256": "b60d079487093c53e198229e6f210651d9f7fe44a8984725c94ffd593a00aba9",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-062-aux",
+    "疑似指数丢失",
+    17,
+    "×109/L"
+   ],
+   [
+    "cmbclin-062-aux",
+    "疑似指数丢失",
+    38,
+    "×1012/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "62",
+   "title": "案例分析-消化道出血伴急性肾损伤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-063",
+  "source_sha256": "82706b7699ffa56b950499c76a0875ddd1f273ac0ad1a9e4d0a609751758e006",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-063-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ],
+   [
+    "cmbclin-063-aux",
+    "疑似指数丢失",
+    58,
+    "×109/L"
+   ],
+   [
+    "cmbclin-063-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    50,
+    "RBC 5.12×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "63",
+   "title": "乳房疾病 案例分析-急性乳腺炎",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-064",
+  "source_sha256": "6120594589ff9fc48d4429cc37fb2ddec97b803eda8efd0cd7bf3a48f1afc9f2",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-064-aux2",
+    "疑似指数丢失",
+    22,
+    "X109/L"
+   ],
+   [
+    "cmbclin-064-aux2",
+    "疑似指数丢失",
+    84,
+    "X109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "64",
+   "title": "胃十二指肠疾病 案例分析-胃十二指肠溃疡伴穿孔",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-065",
+  "source_sha256": "2623f05bd0928b27ed827e351fe0874ad938ebae9313d2390b7b5daa2f52af20",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [
+   [
+    "cmbclin-065-aux",
+    "疑似指数丢失",
+    37,
+    "×1012/L"
+   ],
+   [
+    "cmbclin-065-aux",
+    "疑似指数丢失",
+    53,
+    "×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "65",
+   "title": "案例分析-骨肿瘤",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-066",
+  "source_sha256": "f34bae33e45d17c4147a0f8783a6bb2089c646ac0a06394927a600578c6a5e96",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "66",
+   "title": "案例分析-肾下垂",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-067",
+  "source_sha256": "f5a2a46e1c5f09e076203f5cdc6056d25436750d8e5423b1ca51b60744dcf63a",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 5,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "67",
+   "title": "心脏疾病 案例分析-房间隔缺损",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-068",
+  "source_sha256": "c1c30250ad1acfbb51aef246077fd6b1d04134942fbb8a8be46edae8735a51b9",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "68",
+   "title": "案例分析-勃起功能障碍",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-069",
+  "source_sha256": "f38a4cf499c2f6efcb7b2ad3094fe2e91ca06b1569e0a713becb842f018811d8",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/cmbclin_val_proxy/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 4,
+  "flags": [
+   [
+    "cmbclin-069-aux",
+    "疑似指数丢失",
+    26,
+    "×109/L"
+   ],
+   [
+    "cmbclin-069-aux",
+    "疑似指数丢失",
+    48,
+    "×109/L"
+   ],
+   [
+    "cmbclin-069-aux",
+    "血细胞计数量纲待核（须先确认标本）",
+    41,
+    "RBC 4.2×109/L"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "69",
+   "title": "胆道疾病 案例分析-肝内胆管结石",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-070",
+  "source_sha256": "2cadc76d299c09577fe653d4fb827d653829212518509eaa34fdb147f66e64d5",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 5,
+  "flags": [
+   [
+    "cmbclin-070-aux2",
+    "疑似字符损坏",
+    13,
+    "\u000b"
+   ],
+   [
+    "cmbclin-070-aux3",
+    "疑似字符损坏",
+    9,
+    "\u000b"
+   ]
+  ],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "70",
+   "title": "案例分析-ERAS路径下胰十二指肠切除术一例",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "corruption:control_chars",
+   "title_is_not_a_diagnosis",
+   "post_admission_sections_withheld"
+  ],
+  "prior_tier": "B",
+  "hold": true
+ },
+ {
+  "case_id": "cmbclin-071",
+  "source_sha256": "7f9547fb792f189ee3092087224501db99e7922cf63d6f22d0a7d3afc42e6532",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "71",
+   "title": "腹部损伤 案例分析-肝破裂",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [],
+  "prior_tier": "A",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-072",
+  "source_sha256": "37c5aba6024fcfa7a395479083c9b8bdc5194414522cc826eb3493072eec97b6",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "72",
+   "title": "乳房疾病 案例分析-乳腺癌",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": false
+ },
+ {
+  "case_id": "cmbclin-073",
+  "source_sha256": "61bc7f0adaa4b349165d25fa29d0e4b13327254988c1ec46802ceda1407d6d0b",
+  "files": [
+   "data/standardized/cmb_clin/cases.json",
+   "eval/archive/cmb_clin_before_user_errata_20261118T054351Z/cases.json",
+   "eval/results/phase1_20261118/confirmation/cases_used.json",
+   "eval/results/phase1_20261118/confirmation/official_review/cases_used.json"
+  ],
+  "kind": "病例 JSON",
+  "fragments": 3,
+  "flags": [],
+  "source_reproduction_match": true,
+  "origin": {
+   "dataset": "CMB-Clin",
+   "item_id": "73",
+   "title": "泌尿、男生殖系统肿瘤 案例分析-阴囊Paget病",
+   "license": "Apache-2.0",
+   "url": "https://github.com/FreedomIntelligence/CMB",
+   "raw_sha256": "fc4d8d2dbfe7f647e257ceefddc9ab467576e2c4c2978fecba70f38d3c27c07e"
+  },
+  "prior_flags": [
+   "diagnosis_stated_in_record"
+  ],
+  "prior_tier": "B",
+  "hold": false
+ }
+]

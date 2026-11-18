@@ -372,6 +372,25 @@ class DataPipeline(unittest.TestCase):
                 by_label.setdefault(r["classification"]["disease_label"], set()).add(r["split"])
         self.assertTrue(all(len(v) == 1 for v in by_label.values()))                # no disease label spans two splits
 
+    def test_cmb_clin_confirmed_negation_errata(self):
+        from data_pipeline.cmb_clin import PUNCTUATION_ERRATA, correct_punctuation
+        from medtrace.context import term_attributes
+
+        directory = ROOT / "data" / "standardized" / "cmb_clin"
+        cases = {c["case_id"]: c for c in json.loads((directory / "cases.json").read_text("utf-8"))}
+        refs = {r["case_id"]: r for r in json.loads((directory / "references.json").read_text("utf-8"))}
+        for case_id, term in (("cmbclin-019", "糖尿病"), ("cmbclin-026", "恶心呕吐")):
+            with self.subTest(case=case_id):
+                source_id = case_id + "-hpi"
+                before, after = PUNCTUATION_ERRATA[source_id]
+                self.assertEqual(correct_punctuation(source_id, before), after)
+                self.assertEqual(correct_punctuation("other-hpi", before), before)
+                self.assertNotIn(case_id, cases)
+                self.assertNotIn(case_id, refs)
+                self.assertEqual(term_attributes(after, term)[0]["assertion"], "negated")
+                fixture = {"case_id": case_id, "sources": [{"source_id": source_id, "content": after}]}
+                self.assertIn(term, build_ledger(parse_case(fixture, 0)).neg_terms)
+
 
 class Parsing(unittest.TestCase):
     def test_tolerant_json(self):

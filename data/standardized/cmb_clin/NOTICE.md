@@ -10,3 +10,8 @@ Changes made (see `data_pipeline/cmb_clin.py`): case descriptions were split int
 classification, quality flags, splits and rule-derived fact lists were added. The underlying cases are textbook
 teaching material, not hospital records. This is a benchmark: do not use the `validation` or `test` splits for
 prompt development, and do not train on any of it.
+
+项目用户于 2026-11-18 确认以下标点勘误。更正适用于标准化病例及规则派生事实。专家答案与上游文件保留原文。
+
+- `cmbclin-019-hpi` 改为“否认高血压、糖尿病史，否认手术病史。”，“否认”包含糖尿病史。
+- `cmbclin-026-hpi` 改为“大便色浅，不伴寒战高热、恶心呕吐”，“不伴”包含恶心呕吐。

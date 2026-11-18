@@ -38,13 +38,15 @@ def keep(path: Path, value):
 
 
 def load_public_data():
-    directory = ROOT / "data/standardized/cmb_clin"
+    # Byte-identical 74-case release of the frozen phase-one round; the live standardized
+    # corpus was filtered by the 2026-11-18 admission-input review without changing this protocol.
+    directory = ROOT / "eval/frozen/cmb_clin_74_20261118"
     cases = json.loads((directory / "cases.json").read_text("utf-8"))
     refs = json.loads((directory / "references.json").read_text("utf-8"))
     # CMB-Clin has no timestamped trajectory. T0 is a symbolic admission cutoff, not an invented date.
     by_id = {c["case_id"]: {**c, "record_cutoff": c.get("record_cutoff") or "T0"} for c in cases}
     if len(by_id) != len(cases) or len(refs) != 74:
-        raise ValueError("expected the registered 74-case CMB-Clin release")
+        raise ValueError("expected the frozen 74-case CMB-Clin release")
     groups = {split: sorted([r["case_id"] for r in refs if r["split"] == split]) for split in ("dev", "test")}
     if len(groups["dev"]) != 26 or len(groups["test"]) != 30:
         raise ValueError("CMB-Clin split counts changed")

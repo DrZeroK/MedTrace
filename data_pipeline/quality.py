@@ -2,8 +2,17 @@
 from __future__ import annotations
 
 import hashlib
+import json
+from pathlib import Path
 import re
 import unicodedata
+
+def reviewed_case_ids(dataset: str, raw_sha256: str) -> set[str]:
+    review = json.loads(Path(__file__).with_name("reviewed_inputs_20261118.json").read_text("utf-8"))[dataset]
+    if raw_sha256 != review["raw_sha256"]:
+        raise ValueError(f"{dataset}: source changed since the admission-input review")
+    return set(review["keep"])
+
 
 # ----------------------------------------------------------------------- PII
 _PII_HARD = [  # high-confidence identifiers: always redacted

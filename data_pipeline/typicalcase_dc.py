@@ -62,6 +62,7 @@ def split_sections(text: str) -> dict:
 def build() -> dict:
     items = [json.loads(l) for l in RAW.read_text("utf-8").splitlines() if l.strip()]
     raw_sha = hashlib.sha256(RAW.read_bytes()).hexdigest()
+    keep = Q.reviewed_case_ids("typicalcase_dc", raw_sha)
     stats, seen = collections.Counter(), set()
     cases, refs = [], []
     for it in items:
@@ -83,6 +84,9 @@ def build() -> dict:
             stats["dropped_unstructured"] += 1
             continue
         cid = f"tcdc-{it['id']}"
+        if cid not in keep:
+            stats["excluded_input_review"] += 1
+            continue
         sources = [{"source_id": f"{cid}-{slug}", "content": "\n".join(lines)} for slug, lines in secs.items()]
         case = {"case_id": cid, "record_cutoff": None, "sources": sources}
         body = "\n".join(s["content"] for s in sources)
@@ -125,6 +129,8 @@ def build() -> dict:
                              ratios=(("dev", 0.3), ("validation", 0.2), ("test", 0.5)))
     for r in refs:
         r["split"] = splits.get(r["case_id"], "excluded_pending_review")
+    if {case["case_id"] for case in cases} != keep or len(cases) != len(keep):
+        raise ValueError("Rebuilt case IDs do not match the reviewed input list")
     OUT.mkdir(parents=True, exist_ok=True)
     dump = lambda name, obj: (OUT / name).write_text(json.dumps(obj, ensure_ascii=False, indent=1) + "\n", "utf-8")
     dump("cases.json", cases)
@@ -146,6 +152,7 @@ def build() -> dict:
         "kept only in the private repository and must not be published or redistributed.", "",
         f"- Labelled items: {m['raw_items']}; kept: {stats['kept']}; multi-patient texts dropped: {stats['dropped_multi_patient']}; "
         f"exact duplicates: {stats['dropped_exact_duplicate']}; corrupt or unlabelled: {stats['dropped_corrupt_or_unlabelled']}; unstructured: {stats['dropped_unstructured']}",
+        f"- Excluded by the 2026-11-18 admission-input review: {m['counts']['excluded_input_review']}",
         f"- Cases containing explicit dates (usable for chronology and cutoff tests): {m['cases_with_dates']}",
         f"- Identifier patterns redacted: {m['pii_hits'] or 'none'}", "",
         "## Quality tiers", "", "| tier | cases |", "|---|---|", t(m["tiers"]), "",

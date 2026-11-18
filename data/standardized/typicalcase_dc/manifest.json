@@ -3,47 +3,46 @@
  "raw_sha256": "08d51e7cd7f862c03b522b5754d937b61c07210387a91b128e624f3b47870cf8",
  "raw_items": 2591,
  "counts": {
-  "kept": 2578,
+  "excluded_input_review": 1259,
+  "kept": 1319,
   "dropped_multi_patient": 9,
   "dropped_exact_duplicate": 2,
   "dropped_corrupt_or_unlabelled": 1,
   "dropped_unstructured": 1
  },
  "tiers": {
-  "B": 1026,
-  "A": 836,
-  "review_required": 716
+  "B": 716,
+  "A": 603
  },
  "splits": {
-  "test": 940,
-  "excluded_pending_review": 716,
-  "dev": 524,
-  "validation": 398
+  "test": 657,
+  "dev": 370,
+  "validation": 292
  },
  "tier_A_by_split": {
-  "test": 425,
-  "dev": 232,
-  "validation": 179
+  "test": 300,
+  "dev": 169,
+  "validation": 134
  },
  "completeness": {
-  "complete": 2283,
-  "partial": 295
+  "complete": 1315,
+  "partial": 4
  },
  "complexity": {
-  "high": 1614,
-  "medium": 963,
+  "high": 716,
+  "medium": 602,
   "low": 1
  },
  "gold_diagnoses_per_case": {
-  "1": 1884,
-  "2": 194,
-  "5": 182,
-  "3": 175,
-  "4": 143
+  "1": 975,
+  "2": 103,
+  "3": 90,
+  "5": 79,
+  "4": 72
  },
- "cases_with_dates": 664,
+ "cases_with_dates": 262,
  "pii_hits": {
-  "already_masked_name": 11
+  "already_masked_name": 10
  },
  "split_salt": "medtrace-v1",
  "split_ratios": {

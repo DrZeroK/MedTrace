@@ -2,17 +2,17 @@
 
 The case texts are journal case reports obtained under Tianchi terms; `cases.json` / `references.json` are kept only in the private repository and must not be published or redistributed.
 
-- Labelled items: 2591; kept: 2578; multi-patient texts dropped: 9; exact duplicates: 2; corrupt or unlabelled: 1; unstructured: 1
-- Cases containing explicit dates (usable for chronology and cutoff tests): 664
-- Identifier patterns redacted: {'already_masked_name': 11}
+- Labelled items: 2591; kept: 1319; multi-patient texts dropped: 9; exact duplicates: 2; corrupt or unlabelled: 1; unstructured: 1
+- Excluded by the 2026-11-18 admission-input review: 1259
+- Cases containing explicit dates (usable for chronology and cutoff tests): 262
+- Identifier patterns redacted: {'already_masked_name': 10}
 
 ## Quality tiers
 
 | tier | cases |
 |---|---|
-| B | 1026 |
-| A | 836 |
-| review_required | 716 |
+| B | 716 |
+| A | 603 |
 
 A = no post-admission cue and the record does not state the diagnosis: eligible for the diagnosis-hit metric. B = record states a diagnosis (for example a biopsy result): usable for fidelity metrics only. review_required = post-admission content suspected (operation findings, treatment response, discharge, follow-up, or a treatment/diagnosis sub-heading): excluded from every split until a clinician cuts the record at admission.
 
@@ -20,40 +20,39 @@ A = no post-admission cue and the record does not state the diagnosis: eligible 
 
 | split | cases |
 |---|---|
-| test | 940 |
-| excluded_pending_review | 716 |
-| dev | 524 |
-| validation | 398 |
+| test | 657 |
+| dev | 370 |
+| validation | 292 |
 
 Tier A per split:
 
 | split | tier A cases |
 |---|---|
-| test | 425 |
-| dev | 232 |
-| validation | 179 |
+| test | 300 |
+| dev | 169 |
+| validation | 134 |
 
 ## Completeness
 
 | level | cases |
 |---|---|
-| complete | 2283 |
-| partial | 295 |
+| complete | 1315 |
+| partial | 4 |
 
 ## Complexity
 
 | level | cases |
 |---|---|
-| high | 1614 |
-| medium | 963 |
+| high | 716 |
+| medium | 602 |
 | low | 1 |
 
 ## Gold diagnoses per case (5 = five or more)
 
 | n | cases |
 |---|---|
-| 1 | 1884 |
-| 2 | 194 |
-| 5 | 182 |
-| 3 | 175 |
-| 4 | 143 |
+| 1 | 975 |
+| 2 | 103 |
+| 3 | 90 |
+| 5 | 79 |
+| 4 | 72 |
