@@ -6,8 +6,8 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-BASE = Path('/Users/zerok/Documents/GitHub/MedTrace/data/synthetic_admissions_100_20261117')
-REPO = Path('/Users/zerok/Documents/GitHub/MedTrace')
+BASE = Path(__file__).resolve().parent
+REPO = BASE.parent.parent
 text = (BASE / '入院资料100例.md').read_text(encoding='utf-8')
 blocks = re.split(r'^## (SYN\d{3})｜([^\n]+)\n', text, flags=re.M)
 assert len(blocks) == 301, 'Expected exactly 100 case sections'
