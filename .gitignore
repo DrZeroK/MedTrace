@@ -13,8 +13,6 @@ data/raw/
 .venv/
 data/reference_indexes/
 dist/
-data/standardized/typicalcase_dc/cases.json
-data/standardized/typicalcase_dc/references.json
 # regenerable / sensitive development intermediates (not source)
 knowledge/distillation/
 data/synthetic_admissions_100_20261117/out_*.json

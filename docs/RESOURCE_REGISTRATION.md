@@ -45,8 +45,9 @@ download occurs; the only network use is the configured model endpoint (competit
 ## Data
 
 No dataset is bundled in the submission package. Development datasets (CMB-Clin, TypicalCase-DC,
-CHIP-CDEE, MedCT) live under git-ignored `data/` and are used only offline for evaluation; those
-obtained under Tianchi terms are not redistributed.
+CHIP-CDEE, MedCT) live under `data/`; raw downloads stay git-ignored and are used only offline for
+evaluation. Data obtained under Tianchi terms is kept in the private repository only and must not be
+published or redistributed.
 
 ## Pending organiser items [ORG]
 

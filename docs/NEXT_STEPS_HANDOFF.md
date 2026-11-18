@@ -24,7 +24,6 @@ Local-only, git-ignored material that a fresh clone will **not** have:
 
 - `.env` — holds the project owner's commercial API key. Never commit it.
 - `data/raw/` — downloaded datasets (CMB, MedCT notes, CBLUE Tianchi archives).
-- `data/standardized/typicalcase_dc/{cases,references}.json` — generated from a Tianchi download; not redistributable.
 - `eval/results/` and `eval/archive/` — run outputs, kept locally only (not committed). `eval/archive/` holds the
   real-model development runs behind `docs/REPORT.md` §2.6; the numbers in the report are the record, the raw
   outputs are not redistributed.

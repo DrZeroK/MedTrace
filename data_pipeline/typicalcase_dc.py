@@ -7,8 +7,8 @@ The corpus is 2,591 labelled published case reports already written in admission
 (个人信息 / 主诉 / 现病史 / 既往史 / 个人史 / 家族史 / 体格检查 / 检查检验) with gold diagnoses and distractor options.
 
 It is distributed under Tianchi terms and the texts are journal case reports, so `cases.json` and
-`references.json` are written locally but are git-ignored; only `manifest.json` and `qc_report.md`
-(counts, no case text) are committed.
+`references.json` are kept only in the private repository and must not be published or redistributed
+outside it.
 
 Leakage control: the article title (names the diagnosis) is never used; multi-patient texts are dropped; a case
 whose text contains post-admission cues (operation findings, treatment response, discharge, follow-up) or
@@ -103,7 +103,7 @@ def build() -> dict:
         refs.append({
             "case_id": cid,
             "origin": {"dataset": "TypicalCase-DC (CBLUE)", "item_id": it["id"], "source_url": it.get("url"), "raw_sha256": raw_sha,
-                       "terms": "Tianchi terms; not redistributed"},
+                       "terms": "Tianchi terms; private repository only; do not redistribute"},
             "classification": {"document_type": "published case report in admission-record sections", "question_type": it.get("question_type"),
                                "n_gold_diagnoses": len(gold), "sections_present": list(secs),
                                "completeness": "complete" if {"hx", "exam", "tests"} <= set(secs) and not re.search(r"体格检查[:：]\s*无。?\s*$", body, re.M) else "partial",
@@ -142,8 +142,8 @@ def build() -> dict:
     t = lambda d: "\n".join(f"| {k} | {v} |" for k, v in d.items())
     (OUT / "qc_report.md").write_text("\n".join([
         "# TypicalCase-DC quality-control report", "",
-        "Counts only: the case texts are journal case reports obtained under Tianchi terms and are not redistributed "
-        "(`cases.json` / `references.json` are generated locally and git-ignored).", "",
+        "The case texts are journal case reports obtained under Tianchi terms; `cases.json` / `references.json` are "
+        "kept only in the private repository and must not be published or redistributed.", "",
         f"- Labelled items: {m['raw_items']}; kept: {stats['kept']}; multi-patient texts dropped: {stats['dropped_multi_patient']}; "
         f"exact duplicates: {stats['dropped_exact_duplicate']}; corrupt or unlabelled: {stats['dropped_corrupt_or_unlabelled']}; unstructured: {stats['dropped_unstructured']}",
         f"- Cases containing explicit dates (usable for chronology and cutoff tests): {m['cases_with_dates']}",
