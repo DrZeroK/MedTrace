@@ -1,5 +1,7 @@
 # MedTrace — next-steps handoff
 
+**English** | [简体中文](NEXT_STEPS_HANDOFF.zh-CN.md)
+
 Written 2026-11-17 for a coding model taking over implementation. Read this file, then `docs/COMPETITION_QA.md`,
 then the code you are about to touch. Do not treat README or report claims as proof; section 2 lists what was
 re-verified against the code on the date above.

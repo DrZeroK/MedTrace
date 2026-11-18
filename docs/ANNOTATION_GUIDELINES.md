@@ -1,5 +1,7 @@
 # Annotation guidelines for MedTrace reference data
 
+**English** | [简体中文](ANNOTATION_GUIDELINES.zh-CN.md)
+
 ## 1. Label provenance — every label carries one of these, and they are never mixed silently
 
 | `status` | Meaning | May be used as ground truth? |

@@ -1,5 +1,7 @@
 # Resource registration (MedTrace)
 
+**English** | [简体中文](RESOURCE_REGISTRATION.zh-CN.md)
+
 Status: **draft — the organiser's registration template is pending [ORG]** (competition Q&A Q2).
 This document follows the fields the Q&A asks for (name, source, version, purpose, size, dependencies)
 and will be reformatted once the official template is published. The authoritative version of every

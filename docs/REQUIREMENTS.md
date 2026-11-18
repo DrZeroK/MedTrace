@@ -1,5 +1,7 @@
 # Competition requirements and acceptance boundaries
 
+**English** | [简体中文](REQUIREMENTS.zh-CN.md)
+
 The supplied consolidated guide, Appendix 3, defines the implemented runtime protocol. The latest organiser release takes precedence. Earlier Q&A naming uncertainties do not override this implementation of the complete local guide.
 
 | Requirement | Implementation and regression coverage |

@@ -1,5 +1,7 @@
 # Open Chinese clinical datasets — audit and ranking
 
+**English** | [简体中文](DATASETS.zh-CN.md)
+
 Audit date 2026-11-16. Machine-readable version: `data_pipeline/registry.json`.
 
 **How to read "verified".** GitHub raw files were reachable from the start; Hugging Face was opened on 2026-11-17

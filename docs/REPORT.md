@@ -1,5 +1,7 @@
 # MedTrace — technical report (working draft)
 
+**English** | [简体中文](REPORT.zh-CN.md)
+
 ## 1. What exists
 
 A complete, tested pipeline (`README.md`) with five interchangeable variants (A0, A1, A2, S2, A3), a deterministic

@@ -1,5 +1,7 @@
 # Offline knowledge deployment
 
+**English** | [简体中文](KNOWLEDGE_BASE.zh-CN.md)
+
 Status: the offline implementation is available; **no clinical release is approved**.
 `knowledge/entries.jsonl` contains 300 terminology drafts, 30 lab-unit drafts,
 24 adult internal-medicine card drafts and 10 nonclinical rule templates.
