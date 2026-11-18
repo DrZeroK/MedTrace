@@ -17,7 +17,7 @@ re-verified against the code on the date above.
 | Working branch | `medtrace-pipeline` (all current work; **not merged** into `master` beyond PR #1) |
 | State audited | commit `69640e1` (merge of `master` into `medtrace-pipeline`); this file is added in the commit after it |
 | `master` | `149d906`: PR #1 (first pipeline version + 3 review fixes) plus the competition Q&A docs. About 20 later commits on `medtrace-pipeline` are not on `master` |
-| Open pull requests | #2 (`medtrace-pipeline` → `master`); PR #1 merged |
+| Open pull requests | none (PRs #1, #2 and #4 merged into `master`) |
 | `AGENTS.md` / `CLAUDE.md` | none in the repository |
 
 Local-only, git-ignored material that a fresh clone will **not** have:
@@ -25,7 +25,9 @@ Local-only, git-ignored material that a fresh clone will **not** have:
 - `.env` — holds the project owner's commercial API key. Never commit it.
 - `data/raw/` — downloaded datasets (CMB, MedCT notes, CBLUE Tianchi archives).
 - `data/standardized/typicalcase_dc/{cases,references}.json` — generated from a Tianchi download; not redistributable.
-- `eval/results/` — run outputs. The real-model runs behind `docs/REPORT.md` §2.6 are preserved in `eval/archive/`.
+- `eval/results/` and `eval/archive/` — run outputs, kept locally only (not committed). `eval/archive/` holds the
+  real-model development runs behind `docs/REPORT.md` §2.6; the numbers in the report are the record, the raw
+  outputs are not redistributed.
 
 ## 2. Baseline, verified on the audited commit
 

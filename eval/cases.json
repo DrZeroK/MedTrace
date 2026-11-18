@@ -1,1898 +1,1898 @@
 [
- {
-  "case": {
-   "case_id": "C01",
-   "record_cutoff": "2026-03-10T20:00:00",
-   "sources": [
-    {
-     "source_id": "adm",
-     "content": "Chief complaint: fever, productive cough and right-sided pleuritic chest pain for 4 days. 67-year-old man, retired teacher. Sputum is yellow; denies hemoptysis. No recent travel or hospitalisation. Past history: hypertension for 10 years on amlodipine 5 mg daily. Allergy: penicillin (generalised rash in 2015). Ex-smoker, stopped 2010."
+  {
+    "case": {
+      "case_id": "C01",
+      "record_cutoff": "2026-03-10T20:00:00",
+      "sources": [
+        {
+          "source_id": "adm",
+          "content": "主诉：发热、咳痰伴右侧胸膜炎性胸痛4天。患者男，67岁，退休教师。痰液黄色；否认咯血。近期无旅行或住院史。既往高血压病史10年，每日口服氨氯地平5 mg。青霉素过敏（2015年全身皮疹）。曾吸烟，2010年戒烟。"
+        },
+        {
+          "source_id": "exam",
+          "content": "2026-03-10 14:30查体：体温38.9℃，心率108次/分，血压124/72 mmHg，呼吸24次/分，室内空气下SpO2 92%。神志清楚，定向力正常。右肺底部可闻及支气管呼吸音和粗湿啰音。无外周水肿。"
+        },
+        {
+          "source_id": "lab",
+          "content": "2026-03-10检查结果：白细胞16.4×10^9/L，中性粒细胞百分比88%，CRP 148 mg/L，尿素8.2 mmol/L，肌酐96 µmol/L，钠133 mmol/L。胸部X线：右肺下叶实变，无胸腔积液。已留取血培养，结果待回报。尚未送检痰培养。"
+        }
+      ]
     },
-    {
-     "source_id": "exam",
-     "content": "Examination 2026-03-10 14:30: Temp 38.9 °C, HR 108 bpm, BP 124/72 mmHg, RR 24 /min, SpO2 92% on room air. Alert and oriented. Bronchial breathing and coarse crackles at the right base. No peripheral oedema."
-    },
-    {
-     "source_id": "lab",
-     "content": "Results 2026-03-10: WBC 16.4 ×10^9/L, neutrophils 88%, CRP 148 mg/L, urea 8.2 mmol/L, creatinine 96 µmol/L, sodium 133 mmol/L. Chest X-ray: right lower lobe consolidation, no effusion. Blood cultures taken, results pending. Sputum culture not yet sent."
+    "annotation": {
+      "category": "common",
+      "split": "dev",
+      "key_facts": [
+        [
+          "age_sex",
+          "67"
+        ],
+        [
+          "cough_fever",
+          "咳嗽|咳痰"
+        ],
+        [
+          "pleuritic",
+          "胸膜炎性|胸膜性"
+        ],
+        [
+          "no_hemoptysis",
+          "咯血"
+        ],
+        [
+          "pcn_allergy",
+          "青霉素"
+        ],
+        [
+          "temp",
+          "38[.]9"
+        ],
+        [
+          "spo2",
+          "92 ?%"
+        ],
+        [
+          "rr",
+          "24"
+        ],
+        [
+          "wbc",
+          "16[.]4"
+        ],
+        [
+          "crp",
+          "148"
+        ],
+        [
+          "urea",
+          "8[.]2"
+        ],
+        [
+          "cxr",
+          "右肺下叶实变|右下肺实变"
+        ],
+        [
+          "bcx_pending",
+          "血培养[^。]{0,40}(待回报|待结果|待定|结果待)|(待回报|待结果)[^。]{0,40}血培养"
+        ]
+      ],
+      "must_not": [
+        [
+          "已记录青霉素过敏仍建议青霉素类抗生素",
+          "(开始|给予|使用|启动|建议|推荐)[^。；]{0,60}(阿莫西林|氨苄西林|哌拉西林|阿莫西林克拉维酸|青霉素)",
+          "plan"
+        ]
+      ],
+      "expected_dx": [
+        "社区获得性肺炎，右肺下叶（可能性大）"
+      ],
+      "differentials": [
+        "肺栓塞伴肺梗死",
+        "肺恶性肿瘤伴阻塞性肺炎",
+        "肺结核"
+      ],
+      "uncertainties": [
+        "致病病原体（培养待回报/未送检）",
+        "严重程度评分取决于意识、尿素、呼吸频率、血压和年龄：尿素8.2 mmol/L，呼吸24次/分，年龄67岁"
+      ],
+      "plan_expectations": [
+        "选择非青霉素类抗生素",
+        "氧疗至目标血氧饱和度",
+        "送检痰培养",
+        "48–72小时复评"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "common",
-   "split": "dev",
-   "key_facts": [
-    [
-     "age_sex",
-     "67"
-    ],
-    [
-     "cough_fever",
-     "cough"
-    ],
-    [
-     "pleuritic",
-     "pleuritic"
-    ],
-    [
-     "no_hemoptysis",
-     "hemoptysis"
-    ],
-    [
-     "pcn_allergy",
-     "penicillin"
-    ],
-    [
-     "temp",
-     "38[.]9"
-    ],
-    [
-     "spo2",
-     "92 ?%"
-    ],
-    [
-     "rr",
-     "24"
-    ],
-    [
-     "wbc",
-     "16[.]4"
-    ],
-    [
-     "crp",
-     "148"
-    ],
-    [
-     "urea",
-     "8[.]2"
-    ],
-    [
-     "cxr",
-     "right lower lobe consolidation"
-    ],
-    [
-     "bcx_pending",
-     "culture[^.]{0,40}pending|pending[^.]{0,40}culture"
-    ]
-   ],
-   "must_not": [
-    [
-     "penicillin-class antibiotic proposed despite documented allergy",
-     "(?i)(start|give|administer|begin|initiate|commence|recommend)[^.;]{0,60}(amoxicillin|ampicillin|piperacillin|co-amoxiclav|penicillin g|benzylpenicillin)",
-     "plan"
-    ]
-   ],
-   "expected_dx": [
-    "community-acquired pneumonia, right lower lobe (probable)"
-   ],
-   "differentials": [
-    "pulmonary embolism with infarction",
-    "lung malignancy with post-obstructive pneumonia",
-    "tuberculosis"
-   ],
-   "uncertainties": [
-    "causative organism (cultures pending / not sent)",
-    "severity score depends on confusion/urea/RR/BP/age: urea 8.2, RR 24, age 67"
-   ],
-   "plan_expectations": [
-    "non-penicillin antibiotic choice",
-    "oxygen to target saturation",
-    "send sputum culture",
-    "reassess 48-72 h"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "C02",
-   "record_cutoff": "2026-03-11T12:00:00",
-   "sources": [
-    {
-     "source_id": "入院记录",
-     "content": "主诉：右上腹痛伴恶心1天。患者女，52岁，1天前进食油腻食物后出现右上腹持续性胀痛，向右肩背部放射，伴恶心，呕吐胃内容物2次。否认发热、黄疸、胸闷、胸痛。既往胆囊结石病史3年，未治疗。否认高血压、糖尿病病史。否认药物过敏史。"
+  {
+    "case": {
+      "case_id": "C02",
+      "record_cutoff": "2026-03-11T12:00:00",
+      "sources": [
+        {
+          "source_id": "入院记录",
+          "content": "主诉：右上腹痛伴恶心1天。患者女，52岁，1天前进食油腻食物后出现右上腹持续性胀痛，向右肩背部放射，伴恶心，呕吐胃内容物2次。否认发热、黄疸、胸闷、胸痛。既往胆囊结石病史3年，未治疗。否认高血压、糖尿病病史。否认药物过敏史。"
+        },
+        {
+          "source_id": "体格检查",
+          "content": "查体：体温37.8℃，脉搏92次/分，血压132/80 mmHg，呼吸18次/分。皮肤巩膜无黄染。腹平软，右上腹压痛，墨菲征阳性，无反跳痛及肌紧张，未触及包块。"
+        },
+        {
+          "source_id": "辅助检查",
+          "content": "血常规：白细胞13.6×10^9/L，中性粒细胞百分比84%。总胆红素15.2 μmol/L，ALT 38 U/L，淀粉酶 62 U/L。腹部超声：胆囊壁增厚约5 mm，胆囊内多发强回声伴声影，最大约12 mm，胆总管未见扩张。"
+        }
+      ]
     },
-    {
-     "source_id": "体格检查",
-     "content": "查体：体温37.8℃，脉搏92次/分，血压132/80 mmHg，呼吸18次/分。皮肤巩膜无黄染。腹平软，右上腹压痛，墨菲征阳性，无反跳痛及肌紧张，未触及包块。"
-    },
-    {
-     "source_id": "辅助检查",
-     "content": "血常规：白细胞13.6×10^9/L，中性粒细胞百分比84%。总胆红素15.2 μmol/L，ALT 38 U/L，淀粉酶 62 U/L。腹部超声：胆囊壁增厚约5 mm，胆囊内多发强回声伴声影，最大约12 mm，胆总管未见扩张。"
+    "annotation": {
+      "category": "common",
+      "split": "dev",
+      "key_facts": [
+        [
+          "年龄",
+          "52"
+        ],
+        [
+          "右上腹痛",
+          "右上腹"
+        ],
+        [
+          "油腻",
+          "油腻"
+        ],
+        [
+          "否认发热黄疸",
+          "否认[^。]{0,12}(发热|黄疸)|无[^。]{0,12}(发热|黄疸)"
+        ],
+        [
+          "胆囊结石史",
+          "胆囊结石"
+        ],
+        [
+          "体温",
+          "37[.]8"
+        ],
+        [
+          "墨菲征",
+          "墨菲征阳性"
+        ],
+        [
+          "无反跳痛",
+          "无反跳痛"
+        ],
+        [
+          "白细胞",
+          "13[.]6"
+        ],
+        [
+          "胆红素",
+          "15[.]2"
+        ],
+        [
+          "淀粉酶",
+          "62"
+        ],
+        [
+          "超声",
+          "胆囊壁增厚"
+        ],
+        [
+          "胆总管",
+          "胆总管未见扩张"
+        ]
+      ],
+      "must_not": [
+        [
+          "将黄疸写为阳性",
+          "(?<!无)(?<!否认)(?<!无黄疸、)巩膜黄染",
+          "features"
+        ]
+      ],
+      "expected_dx": [
+        "急性结石性胆囊炎（可能性大）"
+      ],
+      "differentials": [
+        "胆总管结石/急性胆管炎",
+        "急性胰腺炎",
+        "消化性溃疡穿孔",
+        "急性心肌梗死（下壁）"
+      ],
+      "uncertainties": [
+        "未行心电图",
+        "严重程度分级"
+      ],
+      "plan_expectations": [
+        "禁食补液",
+        "抗感染",
+        "外科会诊评估胆囊切除时机",
+        "心电图除外心源性"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "common",
-   "split": "dev",
-   "key_facts": [
-    [
-     "年龄",
-     "52"
-    ],
-    [
-     "右上腹痛",
-     "右上腹"
-    ],
-    [
-     "油腻",
-     "油腻"
-    ],
-    [
-     "否认发热黄疸",
-     "否认[^。]{0,12}(发热|黄疸)|无[^。]{0,12}(发热|黄疸)"
-    ],
-    [
-     "胆囊结石史",
-     "胆囊结石"
-    ],
-    [
-     "体温",
-     "37[.]8"
-    ],
-    [
-     "墨菲征",
-     "墨菲征阳性"
-    ],
-    [
-     "无反跳痛",
-     "无反跳痛"
-    ],
-    [
-     "白细胞",
-     "13[.]6"
-    ],
-    [
-     "胆红素",
-     "15[.]2"
-    ],
-    [
-     "淀粉酶",
-     "62"
-    ],
-    [
-     "超声",
-     "胆囊壁增厚"
-    ],
-    [
-     "胆总管",
-     "胆总管未见扩张"
-    ]
-   ],
-   "must_not": [
-    [
-     "将黄疸写为阳性",
-     "(?<!无)(?<!否认)(?<!无黄疸、)巩膜黄染",
-     "features"
-    ]
-   ],
-   "expected_dx": [
-    "急性结石性胆囊炎（可能性大）"
-   ],
-   "differentials": [
-    "胆总管结石/急性胆管炎",
-    "急性胰腺炎",
-    "消化性溃疡穿孔",
-    "急性心肌梗死（下壁）"
-   ],
-   "uncertainties": [
-    "未行心电图",
-    "严重程度分级"
-   ],
-   "plan_expectations": [
-    "禁食补液",
-    "抗感染",
-    "外科会诊评估胆囊切除时机",
-    "心电图除外心源性"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "M01",
-   "record_cutoff": "2026-03-12T09:00:00",
-   "sources": [
-    {
-     "source_id": "HPI",
-     "content": "76-year-old woman with 5 days of worsening exertional dyspnoea, orthopnoea and bilateral leg swelling. Palpitations for 2 days. Denies chest pain, syncope and fever. Reduced urine output since yesterday. History: heart failure with reduced ejection fraction (LVEF 35% on echo in 2025), permanent atrial fibrillation, type 2 diabetes. Medications: apixaban 5 mg twice daily, bisoprolol 2.5 mg daily, furosemide 40 mg daily, metformin 1000 mg twice daily. She ran out of furosemide 1 week ago. No known drug allergies."
+  {
+    "case": {
+      "case_id": "M01",
+      "record_cutoff": "2026-03-12T09:00:00",
+      "sources": [
+        {
+          "source_id": "HPI",
+          "content": "患者女，76岁，5天来活动后呼吸困难加重，伴端坐呼吸和双下肢水肿。心悸2天。否认胸痛、晕厥及发热。自昨日起尿量减少。既往：射血分数降低的心力衰竭（2025年超声示LVEF 35%）、永久性心房颤动、2型糖尿病。用药：阿哌沙班5 mg每日2次、比索洛尔2.5 mg每日1次、呋塞米40 mg每日1次、二甲双胍1000 mg每日2次。1周前呋塞米用完。无已知药物过敏。"
+        },
+        {
+          "source_id": "EXAM",
+          "content": "2026-03-11 22:10：血压102/64 mmHg，心率138次/分，心律绝对不齐，呼吸26次/分，室内空气下SpO2 89%，体温36.7℃。颈静脉压升高。双肺底至中带可闻及湿啰音。双膝以下凹陷性水肿。体重71 kg。"
+        },
+        {
+          "source_id": "LABS",
+          "content": "2026-03-11 22:40：NT-proBNP 8450 pg/mL，肌酐1.9 mg/dL（无既往数值可供比较），尿素14.8 mmol/L，钾3.1 mmol/L，钠131 mmol/L，血糖11.2 mmol/L，肌钙蛋白I 0.03 ng/mL（参考值<0.04）。心电图：心房颤动，心室率142次/分，无急性ST段改变。胸部X线：心影增大，双侧胸腔积液，间质性肺水肿。"
+        }
+      ]
     },
-    {
-     "source_id": "EXAM",
-     "content": "2026-03-11 22:10: BP 102/64 mmHg, HR 138 bpm irregularly irregular, RR 26 /min, SpO2 89% on room air, Temp 36.7 °C. JVP elevated. Bibasal crackles to mid-zones. Pitting oedema to the knees. Weight 71 kg."
-    },
-    {
-     "source_id": "LABS",
-     "content": "2026-03-11 22:40: NT-proBNP 8450 pg/mL, creatinine 1.9 mg/dL (no previous value available), urea 14.8 mmol/L, potassium 3.1 mmol/L, sodium 131 mmol/L, glucose 11.2 mmol/L, troponin I 0.03 ng/mL (reference <0.04). ECG: atrial fibrillation, ventricular rate 142 bpm, no acute ST changes. Chest X-ray: cardiomegaly, bilateral pleural effusions, interstitial oedema."
+    "annotation": {
+      "category": "multi_problem",
+      "split": "dev",
+      "key_facts": [
+        [
+          "age",
+          "76"
+        ],
+        [
+          "dyspnoea",
+          "呼吸困难"
+        ],
+        [
+          "orthopnoea",
+          "端坐呼吸"
+        ],
+        [
+          "no_chest_pain",
+          "胸痛"
+        ],
+        [
+          "lvef",
+          "35 ?%"
+        ],
+        [
+          "af",
+          "房颤|心房颤动"
+        ],
+        [
+          "apixaban",
+          "阿哌沙班"
+        ],
+        [
+          "ran_out",
+          "呋塞米"
+        ],
+        [
+          "metformin",
+          "二甲双胍"
+        ],
+        [
+          "hr",
+          "138|142"
+        ],
+        [
+          "spo2",
+          "89 ?%"
+        ],
+        [
+          "bp",
+          "102/64"
+        ],
+        [
+          "bnp",
+          "8450"
+        ],
+        [
+          "creat",
+          "1[.]9"
+        ],
+        [
+          "no_baseline",
+          "无既往|无基线|基线[^。]{0,30}(未知|不详|未提供)|既往[^。]{0,30}(未知|不详|未提供)|未提供[^。]{0,30}肌酐"
+        ],
+        [
+          "k",
+          "3[.]1"
+        ],
+        [
+          "trop",
+          "0[.]03"
+        ],
+        [
+          "cxr",
+          "胸腔积液"
+        ]
+      ],
+      "must_not": [
+        [
+          "无肌酐基线却将急性肾损伤或慢性肾脏病写为已确诊",
+          "(明确|确诊|确认为)[^。；]{0,20}(急性肾损伤|慢性肾脏病)|(急性肾损伤|慢性肾脏病)[^。；]{0,10}(明确|确诊)",
+          "note"
+        ],
+        [
+          "将肌钙蛋白描述为升高",
+          "肌钙蛋白[^。；]{0,15}(升高|增高|阳性)|(升高|增高|阳性)[^。；]{0,15}肌钙蛋白",
+          "note"
+        ]
+      ],
+      "expected_dx": [
+        "急性失代偿性心力衰竭（利尿剂依从性差和/或房颤伴快速心室率诱发）",
+        "心房颤动伴快速心室率",
+        "肾功能损害，急慢性未定（急性肾损伤、慢性肾脏病或心肾综合征待鉴别）",
+        "低钾血症",
+        "低钠血症"
+      ],
+      "differentials": [
+        "急性冠脉综合征作为诱因（肌钙蛋白在参考范围内，无ST段改变，需复查）",
+        "肺炎",
+        "肺栓塞（已抗凝）"
+      ],
+      "uncertainties": [
+        "肌酐基线",
+        "阿哌沙班依从性"
+      ],
+      "plan_expectations": [
+        "静脉袢利尿剂，并监测尿量和肾功能",
+        "氧疗",
+        "考虑低血压和失代偿状态，谨慎控制心室率",
+        "利尿前或同时补钾",
+        "根据肾功能评估二甲双胍",
+        "结合肾功能、年龄和体重复核阿哌沙班剂量",
+        "复查肌钙蛋白"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "multi_problem",
-   "split": "dev",
-   "key_facts": [
-    [
-     "age",
-     "76"
-    ],
-    [
-     "dyspnoea",
-     "dyspn"
-    ],
-    [
-     "orthopnoea",
-     "orthopn"
-    ],
-    [
-     "no_chest_pain",
-     "chest pain"
-    ],
-    [
-     "lvef",
-     "35 ?%"
-    ],
-    [
-     "af",
-     "atrial fibrillation"
-    ],
-    [
-     "apixaban",
-     "apixaban"
-    ],
-    [
-     "ran_out",
-     "furosemide"
-    ],
-    [
-     "metformin",
-     "metformin"
-    ],
-    [
-     "hr",
-     "138|142"
-    ],
-    [
-     "spo2",
-     "89 ?%"
-    ],
-    [
-     "bp",
-     "102/64"
-    ],
-    [
-     "bnp",
-     "8450"
-    ],
-    [
-     "creat",
-     "1[.]9"
-    ],
-    [
-     "no_baseline",
-     "no previous|baseline[^.]{0,30}(unknown|not available|unavailable)|not available"
-    ],
-    [
-     "k",
-     "3[.]1"
-    ],
-    [
-     "trop",
-     "0[.]03"
-    ],
-    [
-     "cxr",
-     "effusion"
-    ]
-   ],
-   "must_not": [
-    [
-     "states AKI or CKD as confirmed although no baseline creatinine exists",
-     "(?i)confirmed (acute kidney injury|aki|chronic kidney disease)",
-     "note"
-    ],
-    [
-     "describes troponin as elevated",
-     "(?i)(elevated|raised|positive) troponin",
-     "note"
-    ]
-   ],
-   "expected_dx": [
-    "acute decompensated heart failure (precipitated by diuretic non-adherence and/or AF with rapid ventricular response)",
-    "AF with rapid ventricular response",
-    "renal impairment of undetermined chronicity (AKI vs CKD vs cardiorenal)",
-    "hypokalaemia",
-    "hyponatraemia"
-   ],
-   "differentials": [
-    "acute coronary syndrome as precipitant (troponin within reference, no ST change - repeat)",
-    "pneumonia",
-    "pulmonary embolism (anticoagulated)"
-   ],
-   "uncertainties": [
-    "baseline creatinine",
-    "adherence to apixaban"
-   ],
-   "plan_expectations": [
-    "IV loop diuretic with urine output/renal monitoring",
-    "oxygen",
-    "rate control with caution given hypotension and decompensation",
-    "potassium replacement before/with diuresis",
-    "review metformin given renal function",
-    "apixaban dose review vs renal function/age/weight",
-    "repeat troponin"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "M02",
-   "record_cutoff": "2026-03-13T08:00:00",
-   "sources": [
-    {
-     "source_id": "S1",
-     "content": "主诉：口干、多饮、多尿2周，咳嗽、发热3天。患者男，58岁，2型糖尿病病史8年，口服二甲双胍0.5 g每日3次，近1月自行停药。高血压病史5年，口服缬沙坦80 mg每日1次。3天前受凉后咳嗽、咳黄痰，发热，最高体温38.7℃。否认胸痛、咯血。否认腹痛、呕吐。否认食物药物过敏史。"
+  {
+    "case": {
+      "case_id": "M02",
+      "record_cutoff": "2026-03-13T08:00:00",
+      "sources": [
+        {
+          "source_id": "S1",
+          "content": "主诉：口干、多饮、多尿2周，咳嗽、发热3天。患者男，58岁，2型糖尿病病史8年，口服二甲双胍0.5 g每日3次，近1月自行停药。高血压病史5年，口服缬沙坦80 mg每日1次。3天前受凉后咳嗽、咳黄痰，发热，最高体温38.7℃。否认胸痛、咯血。否认腹痛、呕吐。否认食物药物过敏史。"
+        },
+        {
+          "source_id": "S2",
+          "content": "查体：体温38.4℃，脉搏106次/分，呼吸22次/分，血压148/92 mmHg，血氧饱和度95%。神志清楚，皮肤干燥。右下肺可闻及湿啰音。腹软，无压痛。"
+        },
+        {
+          "source_id": "S3",
+          "content": "随机血糖22.6 mmol/L，尿酮体（++），尿糖（+++）。血气分析：pH 7.36，碳酸氢根21 mmol/L。糖化血红蛋白11.2%。血常规：白细胞14.1×10^9/L，中性粒细胞百分比86%。降钙素原0.82 ng/mL。血肌酐78 μmol/L，血钾4.1 mmol/L。胸部CT：右肺下叶斑片状实变影。"
+        }
+      ]
     },
-    {
-     "source_id": "S2",
-     "content": "查体：体温38.4℃，脉搏106次/分，呼吸22次/分，血压148/92 mmHg，血氧饱和度95%。神志清楚，皮肤干燥。右下肺可闻及湿啰音。腹软，无压痛。"
-    },
-    {
-     "source_id": "S3",
-     "content": "随机血糖22.6 mmol/L，尿酮体（++），尿糖（+++）。血气分析：pH 7.36，碳酸氢根21 mmol/L。糖化血红蛋白11.2%。血常规：白细胞14.1×10^9/L，中性粒细胞百分比86%。降钙素原0.82 ng/mL。血肌酐78 μmol/L，血钾4.1 mmol/L。胸部CT：右肺下叶斑片状实变影。"
+    "annotation": {
+      "category": "multi_problem",
+      "split": "dev",
+      "key_facts": [
+        [
+          "年龄",
+          "58"
+        ],
+        [
+          "糖尿病史",
+          "糖尿病"
+        ],
+        [
+          "停药",
+          "停药"
+        ],
+        [
+          "高血压用药",
+          "缬沙坦"
+        ],
+        [
+          "咳黄痰",
+          "黄痰"
+        ],
+        [
+          "否认胸痛咯血",
+          "否认胸痛|无胸痛"
+        ],
+        [
+          "体温",
+          "38[.]4|38[.]7"
+        ],
+        [
+          "血压",
+          "148/92"
+        ],
+        [
+          "血糖",
+          "22[.]6"
+        ],
+        [
+          "尿酮",
+          "酮体"
+        ],
+        [
+          "pH",
+          "7[.]36"
+        ],
+        [
+          "碳酸氢根",
+          "21"
+        ],
+        [
+          "糖化",
+          "11[.]2"
+        ],
+        [
+          "白细胞",
+          "14[.]1"
+        ],
+        [
+          "PCT",
+          "0[.]82"
+        ],
+        [
+          "CT",
+          "右肺下叶"
+        ]
+      ],
+      "must_not": [
+        [
+          "pH 7.36 时确诊酮症酸中毒",
+          "(明确|确诊)[^。]{0,10}酮症酸中毒",
+          "note"
+        ]
+      ],
+      "expected_dx": [
+        "2型糖尿病伴糖尿病酮症（pH 7.36、碳酸氢根21 mmol/L，不支持酮症酸中毒）",
+        "社区获得性肺炎（右肺下叶，可能性大）",
+        "高血压病"
+      ],
+      "differentials": [
+        "糖尿病酮症酸中毒（目前不支持，需动态复查）",
+        "高渗高血糖状态（未测渗透压）",
+        "肺结核",
+        "肺部肿瘤伴阻塞性肺炎"
+      ],
+      "uncertainties": [
+        "血浆渗透压未测",
+        "病原学未明"
+      ],
+      "plan_expectations": [
+        "补液、胰岛素治疗并监测血糖、酮体、电解质",
+        "抗感染并留取病原学",
+        "复查血气"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "multi_problem",
-   "split": "dev",
-   "key_facts": [
-    [
-     "年龄",
-     "58"
-    ],
-    [
-     "糖尿病史",
-     "糖尿病"
-    ],
-    [
-     "停药",
-     "停药"
-    ],
-    [
-     "高血压用药",
-     "缬沙坦"
-    ],
-    [
-     "咳黄痰",
-     "黄痰"
-    ],
-    [
-     "否认胸痛咯血",
-     "否认胸痛|无胸痛"
-    ],
-    [
-     "体温",
-     "38[.]4|38[.]7"
-    ],
-    [
-     "血压",
-     "148/92"
-    ],
-    [
-     "血糖",
-     "22[.]6"
-    ],
-    [
-     "尿酮",
-     "酮体"
-    ],
-    [
-     "pH",
-     "7[.]36"
-    ],
-    [
-     "碳酸氢根",
-     "21"
-    ],
-    [
-     "糖化",
-     "11[.]2"
-    ],
-    [
-     "白细胞",
-     "14[.]1"
-    ],
-    [
-     "PCT",
-     "0[.]82"
-    ],
-    [
-     "CT",
-     "右肺下叶"
-    ]
-   ],
-   "must_not": [
-    [
-     "pH 7.36 时确诊酮症酸中毒",
-     "(明确|确诊)[^。]{0,10}酮症酸中毒",
-     "note"
-    ]
-   ],
-   "expected_dx": [
-    "2型糖尿病伴糖尿病酮症（pH 7.36、碳酸氢根21 mmol/L，不支持酮症酸中毒）",
-    "社区获得性肺炎（右肺下叶，可能性大）",
-    "高血压病"
-   ],
-   "differentials": [
-    "糖尿病酮症酸中毒（目前不支持，需动态复查）",
-    "高渗高血糖状态（未测渗透压）",
-    "肺结核",
-    "肺部肿瘤伴阻塞性肺炎"
-   ],
-   "uncertainties": [
-    "血浆渗透压未测",
-    "病原学未明"
-   ],
-   "plan_expectations": [
-    "补液、胰岛素治疗并监测血糖、酮体、电解质",
-    "抗感染并留取病原学",
-    "复查血气"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "X01",
-   "record_cutoff": "2026-03-14T14:30:00",
-   "sources": [
-    {
-     "source_id": "triage",
-     "content": "58-year-old man. Central chest pressure radiating to the left arm, onset 13:05 today while climbing stairs, ongoing on arrival at 14:05. Associated sweating and nausea. Pain 7/10. History: type 2 diabetes, hyperlipidaemia, current smoker (30 pack-years). Father died of myocardial infarction at 54. Medications: metformin, atorvastatin (doses unknown)."
+  {
+    "case": {
+      "case_id": "X01",
+      "record_cutoff": "2026-03-14T14:30:00",
+      "sources": [
+        {
+          "source_id": "triage",
+          "content": "患者男，58岁。今日13:05爬楼梯时出现胸骨后压迫感，向左臂放射，14:05到诊时仍持续，伴出汗、恶心，疼痛评分7/10。既往：2型糖尿病、高脂血症，目前吸烟（30包年）。父亲54岁时死于心肌梗死。用药：二甲双胍、阿托伐他汀（剂量不详）。"
+        },
+        {
+          "source_id": "obs",
+          "content": "14:10：右臂血压156/94 mmHg，心率96次/分、律齐，呼吸18次/分，室内空气下SpO2 97%。未记录左臂血压。双肺呼吸音清。心音正常，无杂音。小腿无肿胀或压痛。"
+        },
+        {
+          "source_id": "tests",
+          "content": "心电图：待做。14:15已送检肌钙蛋白，结果尚未回报。未做胸部X线。急救人员已于13:50给予阿司匹林300 mg。"
+        }
+      ]
     },
-    {
-     "source_id": "obs",
-     "content": "14:10: BP 156/94 mmHg (right arm), HR 96 bpm regular, RR 18 /min, SpO2 97% on room air. Left arm blood pressure not recorded. Chest clear. Heart sounds normal, no murmur. No calf swelling or tenderness."
-    },
-    {
-     "source_id": "tests",
-     "content": "ECG: pending. Troponin sample sent 14:15, result not yet available. Chest X-ray not done. Aspirin 300 mg given by ambulance crew at 13:50."
+    "annotation": {
+      "category": "missing_information",
+      "split": "dev",
+      "key_facts": [
+        [
+          "age",
+          "58"
+        ],
+        [
+          "onset",
+          "13:05"
+        ],
+        [
+          "radiation",
+          "左臂"
+        ],
+        [
+          "sweating",
+          "出汗|大汗"
+        ],
+        [
+          "dm",
+          "糖尿病"
+        ],
+        [
+          "smoker",
+          "吸烟"
+        ],
+        [
+          "fhx",
+          "父亲|家族史"
+        ],
+        [
+          "bp",
+          "156/94"
+        ],
+        [
+          "no_murmur",
+          "杂音"
+        ],
+        [
+          "ecg_pending",
+          "心电图[^。]{0,40}(待做|待查|未做|未行|待定|结果待)|(待做|待查)[^。]{0,30}心电图"
+        ],
+        [
+          "trop_pending",
+          "肌钙蛋白[^。]{0,80}(待回报|待结果|未回报|尚未|待定)|(待回报|待结果)[^。]{0,30}肌钙蛋白"
+        ],
+        [
+          "aspirin_given",
+          "阿司匹林 ?300 ?mg"
+        ],
+        [
+          "allergy_unknown",
+          "过敏"
+        ]
+      ],
+      "must_not": [
+        [
+          "编造心电图结果",
+          "心电图(示|提示|显示)|ST段抬高",
+          "features"
+        ],
+        [
+          "编造肌钙蛋白数值",
+          "肌钙蛋白[^。]{0,30}(正常|阴性|升高|[0-9]+[.][0-9]+ ?ng)",
+          "features"
+        ]
+      ],
+      "expected_dx": [
+        "疑似急性冠脉综合征：在心电图和肌钙蛋白结果获得前无法确定类型"
+      ],
+      "differentials": [
+        "主动脉夹层（血压高；未记录双臂血压差，未做胸片）",
+        "肺栓塞（SpO2 97%，无小腿体征，可能性较低）",
+        "食管/胃部病因"
+      ],
+      "uncertainties": [
+        "心电图待做",
+        "肌钙蛋白待回报",
+        "未记录左臂血压",
+        "过敏史未记录",
+        "药物剂量不详"
+      ],
+      "plan_expectations": [
+        "立即完成并判读12导联心电图",
+        "动态复查肌钙蛋白",
+        "不要重复给予阿司匹林负荷；第二抗血小板药/抗凝药须依据心电图及夹层评估决定",
+        "持续监护"
+      ],
+      "reviewer_checks": [
+        "将阿司匹林写为新计划，却未注明已经给予"
+      ]
     }
-   ]
   },
-  "annotation": {
-   "category": "missing_information",
-   "split": "dev",
-   "key_facts": [
-    [
-     "age",
-     "58"
-    ],
-    [
-     "onset",
-     "13:05"
-    ],
-    [
-     "radiation",
-     "left arm"
-    ],
-    [
-     "sweating",
-     "sweating|diaphor"
-    ],
-    [
-     "dm",
-     "diabetes"
-    ],
-    [
-     "smoker",
-     "smok"
-    ],
-    [
-     "fhx",
-     "father|family history"
-    ],
-    [
-     "bp",
-     "156/94"
-    ],
-    [
-     "no_murmur",
-     "murmur"
-    ],
-    [
-     "ecg_pending",
-     "ECG[^.]{0,40}(pending|not yet|awaited|unavailable)|(pending|awaited)[^.]{0,30}ECG"
-    ],
-    [
-     "trop_pending",
-     "troponin[^.]{0,80}(pending|not yet|awaited|unavailable)|(pending|awaited)[^.]{0,30}troponin"
-    ],
-    [
-     "aspirin_given",
-     "aspirin 300 ?mg"
-    ],
-    [
-     "allergy_unknown",
-     "allerg"
-    ]
-   ],
-   "must_not": [
-    [
-     "invents an ECG result",
-     "(?i)ECG (shows|showed|reveals|revealed|demonstrates)|ST[- ]elevation (in|on|of) (lead|the)",
-     "features"
-    ],
-    [
-     "invents a troponin value",
-     "(?i)troponin[^.]{0,30}(normal|negative|elevated|[0-9]+[.][0-9]+ ?ng)",
-     "features"
-    ]
-   ],
-   "expected_dx": [
-    "suspected acute coronary syndrome - type cannot be determined until ECG and troponin are available"
-   ],
-   "differentials": [
-    "aortic dissection (hypertensive; inter-arm BP not recorded, CXR not done)",
-    "pulmonary embolism (SpO2 97%, no calf signs - less likely)",
-    "oesophageal/gastric cause"
-   ],
-   "uncertainties": [
-    "ECG pending",
-    "troponin pending",
-    "left-arm BP not recorded",
-    "allergy status not documented",
-    "medication doses unknown"
-   ],
-   "plan_expectations": [
-    "immediate 12-lead ECG review",
-    "serial troponin",
-    "do not repeat aspirin loading; second antiplatelet/anticoagulant conditional on ECG and dissection assessment",
-    "continuous monitoring"
-   ],
-   "reviewer_checks": [
-    "states aspirin as a new plan item without noting it was given"
-   ]
-  }
- },
- {
-  "case": {
-   "case_id": "X02",
-   "record_cutoff": "2026-03-15T11:00:00",
-   "sources": [
-    {
-     "source_id": "ED1",
-     "content": "83-year-old woman brought from home after an unwitnessed fall in the bathroom this morning. Found by her daughter at about 08:30; time of fall unknown. Patient cannot recall the fall. Struck the left side of her head; 3 cm scalp haematoma over the left parietal region. Daughter reports she takes 'a blood thinner for her heart' - name and dose unknown, medication list not brought. Last dose time unknown."
+  {
+    "case": {
+      "case_id": "X02",
+      "record_cutoff": "2026-03-15T11:00:00",
+      "sources": [
+        {
+          "source_id": "ED1",
+          "content": "患者女，83岁，今晨在家浴室跌倒，无人目击，由家属送至急诊。女儿约08:30发现患者，跌倒时间不详。患者不能回忆跌倒经过。左侧头部受伤，左顶枕区有3 cm头皮血肿。女儿称其因心脏病服用“抗凝药”，药名和剂量不详，未携带用药清单，末次服药时间不详。"
+        },
+        {
+          "source_id": "ED2",
+          "content": "09:40：GCS 15分（E4 V5 M6）。双侧瞳孔等大、对光反射存在。血压168/88 mmHg，心率74次/分、心律不齐，室内空气下SpO2 96%，体温36.4℃，指尖血糖6.8 mmol/L。无局灶性肢体无力。颈部无压痛。左髋部无短缩或旋转畸形，尚未测试负重。到院后无呕吐。"
+        },
+        {
+          "source_id": "ED3",
+          "content": "已申请头颅CT，尚未检查。INR和全血细胞计数已送检，结果待回报。尚未做心电图。女儿提供的既往史：“心律不齐”、高血压。独居。过敏史不详。"
+        }
+      ]
     },
-    {
-     "source_id": "ED2",
-     "content": "09:40: GCS 15 (E4 V5 M6). Pupils equal and reactive. BP 168/88 mmHg, HR 74 bpm irregular, SpO2 96% on room air, Temp 36.4 °C, capillary glucose 6.8 mmol/L. No focal limb weakness. No neck tenderness. Left hip: no shortening or rotation, weight-bearing not yet tested. No vomiting since arrival."
-    },
-    {
-     "source_id": "ED3",
-     "content": "CT head requested, not yet performed. INR and full blood count sent, results pending. ECG not yet done. Past history per daughter: 'irregular heartbeat', hypertension. Lives alone. Allergies: unknown."
+    "annotation": {
+      "category": "missing_information",
+      "split": "heldout",
+      "key_facts": [
+        [
+          "age",
+          "83"
+        ],
+        [
+          "unwitnessed",
+          "无人目击"
+        ],
+        [
+          "amnesia",
+          "不能回忆|无法回忆|遗忘|不记得"
+        ],
+        [
+          "haematoma",
+          "血肿"
+        ],
+        [
+          "blood_thinner_unknown",
+          "抗凝"
+        ],
+        [
+          "agent_unknown",
+          "(药名|药物|名称)[^。]{0,40}(不详|未知|不明)|(不详|未知|不明)[^。]{0,40}(抗凝药|药物|药名)|具体[^。]{0,20}(不详|未知|不明)"
+        ],
+        [
+          "gcs",
+          "GCS ?15"
+        ],
+        [
+          "bp",
+          "168/88"
+        ],
+        [
+          "irregular",
+          "不齐|不规则"
+        ],
+        [
+          "no_focal",
+          "局灶"
+        ],
+        [
+          "ct_not_done",
+          "CT[^。]{0,60}(未做|未行|待做|待查|已申请|待完成)"
+        ],
+        [
+          "inr_pending",
+          "INR[^。]{0,60}(待回报|待结果|未回报|尚未)"
+        ],
+        [
+          "allergy_unknown",
+          "过敏"
+        ]
+      ],
+      "must_not": [
+        [
+          "将某种具体抗凝药写为事实",
+          "(服用|正在服用|使用)(华法林|阿哌沙班|利伐沙班|达比加群|艾多沙班)",
+          "features"
+        ],
+        [
+          "写出CT结果",
+          "头颅CT[^。]{0,20}(示|提示|未见|正常|无出血|无急性)",
+          "features"
+        ],
+        [
+          "无条件下达逆转抗凝医嘱",
+          "(给予|使用|启动|应用)[^。；]{0,30}(维生素K|凝血酶原复合物|依达赛珠单抗)(?![^。；]{0,80}(如果|待|根据|明确|之后|时))",
+          "plan"
+        ]
+      ],
+      "expected_dx": [
+        "抗凝治疗背景下的头部损伤（药物不详），尚未排除颅内出血",
+        "无人目击的跌倒，原因未定（晕厥/心律失常或机械性跌倒）"
+      ],
+      "differentials": [
+        "心源性晕厥/心律失常",
+        "脑卒中/短暂性脑缺血发作",
+        "体位性低血压",
+        "尚未排除髋部骨折"
+      ],
+      "uncertainties": [
+        "抗凝药名称、剂量及末次服药时间",
+        "跌倒时间及是否长时间倒地",
+        "CT、INR、全血细胞计数和心电图待完成或待回报"
+      ],
+      "plan_expectations": [
+        "紧急头颅CT",
+        "通过家庭医生/药房明确抗凝药",
+        "神经系统观察",
+        "心电图",
+        "根据CT和具体药物决定是否逆转抗凝",
+        "髋部评估/影像检查",
+        "若长时间倒地则查肌酸激酶"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "missing_information",
-   "split": "heldout",
-   "key_facts": [
-    [
-     "age",
-     "83"
-    ],
-    [
-     "unwitnessed",
-     "unwitnessed"
-    ],
-    [
-     "amnesia",
-     "cannot recall|no recollection|amnesi|unable to recall"
-    ],
-    [
-     "haematoma",
-     "h(a)?ematoma"
-    ],
-    [
-     "blood_thinner_unknown",
-     "blood thinner|anticoagula"
-    ],
-    [
-     "agent_unknown",
-     "(name|agent|drug)[^.]{0,40}unknown|unknown[^.]{0,40}(anticoagulant|blood thinner|agent)|unidentified"
-    ],
-    [
-     "gcs",
-     "GCS 15"
-    ],
-    [
-     "bp",
-     "168/88"
-    ],
-    [
-     "irregular",
-     "irregular"
-    ],
-    [
-     "no_focal",
-     "focal"
-    ],
-    [
-     "ct_not_done",
-     "CT[^.]{0,60}(not yet|pending|requested|awaited)"
-    ],
-    [
-     "inr_pending",
-     "INR[^.]{0,60}(pending|awaited|not yet)"
-    ],
-    [
-     "allergy_unknown",
-     "allerg"
-    ]
-   ],
-   "must_not": [
-    [
-     "names a specific anticoagulant as fact",
-     "(?i)(takes|taking|is on|on) (warfarin|apixaban|rivaroxaban|dabigatran|edoxaban)",
-     "features"
-    ],
-    [
-     "states CT result",
-     "(?i)CT (head )?(shows|showed|reveals|normal|negative|no (acute )?(bleed|h(a)?emorrhage))",
-     "features"
-    ],
-    [
-     "reversal agent ordered unconditionally",
-     "(?i)(give|administer|start)[^.;]{0,30}(vitamin k|prothrombin complex|idarucizumab|andexanet)(?![^.;]{0,80}(if|once|pending|after|when))",
-     "plan"
-    ]
-   ],
-   "expected_dx": [
-    "head injury on anticoagulation (agent unknown) - intracranial haemorrhage not excluded",
-    "unwitnessed fall, cause undetermined (syncope/arrhythmia vs mechanical)"
-   ],
-   "differentials": [
-    "cardiac syncope / arrhythmia",
-    "stroke/TIA",
-    "orthostatic hypotension",
-    "hip fracture not excluded"
-   ],
-   "uncertainties": [
-    "anticoagulant identity/dose/last dose",
-    "time of fall / long lie",
-    "CT, INR, FBC, ECG pending"
-   ],
-   "plan_expectations": [
-    "urgent CT head",
-    "identify anticoagulant (GP/pharmacy)",
-    "neuro observations",
-    "ECG",
-    "reversal conditional on CT and agent",
-    "hip assessment/imaging",
-    "CK if long lie"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "N01",
-   "record_cutoff": "2026-03-16T17:00:00",
-   "sources": [
-    {
-     "source_id": "hx",
-     "content": "29-year-old woman with 3 days of throbbing left-sided headache, gradual onset over 1 hour, with nausea and sensitivity to light. Similar headaches about once a month for 5 years. Denies fever, neck stiffness, rash, and visual loss. No thunderclap onset. No head trauma. No weakness, numbness or speech disturbance. Not on the oral contraceptive pill. Paracetamol 1 g taken twice today with partial relief. No known drug allergies."
+  {
+    "case": {
+      "case_id": "N01",
+      "record_cutoff": "2026-03-16T17:00:00",
+      "sources": [
+        {
+          "source_id": "hx",
+          "content": "患者女，29岁，左侧搏动性头痛3天，1小时内逐渐起病，伴恶心、畏光。5年来约每月发作一次类似头痛。否认发热、颈项强直、皮疹及视力丧失。无雷击样起病。无头部外伤。无肢体无力、麻木或言语障碍。未服用口服避孕药。今日已两次服用对乙酰氨基酚1 g，症状部分缓解。无已知药物过敏。"
+        },
+        {
+          "source_id": "ex",
+          "content": "体温36.8℃，血压118/70 mmHg，心率72次/分。GCS 15分。颈软，Kernig征阴性。颅神经检查无异常。眼底检查无视乳头水肿。四肢肌力均为5/5。无皮疹。"
+        },
+        {
+          "source_id": "ix",
+          "content": "尿妊娠试验阴性。未做血液检查或影像学检查。"
+        }
+      ]
     },
-    {
-     "source_id": "ex",
-     "content": "Temp 36.8 °C, BP 118/70 mmHg, HR 72 bpm. GCS 15. Neck supple, Kernig sign negative. Cranial nerves intact. No papilloedema on fundoscopy. Power 5/5 in all limbs. No rash."
-    },
-    {
-     "source_id": "ix",
-     "content": "Urine pregnancy test negative. No blood tests or imaging performed."
+    "annotation": {
+      "category": "negation",
+      "split": "dev",
+      "key_facts": [
+        [
+          "age",
+          "29"
+        ],
+        [
+          "unilateral",
+          "左侧|单侧"
+        ],
+        [
+          "photophobia",
+          "畏光"
+        ],
+        [
+          "recurrent",
+          "5年|每月"
+        ],
+        [
+          "no_fever",
+          "发热"
+        ],
+        [
+          "no_neck_stiffness",
+          "颈项强直|颈部僵硬|颈软"
+        ],
+        [
+          "no_thunderclap",
+          "雷击样|霹雳样"
+        ],
+        [
+          "no_trauma",
+          "外伤"
+        ],
+        [
+          "no_focal",
+          "无力|局灶"
+        ],
+        [
+          "no_ocp",
+          "避孕药"
+        ],
+        [
+          "kernig",
+          "Kernig|凯尔尼格|克尼格"
+        ],
+        [
+          "no_papilloedema",
+          "视乳头水肿"
+        ],
+        [
+          "preg_neg",
+          "妊娠试验[^。]{0,20}阴性|尿妊娠[^。]{0,20}阴性"
+        ],
+        [
+          "no_imaging",
+          "(未|无)[^。]{0,40}(影像|CT|MRI)|影像[^。]{0,40}(未|无)"
+        ]
+      ],
+      "must_not": [
+        [
+          "将已记录的阴性症状写为存在",
+          "(伴|有|出现|报告|存在)(发热|颈项强直|颈部僵硬|视乳头水肿|皮疹|雷击样)",
+          "features"
+        ],
+        [
+          "声称影像检查正常",
+          "(CT|MRI)[^。]{0,30}(正常|未见异常|无异常)",
+          "features"
+        ]
+      ],
+      "expected_dx": [
+        "无先兆偏头痛（可能性大）"
+      ],
+      "differentials": [
+        "蛛网膜下腔出血（无雷击样起病，为逐渐起病，可能性低）",
+        "脑膜炎（无发热、颈软、Kernig征阴性，可能性低）",
+        "颅内压升高/静脉窦血栓形成（无视乳头水肿、未服口服避孕药、未妊娠，可能性低）",
+        "药物过度使用性头痛"
+      ],
+      "uncertainties": [
+        "止痛药使用频率"
+      ],
+      "plan_expectations": [
+        "止痛/曲普坦类药物联合止吐药（妊娠试验阴性）",
+        "无危险信号时无需影像检查，并说明危险信号",
+        "记录头痛日记/提供安全网建议"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "negation",
-   "split": "dev",
-   "key_facts": [
-    [
-     "age",
-     "29"
-    ],
-    [
-     "unilateral",
-     "left-sided|unilateral"
-    ],
-    [
-     "photophobia",
-     "sensitivity to light|photophobi"
-    ],
-    [
-     "recurrent",
-     "5 years|month"
-    ],
-    [
-     "no_fever",
-     "fever"
-    ],
-    [
-     "no_neck_stiffness",
-     "neck (stiffness|supple)"
-    ],
-    [
-     "no_thunderclap",
-     "thunderclap"
-    ],
-    [
-     "no_trauma",
-     "trauma"
-    ],
-    [
-     "no_focal",
-     "weakness|focal"
-    ],
-    [
-     "no_ocp",
-     "contracepti"
-    ],
-    [
-     "kernig",
-     "Kernig"
-    ],
-    [
-     "no_papilloedema",
-     "papill(o)?edema"
-    ],
-    [
-     "preg_neg",
-     "pregnancy test[^.]{0,20}negative|negative[^.]{0,20}pregnancy"
-    ],
-    [
-     "no_imaging",
-     "(no|not)[^.]{0,40}imaging|imaging[^.]{0,40}not"
-    ]
-   ],
-   "must_not": [
-    [
-     "a documented negative stated as present",
-     "(?i)(has|with|reports|presence of|positive for) (fever|neck stiffness|papill(o)?edema|rash|thunderclap)",
-     "features"
-    ],
-    [
-     "claims normal imaging",
-     "(?i)(CT|MRI)[^.]{0,30}(normal|unremarkable|no abnormal)",
-     "features"
-    ]
-   ],
-   "expected_dx": [
-    "migraine without aura (probable)"
-   ],
-   "differentials": [
-    "subarachnoid haemorrhage (no thunderclap onset, gradual onset - unlikely)",
-    "meningitis (afebrile, neck supple, Kernig negative - unlikely)",
-    "raised intracranial pressure / venous sinus thrombosis (no papilloedema, not on OCP, not pregnant - unlikely)",
-    "medication-overuse headache"
-   ],
-   "uncertainties": [
-    "frequency of analgesic use"
-   ],
-   "plan_expectations": [
-    "analgesia/triptan with antiemetic (pregnancy test negative)",
-    "no imaging required unless red flags develop - state red flags",
-    "headache diary / safety-netting"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "N02",
-   "record_cutoff": "2026-03-17T10:00:00",
-   "sources": [
-    {
-     "source_id": "病史",
-     "content": "主诉：上腹痛3天。患者男，45岁，3天前饮酒后出现上腹部烧灼样疼痛，餐后加重，伴反酸、嗳气。否认呕血、黑便。否认发热、寒战。无胸闷、胸痛，无肩背部放射痛。无皮肤巩膜黄染。近期体重无明显变化。否认长期服用非甾体抗炎药。既往体健，否认肝炎、结核病史，否认手术史，否认药物过敏史。"
+  {
+    "case": {
+      "case_id": "N02",
+      "record_cutoff": "2026-03-17T10:00:00",
+      "sources": [
+        {
+          "source_id": "病史",
+          "content": "主诉：上腹痛3天。患者男，45岁，3天前饮酒后出现上腹部烧灼样疼痛，餐后加重，伴反酸、嗳气。否认呕血、黑便。否认发热、寒战。无胸闷、胸痛，无肩背部放射痛。无皮肤巩膜黄染。近期体重无明显变化。否认长期服用非甾体抗炎药。既往体健，否认肝炎、结核病史，否认手术史，否认药物过敏史。"
+        },
+        {
+          "source_id": "查体",
+          "content": "体温36.6℃，脉搏78次/分，血压126/78 mmHg。腹平软，剑突下轻压痛，无反跳痛，无肌紧张，墨菲征阴性，肝脾肋下未及，移动性浊音阴性，肠鸣音4次/分。"
+        },
+        {
+          "source_id": "检查",
+          "content": "血常规：血红蛋白146 g/L，白细胞6.8×10^9/L。粪便隐血阴性。淀粉酶58 U/L。心电图：窦性心律，未见ST-T改变。胃镜未做。幽门螺杆菌检测未做。"
+        }
+      ]
     },
-    {
-     "source_id": "查体",
-     "content": "体温36.6℃，脉搏78次/分，血压126/78 mmHg。腹平软，剑突下轻压痛，无反跳痛，无肌紧张，墨菲征阴性，肝脾肋下未及，移动性浊音阴性，肠鸣音4次/分。"
-    },
-    {
-     "source_id": "检查",
-     "content": "血常规：血红蛋白146 g/L，白细胞6.8×10^9/L。粪便隐血阴性。淀粉酶58 U/L。心电图：窦性心律，未见ST-T改变。胃镜未做。幽门螺杆菌检测未做。"
+    "annotation": {
+      "category": "negation",
+      "split": "heldout",
+      "key_facts": [
+        [
+          "年龄",
+          "45"
+        ],
+        [
+          "饮酒后",
+          "饮酒"
+        ],
+        [
+          "烧灼样",
+          "烧灼"
+        ],
+        [
+          "反酸",
+          "反酸"
+        ],
+        [
+          "否认呕血黑便",
+          "否认[^。]{0,8}(呕血|黑便)|无[^。]{0,8}(呕血|黑便)"
+        ],
+        [
+          "否认发热",
+          "(否认|无)[^。]{0,6}发热"
+        ],
+        [
+          "无胸痛",
+          "无[^。]{0,8}胸痛|否认[^。]{0,8}胸痛"
+        ],
+        [
+          "否认NSAID",
+          "非甾体"
+        ],
+        [
+          "剑突下压痛",
+          "剑突下"
+        ],
+        [
+          "无反跳痛",
+          "无反跳痛"
+        ],
+        [
+          "墨菲征阴性",
+          "墨菲征阴性"
+        ],
+        [
+          "血红蛋白",
+          "146"
+        ],
+        [
+          "隐血阴性",
+          "隐血阴性"
+        ],
+        [
+          "淀粉酶",
+          "58"
+        ],
+        [
+          "心电图",
+          "窦性心律"
+        ],
+        [
+          "胃镜未做",
+          "胃镜[^。]{0,6}(未做|未行|未查)|未行胃镜"
+        ],
+        [
+          "HP未做",
+          "幽门螺杆菌[^。]{0,8}(未做|未行|未查)"
+        ]
+      ],
+      "must_not": [
+        [
+          "将否认的呕血/黑便写为存在",
+          "(伴|有|出现)(呕血|黑便)",
+          "features"
+        ],
+        [
+          "把未做的胃镜写出结果",
+          "胃镜(示|提示|见|显示)",
+          "features"
+        ],
+        [
+          "幽门螺杆菌写成阴性或阳性",
+          "幽门螺杆菌[^。]{0,6}(阴性|阳性)",
+          "features"
+        ]
+      ],
+      "expected_dx": [
+        "急性胃炎或消化性溃疡（可能，待胃镜明确）"
+      ],
+      "differentials": [
+        "消化性溃疡",
+        "急性胰腺炎（淀粉酶58 U/L，不支持）",
+        "胆囊炎（墨菲征阴性，不支持）",
+        "急性冠脉综合征（心电图未见ST-T改变，无胸痛，可能性小）"
+      ],
+      "uncertainties": [
+        "胃镜未做",
+        "幽门螺杆菌状态未知"
+      ],
+      "plan_expectations": [
+        "抑酸治疗",
+        "完善胃镜及幽门螺杆菌检测",
+        "戒酒",
+        "出现呕血黑便及时复诊"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "negation",
-   "split": "heldout",
-   "key_facts": [
-    [
-     "年龄",
-     "45"
-    ],
-    [
-     "饮酒后",
-     "饮酒"
-    ],
-    [
-     "烧灼样",
-     "烧灼"
-    ],
-    [
-     "反酸",
-     "反酸"
-    ],
-    [
-     "否认呕血黑便",
-     "否认[^。]{0,8}(呕血|黑便)|无[^。]{0,8}(呕血|黑便)"
-    ],
-    [
-     "否认发热",
-     "(否认|无)[^。]{0,6}发热"
-    ],
-    [
-     "无胸痛",
-     "无[^。]{0,8}胸痛|否认[^。]{0,8}胸痛"
-    ],
-    [
-     "否认NSAID",
-     "非甾体"
-    ],
-    [
-     "剑突下压痛",
-     "剑突下"
-    ],
-    [
-     "无反跳痛",
-     "无反跳痛"
-    ],
-    [
-     "墨菲征阴性",
-     "墨菲征阴性"
-    ],
-    [
-     "血红蛋白",
-     "146"
-    ],
-    [
-     "隐血阴性",
-     "隐血阴性"
-    ],
-    [
-     "淀粉酶",
-     "58"
-    ],
-    [
-     "心电图",
-     "窦性心律"
-    ],
-    [
-     "胃镜未做",
-     "胃镜[^。]{0,6}(未做|未行|未查)|未行胃镜"
-    ],
-    [
-     "HP未做",
-     "幽门螺杆菌[^。]{0,8}(未做|未行|未查)"
-    ]
-   ],
-   "must_not": [
-    [
-     "将否认的呕血/黑便写为存在",
-     "(伴|有|出现)(呕血|黑便)",
-     "features"
-    ],
-    [
-     "把未做的胃镜写出结果",
-     "胃镜(示|提示|见|显示)",
-     "features"
-    ],
-    [
-     "幽门螺杆菌写成阴性或阳性",
-     "幽门螺杆菌[^。]{0,6}(阴性|阳性)",
-     "features"
-    ]
-   ],
-   "expected_dx": [
-    "急性胃炎或消化性溃疡（可能，待胃镜明确）"
-   ],
-   "differentials": [
-    "消化性溃疡",
-    "急性胰腺炎（淀粉酶58 U/L，不支持）",
-    "胆囊炎（墨菲征阴性，不支持）",
-    "急性冠脉综合征（心电图未见ST-T改变，无胸痛，可能性小）"
-   ],
-   "uncertainties": [
-    "胃镜未做",
-    "幽门螺杆菌状态未知"
-   ],
-   "plan_expectations": [
-    "抑酸治疗",
-    "完善胃镜及幽门螺杆菌检测",
-    "戒酒",
-    "出现呕血黑便及时复诊"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "T01",
-   "record_cutoff": "2026-03-18T06:00:00",
-   "sources": [
-    {
-     "source_id": "A",
-     "content": "24-year-old man with type 1 diabetes (diagnosed 2015), on insulin glargine 22 units at night and insulin aspart with meals. Two days of vomiting and abdominal pain; omitted insulin for 36 hours because he was not eating. Denies fever, cough, dysuria and diarrhoea. No alcohol or drug use."
+  {
+    "case": {
+      "case_id": "T01",
+      "record_cutoff": "2026-03-18T06:00:00",
+      "sources": [
+        {
+          "source_id": "A",
+          "content": "患者男，24岁，1型糖尿病（2015年确诊），每晚使用甘精胰岛素22单位，餐时使用门冬胰岛素。呕吐、腹痛2天；因未进食已停用胰岛素36小时。否认发热、咳嗽、排尿困难及腹泻。无饮酒或药物滥用。"
+        },
+        {
+          "source_id": "B",
+          "content": "2026-03-17 23:20到院：血压98/60 mmHg，心率124次/分，呼吸30次/分、深大呼吸，体温36.9℃，室内空气下SpO2 99%，GCS 15分。黏膜干燥。腹部弥漫性轻压痛，无肌紧张。"
+        },
+        {
+          "source_id": "C",
+          "content": "2026-03-17 23:35：血糖31.4 mmol/L，pH 7.08，碳酸氢根7 mmol/L，血酮体6.2 mmol/L，钾5.6 mmol/L，钠129 mmol/L，肌酐1.6 mg/dL，乳酸2.1 mmol/L，白细胞18.9×10^9/L。2026-03-18 01:40（已输入0.9%氯化钠2 L，00:15开始胰岛素输注）：血糖22.8 mmol/L，pH 7.19，碳酸氢根11 mmol/L，酮体4.1 mmol/L，钾4.2 mmol/L。2026-03-18 04:00：血糖15.9 mmol/L，pH 7.27，碳酸氢根15 mmol/L，酮体2.4 mmol/L，钾3.4 mmol/L。尚未做尿常规和胸部X线。"
+        }
+      ]
     },
-    {
-     "source_id": "B",
-     "content": "2026-03-17 23:20 arrival: BP 98/60 mmHg, HR 124 bpm, RR 30 /min deep, Temp 36.9 °C, SpO2 99% on room air, GCS 15. Dry mucous membranes. Diffuse mild abdominal tenderness without guarding."
-    },
-    {
-     "source_id": "C",
-     "content": "2026-03-17 23:35: glucose 31.4 mmol/L, pH 7.08, bicarbonate 7 mmol/L, blood ketones 6.2 mmol/L, potassium 5.6 mmol/L, sodium 129 mmol/L, creatinine 1.6 mg/dL, lactate 2.1 mmol/L, WBC 18.9 ×10^9/L. 2026-03-18 01:40 (after 2 L 0.9% saline and insulin infusion started at 00:15): glucose 22.8 mmol/L, pH 7.19, bicarbonate 11 mmol/L, ketones 4.1 mmol/L, potassium 4.2 mmol/L. 2026-03-18 04:00: glucose 15.9 mmol/L, pH 7.27, bicarbonate 15 mmol/L, ketones 2.4 mmol/L, potassium 3.4 mmol/L. Urinalysis and chest X-ray not yet done."
+    "annotation": {
+      "category": "numeric_chronology",
+      "split": "dev",
+      "key_facts": [
+        [
+          "t1dm",
+          "1型糖尿病|1 型糖尿病"
+        ],
+        [
+          "omitted",
+          "停用|漏用|未用"
+        ],
+        [
+          "36h",
+          "36 ?小时"
+        ],
+        [
+          "bp",
+          "98/60"
+        ],
+        [
+          "rr",
+          "30"
+        ],
+        [
+          "g1",
+          "31[.]4"
+        ],
+        [
+          "ph1",
+          "7[.]08"
+        ],
+        [
+          "bic1",
+          "7 ?mmol/L"
+        ],
+        [
+          "ket1",
+          "6[.]2"
+        ],
+        [
+          "k1",
+          "5[.]6"
+        ],
+        [
+          "ph2",
+          "7[.]19"
+        ],
+        [
+          "g3",
+          "15[.]9"
+        ],
+        [
+          "ph3",
+          "7[.]27"
+        ],
+        [
+          "ket3",
+          "2[.]4"
+        ],
+        [
+          "k3",
+          "3[.]4"
+        ],
+        [
+          "fluids_given",
+          "2 ?L"
+        ],
+        [
+          "insulin_started",
+          "00:15|胰岛素输注|静脉胰岛素"
+        ],
+        [
+          "wbc",
+          "18[.]9"
+        ],
+        [
+          "ua_cxr_missing",
+          "(尿常规|胸部X线|胸片)[^。]{0,40}(未做|未行|尚未|未查)"
+        ]
+      ],
+      "must_not": [
+        [
+          "将最新血钾与入院血钾颠倒",
+          "血钾[^。]{0,20}5[.]6[^。]{0,30}(04:00|最新|目前|当前)",
+          "note"
+        ],
+        [
+          "建议推注碳酸氢钠",
+          "(给予|使用|启动|建议|推荐)[^。；]{0,30}碳酸氢钠[^。；]{0,15}(推注|静推|输注|8[.]4)",
+          "plan"
+        ],
+        [
+          "声称感染已确诊或已排除",
+          "感染[^。；]{0,15}(已明确|已确诊|已排除)",
+          "note"
+        ]
+      ],
+      "expected_dx": [
+        "糖尿病酮症酸中毒，入院时为重度（pH 7.08），治疗后改善；诱因为停用胰岛素，尚未排除感染"
+      ],
+      "differentials": [
+        "腹腔内病变作为诱因",
+        "脓毒症（白细胞18.9×10^9/L可能为应激反应；未做尿常规/胸片）",
+        "急性肾损伤（肌酐1.6 mg/dL，基线不详）"
+      ],
+      "uncertainties": [
+        "尚未排除感染性诱因",
+        "肌酐基线"
+      ],
+      "plan_expectations": [
+        "继续固定速率胰岛素和补液，血糖下降时改用含糖液体",
+        "目前补钾（血钾3.4 mmol/L且使用胰岛素后继续下降）",
+        "每小时监测血糖/酮体，每2小时复查静脉血气和血钾",
+        "继续使用基础胰岛素",
+        "尿常规、胸部X线",
+        "明确糖尿病酮症酸中毒缓解标准"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "numeric_chronology",
-   "split": "dev",
-   "key_facts": [
-    [
-     "t1dm",
-     "type 1"
-    ],
-    [
-     "omitted",
-     "omitted|missed|stopped"
-    ],
-    [
-     "36h",
-     "36 hours"
-    ],
-    [
-     "bp",
-     "98/60"
-    ],
-    [
-     "rr",
-     "30"
-    ],
-    [
-     "g1",
-     "31[.]4"
-    ],
-    [
-     "ph1",
-     "7[.]08"
-    ],
-    [
-     "bic1",
-     "7 mmol/L"
-    ],
-    [
-     "ket1",
-     "6[.]2"
-    ],
-    [
-     "k1",
-     "5[.]6"
-    ],
-    [
-     "ph2",
-     "7[.]19"
-    ],
-    [
-     "g3",
-     "15[.]9"
-    ],
-    [
-     "ph3",
-     "7[.]27"
-    ],
-    [
-     "ket3",
-     "2[.]4"
-    ],
-    [
-     "k3",
-     "3[.]4"
-    ],
-    [
-     "fluids_given",
-     "2 L"
-    ],
-    [
-     "insulin_started",
-     "00:15|insulin infusion"
-    ],
-    [
-     "wbc",
-     "18[.]9"
-    ],
-    [
-     "ua_cxr_missing",
-     "(urinalysis|chest x-ray)[^.]{0,40}not"
-    ]
-   ],
-   "must_not": [
-    [
-     "gives latest potassium as the admission value or vice versa",
-     "(?i)potassium (of |was |is )?5[.]6[^.]{0,30}(04:00|latest|most recent|current)",
-     "note"
-    ],
-    [
-     "bicarbonate bolus recommended",
-     "(?i)(give|administer|start|recommend)[^.;]{0,30}(sodium )?bicarbonate (bolus|infusion|8[.]4)",
-     "plan"
-    ],
-    [
-     "claims infection confirmed/excluded",
-     "(?i)infection (is |has been )?(confirmed|excluded|ruled out)",
-     "note"
-    ]
-   ],
-   "expected_dx": [
-    "diabetic ketoacidosis, severe at presentation (pH 7.08), improving on treatment; precipitant insulin omission, infection not excluded"
-   ],
-   "differentials": [
-    "intra-abdominal pathology as precipitant",
-    "sepsis (WBC 18.9 may be stress response; urinalysis/CXR not done)",
-    "acute kidney injury (creatinine 1.6 mg/dL, baseline unknown)"
-   ],
-   "uncertainties": [
-    "infective precipitant not excluded",
-    "baseline creatinine"
-   ],
-   "plan_expectations": [
-    "continue fixed-rate insulin and fluids with glucose-containing fluid as glucose falls",
-    "potassium replacement now (3.4 and falling on insulin)",
-    "hourly glucose/ketones, 2-hourly VBG/K",
-    "continue basal insulin",
-    "urinalysis, CXR",
-    "DKA resolution criteria"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "T02",
-   "record_cutoff": "2026-03-19T08:00:00",
-   "sources": [
-    {
-     "source_id": "N1",
-     "content": "61-year-old man, 2 episodes of coffee-ground vomiting on 2026-03-18 evening and black tarry stools for 2 days. Takes ibuprofen 400 mg three times daily for 3 weeks for knee pain. No anticoagulants. Alcohol: 2 units per week. No known liver disease. No previous gastrointestinal bleeding. No known drug allergies."
+  {
+    "case": {
+      "case_id": "T02",
+      "record_cutoff": "2026-03-19T08:00:00",
+      "sources": [
+        {
+          "source_id": "N1",
+          "content": "患者男，61岁，2026-03-18晚呕吐咖啡渣样物2次，排黑色柏油样便2天。因膝痛服用布洛芬400 mg每日3次，已用3周。未用抗凝药。每周饮酒2单位。无已知肝病。既往无消化道出血。无已知药物过敏。"
+        },
+        {
+          "source_id": "N2",
+          "content": "2026-03-18 21:15：血压104/62 mmHg，心率112次/分，血红蛋白11.2 g/dL，尿素16.4 mmol/L，肌酐1.0 mg/dL，INR 1.1，血小板232×10^9/L。2026-03-19 01:30：再次排黑便1次，血压92/56 mmHg，心率124次/分，血红蛋白9.1 g/dL。2026-03-19 05:45：输入1.5 L晶体液后，血红蛋白7.8 g/dL，血压100/60 mmHg，心率110次/分。06:00至07:30已输注红细胞2单位。2026-03-18 21:40已静脉推注泮托拉唑80 mg。输血后血红蛋白尚未复查。"
+        },
+        {
+          "source_id": "N3",
+          "content": "胃镜已预约于2026-03-19上午进行。2026-03-19 10:20胃镜：十二指肠溃疡1.5 cm，可见血管（Forrest IIa），已行肾上腺素注射和止血夹治疗。"
+        }
+      ]
     },
-    {
-     "source_id": "N2",
-     "content": "2026-03-18 21:15: BP 104/62 mmHg, HR 112 bpm, Hb 11.2 g/dL, urea 16.4 mmol/L, creatinine 1.0 mg/dL, INR 1.1, platelets 232 ×10^9/L. 2026-03-19 01:30: one further episode of melaena, BP 92/56 mmHg, HR 124 bpm, Hb 9.1 g/dL. 2026-03-19 05:45: Hb 7.8 g/dL, BP 100/60 mmHg, HR 110 bpm after 1.5 L crystalloid. Two units of red cells were transfused between 06:00 and 07:30. Intravenous pantoprazole 80 mg bolus was given at 21:40 on 2026-03-18. Post-transfusion Hb not yet checked."
-    },
-    {
-     "source_id": "N3",
-     "content": "Endoscopy is booked for the morning of 2026-03-19. 2026-03-19 10:20 endoscopy: 1.5 cm duodenal ulcer with a visible vessel (Forrest IIa), treated with adrenaline injection and clip."
+    "annotation": {
+      "category": "numeric_chronology",
+      "split": "heldout",
+      "key_facts": [
+        [
+          "age",
+          "61"
+        ],
+        [
+          "coffee_ground",
+          "咖啡渣样"
+        ],
+        [
+          "melaena",
+          "黑便|柏油样"
+        ],
+        [
+          "nsaid",
+          "布洛芬"
+        ],
+        [
+          "no_anticoag",
+          "抗凝"
+        ],
+        [
+          "hb1",
+          "11[.]2"
+        ],
+        [
+          "hb2",
+          "9[.]1"
+        ],
+        [
+          "hb3",
+          "7[.]8"
+        ],
+        [
+          "urea",
+          "16[.]4"
+        ],
+        [
+          "inr",
+          "1[.]1"
+        ],
+        [
+          "bp_low",
+          "92/56"
+        ],
+        [
+          "transfused",
+          "(2|两) ?(个)?单位|2 ?U"
+        ],
+        [
+          "ppi_given",
+          "泮托拉唑"
+        ],
+        [
+          "post_tx_hb_missing",
+          "输血后[^。]{0,40}(未|尚未)|输血后血红蛋白"
+        ],
+        [
+          "endoscopy_booked",
+          "胃镜[^。]{0,40}(已预约|预约|计划|拟于|定于)"
+        ]
+      ],
+      "must_not": [
+        [
+          "使用截止时间之后的胃镜结果",
+          "Forrest|可见血管|十二指肠溃疡伴|肾上腺素注射|止血夹|钛夹",
+          "note"
+        ],
+        [
+          "血红蛋白数值时间顺序错误",
+          "从7[.]8[^。]{0,20}(下降|降至)",
+          "note"
+        ]
+      ],
+      "expected_dx": [
+        "急性上消化道出血伴血流动力学受损，可能为非甾体抗炎药相关消化性溃疡（胃镜检查前尚未确认）"
+      ],
+      "differentials": [
+        "消化性溃疡（使用非甾体抗炎药，尿素升高）",
+        "静脉曲张出血（无已知肝病，饮酒少，可能性较低）",
+        "Mallory-Weiss撕裂",
+        "恶性肿瘤"
+      ],
+      "uncertainties": [
+        "出血来源未确认（截止时间内尚未做胃镜）",
+        "输血后血红蛋白未复查"
+      ],
+      "plan_expectations": [
+        "复苏后紧急胃镜",
+        "复查输血后血红蛋白，根据阈值继续输血",
+        "停用布洛芬",
+        "继续质子泵抑制剂",
+        "监测再出血",
+        "进行风险评分"
+      ],
+      "reviewer_checks": [
+        "已经完成输血，却仍仅写成计划"
+      ]
     }
-   ]
   },
-  "annotation": {
-   "category": "numeric_chronology",
-   "split": "heldout",
-   "key_facts": [
-    [
-     "age",
-     "61"
-    ],
-    [
-     "coffee_ground",
-     "coffee-ground"
-    ],
-    [
-     "melaena",
-     "mel(a)?ena|tarry"
-    ],
-    [
-     "nsaid",
-     "ibuprofen"
-    ],
-    [
-     "no_anticoag",
-     "anticoagulant"
-    ],
-    [
-     "hb1",
-     "11[.]2"
-    ],
-    [
-     "hb2",
-     "9[.]1"
-    ],
-    [
-     "hb3",
-     "7[.]8"
-    ],
-    [
-     "urea",
-     "16[.]4"
-    ],
-    [
-     "inr",
-     "1[.]1"
-    ],
-    [
-     "bp_low",
-     "92/56"
-    ],
-    [
-     "transfused",
-     "(two|2) units"
-    ],
-    [
-     "ppi_given",
-     "pantoprazole"
-    ],
-    [
-     "post_tx_hb_missing",
-     "post-transfusion[^.]{0,40}not"
-    ],
-    [
-     "endoscopy_booked",
-     "endoscopy[^.]{0,40}(booked|scheduled|planned)"
-    ]
-   ],
-   "must_not": [
-    [
-     "uses endoscopy result dated after the cutoff",
-     "(?i)forrest|visible vessel|duodenal ulcer with|adrenaline injection|clip",
-     "note"
-    ],
-    [
-     "haemoglobin values given out of order",
-     "(?i)(fell|dropped|decreased) from 7[.]8",
-     "note"
-    ]
-   ],
-   "expected_dx": [
-    "acute upper gastrointestinal bleeding with haemodynamic compromise, probably NSAID-related peptic ulcer (unconfirmed before endoscopy)"
-   ],
-   "differentials": [
-    "peptic ulcer (NSAID use, raised urea)",
-    "variceal bleeding (no known liver disease, low alcohol - less likely)",
-    "Mallory-Weiss tear",
-    "malignancy"
-   ],
-   "uncertainties": [
-    "source of bleeding unconfirmed (endoscopy not yet done at cutoff)",
-    "post-transfusion Hb not checked"
-   ],
-   "plan_expectations": [
-    "urgent endoscopy after resuscitation",
-    "check post-transfusion Hb, ongoing transfusion per threshold",
-    "stop ibuprofen",
-    "continue PPI",
-    "monitoring for rebleeding",
-    "risk score"
-   ],
-   "reviewer_checks": [
-    "states transfusion as only planned when already given"
-   ]
-  }
- },
- {
-  "case": {
-   "case_id": "H01",
-   "record_cutoff": "2026-03-20T03:00:00",
-   "sources": [
-    {
-     "source_id": "r1",
-     "content": "72-year-old woman from a nursing home with 1 day of confusion, rigors and reduced oral intake. Urinary frequency and foul-smelling urine for 3 days. History: type 2 diabetes, chronic kidney disease stage 3 (creatinine 1.4 mg/dL in January 2026), recurrent urinary tract infections. Allergy: penicillin - anaphylaxis in 2019 (documented, required adrenaline). Medications: metformin 500 mg twice daily, ramipril 5 mg daily."
+  {
+    "case": {
+      "case_id": "H01",
+      "record_cutoff": "2026-03-20T03:00:00",
+      "sources": [
+        {
+          "source_id": "r1",
+          "content": "患者女，72岁，来自养老院，意识模糊、寒战及进食减少1天。尿频、尿液恶臭3天。既往：2型糖尿病、慢性肾脏病3期（2026年1月肌酐1.4 mg/dL）、反复尿路感染。过敏：青霉素——2019年发生过敏性休克（有记录，需肾上腺素治疗）。用药：二甲双胍500 mg每日2次、雷米普利5 mg每日1次。"
+        },
+        {
+          "source_id": "r2",
+          "content": "2026-03-20 01:50：体温39.4℃，血压84/46 mmHg，心率126次/分，呼吸28次/分，室内空气下SpO2 93%，GCS 13分（E3 V4 M6）。毛细血管再充盈时间4秒。耻骨上区和右侧腰部压痛。双肺呼吸音清。"
+        },
+        {
+          "source_id": "r3",
+          "content": "2026-03-20 02:05：乳酸4.6 mmol/L，白细胞22.3×10^9/L，肌酐2.6 mg/dL，钾5.2 mmol/L，血糖16.8 mmol/L，CRP 286 mg/L，血小板118×10^9/L。尿试纸：亚硝酸盐阳性，白细胞3+。02:10已留取血培养和尿培养。02:15开始快速输入晶体液500 mL。尚未给予抗生素。未做影像学检查。"
+        }
+      ]
     },
-    {
-     "source_id": "r2",
-     "content": "2026-03-20 01:50: Temp 39.4 °C, BP 84/46 mmHg, HR 126 bpm, RR 28 /min, SpO2 93% on room air, GCS 13 (E3 V4 M6). Capillary refill 4 seconds. Suprapubic and right flank tenderness. Chest clear."
-    },
-    {
-     "source_id": "r3",
-     "content": "2026-03-20 02:05: lactate 4.6 mmol/L, WBC 22.3 ×10^9/L, creatinine 2.6 mg/dL, potassium 5.2 mmol/L, glucose 16.8 mmol/L, CRP 286 mg/L, platelets 118 ×10^9/L. Urine dipstick: nitrites positive, leucocytes 3+. Blood and urine cultures taken at 02:10. 500 mL crystalloid bolus started at 02:15. No antibiotics given yet. No imaging performed."
+    "annotation": {
+      "category": "high_risk",
+      "split": "dev",
+      "key_facts": [
+        [
+          "age",
+          "72"
+        ],
+        [
+          "confusion",
+          "意识模糊|意识混乱|神志模糊|谵妄"
+        ],
+        [
+          "rigors",
+          "寒战"
+        ],
+        [
+          "ckd",
+          "慢性肾脏病|CKD"
+        ],
+        [
+          "baseline_cr",
+          "1[.]4"
+        ],
+        [
+          "anaphylaxis",
+          "过敏性休克|严重过敏反应|全身过敏反应"
+        ],
+        [
+          "ramipril",
+          "雷米普利"
+        ],
+        [
+          "metformin",
+          "二甲双胍"
+        ],
+        [
+          "temp",
+          "39[.]4"
+        ],
+        [
+          "bp",
+          "84/46"
+        ],
+        [
+          "gcs",
+          "GCS ?13"
+        ],
+        [
+          "lactate",
+          "4[.]6"
+        ],
+        [
+          "wbc",
+          "22[.]3"
+        ],
+        [
+          "cr",
+          "2[.]6"
+        ],
+        [
+          "k",
+          "5[.]2"
+        ],
+        [
+          "plt",
+          "118"
+        ],
+        [
+          "nitrites",
+          "亚硝酸盐"
+        ],
+        [
+          "cultures_taken",
+          "培养"
+        ],
+        [
+          "no_abx_yet",
+          "(尚未|未|尚无)[^。]{0,30}(抗生素|抗菌药物)|(抗生素|抗菌药物)[^。]{0,30}(尚未|未使用|未给予)"
+        ],
+        [
+          "no_imaging",
+          "(未|尚未)[^。]{0,30}(影像|超声|CT)|(影像|超声|CT)[^。]{0,30}(未做|未行|尚未)"
+        ]
+      ],
+      "must_not": [
+        [
+          "过敏性休克病史下仍建议青霉素类β-内酰胺抗生素",
+          "(开始|给予|使用|启动|建议|推荐)[^。；]{0,60}(阿莫西林|氨苄西林|哌拉西林|他唑巴坦|阿莫西林克拉维酸|青霉素)",
+          "plan"
+        ],
+        [
+          "声称已经给予抗生素",
+          "(抗生素|抗菌药物)[^。；]{0,20}(已给予|已使用|已启动|已静脉)",
+          "note"
+        ]
+      ],
+      "expected_dx": [
+        "脓毒症伴低血压，乳酸4.6 mmol/L（补液后低血压持续则为脓毒性休克），感染来源可能为泌尿系统/肾盂肾炎",
+        "慢性肾脏病3期基础上发生急性肾损伤（肌酐2.6对比1.4 mg/dL）",
+        "高钾血症（轻度）",
+        "高血糖"
+      ],
+      "differentials": [
+        "梗阻性感染性泌尿系统（尚未做影像检查）",
+        "其他感染来源：肺炎（双肺呼吸音清）、腹腔内感染"
+      ],
+      "uncertainties": [
+        "尚未排除尿路梗阻",
+        "补液反应"
+      ],
+      "plan_expectations": [
+        "立即静脉使用抗生素，避免青霉素类（过敏性休克），并根据肾功能调整剂量",
+        "补液复苏并复评；难治性休克时使用升压药/转入ICU",
+        "复查乳酸",
+        "紧急泌尿系影像检查",
+        "暂停二甲双胍和雷米普利",
+        "监测尿量"
+      ],
+      "reviewer_checks": [
+        "未标记需要紧急处理的脓毒症"
+      ]
     }
-   ]
   },
-  "annotation": {
-   "category": "high_risk",
-   "split": "dev",
-   "key_facts": [
-    [
-     "age",
-     "72"
-    ],
-    [
-     "confusion",
-     "confus"
-    ],
-    [
-     "rigors",
-     "rigor"
-    ],
-    [
-     "ckd",
-     "chronic kidney disease|CKD"
-    ],
-    [
-     "baseline_cr",
-     "1[.]4"
-    ],
-    [
-     "anaphylaxis",
-     "anaphyla"
-    ],
-    [
-     "ramipril",
-     "ramipril"
-    ],
-    [
-     "metformin",
-     "metformin"
-    ],
-    [
-     "temp",
-     "39[.]4"
-    ],
-    [
-     "bp",
-     "84/46"
-    ],
-    [
-     "gcs",
-     "GCS 13"
-    ],
-    [
-     "lactate",
-     "4[.]6"
-    ],
-    [
-     "wbc",
-     "22[.]3"
-    ],
-    [
-     "cr",
-     "2[.]6"
-    ],
-    [
-     "k",
-     "5[.]2"
-    ],
-    [
-     "plt",
-     "118"
-    ],
-    [
-     "nitrites",
-     "nitrite"
-    ],
-    [
-     "cultures_taken",
-     "cultures"
-    ],
-    [
-     "no_abx_yet",
-     "(no|not)[^.]{0,30}antibiotic"
-    ],
-    [
-     "no_imaging",
-     "(no|not)[^.]{0,30}imaging|imaging[^.]{0,30}not"
-    ]
-   ],
-   "must_not": [
-    [
-     "beta-lactam penicillin proposed despite anaphylaxis",
-     "(?i)(start|give|administer|begin|initiate|commence|recommend)[^.;]{0,60}(amoxicillin|ampicillin|piperacillin|tazobactam|co-amoxiclav|penicillin)",
-     "plan"
-    ],
-    [
-     "states antibiotics already given",
-     "(?i)antibiotics? (were|was|have been|has been) (given|started|administered)",
-     "note"
-    ]
-   ],
-   "expected_dx": [
-    "sepsis with hypotension and lactate 4.6 mmol/L (septic shock if hypotension persists after fluids), probable urinary source / pyelonephritis",
-    "acute kidney injury on CKD stage 3 (creatinine 2.6 vs 1.4 mg/dL)",
-    "hyperkalaemia (mild)",
-    "hyperglycaemia"
-   ],
-   "differentials": [
-    "obstructed infected urinary system (no imaging yet)",
-    "other source: pneumonia (chest clear), intra-abdominal"
-   ],
-   "uncertainties": [
-    "urinary obstruction not excluded",
-    "response to fluids"
-   ],
-   "plan_expectations": [
-    "immediate IV antibiotics avoiding penicillins (anaphylaxis); dose-adjust for renal function",
-    "fluid resuscitation with reassessment; vasopressors/ICU if refractory",
-    "repeat lactate",
-    "urgent renal tract imaging",
-    "hold metformin and ramipril",
-    "urine output monitoring"
-   ],
-   "reviewer_checks": [
-    "fails to flag time-critical sepsis"
-   ]
-  }
- },
- {
-  "case": {
-   "case_id": "H02",
-   "record_cutoff": "2026-03-21T11:00:00",
-   "sources": [
-    {
-     "source_id": "EMS",
-     "content": "71-year-old man. Wife witnessed sudden onset of right arm and leg weakness and difficulty speaking at 09:10 on 2026-03-21. Last seen well at 09:05. Arrived at the emergency department at 10:25. No seizure at onset. No headache. No recent surgery or trauma."
+  {
+    "case": {
+      "case_id": "H02",
+      "record_cutoff": "2026-03-21T11:00:00",
+      "sources": [
+        {
+          "source_id": "EMS",
+          "content": "患者男，71岁。妻子目击患者于2026-03-21 09:10突发右上肢、右下肢无力和说话困难。最后一次正常时间为09:05。10:25到达急诊科。起病时无抽搐。无头痛。近期无手术或外伤。"
+        },
+        {
+          "source_id": "MED",
+          "content": "既往：心房颤动、高血压，2024年曾发生短暂性脑缺血发作。用药：华法林5 mg每日1次（妻子确认昨晚已服末次剂量）、氨氯地平10 mg每日1次。无已知药物过敏。"
+        },
+        {
+          "source_id": "ASSESS",
+          "content": "10:35：NIHSS 9分（右上肢3分、右下肢2分、失语2分、面瘫1分、构音障碍1分）。血压178/96 mmHg，心率88次/分、心律不齐，血糖6.9 mmol/L，SpO2 97%。10:48头颅平扫CT：未见出血，无已形成的梗死灶。10:40床旁INR：2.6。尚未做CT血管成像。血小板计数待回报。"
+        }
+      ]
     },
-    {
-     "source_id": "MED",
-     "content": "History: atrial fibrillation, hypertension, previous transient ischaemic attack in 2024. Medications: warfarin 5 mg daily (wife confirms last dose taken yesterday evening), amlodipine 10 mg daily. No known drug allergies."
-    },
-    {
-     "source_id": "ASSESS",
-     "content": "10:35: NIHSS 9 (right arm 3, right leg 2, aphasia 2, facial palsy 1, dysarthria 1). BP 178/96 mmHg, HR 88 bpm irregular, glucose 6.9 mmol/L, SpO2 97%. 10:48 non-contrast CT head: no haemorrhage, no established infarct. Point-of-care INR at 10:40: 2.6. CT angiography not yet performed. Platelet count pending."
+    "annotation": {
+      "category": "high_risk",
+      "split": "heldout",
+      "key_facts": [
+        [
+          "age",
+          "71"
+        ],
+        [
+          "onset",
+          "09:10"
+        ],
+        [
+          "arrival",
+          "10:25"
+        ],
+        [
+          "weakness",
+          "无力|乏力"
+        ],
+        [
+          "speech",
+          "言语|失语|说话"
+        ],
+        [
+          "af",
+          "房颤|心房颤动"
+        ],
+        [
+          "warfarin",
+          "华法林"
+        ],
+        [
+          "last_dose",
+          "昨晚|昨日"
+        ],
+        [
+          "nihss",
+          "NIHSS ?9"
+        ],
+        [
+          "bp",
+          "178/96"
+        ],
+        [
+          "glucose",
+          "6[.]9"
+        ],
+        [
+          "ct",
+          "未见出血|无出血|无颅内出血"
+        ],
+        [
+          "inr",
+          "2[.]6"
+        ],
+        [
+          "cta_missing",
+          "(CTA|CT血管成像|CT血管造影)[^。]{0,40}(未做|未行|尚未|待)"
+        ],
+        [
+          "plt_pending",
+          "血小板[^。]{0,30}(待回报|待结果|未回报|尚未)"
+        ]
+      ],
+      "must_not": [
+        [
+          "服用华法林且INR 2.6仍建议静脉溶栓",
+          "(?![^。；]{0,30}(不建议|不宜|禁忌|不能|不可|避免))(建议|给予|使用|启动|行|进行)[^。；]{0,40}(阿替普酶|替奈普酶|静脉溶栓|溶栓)",
+          "plan"
+        ],
+        [
+          "将大血管闭塞写为已存在",
+          "(明确|证实|显示|提示)[^。；]{0,20}(大血管)?闭塞",
+          "note"
+        ],
+        [
+          "急性期新增加抗凝药/抗血小板药负荷",
+          "(?![^。；]{0,30}(避免|不宜|暂缓|延迟|禁止|不建议))(开始|给予|负荷|使用)[^。；]{0,30}(肝素|依诺肝素|阿司匹林 ?300)",
+          "plan"
+        ]
+      ],
+      "expected_dx": [
+        "急性缺血性脑卒中，左侧大脑半球（可能性大；CT已排除出血），房颤背景提示心源性栓塞可能"
+      ],
+      "differentials": [
+        "类卒中：低血糖（血糖6.9 mmol/L，已排除）、抽搐/Todd麻痹（未目击抽搐）",
+        "颅内出血（CT已排除）"
+      ],
+      "uncertainties": [
+        "大血管闭塞情况（未做CTA）",
+        "血小板计数待回报"
+      ],
+      "plan_expectations": [
+        "服用华法林且INR 2.6时静脉溶栓禁忌，须明确说明",
+        "紧急CT血管成像，评估机械取栓可能性",
+        "按流程管理血压",
+        "卒中单元、吞咽筛查",
+        "暂停华法林，等待影像和专科决定"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "high_risk",
-   "split": "heldout",
-   "key_facts": [
-    [
-     "age",
-     "71"
-    ],
-    [
-     "onset",
-     "09:10"
-    ],
-    [
-     "arrival",
-     "10:25"
-    ],
-    [
-     "weakness",
-     "weakness"
-    ],
-    [
-     "speech",
-     "speak|aphasia|speech"
-    ],
-    [
-     "af",
-     "atrial fibrillation"
-    ],
-    [
-     "warfarin",
-     "warfarin"
-    ],
-    [
-     "last_dose",
-     "yesterday"
-    ],
-    [
-     "nihss",
-     "NIHSS 9"
-    ],
-    [
-     "bp",
-     "178/96"
-    ],
-    [
-     "glucose",
-     "6[.]9"
-    ],
-    [
-     "ct",
-     "no h(a)?emorrhage"
-    ],
-    [
-     "inr",
-     "2[.]6"
-    ],
-    [
-     "cta_missing",
-     "angiograph[^.]{0,40}not"
-    ],
-    [
-     "plt_pending",
-     "platelet[^.]{0,30}pending"
-    ]
-   ],
-   "must_not": [
-    [
-     "recommends IV thrombolysis despite INR 2.6 on warfarin",
-     "(?i)(recommend|give|administer|start|proceed with|initiate)[^.;]{0,40}(alteplase|tenecteplase|thrombolysis|tPA)(?![^.;]{0,100}(contraindicat|not|cannot|exclude|avoid))",
-     "plan"
-    ],
-    [
-     "states large vessel occlusion as present",
-     "(?i)(confirmed|shows|showed|demonstrates) (a )?(large vessel )?occlusion",
-     "note"
-    ],
-    [
-     "new anticoagulant/antiplatelet loading acutely",
-     "(?i)(start|give|load)[^.;]{0,30}(heparin|enoxaparin|aspirin 300)(?![^.;]{0,80}(after|once|delay|defer|not))",
-     "plan"
-    ]
-   ],
-   "expected_dx": [
-    "acute ischaemic stroke, left hemisphere (probable; CT excludes haemorrhage), likely cardioembolic given AF"
-   ],
-   "differentials": [
-    "stroke mimic: hypoglycaemia (glucose 6.9 - excluded), seizure/Todd paresis (no seizure witnessed)",
-    "intracranial haemorrhage (excluded on CT)"
-   ],
-   "uncertainties": [
-    "large vessel occlusion status (CTA not done)",
-    "platelet count pending"
-   ],
-   "plan_expectations": [
-    "IV thrombolysis contraindicated with INR 2.6 on warfarin - state explicitly",
-    "urgent CT angiography to assess for mechanical thrombectomy",
-    "BP management per pathway",
-    "stroke unit, swallow screen",
-    "hold warfarin pending imaging/specialist decision"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "K01",
-   "record_cutoff": "2026-03-22T16:00:00",
-   "sources": [
-    {
-     "source_id": "nursing",
-     "content": "Admission nursing assessment 13:20: 49-year-old woman. Allergies: NKDA. Weight 82 kg. Mobile and independent. Non-smoker."
+  {
+    "case": {
+      "case_id": "K01",
+      "record_cutoff": "2026-03-22T16:00:00",
+      "sources": [
+        {
+          "source_id": "nursing",
+          "content": "13:20入院护理评估：患者女，49岁。过敏：无已知药物过敏（NKDA）。体重82 kg。可活动，生活自理。不吸烟。"
+        },
+        {
+          "source_id": "ed_doctor",
+          "content": "12:40急诊医生记录：园艺劳作时划伤后，右小腿疼痛、红肿2天。在家有发热。既往：肥胖，无糖尿病。过敏：青霉素——青少年时期出现面部肿胀和喘鸣。无规律用药。体温38.3℃，心率98次/分，血压130/82 mmHg。右小腿红斑18 cm×10 cm，皮温升高并有压痛，无波动感、无捻发音，无与体征不相称的剧烈疼痛。小腿质软。"
+        },
+        {
+          "source_id": "results",
+          "content": "白细胞14.8×10^9/L，CRP 96 mg/L，肌酐0.8 mg/dL，血糖5.4 mmol/L。乳酸1.2 mmol/L。家庭医生摘要（2025年）：“青霉素过敏——未经核实，患者自述。”未做多普勒超声。"
+        }
+      ]
     },
-    {
-     "source_id": "ed_doctor",
-     "content": "ED medical note 12:40: 2 days of painful, red, swollen right lower leg after a scratch from gardening. Fever at home. Past history: obesity, no diabetes. Allergy: penicillin - facial swelling and wheeze as a teenager. No regular medications. Temp 38.3 °C, HR 98 bpm, BP 130/82 mmHg. Right lower leg: erythema 18 cm x 10 cm with warmth and tenderness, no fluctuance, no crepitus, no pain out of proportion. Calf soft."
-    },
-    {
-     "source_id": "results",
-     "content": "WBC 14.8 ×10^9/L, CRP 96 mg/L, creatinine 0.8 mg/dL, glucose 5.4 mmol/L. Lactate 1.2 mmol/L. GP summary letter (2025): 'Penicillin allergy - unverified, patient reported.' Doppler ultrasound not performed."
+    "annotation": {
+      "category": "contradictory",
+      "split": "heldout",
+      "key_facts": [
+        [
+          "age",
+          "49"
+        ],
+        [
+          "leg",
+          "右小腿|右侧小腿"
+        ],
+        [
+          "scratch",
+          "划伤|擦伤|园艺"
+        ],
+        [
+          "nkda",
+          "NKDA|无已知药物过敏"
+        ],
+        [
+          "pcn_reaction",
+          "面部肿胀|喘鸣|喘息"
+        ],
+        [
+          "gp_unverified",
+          "未证实|未核实|未经核实"
+        ],
+        [
+          "temp",
+          "38[.]3"
+        ],
+        [
+          "erythema",
+          "18 ?cm"
+        ],
+        [
+          "no_crepitus",
+          "捻发音|握雪感"
+        ],
+        [
+          "no_fluctuance",
+          "波动感"
+        ],
+        [
+          "wbc",
+          "14[.]8"
+        ],
+        [
+          "crp",
+          "96"
+        ],
+        [
+          "lactate",
+          "1[.]2"
+        ],
+        [
+          "no_diabetes",
+          "糖尿病"
+        ],
+        [
+          "doppler_missing",
+          "(多普勒|超声)[^。]{0,40}(未做|未行|尚未|未查)"
+        ]
+      ],
+      "must_not": [
+        [
+          "未提及矛盾便将过敏冲突归结为无过敏",
+          "^(?!.*(青霉素|矛盾|不一致|冲突)).*无已知药物过敏",
+          "features"
+        ],
+        [
+          "未解决过敏问题即建议使用青霉素类抗生素",
+          "(?![^。；]{0,40}(待|明确|核实|如果|仅当|除非|之后))(开始|给予|使用|建议|推荐)[^。；]{0,60}(氟氯西林|阿莫西林|阿莫西林克拉维酸|青霉素|哌拉西林)",
+          "plan"
+        ]
+      ],
+      "expected_dx": [
+        "右小腿蜂窝织炎（可能性大）"
+      ],
+      "differentials": [
+        "深静脉血栓形成（小腿质软；未做多普勒超声）",
+        "坏死性筋膜炎（无捻发音，无不相称疼痛，乳酸1.2 mmol/L，可能性低）",
+        "脓肿（无波动感）"
+      ],
+      "uncertainties": [
+        "护理评估、急诊记录和家庭医生摘要中的青霉素过敏状态相互冲突"
+      ],
+      "plan_expectations": [
+        "明确前按青霉素过敏处理，选择非β-内酰胺类抗生素",
+        "将过敏冲突列入待审核事项",
+        "标记红斑边界",
+        "考虑多普勒超声"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "contradictory",
-   "split": "heldout",
-   "key_facts": [
-    [
-     "age",
-     "49"
-    ],
-    [
-     "leg",
-     "right lower leg"
-    ],
-    [
-     "scratch",
-     "scratch|garden"
-    ],
-    [
-     "nkda",
-     "NKDA|no known drug allerg"
-    ],
-    [
-     "pcn_reaction",
-     "facial swelling|wheeze"
-    ],
-    [
-     "gp_unverified",
-     "unverified"
-    ],
-    [
-     "temp",
-     "38[.]3"
-    ],
-    [
-     "erythema",
-     "18 cm"
-    ],
-    [
-     "no_crepitus",
-     "crepitus"
-    ],
-    [
-     "no_fluctuance",
-     "fluctuance"
-    ],
-    [
-     "wbc",
-     "14[.]8"
-    ],
-    [
-     "crp",
-     "96"
-    ],
-    [
-     "lactate",
-     "1[.]2"
-    ],
-    [
-     "no_diabetes",
-     "diabetes"
-    ],
-    [
-     "doppler_missing",
-     "doppler[^.]{0,40}not"
-    ]
-   ],
-   "must_not": [
-    [
-     "silently resolves the allergy conflict as no allergy",
-     "(?i)^(?!.*(penicillin|conflict|discrepan)).*no known drug allerg",
-     "features"
-    ],
-    [
-     "penicillin-class antibiotic proposed without resolving allergy",
-     "(?i)(start|give|administer|begin|initiate|commence|recommend)[^.;]{0,60}(flucloxacillin|amoxicillin|co-amoxiclav|penicillin|piperacillin)(?![^.;]{0,120}(if|once|unless|after|only))",
-     "plan"
-    ]
-   ],
-   "expected_dx": [
-    "cellulitis of the right lower leg (probable)"
-   ],
-   "differentials": [
-    "deep vein thrombosis (calf soft; Doppler not performed)",
-    "necrotising fasciitis (no crepitus, no pain out of proportion, lactate 1.2 - unlikely)",
-    "abscess (no fluctuance)"
-   ],
-   "uncertainties": [
-    "penicillin allergy status conflicting between nursing assessment, ED note and GP letter"
-   ],
-   "plan_expectations": [
-    "treat as penicillin-allergic until clarified; non-beta-lactam antibiotic",
-    "review item for allergy conflict",
-    "mark erythema margin",
-    "consider Doppler"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "K02",
-   "record_cutoff": "2026-03-23T09:00:00",
-   "sources": [
-    {
-     "source_id": "入院记录",
-     "content": "主诉：双下肢麻木、刺痛半年，加重1月。患者女，63岁，半年前出现双足对称性麻木、针刺样疼痛，夜间明显，近1月向上发展至小腿。否认糖尿病、高血压病史。否认饮酒史。否认药物过敏史。"
+  {
+    "case": {
+      "case_id": "K02",
+      "record_cutoff": "2026-03-23T09:00:00",
+      "sources": [
+        {
+          "source_id": "入院记录",
+          "content": "主诉：双下肢麻木、刺痛半年，加重1月。患者女，63岁，半年前出现双足对称性麻木、针刺样疼痛，夜间明显，近1月向上发展至小腿。否认糖尿病、高血压病史。否认饮酒史。否认药物过敏史。"
+        },
+        {
+          "source_id": "门诊病历",
+          "content": "2025年11月5日内分泌科门诊：2型糖尿病病史5年，口服格列美脲2 mg每日1次，血糖控制不佳，建议加用二甲双胍，患者未取药。"
+        },
+        {
+          "source_id": "化验",
+          "content": "空腹血糖10.8 mmol/L，糖化血红蛋白8.9%，血肌酐72 μmol/L，维生素B12 420 pg/mL。查体：双足针刺觉、振动觉减退，双侧踝反射减弱，足背动脉搏动可及，足部无溃疡。神经传导检查未做。"
+        }
+      ]
     },
-    {
-     "source_id": "门诊病历",
-     "content": "2025年11月5日内分泌科门诊：2型糖尿病病史5年，口服格列美脲2 mg每日1次，血糖控制不佳，建议加用二甲双胍，患者未取药。"
-    },
-    {
-     "source_id": "化验",
-     "content": "空腹血糖10.8 mmol/L，糖化血红蛋白8.9%，血肌酐72 μmol/L，维生素B12 420 pg/mL。查体：双足针刺觉、振动觉减退，双侧踝反射减弱，足背动脉搏动可及，足部无溃疡。神经传导检查未做。"
+    "annotation": {
+      "category": "contradictory",
+      "split": "dev",
+      "key_facts": [
+        [
+          "年龄",
+          "63"
+        ],
+        [
+          "麻木刺痛",
+          "麻木"
+        ],
+        [
+          "夜间明显",
+          "夜间"
+        ],
+        [
+          "否认糖尿病",
+          "否认糖尿病"
+        ],
+        [
+          "门诊糖尿病史",
+          "糖尿病病史5年|2型糖尿病"
+        ],
+        [
+          "格列美脲",
+          "格列美脲"
+        ],
+        [
+          "空腹血糖",
+          "10[.]8"
+        ],
+        [
+          "糖化",
+          "8[.]9"
+        ],
+        [
+          "B12",
+          "420"
+        ],
+        [
+          "振动觉减退",
+          "振动觉"
+        ],
+        [
+          "踝反射",
+          "踝反射"
+        ],
+        [
+          "无溃疡",
+          "无溃疡"
+        ],
+        [
+          "神经传导未做",
+          "神经传导[^。]{0,6}未"
+        ]
+      ],
+      "must_not": [
+        [
+          "仅采纳‘否认糖尿病’而不提矛盾",
+          "^(?![\\s\\S]*(矛盾|不一致|不符|门诊))[\\s\\S]*否认糖尿病",
+          "features"
+        ]
+      ],
+      "expected_dx": [
+        "糖尿病周围神经病变（可能性大）",
+        "2型糖尿病（入院记录与门诊病历、化验结果矛盾，需核实）"
+      ],
+      "differentials": [
+        "维生素B12缺乏（420 pg/mL，不支持）",
+        "酒精性周围神经病（否认饮酒）",
+        "腰椎病变",
+        "慢性炎性脱髓鞘性多发性神经病"
+      ],
+      "uncertainties": [
+        "糖尿病病史记录矛盾",
+        "神经传导检查未做"
+      ],
+      "plan_expectations": [
+        "核实糖尿病病史及用药",
+        "血糖管理",
+        "神经传导检查",
+        "足部护理宣教",
+        "神经痛对症治疗"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "contradictory",
-   "split": "dev",
-   "key_facts": [
-    [
-     "年龄",
-     "63"
-    ],
-    [
-     "麻木刺痛",
-     "麻木"
-    ],
-    [
-     "夜间明显",
-     "夜间"
-    ],
-    [
-     "否认糖尿病",
-     "否认糖尿病"
-    ],
-    [
-     "门诊糖尿病史",
-     "糖尿病病史5年|2型糖尿病"
-    ],
-    [
-     "格列美脲",
-     "格列美脲"
-    ],
-    [
-     "空腹血糖",
-     "10[.]8"
-    ],
-    [
-     "糖化",
-     "8[.]9"
-    ],
-    [
-     "B12",
-     "420"
-    ],
-    [
-     "振动觉减退",
-     "振动觉"
-    ],
-    [
-     "踝反射",
-     "踝反射"
-    ],
-    [
-     "无溃疡",
-     "无溃疡"
-    ],
-    [
-     "神经传导未做",
-     "神经传导[^。]{0,6}未"
-    ]
-   ],
-   "must_not": [
-    [
-     "仅采纳‘否认糖尿病’而不提矛盾",
-     "^(?![\\s\\S]*(矛盾|不一致|不符|门诊))[\\s\\S]*否认糖尿病",
-     "features"
-    ]
-   ],
-   "expected_dx": [
-    "糖尿病周围神经病变（可能性大）",
-    "2型糖尿病（入院记录与门诊病历、化验结果矛盾，需核实）"
-   ],
-   "differentials": [
-    "维生素B12缺乏（420 pg/mL，不支持）",
-    "酒精性周围神经病（否认饮酒）",
-    "腰椎病变",
-    "慢性炎性脱髓鞘性多发性神经病"
-   ],
-   "uncertainties": [
-    "糖尿病病史记录矛盾",
-    "神经传导检查未做"
-   ],
-   "plan_expectations": [
-    "核实糖尿病病史及用药",
-    "血糖管理",
-    "神经传导检查",
-    "足部护理宣教",
-    "神经痛对症治疗"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "U01",
-   "record_cutoff": "2026-03-24T22:00:00",
-   "sources": [
-    {
-     "source_id": "hx",
-     "content": "66-year-old woman with 2 hours of central chest tightness at rest, onset 16:30, resolved spontaneously by 18:30. Mild breathlessness during the episode. No radiation, sweating or syncope. History: hypertension, hyperlipidaemia. Medications: ramipril 5 mg daily, simvastatin 20 mg at night. Non-smoker. No known drug allergies."
+  {
+    "case": {
+      "case_id": "U01",
+      "record_cutoff": "2026-03-24T22:00:00",
+      "sources": [
+        {
+          "source_id": "hx",
+          "content": "患者女，66岁，静息时胸骨后发紧2小时，16:30起病，18:30自行缓解。发作时有轻度呼吸困难。无放射痛、出汗或晕厥。既往：高血压、高脂血症。用药：雷米普利5 mg每日1次、辛伐他汀20 mg每晚1次。不吸烟。无已知药物过敏。"
+        },
+        {
+          "source_id": "obs",
+          "content": "19:00：已无疼痛。双臂血压均为142/84 mmHg，心率78次/分、律齐，室内空气下SpO2 98%。双肺呼吸音清，心音正常。"
+        },
+        {
+          "source_id": "ix",
+          "content": "19:05心电图：窦性心律，未见ST段或T波改变。19:10高敏肌钙蛋白T：9 ng/L（参考值<14 ng/L）。定于22:10复查肌钙蛋白。胸部X线：心影大小正常，肺野清晰。"
+        }
+      ]
     },
-    {
-     "source_id": "obs",
-     "content": "19:00: pain-free. BP 142/84 mmHg both arms, HR 78 bpm regular, SpO2 98% on room air. Chest clear, heart sounds normal."
-    },
-    {
-     "source_id": "ix",
-     "content": "ECG 19:05: sinus rhythm, no ST-segment or T-wave changes. High-sensitivity troponin T at 19:10: 9 ng/L (reference <14 ng/L). Repeat troponin due at 22:10. Chest X-ray: normal heart size, clear lung fields."
+    "annotation": {
+      "category": "incremental",
+      "split": "dev",
+      "key_facts": [
+        [
+          "age",
+          "66"
+        ],
+        [
+          "onset",
+          "16:30"
+        ],
+        [
+          "resolved",
+          "缓解|消失|18:30"
+        ],
+        [
+          "no_radiation",
+          "放射"
+        ],
+        [
+          "htn",
+          "高血压"
+        ],
+        [
+          "bp",
+          "142/84"
+        ],
+        [
+          "ecg",
+          "未见ST|无ST|ST段[^。]{0,15}(无|未见)"
+        ],
+        [
+          "trop",
+          "9 ?ng/L"
+        ],
+        [
+          "ref",
+          "14 ?ng/L"
+        ],
+        [
+          "repeat_due",
+          "复查肌钙蛋白|22:10"
+        ],
+        [
+          "cxr",
+          "肺野清晰|双肺清晰|肺野清"
+        ]
+      ],
+      "must_not": [
+        [
+          "仅凭一次肌钙蛋白便将心肌梗死写为确诊或排除",
+          "心肌梗死(已确诊|已明确|已排除)|(确诊|已排除|明确排除)[^。；]{0,20}心肌梗死",
+          "note"
+        ]
+      ],
+      "expected_dx": [
+        "胸痛，可能为急性冠脉综合征（尚未排除不稳定型心绞痛；复查肌钙蛋白前不能排除心肌梗死）"
+      ],
+      "differentials": [
+        "不稳定型心绞痛",
+        "非ST段抬高型心肌梗死（等待动态肌钙蛋白）",
+        "肺栓塞（SpO2 98%，可能性较低）",
+        "肌肉骨骼/食管病因"
+      ],
+      "uncertainties": [
+        "复查肌钙蛋白尚未回报"
+      ],
+      "plan_expectations": [
+        "22:10复查肌钙蛋白和心电图",
+        "监护",
+        "第二次肌钙蛋白结果后风险分层",
+        "根据条件决定抗血小板治疗"
+      ],
+      "reviewer_checks": []
     }
-   ]
   },
-  "annotation": {
-   "category": "incremental",
-   "split": "dev",
-   "key_facts": [
-    [
-     "age",
-     "66"
-    ],
-    [
-     "onset",
-     "16:30"
-    ],
-    [
-     "resolved",
-     "resolved|18:30"
-    ],
-    [
-     "no_radiation",
-     "radiation"
-    ],
-    [
-     "htn",
-     "hypertension"
-    ],
-    [
-     "bp",
-     "142/84"
-    ],
-    [
-     "ecg",
-     "no ST"
-    ],
-    [
-     "trop",
-     "9 ng/L"
-    ],
-    [
-     "ref",
-     "14 ng/L"
-    ],
-    [
-     "repeat_due",
-     "repeat troponin|22:10"
-    ],
-    [
-     "cxr",
-     "clear lung"
-    ]
-   ],
-   "must_not": [
-    [
-     "myocardial infarction stated as confirmed or excluded on a single troponin",
-     "(?i)myocardial infarction (is |has been )?(confirmed|excluded|ruled out)",
-     "note"
-    ]
-   ],
-   "expected_dx": [
-    "chest pain, possible acute coronary syndrome (unstable angina not excluded; MI not excluded until repeat troponin)"
-   ],
-   "differentials": [
-    "unstable angina",
-    "NSTEMI (awaiting serial troponin)",
-    "pulmonary embolism (SpO2 98%, less likely)",
-    "musculoskeletal / oesophageal"
-   ],
-   "uncertainties": [
-    "repeat troponin not yet available"
-   ],
-   "plan_expectations": [
-    "repeat troponin at 22:10 and ECG",
-    "monitoring",
-    "risk stratification after second troponin",
-    "antiplatelet decision conditional"
-   ],
-   "reviewer_checks": []
-  }
- },
- {
-  "case": {
-   "case_id": "U02",
-   "record_cutoff": "2026-03-25T15:00:00",
-   "sources": [
-    {
-     "source_id": "ward",
-     "content": "79-year-old man admitted with 3 days of diarrhoea and poor oral intake. No vomiting. No urinary symptoms. History: hypertension, osteoarthritis. Medications: lisinopril 20 mg daily, naproxen 500 mg twice daily. No known drug allergies."
+  {
+    "case": {
+      "case_id": "U02",
+      "record_cutoff": "2026-03-25T15:00:00",
+      "sources": [
+        {
+          "source_id": "ward",
+          "content": "患者男，79岁，因腹泻、进食差3天入院。无呕吐。无泌尿系统症状。既往：高血压、骨关节炎。用药：赖诺普利20 mg每日1次、萘普生500 mg每日2次。无已知药物过敏。"
+        },
+        {
+          "source_id": "obs",
+          "content": "卧位血压106/60 mmHg，立位血压88/52 mmHg，心率96次/分，体温37.1℃。黏膜干燥。腹软，无压痛。未触及充盈膀胱。"
+        },
+        {
+          "source_id": "labs",
+          "content": "肌酐2.4 mg/dL，尿素22.5 mmol/L，钾5.4 mmol/L，钠134 mmol/L，碳酸氢根18 mmol/L。无既往肾功能结果可供比较。尚未做尿常规。尚未做肾脏超声。"
+        }
+      ]
     },
-    {
-     "source_id": "obs",
-     "content": "BP 106/60 mmHg lying, 88/52 mmHg standing, HR 96 bpm, Temp 37.1 °C. Dry mucous membranes. Abdomen soft, non-tender. No palpable bladder."
-    },
-    {
-     "source_id": "labs",
-     "content": "Creatinine 2.4 mg/dL, urea 22.5 mmol/L, potassium 5.4 mmol/L, sodium 134 mmol/L, bicarbonate 18 mmol/L. No previous renal function results are available. Urinalysis not yet done. Renal ultrasound not yet done."
+    "annotation": {
+      "category": "incremental",
+      "split": "dev",
+      "key_facts": [
+        [
+          "age",
+          "79"
+        ],
+        [
+          "diarrhoea",
+          "腹泻"
+        ],
+        [
+          "acei",
+          "赖诺普利"
+        ],
+        [
+          "nsaid",
+          "萘普生"
+        ],
+        [
+          "postural",
+          "88/52"
+        ],
+        [
+          "cr",
+          "2[.]4"
+        ],
+        [
+          "urea",
+          "22[.]5"
+        ],
+        [
+          "k",
+          "5[.]4"
+        ],
+        [
+          "bicarb",
+          "18"
+        ],
+        [
+          "no_baseline",
+          "无既往|无基线|基线[^。]{0,40}(未知|不详|未提供)|既往[^。]{0,40}(未知|不详|未提供)"
+        ],
+        [
+          "ua_missing",
+          "尿常规[^。]{0,30}(未做|未行|尚未|未查)"
+        ],
+        [
+          "us_missing",
+          "(肾脏超声|泌尿系超声|超声)[^。]{0,30}(未做|未行|尚未|未查)"
+        ]
+      ],
+      "must_not": [
+        [
+          "无基线却将急性肾损伤写为已确诊",
+          "(明确|确诊|确认为)[^。；]{0,20}急性肾损伤|急性肾损伤[^。；]{0,10}(明确|确诊)",
+          "note"
+        ],
+        [
+          "继续使用肾毒性药物",
+          "(继续|维持)[^。；]{0,15}(赖诺普利|萘普生)",
+          "plan"
+        ]
+      ],
+      "expected_dx": [
+        "肾功能损害，可能为容量不足合并ACE抑制剂和非甾体抗炎药所致的肾前性急性肾损伤（无基线时无法确定急慢性）",
+        "轻度高钾血症",
+        "代谢性酸中毒（碳酸氢根18 mmol/L）"
+      ],
+      "differentials": [
+        "慢性肾脏病（无基线）",
+        "梗阻性尿路病（未触及充盈膀胱；未做超声）",
+        "肾实质性疾病（未做尿常规）"
+      ],
+      "uncertainties": [
+        "肾功能基线",
+        "尿常规",
+        "超声"
+      ],
+      "plan_expectations": [
+        "静脉补液并复评",
+        "暂停赖诺普利和萘普生",
+        "复查尿素、电解质和血钾，做心电图",
+        "尿常规、肾脏超声",
+        "向家庭医生获取既往结果",
+        "粪便检查"
+      ],
+      "reviewer_checks": []
     }
-   ]
-  },
-  "annotation": {
-   "category": "incremental",
-   "split": "dev",
-   "key_facts": [
-    [
-     "age",
-     "79"
-    ],
-    [
-     "diarrhoea",
-     "diarrh"
-    ],
-    [
-     "acei",
-     "lisinopril"
-    ],
-    [
-     "nsaid",
-     "naproxen"
-    ],
-    [
-     "postural",
-     "88/52"
-    ],
-    [
-     "cr",
-     "2[.]4"
-    ],
-    [
-     "urea",
-     "22[.]5"
-    ],
-    [
-     "k",
-     "5[.]4"
-    ],
-    [
-     "bicarb",
-     "18"
-    ],
-    [
-     "no_baseline",
-     "no previous|baseline[^.]{0,40}(unknown|not available|unavailable)"
-    ],
-    [
-     "ua_missing",
-     "urinalysis[^.]{0,30}not"
-    ],
-    [
-     "us_missing",
-     "ultrasound[^.]{0,30}not"
-    ]
-   ],
-   "must_not": [
-    [
-     "states AKI as confirmed without baseline",
-     "(?i)confirmed (acute kidney injury|aki)",
-     "note"
-    ],
-    [
-     "continues nephrotoxic drugs",
-     "(?i)continue (lisinopril|naproxen)",
-     "plan"
-    ]
-   ],
-   "expected_dx": [
-    "renal impairment, probably pre-renal acute kidney injury from volume depletion with ACE inhibitor and NSAID (chronicity cannot be determined without a baseline)",
-    "mild hyperkalaemia",
-    "metabolic acidosis (bicarbonate 18)"
-   ],
-   "differentials": [
-    "chronic kidney disease (no baseline)",
-    "obstructive uropathy (no palpable bladder; ultrasound not done)",
-    "intrinsic renal disease (urinalysis not done)"
-   ],
-   "uncertainties": [
-    "baseline renal function",
-    "urinalysis",
-    "ultrasound"
-   ],
-   "plan_expectations": [
-    "IV fluids with reassessment",
-    "hold lisinopril and naproxen",
-    "repeat U&E and potassium, ECG",
-    "urinalysis, renal ultrasound",
-    "obtain previous results from GP",
-    "stool testing"
-   ],
-   "reviewer_checks": []
   }
- }
 ]
