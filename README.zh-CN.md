@@ -43,4 +43,6 @@ output.json在整批处理结束后原子发布。每条包含case_id、status�
 
 项目采用事实台账、带来源生成与确定性校验。规则不能证明临床推断正确，也不能发现所有遗漏。历史公开数据上的非指定模型结果不替代指定服务验收。
 
+第一阶段开发候选加入中文 ConText 式作用域与 DSPy MIPROv2 组织指令优化，共享持久化300次请求预算。正式默认值不变，候选待临床盲评；分组、续跑、报告与使用方法见仓库中的 [第一阶段实验](https://github.com/DrZeroK/MedTrace/blob/codex/context-prompt-experiments/docs/PHASE1_EXPERIMENTS.md)。
+
 详见[项目说明](docs/PROJECT_DESCRIPTION.md)、[协议及待验收项](docs/REQUIREMENTS.md)、[声明](docs/DECLARATIONS.md)、[资源登记](docs/RESOURCE_REGISTRATION.md)、[知识库说明](docs/KNOWLEDGE_BASE.md)。

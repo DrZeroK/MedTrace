@@ -150,6 +150,10 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     else:
         checked = text
         pos = "\n".join(T.clearly_positive_text(s) for s in T.split_sentences(text))
+    enhanced = L.context_mode == "zh_context_v1" and T.detect_lang(checked) == "zh"
+    if enhanced:
+        from . import context as C
+        pos = C.positive_text(checked)
     if sec in ("features", "discussion") and checked.strip():
         for term in sorted(L.neg_only):      # sorted: set order varies per process (PYTHONHASHSEED)
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS or len(term) < 2:
@@ -167,7 +171,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             if key not in {u["key"] for u in L.undocumented} and any(rx.search(c) and _SAYS_ABSENT.search(c) for c in clauses):
                 add("false_missing", HIGH, f"states that {key} information is not documented, but the records contain it")
     if sec == "features" and checked.strip():
-        for term in T.negated_terms(checked):
+        for term in (C.negated_terms(checked) if enhanced else T.negated_terms(checked)):
             if term in L.neg_terms:
                 continue
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS:
@@ -178,6 +182,9 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 continue        # the records mention it after a negation cue: ambiguous, not flagged
             elif term not in L.all_text:
                 add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records")
+    if enhanced and sec == "features":
+        for code, term in C.context_conflicts(checked, L.facts):
+            add(code, MEDIUM, f"{term!r}: assertion/person/time differs from the source context; review required")
 
     # ---- lexical grounding of case features
     if sec == "features" and checked.strip():

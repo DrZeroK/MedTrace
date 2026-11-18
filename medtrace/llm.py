@@ -66,9 +66,10 @@ def _post(url, headers, payload, timeout):
 
 
 class LLMClient:
-    def __init__(self, cfg, mock=None):
+    def __init__(self, cfg, mock=None, transport=None):
         self.cfg = cfg
         self.mock = mock
+        self.transport = transport or _post
         # An explicit official ENDPOINT outranks a legacy mock base: copying .env.example (LLM_API_BASE=mock://)
         # and filling ENDPOINT must reach the real service, not silently return synthetic mock output.
         if self.mock is None and not cfg.endpoint and cfg.api_base.lower().startswith("mock"):
@@ -141,7 +142,7 @@ class LLMClient:
             stats.attempts.append(detail)
             retryable = True
             try:
-                status, body = _post(self.url, headers, payload, timeout)
+                status, body = self.transport(self.url, headers, payload, timeout)
                 detail["status_code"] = status
                 if status == 200:
                     self._usage(body, stats)

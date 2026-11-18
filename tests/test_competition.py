@@ -86,6 +86,7 @@ class Competition(unittest.TestCase):
         endpoint, requests = self.server()
         poison = {"MODEL_NAME": "wrong", "ENDPOINT": "http://127.0.0.1:1/wrong", "INPUT_PATH": "/missing/input.json",
                   "OUTPUT_PATH": "/missing/output.json", "OUTPUT_PROTOCOL": "legacy", "PROMPT_VERSION": "missing",
+                  "CONTEXT_MODE": "zh_context_v1", "PROMPT_CANDIDATE_PATH": "/missing/candidate.json",
                   "LLM_API_BASE": "mock://", "LLM_API_KEY": "SYNTHETIC-KEY", "OPENAI_API_KEY": "SYNTHETIC-KEY",
                   "HTTP_PROXY": "http://127.0.0.1:1", "HTTPS_PROXY": "http://127.0.0.1:1", "ALL_PROXY": "http://127.0.0.1:1"}
         p = self.run_package(root, [CASE], endpoint, poison)
@@ -232,8 +233,10 @@ class Competition(unittest.TestCase):
                 pass
 
             def do_POST(self):
+                self.rfile.read(int(self.headers.get("Content-Length", 0)))
                 self.send_response(307)
                 self.send_header("Location", endpoint)
+                self.send_header("Content-Length", "0")
                 self.end_headers()
         srv = ThreadingHTTPServer(("127.0.0.1", 0), Redirect)
         threading.Thread(target=srv.serve_forever, daemon=True).start()
@@ -317,7 +320,8 @@ class Competition(unittest.TestCase):
         for path in ("README.md", "README.zh-CN.md"):
             import re
             for target in re.findall(r"\]\(([^)]+)\)", (root / path).read_text()):
-                self.assertTrue((root / target).is_file(), target)
+                if not target.startswith(("https://", "http://")):
+                    self.assertTrue((root / target).is_file(), target)
 
     def test_result_bundle_rejects_changed_outputs_and_stale_logs(self):
         root = self.package()

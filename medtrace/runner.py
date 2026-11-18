@@ -116,7 +116,7 @@ def main(argv=None) -> int:
         return 2 if cfg.official else 1
     try:
         pipe = Pipeline(cfg, LLMClient(cfg))
-    except LLMError as e:
+    except (LLMError, ConfigError) as e:
         log.error("FATAL: %s", e)
         emit({"event": "fatal", "error": str(e)})
         if run_log:

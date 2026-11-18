@@ -50,10 +50,12 @@ class Fact:
     numerics: list = field(default_factory=list)       # [{label, value, unit, raw}]
     dates: list = field(default_factory=list)
     neg_terms: list = field(default_factory=list)
+    contexts: list = field(default_factory=list)
 
 
 @dataclass
 class Ledger:
+    context_mode: str = "legacy"
     facts: list[Fact] = field(default_factory=list)
     numbers: set = field(default_factory=set)           # every numeric value present in the sources
     units: dict = field(default_factory=dict)           # value -> {normalised units}
@@ -103,8 +105,11 @@ def numerics(sent: str, year) -> list[dict]:
     return out
 
 
-def build_ledger(case: Case) -> Ledger:
-    L = Ledger(lang=case.lang)
+def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
+    if context_mode not in ("legacy", "zh_context_v1"):
+        raise ValueError("unknown context mode")
+    from . import context as C
+    L = Ledger(lang=case.lang, context_mode=context_mode)
     year = case.cutoff.year if case.cutoff else None
     n = 0
     pos_parts, clear_parts = [], []
@@ -120,10 +125,12 @@ def build_ledger(case: Case) -> Ledger:
             f = Fact(fid=f"F{n}", sid=src.sid, text=sent, category=_category(sent))
             f.numerics = numerics(sent, year)
             f.dates = [d[0] for d in T.find_dates(sent, year)]
-            f.neg_terms = T.negated_terms(sent)
-            pos = T.positive_text(sent)
+            enhanced = context_mode == C.VERSION and T.detect_lang(sent) == "zh"
+            f.contexts = [s.as_dict() for s in C.analyze(sent)] if enhanced else []
+            f.neg_terms = C.negated_terms(sent) if enhanced else T.negated_terms(sent)
+            pos = C.positive_text(sent) if enhanced else T.positive_text(sent)
             pos_parts.append(pos)
-            clear_parts.append(T.clearly_positive_text(sent))
+            clear_parts.append(pos if enhanced else T.clearly_positive_text(sent))
             if T.has_missing_cue(sent):
                 f.polarity = "missing"
             elif f.neg_terms:
@@ -170,6 +177,7 @@ def _asserts(term: str, text: str) -> bool:
 
 
 def _find_conflicts(L: Ledger) -> None:
+    from . import context as C
     fact = {f.fid: f for f in L.facts}
     seen = set()
     # (1) a history the patient explicitly denies in one source but that another source asserts.
@@ -180,7 +188,12 @@ def _find_conflicts(L: Ledger) -> None:
         for term in T.denied_terms(f.text):
             if term in seen or term in _GENERIC_TERMS:
                 continue
-            pos = [g for g in L.facts if g.sid != f.sid and _asserts(term, g.text)]
+            if L.context_mode != "legacy" and not any(s["assertion"] == "negated" and s["experiencer"] == "patient"
+                                                      for s in C.term_attributes(f.text, term)):
+                continue
+            pos = [g for g in L.facts if g.sid != f.sid and _asserts(term, g.text)
+                   and (L.context_mode == "legacy" or any(s["assertion"] == "affirmed" and s["experiencer"] == "patient"
+                                                        for s in C.term_attributes(g.text, term)))]
             if pos:
                 seen.add(term)
                 L.conflicts.append({"kind": "polarity", "term": term, "detail": f'"{f.text}" vs "{pos[0].text}"',
@@ -205,6 +218,13 @@ def digest(L: Ledger, max_items: int = 40) -> str:
     zh = L.lang == "zh"
     h = (lambda e, z: z if zh else e)
     out = []
+    if L.context_mode != "legacy":
+        out.append("【中文上下文作用域：仅为规则标注；unknown需核实，不得据此补造事实】")
+        for f in L.facts:
+            for s in f.contexts:
+                if len(out) > max_items:
+                    break
+                out.append(f"- ({f.sid}/{f.fid}) {s['dimension']}={s['value']}: {f.text[s['start']:s['end']]}")
     nums = [(f.sid, n["raw"]) for f in L.facts for n in f.numerics][:max_items]
     if nums:
         out.append(h("[Measurements - reproduce value AND unit exactly]", "【数值指标——数值与单位须原样引用】"))
