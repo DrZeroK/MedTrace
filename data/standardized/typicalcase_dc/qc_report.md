@@ -1,6 +1,6 @@
 # TypicalCase-DC quality-control report
 
-Counts only: the case texts are journal case reports obtained under Tianchi terms and are not redistributed (`cases.json` / `references.json` are generated locally and git-ignored).
+The case texts are journal case reports obtained under Tianchi terms; `cases.json` / `references.json` are kept only in the private repository and must not be published or redistributed.
 
 - Labelled items: 2591; kept: 2578; multi-patient texts dropped: 9; exact duplicates: 2; corrupt or unlabelled: 1; unstructured: 1
 - Cases containing explicit dates (usable for chronology and cutoff tests): 664

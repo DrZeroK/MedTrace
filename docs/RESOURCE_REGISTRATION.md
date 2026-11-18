@@ -1,5 +1,7 @@
 # Resource registration (MedTrace)
 
+**English** | [简体中文](RESOURCE_REGISTRATION.zh-CN.md)
+
 Status: **draft — the organiser's registration template is pending [ORG]** (competition Q&A Q2).
 This document follows the fields the Q&A asks for (name, source, version, purpose, size, dependencies)
 and will be reformatted once the official template is published. The authoritative version of every
@@ -45,8 +47,9 @@ download occurs; the only network use is the configured model endpoint (competit
 ## Data
 
 No dataset is bundled in the submission package. Development datasets (CMB-Clin, TypicalCase-DC,
-CHIP-CDEE, MedCT) live under git-ignored `data/` and are used only offline for evaluation; those
-obtained under Tianchi terms are not redistributed.
+CHIP-CDEE, MedCT) live under `data/`; raw downloads stay git-ignored and are used only offline for
+evaluation. Data obtained under Tianchi terms is kept in the private repository only and must not be
+published or redistributed.
 
 ## Pending organiser items [ORG]
 

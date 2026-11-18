@@ -23,7 +23,7 @@ output.json在整批处理结束后原子发布。每条包含case_id、status�
 
 退出码：0为完整输出已写入（允许单例失败）；1为任务运行或输出/日志写入失败；2为配置或基本输入协议错误。根目录run_log.json对应本次完整运行；logs/run_log.jsonl保留追加记录。日志含运行标识、时间戳、病例映射、逐次请求信息、调用/重试次数、token用量和输入输出摘要。
 
-默认固定参数：A2、v2提示词、temperature=0、seed=42、每例最多2次逻辑调用、每次最多2次瞬时错误重试、请求超时600秒、单工作线程、额外模型修复关闭。正式限额须按赛方最终附件确认，当前参数不代表已获赛方批准。
+默认固定参数：A2、v2提示词、temperature=0、seed=42、每例最多2次逻辑调用、每次最多2次瞬时错误重试、请求超时600秒、单工作线程、额外模型修复关闭。正式限额须按赛方最终附件确认，当前参数不代表已获赛方批准。若服务不支持 seed，须显式记录变更；客户端不会静默丢弃。
 
 ## 测试打包
 
@@ -37,10 +37,14 @@ output.json在整批处理结束后原子发布。每条包含case_id、status�
 
 离线测试：将ZIP解压至新目录，设置进程环境LLM_API_BASE=mock://、OUTPUT_PROTOCOL=official，再执行 `python main.py --development --input /绝对路径/input.example.json --output /绝对路径/test_output.json`。这是显式模拟运行。
 
-开发实验须加--development；可在独立工作目录使用.env.development.example，启用模型别名、路径与参数配置，默认使用旧扁平输出。官方病例不得发往第三方服务。
+开发实验须加--development；可在独立工作目录使用.env.development.example，启用模型别名、路径与参数配置，默认使用旧扁平输出。评测模块显式使用开发配置。官方病例不得发往第三方服务。
 
 运行 `python -m unittest discover -s tests -v`检查回归；测试包含本地HTTP模拟服务下、仅两项.env配置的无参数比赛入口，测试产物保留。
 
+## 方法与证据
+
 项目采用事实台账、带来源生成与确定性校验。规则不能证明临床推断正确，也不能发现所有遗漏。历史公开数据上的非指定模型结果不替代指定服务验收。
+
+第一阶段开发候选加入中文 ConText 式作用域与 DSPy MIPROv2 组织指令优化，共享持久化300次请求预算。正式默认值不变，候选待临床盲评；分组、续跑、报告与使用方法见仓库中的 [第一阶段实验](https://github.com/DrZeroK/MedTrace/blob/codex/context-prompt-experiments/docs/PHASE1_EXPERIMENTS.md)。
 
 详见[项目说明](docs/PROJECT_DESCRIPTION.md)、[协议及待验收项](docs/REQUIREMENTS.md)、[声明](docs/DECLARATIONS.md)、[资源登记](docs/RESOURCE_REGISTRATION.md)、[知识库说明](docs/KNOWLEDGE_BASE.md)。

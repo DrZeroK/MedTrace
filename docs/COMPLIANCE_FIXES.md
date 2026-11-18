@@ -1,5 +1,7 @@
 # Competition compliance fixes — 2026-11-18
 
+**English** | [简体中文](COMPLIANCE_FIXES.zh-CN.md)
+
 The earlier audit's engineering issues are addressed below. Packaging is for testing;
 the team ID has not been assigned. This record does not claim designated-service or clinical acceptance.
 

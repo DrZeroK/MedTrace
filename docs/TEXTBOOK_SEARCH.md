@@ -1,5 +1,7 @@
 # 两本教材的本地正文检索
 
+[English](TEXTBOOK_SEARCH.en.md) | **简体中文**
+
 已完成离线全文索引：1554个正文/附录范围内的PDF页，3379个重叠片段。
 数据库约32.3 MiB，位于 `data/reference_indexes/textbooks-v1/textbooks.sqlite`，已排除在Git与提交包之外。
 两个原始PDF仍在用户提供的Downloads路径，没有移动或改写。

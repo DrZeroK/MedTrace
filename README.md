@@ -53,4 +53,6 @@ The pipeline builds a fact ledger, generates source-tagged statements and checks
 
 Historical experiments used mocks and non-designated models on public data. They do not establish performance on the designated service. Engineering validation, designated-service acceptance and clinician assessment are separate checks.
 
+Phase-one development candidates add Chinese ConText-style scopes and DSPy MIPROv2 instruction optimization under a persistent 300-request cap. Official defaults remain unchanged and clinical review is pending. See the repository's [experiment protocol](https://github.com/DrZeroK/MedTrace/blob/codex/context-prompt-experiments/docs/PHASE1_EXPERIMENTS.md) for splits, resume safeguards and reports.
+
 See [requirements](docs/REQUIREMENTS.md), [project description](docs/PROJECT_DESCRIPTION.md), [declarations](docs/DECLARATIONS.md), [resource registration](docs/RESOURCE_REGISTRATION.md) and [optional knowledge support](docs/KNOWLEDGE_BASE.md).

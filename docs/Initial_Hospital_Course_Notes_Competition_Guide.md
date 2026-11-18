@@ -1,5 +1,7 @@
 # Intelligent Generation of Initial Hospital Course Notes
 
+**English** | [简体中文](Initial_Hospital_Course_Notes_Competition_Guide.zh-CN.md)
+
 ## Consolidated Competition Rules, Technical Specifications, and FAQs
 
 > **Editorial note:** The main rules are presented in neutral English, with geographic and institution-specific references removed or generalized. Model names are retained. All appendices are provided in both Chinese and English, and original Chinese text within sample code is preserved. Conflicting or pending requirements are identified explicitly rather than silently resolved. The latest officially released specifications take precedence.

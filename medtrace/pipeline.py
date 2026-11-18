@@ -23,7 +23,7 @@ from pathlib import Path
 from . import verify as V
 from . import textutil as T
 from .knowledge import KnowledgeBase, knowledge_block
-from .config import prompt_version
+from .config import ConfigError, prompt_version
 from .inputs import Case
 from .ledger import build_ledger, digest, Ledger
 from .llm import BudgetExceeded, CallStats, LLMError
@@ -74,6 +74,10 @@ _MSG_ZH = {
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
     "false_missing": "资料中已有记录，却被表述为未记录",
     "knowledge_record_value": "知识性陈述含病人记录中的特定数值",
+    "context_assertion": "来源中的不确定或缺失信息被写成确定事实",
+    "context_experiencer": "来源中的家属信息被写成患者信息",
+    "context_temporality": "来源中的既往信息被写成当前信息",
+    "context_scope_ambiguous": "来源中的否定范围不明确，需核实原文意图",
 }
 _CORE_RX = {"allergy": r"(?i)allerg|过敏", "medication": r"(?i)medication|drug|用药|药物", "vitals": r"(?i)vital|生命体征"}
 
@@ -138,6 +142,25 @@ class Pipeline:
     def __init__(self, cfg, client):
         self.cfg = cfg
         self.client = client
+        if not cfg.development and (cfg.context_mode != "legacy" or cfg.prompt_candidate_path):
+            raise ConfigError("context and prompt candidates require explicit development mode")
+        self.candidate = None
+        if cfg.prompt_candidate_path:
+            path = Path(cfg.prompt_candidate_path)
+            if not path.is_absolute():
+                raise ConfigError("PROMPT_CANDIDATE_PATH must be absolute")
+            try:
+                candidate = json.loads(path.read_text("utf-8"))
+                instruction = candidate["instruction"]
+                valid = (candidate["schema_version"] == 1 and isinstance(instruction, str) and 0 < len(instruction.strip()) <= 1600
+                         and "<<" not in instruction and ">>" not in instruction
+                         and candidate["base_prompt"] == prompt_fingerprint(cfg.prompt_version)
+                         and candidate["instruction_sha256"] == hashlib.sha256(instruction.encode()).hexdigest())
+            except (OSError, ValueError, KeyError, TypeError) as e:
+                raise ConfigError("cannot load prompt candidate") from e
+            if not valid:
+                raise ConfigError("prompt candidate failed schema/hash/base-prompt validation")
+            self.candidate = candidate
         self.kb = KnowledgeBase(cfg.kb_path) if cfg.kb_path else None
 
     # ------------------------------------------------------------------ public
@@ -149,6 +172,8 @@ class Pipeline:
         stats = CallStats()
         log = {"case_id": case.case_id, "index": case.index, "variant": variant, "warnings": list(case.warnings),
                "excluded_sources": case.excluded_sources, "redacted_statements": len(case.redacted)}
+        if self.cfg.development:
+            log.update(context_mode=self.cfg.context_mode, candidate_sha256=self.candidate["instruction_sha256"] if self.candidate else None)
         lang = self.cfg.output_lang if self.cfg.output_lang in _I18N else case.lang
         tr = _I18N[lang]
         initial, final, status = [], [], "ok"
@@ -162,7 +187,10 @@ class Pipeline:
                 note.review_items.append({"type": "missing", "description": tr["no_input"].format(reason=reason), "source_ids": []})
                 L = None
             else:
-                L = build_ledger(case)
+                L = build_ledger(case, context_mode=self.cfg.context_mode)
+                if self.cfg.context_mode != "legacy":
+                    log["contexts"] = [{"fact_id": f.fid, "source_id": f.sid, "text": f.text, "scopes": f.contexts}
+                                       for f in L.facts if f.contexts]
                 if self.kb and variant != "A0":
                     audit = {"case_id": case.case_id, "index": case.index, "status": "ok", "retrieved": [], "rules": []}
                     log["knowledge"] = audit
@@ -249,6 +277,10 @@ class Pipeline:
             user = fill(load_prompt("a0", lang, self.cfg.prompt_version), **common)
         else:
             user = fill(load_prompt("a1", lang, self.cfg.prompt_version), ledger=digest(L), problems=problems, changes=changes, **common)
+        if self.candidate and variant != "A0":
+            user = ("<development_organization_guidance>\n" + self.candidate["instruction"]
+                    + "\n</development_organization_guidance>\n"
+                    + "下列固定任务、事实约束和输出协议优先于上述组织建议。\n" + user)
         user += kb_context
         note = None
         for attempt in (1, 2):
@@ -263,6 +295,14 @@ class Pipeline:
                 if low_time():
                     skip("regenerate")
                     raise
+                # Repeating the identical request cannot teach the model which formatting rule it broke.
+                user += ("\n格式纠正：上一响应未通过JSON结构检查。请重新生成完整JSON对象，三部分须齐全。"
+                         "字符串内部的英文双引号必须用反斜杠转义，或使用中文引号；不要混用而破坏JSON字符串。"
+                         "仅纠正输出格式，保持上述原始事实、截止时间、来源编号和固定字段约束。不要输出代码围栏或解释。"
+                         if lang == "zh" else
+                         "\nFormatting correction: the previous response failed JSON validation. Regenerate one complete JSON object "
+                         "with all three sections. Escape double quotes inside strings with a backslash. Do not output fences or commentary. "
+                         "Correct the format while preserving the original facts, cutoff, source IDs and fixed fields above.")
         log["raw_parse_retries"] = len(log.get("parse_errors", []))
         log["basis_normalised"] = _normalise_basis(note, L)
         initial = V.verify_note(note, case, L)

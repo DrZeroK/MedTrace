@@ -34,7 +34,7 @@
    "license": "Tianchi terms accepted by the downloader; underlying texts are journal articles. No licence text in the archive",
    "verified": "team-supplied archive inspected and fully processed 2026-11-17",
    "access": "Tianchi account",
-   "redistribution": "not permitted: standardized cases and references are generated locally and git-ignored; only counts are committed",
+   "redistribution": "not permitted outside the private repository: standardized cases and references are committed there for team use only and must not be published",
    "permitted_use_here": [
     "evaluation and prompt development on the dev split (local only)"
    ],

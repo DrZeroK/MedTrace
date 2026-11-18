@@ -1,5 +1,7 @@
 # Clinical error classification and scoring rubric (draft for Clinical Lead sign-off)
 
+**English** | [简体中文](CLINICAL_RUBRIC.zh-CN.md)
+
 ## Severity
 
 - **Critical (severe)** — could plausibly lead to patient harm if the note were acted on, or misrepresents the

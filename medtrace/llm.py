@@ -4,6 +4,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import time
@@ -66,9 +67,10 @@ def _post(url, headers, payload, timeout):
 
 
 class LLMClient:
-    def __init__(self, cfg, mock=None):
+    def __init__(self, cfg, mock=None, transport=None):
         self.cfg = cfg
         self.mock = mock
+        self.transport = transport or _post
         # An explicit official ENDPOINT outranks a legacy mock base: copying .env.example (LLM_API_BASE=mock://)
         # and filling ENDPOINT must reach the real service, not silently return synthetic mock output.
         if self.mock is None and not cfg.endpoint and cfg.api_base.lower().startswith("mock"):
@@ -141,11 +143,11 @@ class LLMClient:
             stats.attempts.append(detail)
             retryable = True
             try:
-                status, body = _post(self.url, headers, payload, timeout)
+                status, body = self.transport(self.url, headers, payload, timeout)
                 detail["status_code"] = status
                 if status == 200:
                     self._usage(body, stats)
-                    return self._content(body)
+                    return self._content(body, detail)
                 last = f"HTTP {status}: {body[:200]}"
                 retryable = status in _RETRY_STATUS
             except ConnectionError as e:
@@ -180,12 +182,21 @@ class LLMClient:
                 setattr(stats, key, getattr(stats, key) + v)
 
     @staticmethod
-    def _content(body: str) -> str:
+    def _content(body: str, detail: dict | None = None) -> str:
+        if detail is not None:
+            detail["response_sha256"] = hashlib.sha256(body.encode("utf-8")).hexdigest()
         try:
-            msg = json.loads(body)["choices"][0]["message"]
+            choice = json.loads(body)["choices"][0]
+            msg = choice["message"]
             content = msg.get("content")
         except (ValueError, KeyError, IndexError, TypeError, AttributeError) as e:
             raise LLMError(f"unexpected response shape: {body[:200]}") from e
+        if detail is not None:
+            finish = choice.get("finish_reason")
+            detail["finish_reason"] = finish if finish in ("stop", "length", "content_filter", "tool_calls", "function_call") else "unknown"
+            detail["content_type"] = type(content).__name__
+            if isinstance(content, str):
+                detail["content_characters"] = len(content)
         if isinstance(content, list):
             content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
         if not isinstance(content, str) or not content.strip():

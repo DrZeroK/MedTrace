@@ -1,5 +1,7 @@
 # MedTrace — next-steps handoff
 
+**English** | [简体中文](NEXT_STEPS_HANDOFF.zh-CN.md)
+
 Written 2026-11-17 for a coding model taking over implementation. Read this file, then `docs/COMPETITION_QA.md`,
 then the code you are about to touch. Do not treat README or report claims as proof; section 2 lists what was
 re-verified against the code on the date above.
@@ -24,7 +26,6 @@ Local-only, git-ignored material that a fresh clone will **not** have:
 
 - `.env` — holds the project owner's commercial API key. Never commit it.
 - `data/raw/` — downloaded datasets (CMB, MedCT notes, CBLUE Tianchi archives).
-- `data/standardized/typicalcase_dc/{cases,references}.json` — generated from a Tianchi download; not redistributable.
 - `eval/results/` and `eval/archive/` — run outputs, kept locally only (not committed). `eval/archive/` holds the
   real-model development runs behind `docs/REPORT.md` §2.6; the numbers in the report are the record, the raw
   outputs are not redistributed.

@@ -11,17 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dependencies: [pinned, stdlib]
+        dependencies: [pinned, stdlib, dspy]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"   # competition unified runtime (tech spec 附件3)
       - name: Install dependencies
-        if: matrix.dependencies == 'pinned'
+        if: matrix.dependencies != 'stdlib'
         run: python -m pip install -r requires.txt
+      - name: Install optional optimizer for its offline integration test
+        if: matrix.dependencies == 'dspy'
+        run: python -m pip install 'dspy[optuna,numpy]==3.5.0'
       - name: Run tests (includes the submission-package smoke test)
-        if: matrix.dependencies == 'pinned'
+        if: matrix.dependencies != 'stdlib'
         run: python -m unittest discover -s tests -v
       - name: Run without site packages
         if: matrix.dependencies == 'stdlib'

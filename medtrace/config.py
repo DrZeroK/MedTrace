@@ -68,6 +68,8 @@ def _tri_flag(*names):
 @dataclass
 class Config:
     development: bool = False
+    context_mode: str = "legacy"
+    prompt_candidate_path: str = ""
     prompt_version: str = DEFAULT_PROMPT_VERSION
     kb_path: str = ""
     input_path: str = "input.json"
@@ -174,6 +176,8 @@ def load_config(*, development: bool = False, **overrides) -> Config:
     load_dotenv_files()
     c = Config(
         development=True,
+        context_mode=str(_get("CONTEXT_MODE", default="legacy")),
+        prompt_candidate_path=str(_get("PROMPT_CANDIDATE_PATH", default="")),
         prompt_version=str(_get("PROMPT_VERSION", default=DEFAULT_PROMPT_VERSION)).strip(),
         kb_path=_get("KB_PATH", default=""),
         input_path=_get("INPUT_PATH", default="input.json"),
@@ -229,4 +233,6 @@ def load_config(*, development: bool = False, **overrides) -> Config:
         c.pipeline = "A2"
     if c.output_protocol not in ("legacy", "official"):
         c.output_protocol = "official"
+    if c.context_mode not in ("legacy", "zh_context_v1"):
+        raise ConfigError("CONTEXT_MODE must be legacy or zh_context_v1")
     return c

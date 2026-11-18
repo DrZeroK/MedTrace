@@ -1,8 +1,10 @@
 # Competition Technical Q&A
 
-- Compiled on: 2026-11-17.
-- Source: the organizer's full Q&A supplied by the project owner in conversation. No original announcement URL, publication date, or version number was provided.
-- Editorial approach: all nine questions and answers are translated into English, with consistent headings, paragraphs, and code formatting.
+**English** | [简体中文](COMPETITION_QA.zh-CN.md)
+
+- Compiled on: 2026-11-17. Updated on: 2026-11-18 with four supplementary organizer answers (Q10-Q13).
+- Source: the organizer's full Q&A supplied by the project owner in conversation, plus the supplementary answers supplied on 2026-11-18. No original announcement URL, publication date, or version number was provided.
+- Editorial approach: all questions and answers are translated into English, with consistent headings, paragraphs, and code formatting.
 - Applicability: this document records the supplied answers. Subsequent unified technical specifications, actual API examples, and official evaluation configurations take precedence. This document does not certify that the repository implements or satisfies every requirement.
 
 ## Rules at a Glance
@@ -14,6 +16,10 @@
 | Dependencies and deployment | Reasonable third-party dependencies are supported in principle | Complete dependency documentation required; package size and compatibility requirements pending |
 | Official evaluation network | Only designated internal services are accessible | No public internet access or runtime online installation or downloading of resources |
 | `seed` | May be passed at the top level of the request body | May be omitted with an explanation if unsupported; exact reproducibility is not guaranteed |
+| vLLM automatic prefix caching | Native to the self-hosted service; centrally managed | No cache marker (`cachemark`) needed in request input or output; planned to be disabled for official evaluation; final published environment configuration prevails |
+| Reproducibility | Model version, inference framework, runtime environment, and evaluation conditions are unified; fixed random seed permitted within interface support | A fixed seed does not guarantee identical outputs; organizers guarantee consistent conditions and verifiable results, not word-for-word-identical generations; participants must pin their own code, dependency, and knowledge-resource versions and control internal randomness |
+| Embedding models (e.g., BGE-M3) | Unified internal-network embedding API planned on the Ascend stack | Self-deployment of embedding models requiring GPU/NPU not supported in principle; local knowledge bases and prebuilt indexes may be submitted, size limits pending |
+| Enterprise-track hardware | Model inference served on a unified Huawei Ascend deployment; participant algorithms run in an isolated CPU environment without direct GPU/NPU allocation | Python, rule computation, local retrieval, and lightweight computing allowed within resource limits; no additional self-deployed LLMs or GPU/NPU inference services; special CPU dependencies require advance declaration and compatibility review; OS, CPU, memory, storage, and runtime limits pending |
 | Token, call, and runtime budgets | No explicit total token limit during the current development and testing stage | Official timeout, runtime, token, call, and retry limits pending; participant-initiated retries count toward the call budget |
 | `temperature` and `response_format` | Participant configuration permitted in principle | Subject to the deployed version and unified API specification |
 | Thinking | Strategy-dependent selection permitted in principle | Controlled through `chat_template_kwargs`; omission uses the server default |
@@ -123,6 +129,40 @@ During compatibility prechecks, the organizers will accommodate both filenames f
 
 Official submissions must follow the updated unified technical specification.
 
+## 5. Inference Infrastructure and Runtime Environment
+
+### Q10. Does the self-hosted vLLM service use prefix caching, and must participants add a cachemark?
+
+The competition uses a self-hosted vLLM inference service. vLLM natively supports automatic prefix caching; participants do not need to manually add any cache marker (`cachemark`) to the input or output of requests.
+
+Whether prefix caching is enabled and its specific configuration are managed centrally by the organizing committee; participants do not need to handle it themselves. For official evaluation, automatic prefix caching is planned to be disabled uniformly to reduce the influence of cache state on the evaluation process. The final published environment configuration prevails.
+
+### Q11. How reproducible are inference results, and what does a fixed random seed guarantee?
+
+The organizers understand that floating-point computation, concurrent scheduling, and inference optimizations may introduce a degree of nondeterminism into large-model inference.
+
+The competition will unify the model version, inference framework, runtime environment, and evaluation conditions, and permits participants to set a fixed random seed within the range supported by the interface.
+
+It should be noted that a fixed random seed is not equivalent to a guarantee that model outputs will be completely identical. The competition primarily guarantees that evaluation conditions are consistent and results are verifiable; it does not require each generation to be identical word for word.
+
+Participants only need to ensure that their own code, dependencies, and knowledge resources are pinned to fixed versions, and to reasonably control random behavior inside their algorithms.
+
+### Q12. May participants self-deploy BGE-M3 or other embedding models?
+
+Considering that the competition uses the Huawei Ascend technology stack, and to reduce deployment complexity and ensure evaluation fairness, the organizers plan to provide a unified internal-network embedding API. Participants can generate vectors through this unified interface and implement knowledge base construction, vector retrieval, hybrid recall, and other RAG algorithm logic themselves.
+
+In principle, participants are not supported in self-deploying embedding models that require GPU/NPU resources. Submitting local knowledge bases and prebuilt indexes is permitted; the specific resource size limits will be published uniformly.
+
+### Q13. What hardware is available in the enterprise track, and may participants run local inference?
+
+Model inference in the enterprise track is deployed uniformly on the Huawei Ascend technology stack.
+
+Participant algorithms in principle run in an isolated CPU environment and are not directly allocated GPU/NPU resources. Within the prescribed resource limits, participants may run Python programs, rule computation, local retrieval, and other lightweight computing tasks.
+
+Participants may not deploy or run additional self-hosted large models or GPU/NPU inference services. Special CPU computing dependencies may be declared in advance for a compatibility assessment.
+
+The specific operating system, CPU, memory, storage, and runtime limits will be specified uniformly in the official evaluation environment specification.
+
 ## Items Awaiting Organizer Clarification
 
 The following items were not finalized in this Q&A and must not be replaced with assumed official limits:
@@ -132,5 +172,9 @@ The following items were not finalized in this Q&A and must not be replaced with
 - How platform faults are confirmed and handled under the unified exception-handling rules.
 - Actual model configuration, default Thinking mode, supported parameters, and unified API examples.
 - Final result filename and data structure.
+- Final evaluation environment configuration, including whether vLLM automatic prefix caching is disabled for official evaluation.
+- Specification of the unified internal-network embedding API, including endpoint, model name, vector dimensions, batching, and rate limits.
+- Size limits for local knowledge bases and prebuilt indexes submitted with the algorithm.
+- Operating system, CPU, memory, storage, and runtime limits of the isolated CPU evaluation environment.
 
 This Q&A does not specify the exact model name, ENDPOINT configuration method, complete input/output schemas, or exit-code rules. These items must be checked separately against the official technical specification.
