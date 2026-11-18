@@ -90,7 +90,7 @@ class KnowledgeTests(unittest.TestCase):
             self.assertEqual(state(t), "insufficient", t)
 
     def test_number_quotation_and_patient_values(self):
-        L = build_ledger(self.case); L.knowledge_enabled = True; L.knowledge_cards = {"K1":self.entries[0]}
+        L = build_ledger(self.case); L.knowledge_cards = {"K1":self.entries[0]}
         def codes(st, sec="diagnostic_discussion"):
             return {f.code for f in check_statement(sec,0,st,self.case,L)}
         quote = Statement(self.entries[0]["text"], [], "", "knowledge", ["K1"])
@@ -103,7 +103,7 @@ class KnowledgeTests(unittest.TestCase):
     def test_parse_copy_and_patch(self):
         n = note_from_model({"diagnostic_discussion":[{"text":self.entries[0]["text"],"basis":"knowledge","knowledge_ids":["K1"]}]})
         self.assertEqual(n.copy().sections["diagnostic_discussion"][0].knowledge_ids, ["K1"])
-        L = build_ledger(self.case); L.knowledge_enabled=True; L.knowledge_cards={"K1":self.entries[0]}
+        L = build_ledger(self.case); L.knowledge_cards={"K1":self.entries[0]}
         result = apply_patches(n,[{"section":"diagnostic_discussion","index":0,"action":"replace","text":"伪造知识", "basis":"knowledge","knowledge_ids":["BAD"]}], self.case,L,"review",set())
         self.assertEqual(result["rejected"],1)
 
@@ -137,6 +137,49 @@ class KnowledgeTests(unittest.TestCase):
             res=pipe.run_case(self.case)
         self.assertEqual(res.log["knowledge"]["status"],"degraded")
         self.assertTrue(any("知识检索失败" in r["description"] for r in res.record["review_items"]))
+
+    def test_same_reply_with_no_library_no_hits_error_and_cards(self):
+        reply = json.dumps({
+            "case_features": [{"text": "患者50岁。", "sources": ["S1"]}],
+            "diagnostic_discussion": [{"text": "结合病史及检查综合评估。", "basis": "knowledge"}],
+            "treatment_plan": [{"text": "建议复核病历。", "sources": ["S1"], "basis": "inference"}],
+        }, ensure_ascii=False)
+
+        def run(kb, found, error=None):
+            prompts = []
+            def transport(url, headers, payload, timeout):
+                prompts.append(payload["messages"])
+                return 200, json.dumps({"choices": [{"message": {"content": reply}}]})
+            cfg = Config(endpoint="http://127.0.0.1/stub", model="test", repair_call=False)
+            pipe = Pipeline(cfg, LLMClient(cfg, transport=transport))
+            pipe.kb = kb
+            with patch.object(self.kb, "retrieve", return_value=found, side_effect=error):
+                result = pipe.run_case(self.case)
+            self.assertEqual(result.status, "ok")
+            return prompts, result
+
+        baseline, plain = run(None, [])
+        for found, error, status in (([], None, "no_hits"), ([], OSError("failure"), "degraded"),
+                                      ([self.entries[0]], None, "ok")):
+            with self.subTest(status=status):
+                prompts, result = run(self.kb, found, error)
+                self.assertEqual(result.log["knowledge"]["status"], status)
+                codes = {f.code for f in result.final_findings}
+                self.assertEqual("missing_knowledge_ref" in codes, bool(found))
+                if not found:
+                    self.assertEqual(prompts, baseline)
+                    self.assertEqual(result.final_findings, plain.final_findings)
+                if status == "no_hits":
+                    self.assertTrue(any(r["state"] == "triggered" for r in result.log["knowledge"]["rules"]))
+                    self.assertTrue(any(self.entries[-1]["text"] in item for item in result.record["medical_record"]["review_items"]))
+                if status == "degraded":
+                    self.assertTrue(any("知识检索失败" in item for item in result.record["medical_record"]["review_items"]))
+
+    def test_fabricated_knowledge_id_checked_without_a_library(self):
+        ledger = build_ledger(self.case)
+        st = Statement("患者血钾 99 mmol/L。", ["S1"], "", "record", ["FORGED"])
+        codes = {f.code for f in check_statement("case_features", 0, st, self.case, ledger)}
+        self.assertTrue({"invalid_knowledge_ref", "knowledge_in_features", "number_not_in_source"} <= codes)
 
     def test_package_with_knowledge(self):
         from scripts.build_submission import build_zip

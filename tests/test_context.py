@@ -19,6 +19,40 @@ from medtrace.pipeline import Pipeline, prompt_fingerprint
 from medtrace.verify import check_statement
 
 
+class EvidenceStatusTests(unittest.TestCase):
+    def test_assertion_drift_and_controls_in_features_and_discussion(self):
+        examples = [
+            ("痰培养待回报，未提供血气分析。", "未行血气分析评估缺氧。", "unsupported_test_status"),
+            ("活动耐量下降1个月，近3天夜间憋醒、需垫高枕头。",
+             "表现为突发呼吸困难和低氧。", "unsupported_sudden_onset"),
+            ("血气分析已采样，结果待回报。", "血气分析结果正常。", "unsupported_test_status"),
+            ("未行血气分析。", "未行血气分析。", None),
+            ("劳力性气促2个月，今日突发呼吸困难。", "今日突发呼吸困难。", None),
+            ("胸闷2个月。", "若突发胸闷则考虑进一步复核。", None),
+            ("胸闷2个月，昨晚突发头痛。", "昨晚突发头痛。", None),
+            ("既往肝功能结果待回报。", "本次未行肝功能检查。", None),
+            ("尿培养结果待回报。", "未行血培养。", None),
+            # New wording and entities exercise the same boundaries independently.
+            ("胸片已完成，报告尚未出具。", "胸片未做。", "unsupported_test_status"),
+            ("头痛反复半年，近两日加重。", "患者突然出现头痛。", "unsupported_sudden_onset"),
+            ("昨晚头痛，否认突发头痛。", "昨晚突发头痛。", "unsupported_sudden_onset"),
+            ("今日未做胸片，昨日报告未提供。", "今日未做胸片。", None),
+            ("昨日尿培养报告未提供。", "今日确认未行尿培养。", None),
+            ("本次没有血气结果。", "如未行血气分析，可核对医嘱。", None),
+        ]
+        for source, claim, expected in examples:
+            case = parse_case({"case_id": "scope", "record_cutoff": "T0",
+                               "sources": [{"source_id": "S", "content": source}]}, 0)
+            ledger = build_ledger(case, context_mode="zh_context_v1")
+            for section in ("case_features", "diagnostic_discussion"):
+                with self.subTest(claim=claim, section=section):
+                    findings = check_statement(section, 0, Statement(claim, ["S"]), case, ledger)
+                    found = {f.code for f in findings if f.code in
+                             ("unsupported_test_status", "unsupported_sudden_onset")}
+                    self.assertEqual(found, {expected} if expected else set())
+                    self.assertTrue(all(f.text == claim and "S" in f.message for f in findings if f.code in found))
+
+
 CONTRASTS = [
     ("患者发热。", "发热", "affirmed"), ("否认发热。", "发热", "negated"),
     ("没有咳嗽。", "咳嗽", "negated"), ("不伴胸痛。", "胸痛", "negated"),

@@ -194,12 +194,13 @@ class Pipeline:
                 if self.kb and variant != "A0":
                     audit = {"case_id": case.case_id, "index": case.index, "status": "ok", "retrieved": [], "rules": []}
                     log["knowledge"] = audit
-                    L.knowledge_enabled = True
                     try:
                         cards = self.kb.retrieve(case.text)
+                        normalized = [{"fact_id": f.fid, "source_id": f.sid, "polarity": f.polarity,
+                                      "matches": self.kb.normalize(f.text)} for f in L.facts]
+                        rules = self.kb.check_rules(L)
                         L.knowledge_cards = {e["id"]: e for e in cards}
-                        audit.update(retrieved=cards, normalized=[{"fact_id": f.fid, "source_id": f.sid, "polarity": f.polarity,
-                                      "matches": self.kb.normalize(f.text)} for f in L.facts], rules=self.kb.check_rules(L))
+                        audit.update(status="ok" if cards else "no_hits", retrieved=cards, normalized=normalized, rules=rules)
                     except Exception as e:
                         L.knowledge_cards = {}
                         audit.update(status="degraded", error=str(e))

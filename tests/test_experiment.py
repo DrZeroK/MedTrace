@@ -1,10 +1,12 @@
 import json
 import tempfile
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
 from eval.experiment import RequestBudget
+from eval.followup import FollowupBudget, planned_jobs
 from medtrace.llm import BudgetExceeded, CallStats, LLMClient
 from medtrace.config import Config
 
@@ -54,4 +56,22 @@ class BudgetTests(unittest.TestCase):
                     budget.post("http://test", {}, {}, 1)
             self.assertEqual(budget.used(), 1)
             self.assertEqual(budget.events[-1]["error_type"], "ConnectionError")
+
+    def test_followup_concurrent_budget_is_global_and_persists(self):
+        self.assertEqual(sum(map(len, planned_jobs())), 48)
+        def submit(budget, stage, index):
+            try:
+                budget.post("http://stub", {}, {"model": "test"}, 1, purpose=f"{stage}/{index}", stage=stage)
+            except BudgetExceeded:
+                return False
+            return True
+        with FollowupBudget(self.d, {"test": "capped"}) as budget, ThreadPoolExecutor(3) as pool:
+            with patch("medtrace.llm._post", return_value=(200, "{}")) as post:
+                initial = list(pool.map(lambda i: submit(budget, "development", i), range(60)))
+                recovery = list(pool.map(lambda i: submit(budget, "recovery", i), range(10)))
+                self.assertEqual((sum(initial), sum(recovery), post.call_count), (52, 8, 60))
+        with FollowupBudget(self.d, {"test": "capped"}) as budget:
+            self.assertEqual(budget.used(), 60)
+            self.assertFalse(submit(budget, "development", 61))
+            self.assertFalse(submit(budget, "recovery", 61))
 

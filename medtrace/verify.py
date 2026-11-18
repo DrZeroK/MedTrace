@@ -93,15 +93,20 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             add("date_not_in_source", MEDIUM, f"date {dt:%Y-%m-%d} does not appear in the records")
 
     quoted_knowledge = sec != "features" and approved_quote(st, L.knowledge_cards)
-    if L.knowledge_enabled:
-        if any(k not in L.knowledge_cards for k in st.knowledge_ids):
-            add("invalid_knowledge_ref", MEDIUM, "knowledge reference was not supplied for this case")
-        if sec == "features" and st.knowledge_ids:
-            add("knowledge_in_features", HIGH, "knowledge cannot establish patient facts")
+    if any(k not in L.knowledge_cards for k in st.knowledge_ids):
+        add("invalid_knowledge_ref", MEDIUM, "knowledge reference was not supplied for this case")
+    if sec == "features" and st.knowledge_ids:
+        add("knowledge_in_features", HIGH, "knowledge cannot establish patient facts")
+    if L.knowledge_cards:
         if st.basis == "knowledge" and not st.knowledge_ids:
             add("missing_knowledge_ref", MEDIUM, "knowledge statement has no knowledge citation")
         if st.basis == "knowledge" and T.extract_numbers(text) and not quoted_knowledge:
             add("unverified_knowledge_number", MEDIUM, "numeric knowledge must quote an approved supplied card exactly")
+
+    if L.context_mode == "zh_context_v1" and sec in ("features", "discussion") and st.basis != "knowledge":
+        from .evidence_status import unsupported_claims
+        for code, reason in unsupported_claims(text, L.facts):
+            add(code, MEDIUM, reason)
 
     # ---- numbers and units
     if sec in ("features", "discussion") and not quoted_knowledge:

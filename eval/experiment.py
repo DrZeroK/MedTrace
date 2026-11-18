@@ -96,22 +96,21 @@ class RequestBudget:
             os.fsync(f.fileno())
         self.events.append(event)
 
-    def post(self, url, headers, payload, timeout):
+    def post(self, url, headers, payload, timeout, *, purpose=None, stage=None):
         with self.mutex:
-            return self._post(url, headers, payload, timeout)
-
-    def _post(self, url, headers, payload, timeout):
-        if self.stage not in self.LIMITS:
-            raise ValueError("unknown request stage")
-        if self.used() >= 300 or self.used(self.stage) >= self.LIMITS[self.stage]:
-            raise BudgetExceeded(f"{self.stage} HTTP request allowance exhausted")
-        number = self.used() + 1
-        self.append({"event": "reserved", "id": number, "stage": self.stage, "purpose": self.purpose,
-                     "request_sha256": fingerprint({"url": url, "body": payload}), "model": payload.get("model")})
+            stage = self.stage if stage is None else stage
+            if stage not in self.LIMITS:
+                raise ValueError("unknown request stage")
+            if self.used(stage) >= self.LIMITS[stage]:
+                raise BudgetExceeded(f"{stage} HTTP request allowance exhausted")
+            number = self.used() + 1
+            self.append({"event": "reserved", "id": number, "stage": stage, "purpose": purpose or self.purpose,
+                         "request_sha256": fingerprint({"url": url, "body": payload}), "model": payload.get("model")})
         try:
             status, body = llm._post(url, headers, payload, timeout)
         except BaseException as e:
-            self.append({"event": "finished", "id": number, "error_type": type(e).__name__})
+            with self.mutex:
+                self.append({"event": "finished", "id": number, "error_type": type(e).__name__})
             raise
         try:
             usage = json.loads(body).get("usage", {})
@@ -119,7 +118,8 @@ class RequestBudget:
             usage = {}
         usage = {k: v for k, v in usage.items() if k in ("prompt_tokens", "completion_tokens", "total_tokens")
                  and isinstance(v, int) and not isinstance(v, bool) and v >= 0} if isinstance(usage, dict) else {}
-        self.append({"event": "finished", "id": number, "status_code": status, "usage": usage})
+        with self.mutex:
+            self.append({"event": "finished", "id": number, "status_code": status, "usage": usage})
         return status, body
 
     def summary(self):
