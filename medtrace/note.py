@@ -5,7 +5,7 @@ import json
 import re
 from dataclasses import dataclass, field
 
-from .textutil import split_sentences, strip_enum
+from .textutil import detect_lang, split_sentences, strip_enum
 
 SECTIONS = ("case_features", "diagnostic_discussion", "treatment_plan")
 _ALIASES = {
@@ -17,6 +17,10 @@ _MARK = re.compile(r"\s*\[\[([^\[\]]+)\]\]")
 _THINK = re.compile(r"<think>.*?</think>", re.S | re.I)
 _FENCE = re.compile(r"^\s*```(?:json)?\s*|\s*```\s*$", re.I)
 REVIEW_TYPES = ("missing", "conflict", "verify")
+# Verifier findings and internal pipeline warnings stay in run logs; the scored review_items
+# must read as clinician-facing missing/conflict/confirmation items, not QA messages that quote
+# our own draft back at the reader.
+OFFICIAL_REVIEW_EXCLUDE = {"verifier", "internal"}
 
 
 class ParseError(Exception):
@@ -149,7 +153,7 @@ def note_from_model(obj: dict, require_complete: bool = False) -> Note:
         typ = str(r.get("type") or "verify").lower()
         if desc:
             note.review_items.append({"type": typ if typ in REVIEW_TYPES else "verify", "description": str(desc),
-                                      "source_ids": _ids(r.get("sources", r.get("source_ids")))})
+                                      "source_ids": _ids(r.get("sources", r.get("source_ids"))), "origin": "model"})
     for e in obj.get("evidence") or []:
         if isinstance(e, dict) and (e.get("statement") or e.get("claim") or e.get("text")):
             note.extra_evidence.append({"section": str(e.get("section") or ""),
@@ -164,6 +168,24 @@ def render_section(stmts: list[Statement], numbered: bool, inline: bool) -> str:
         t = s.text + (f" [{', '.join(s.sources)}]" if inline and s.sources else "")
         lines.append(f"{i}. {t}" if numbered and len(stmts) > 1 else t)
     return "\n".join(lines)
+
+
+_TERMINAL = re.compile(r"[。！？；.!?;][\"'”’）)]*$")
+
+
+def render_prose(stmts: list[Statement]) -> str:
+    """Official sections read as one paragraph; evidence remains in the separate evidence array."""
+    texts = [s.text.strip() for s in stmts if s.text and s.text.strip()]
+    if not texts:
+        return ""
+    zh = detect_lang(" ".join(texts)) == "zh"
+    out = texts[0]
+    for t in texts[1:]:
+        if _TERMINAL.search(out):
+            out += t if zh else " " + t
+        else:
+            out += ("；" if zh else "; ") + t
+    return out
 
 
 def to_record(note: Note, case, cfg, meta: dict | None = None) -> dict:
@@ -214,7 +236,7 @@ def to_official_record(note: Note, case, meta: dict | None = None, status: str =
             "error": {"code": str((error or {}).get("code", "GENERATION_ERROR")),
                       "message": str((error or {}).get("message", "generation failed"))},
         }
-    sections = {sec: render_section(note.sections[sec], True, False) for sec in SECTIONS}
+    sections = {sec: render_prose(note.sections[sec]) for sec in SECTIONS}
 
     def _kind(sec: str, basis: str) -> str:
         """Official 'fact' = content stated in the records; 'inference' = reasoning over them.
@@ -235,7 +257,9 @@ def to_official_record(note: Note, case, meta: dict | None = None, status: str =
                     "kind": _kind(e.get("section", ""), e.get("basis", ""))}
                    for e in note.extra_evidence if e["source_ids"]]
     evidence = _select_evidence(candidates)
-    review = [r["description"] for r in note.review_items if r.get("description")]
+    review = [r["description"] for r in note.review_items
+              if r.get("description")
+              and (r.get("origin", "model") not in OFFICIAL_REVIEW_EXCLUDE or r.get("official_visible"))]
     return {
         "case_id": case.case_id,
         "status": "success",

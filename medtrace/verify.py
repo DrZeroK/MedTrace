@@ -177,7 +177,8 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 add("false_missing", HIGH, f"states that {key} information is not documented, but the records contain it")
     if sec == "features" and checked.strip():
         for term in (C.negated_terms(checked) if enhanced else T.negated_terms(checked)):
-            if term in L.neg_terms:
+            term_norm = T.squash(term)
+            if term_norm in L.neg_terms_norm:
                 continue
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS:
                 continue        # "无扩张" at one site does not contradict "扩张" at another; section headers are not findings
@@ -186,11 +187,11 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 if source_states and all(s["assertion"] == "unknown" for s in source_states):
                     add("context_scope_ambiguous", MEDIUM, f"{term!r}: the source assertion scope is ambiguous; review required")
                     continue
-            if term in L.clear_pos_text:
+            if term_norm in L.clear_pos_text_norm:
                 add("negation_flip", HIGH, f"{term!r} is negated here but the records document it as present")
-            elif term in L.pos_text:
+            elif term_norm in L.pos_text_norm:
                 continue        # the records mention it after a negation cue: ambiguous, not flagged
-            elif term not in L.all_text:
+            elif term_norm not in L.all_text_norm:
                 add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records")
     if enhanced and sec == "features":
         for code, term in C.context_conflicts(checked, L.facts):
@@ -218,7 +219,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
 
     # ---- diagnostic certainty
     if sec == "discussion" and T.has_certain_cue(text) and not T.has_certain_cue(L.all_text):
-        add("overconfident", LOW, "uses definitive diagnostic wording not present in the records")
+        add("overconfident", MEDIUM, "uses definitive diagnostic wording not present in the records")
     return out
 
 

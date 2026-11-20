@@ -13,6 +13,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PIPELINES = ("A0", "A1", "A2", "S2", "A3")  # A2 == strategy S1 (default), A3 == strategy S3
 DEFAULT_PROMPT_VERSION = "v2"
+# Safety ceilings for the no-argument official entry point. These are not the organiser's
+# published limits (Q5 still pending); they exist so one stalled request cannot consume the
+# whole evaluation window before output.json is written. Development mode keeps 0 = unlimited.
+OFFICIAL_CASE_TIMEOUT = 300.0
+OFFICIAL_TOTAL_TIMEOUT = 3600.0
 
 
 class ConfigError(ValueError):
@@ -106,16 +111,16 @@ class Config:
     temperature: float = 0.0
     max_tokens: int = 0             # 0 => omit, use server default
     json_mode: bool = False         # send response_format=json_object if the endpoint supports it
-    seed: int | None = 42           # fixed request seed; unsupported services must be documented before changing it
-    enable_thinking: bool | None = None   # None => omit (server default, not necessarily off); sent as chat_template_kwargs (Q7)
+    seed: int | None = 42           # fixed request seed; a 400 that rejects it is handled by the payload compatibility fallback
+    enable_thinking: bool | None = None   # None => omit (server default, not necessarily off); official load_config sets False. Sent as chat_template_kwargs (Q7)
     extra_body: dict = field(default_factory=dict)   # merged into every request last (provider-specific switches, may override the above)
     pipeline: str = "A2"
     max_calls_per_case: int = 2     # logical model calls (generation, one regeneration on unparseable output, optional repair/review)
     max_requests_per_case: int = 0  # every HTTP attempt incl. retries (Q5); 0 => unlimited until the organiser publishes a limit
     repair_call: bool = True        # A2: targeted repair call on high-severity findings. load_config() defaults it OFF:
                                     # on real qwen4-max output it fired only on verifier false alarms (docs/REPORT.md 2.6)
-    case_timeout: float = 0.0       # 0 => unlimited
-    total_timeout: float = 0.0      # 0 => unlimited
+    case_timeout: float = 0.0       # 0 => unlimited; official load_config sets OFFICIAL_CASE_TIMEOUT
+    total_timeout: float = 0.0      # 0 => unlimited; official load_config sets OFFICIAL_TOTAL_TIMEOUT
     time_reserve: float = 2.0       # seconds of headroom; only used when a case/total deadline exists. Below it, optional
                                     # model steps (extract/regenerate/repair/review) are skipped. Our safety margin, not an official limit.
     workers: int = 1
@@ -193,7 +198,9 @@ def load_config(*, development: bool = False, **overrides) -> Config:
         kb = ROOT / "resources" / "knowledge.sqlite"
         return Config(input_path=str(ROOT / "input.json"), output_path=str(ROOT / "output.json"),
                       log_dir=str(ROOT / "logs"), endpoint=endpoint, model=values["MODEL_NAME"].strip(),
-                      kb_path=str(kb) if kb.is_file() else "", repair_call=False)
+                      kb_path=str(kb) if kb.is_file() else "", repair_call=False,
+                      enable_thinking=False,
+                      case_timeout=OFFICIAL_CASE_TIMEOUT, total_timeout=OFFICIAL_TOTAL_TIMEOUT)
     load_dotenv_files()
     warnings: list = []
     c = Config(

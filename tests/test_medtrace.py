@@ -186,6 +186,18 @@ class Ledger(unittest.TestCase):
         kinds = {(c["kind"], c["term"]) for c in build_ledger(parse_case(raw, 0)).conflicts}
         self.assertEqual(kinds, {("polarity", "diabetes"), ("numeric", "potassium")})
 
+    def test_vitals_accept_respiratory_rate_and_subscript_spo2(self):
+        # REVIEW R4: SYN006 uses 呼吸22次/分 and SpO₂ 94%; neither counted as a vital sign before.
+        for content in ("呼吸22次/分，室内空气下SpO₂ 94%。", "RR 22/min, SpO2 94% on room air.",
+                        "呼吸频率 22 次/分，血氧饱和度 94%。"):
+            raw = {"case_id": "V", "sources": [{"source_id": "S1", "content": content}]}
+            self.assertNotIn("vitals", {u["key"] for u in build_ledger(parse_case(raw, 0)).undocumented}, content)
+
+    def test_vitals_do_not_treat_history_as_a_reading(self):
+        # "高血压病史10年" is not a blood-pressure measurement; the stricter binding leaves vitals undocumented.
+        raw = {"case_id": "V", "sources": [{"source_id": "S1", "content": "高血压病史10年，未提供生命体征。"}]}
+        self.assertIn("vitals", {u["key"] for u in build_ledger(parse_case(raw, 0)).undocumented})
+
 
 class Verifier(unittest.TestCase):
     def test_verbatim_is_clean(self):
@@ -232,6 +244,23 @@ class Verifier(unittest.TestCase):
         self.assertEqual(codes("68-year-old man with 3 days of fever and cough; denies chest pain and hemoptysis.", sources=("S1",)), set())
         self.assertEqual(codes("Recommend repeat potassium in 6 hours and oxygen to keep SpO2 above 94%.", "treatment_plan"), set())
         self.assertEqual(codes("The absence of chest pain makes pulmonary embolism less likely.", "diagnostic_discussion"), set())
+
+    def test_spacing_variant_is_not_an_undocumented_negative(self):
+        # REVIEW R5: "ST 段" vs "ST段" used to trigger undocumented_negative and leak into review_items.
+        zh = {"case_id": "Z", "sources": [{"source_id": "S1", "content": "心电图未见ST段抬高，未见病理性Q波。"}]}
+        self.assertNotIn("undocumented_negative", codes("心电图无ST 段抬高。", sources=("S1",), case=zh))
+        self.assertNotIn("undocumented_negative", codes("心电图无ST段抬高。", sources=("S1",), case=zh))
+
+    def test_overconfident_is_medium_and_source_certainty_suppresses_it(self):
+        # REVIEW R6/R7: definitive wording absent from the records must be visible enough to surface.
+        c = parse_case(CASE, 0)
+        L = build_ledger(c)
+        fs = V.check_statement("diagnostic_discussion", 0, Statement("Pneumonia is confirmed.", ["S3"]), c, L)
+        self.assertIn(("overconfident", V.MEDIUM), {(f.code, f.severity) for f in fs})
+        certain = {"case_id": "Z", "sources": [{"source_id": "S1", "content": "贫血诊断明确。血红蛋白82 g/L。"}]}
+        c2 = parse_case(certain, 0)
+        fs2 = V.check_statement("diagnostic_discussion", 0, Statement("贫血诊断明确。", ["S1"]), c2, build_ledger(c2))
+        self.assertNotIn("overconfident", {f.code for f in fs2})
 
     def test_safe_repair_only_drops_bad_refs(self):
         c = parse_case(CASE, 0)
@@ -615,12 +644,15 @@ class Http(unittest.TestCase):
         self.assertEqual(req["chat_template_kwargs"], {"enable_thinking": True})
 
     def test_usage_accumulates_in_case_log(self):
-        srv = self._srv(usage={"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12})
+        srv = self._srv(usage={"prompt_tokens": 5, "completion_tokens": 7, "total_tokens": 12,
+                               "completion_tokens_details": {"reasoning_tokens": 2},
+                               "prompt_tokens_details": {"cached_tokens": 1}})
         c = cfg(api_base=self._url(srv))
         r = Pipeline(c, LLMClient(c)).run_case(parse_case(CASE, 0))
         self.assertEqual(r.status, "ok")
         n = r.log["calls"]
         self.assertEqual((r.log["prompt_tokens"], r.log["completion_tokens"], r.log["total_tokens"]), (5 * n, 7 * n, 12 * n))
+        self.assertEqual((r.log["reasoning_tokens"], r.log["cached_tokens"]), (2 * n, 1 * n))
         self.assertEqual(r.log["usage_missing"], 0)
 
     def test_partial_usage_derives_total(self):
@@ -1032,7 +1064,13 @@ class OfficialProtocol(EndToEnd):
             self.assertTrue(c.official)
             self.assertEqual(c.endpoint, "http://host:8000/v1/chat/completions")
             self.assertEqual(c.model, "qwen-official")
-            self.assertFalse(C.load_config(development=True).official)
+            self.assertFalse(c.enable_thinking)
+            self.assertGreater(c.case_timeout, 0)
+            self.assertGreater(c.total_timeout, 0)
+            dev = C.load_config(development=True)
+            self.assertFalse(dev.official)
+            self.assertIsNone(dev.enable_thinking)
+            self.assertEqual((dev.case_timeout, dev.total_timeout), (0.0, 0.0))
 
     def test_endpoint_used_verbatim_no_auth_header(self):
         # Official ENDPOINT is used verbatim (no path appended) and needs no key.
@@ -1043,6 +1081,121 @@ class OfficialProtocol(EndToEnd):
         # Legacy base still appends the path.
         c2 = Config(api_base="http://host:8000/v1", model="qwen")
         self.assertEqual(LLMClient(c2).url, "http://host:8000/v1/chat/completions")
+
+    @staticmethod
+    def _ok_body(content="ok"):
+        return json.dumps({"choices": [{"message": {"content": content}, "finish_reason": "stop"}],
+                           "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}})
+
+    def test_official_payload_sends_seed_and_thinking_false(self):
+        c = Config(endpoint="http://host:8000/v1/chat/completions", model="qwen", enable_thinking=False)
+        seen = []
+        def transport(url, headers, payload, timeout):
+            seen.append((headers, payload))
+            return 200, self._ok_body()
+        client = LLMClient(c, transport=transport)
+        stats = CallStats()
+        self.assertEqual(client.chat("s", "u", stats), "ok")
+        headers, payload = seen[0]
+        self.assertEqual(payload["seed"], 42)
+        self.assertEqual(payload["chat_template_kwargs"], {"enable_thinking": False})
+        self.assertNotIn("Authorization", headers)
+        self.assertEqual((stats.calls, stats.http_attempts), (1, 1))
+
+    def test_payload_compat_strips_rejected_fields_once(self):
+        # REVIEW R2/R3: a 400 that explicitly names unsupported fields must not fail every case.
+        c = Config(endpoint="http://host:8000/v1/chat/completions", model="qwen", enable_thinking=False,
+                   max_retries=2, retry_backoff=0.0)
+        calls = []
+        def transport(url, headers, payload, timeout):
+            calls.append(payload)
+            if len(calls) == 1:
+                return 400, json.dumps({"error": {"message": "Unrecognized request fields: seed, chat_template_kwargs"}})
+            return 200, self._ok_body()
+        client = LLMClient(c, transport=transport)
+        self.assertEqual(client._compat_fields('"seed" is not a valid parameter'), {"seed"})
+        self.assertEqual(client._compat_fields("seed must be an integer"), set())
+        stats = CallStats()
+        self.assertEqual(client.chat("s", "u", stats), "ok")
+        self.assertIn("seed", calls[0])
+        self.assertIn("chat_template_kwargs", calls[0])
+        self.assertNotIn("seed", calls[1])
+        self.assertNotIn("chat_template_kwargs", calls[1])
+        self.assertEqual((stats.retries, stats.http_attempts), (1, 2))
+        self.assertTrue(stats.compat)
+        client.chat("s", "u", CallStats())      # cached for the rest of the run
+        self.assertNotIn("seed", calls[2])
+        self.assertNotIn("chat_template_kwargs", calls[2])
+
+    def test_unrelated_400_is_not_retried(self):
+        c = Config(endpoint="http://host:8000/v1/chat/completions", model="qwen", max_retries=2, retry_backoff=0.0)
+        calls = []
+        def transport(url, headers, payload, timeout):
+            calls.append(payload)
+            return 400, json.dumps({"error": {"message": "bad request body"}})
+        with self.assertRaises(LLMError):
+            LLMClient(c, transport=transport).chat("s", "u", CallStats())
+        self.assertEqual(len(calls), 1)
+
+    def test_official_review_items_exclude_internal_verifier_messages(self):
+        n = Note()
+        n.sections["case_features"] = [Statement("发热。", ["S1"])]
+        n.sections["diagnostic_discussion"] = [Statement("考虑感染。", ["S1"])]
+        n.sections["treatment_plan"] = [Statement("复查血常规。", ["S1"])]
+        n.review_items = [
+            {"type": "verify", "description": "请核实：“ST 段”", "source_ids": [], "origin": "verifier"},
+            {"type": "verify", "description": "知识检索失败", "source_ids": [], "origin": "internal"},
+            {"type": "missing", "description": "药物过敏史未记录", "source_ids": [], "origin": "ledger"},
+            {"type": "verify", "description": "血压需复核", "source_ids": [], "origin": "model"},
+        ]
+        rec = to_official_record(n, parse_case(CASE, 0), status="success")
+        self.assertEqual(rec["medical_record"]["review_items"], ["药物过敏史未记录", "血压需复核"])
+
+    def test_finalise_marks_verifier_items_for_exclusion(self):
+        from medtrace import pipeline as P
+        c = parse_case(CASE, 0)
+        L = build_ledger(c)
+        c0 = cfg()
+        p = Pipeline(c0, LLMClient(c0))
+        n = Note()
+        n.sections["case_features"] = [Statement("Temp 39.9 °C.", ["S2"])]
+        n.sections["diagnostic_discussion"] = [Statement("Fever.", ["S1"])]
+        n.sections["treatment_plan"] = [Statement("Observe.", ["S1"])]
+        p._finalise(n, c, L, V.verify_note(n, c, L), P._I18N["en"], "en")
+        self.assertTrue(any(r.get("origin") == "verifier" for r in n.review_items))
+        rec = to_official_record(n, c, status="success")
+        self.assertFalse(any("Verify:" in x for x in rec["medical_record"]["review_items"]))
+
+    def test_overconfident_is_visible_with_clean_wording(self):
+        # Approved 2026-11-19 (project owner; formal signature waived). Keep in sync with
+        # docs/CLINICAL_REVIEW_BATCH_A.* before changing the wording.
+        from medtrace import pipeline as P
+        zh = {"case_id": "Z", "sources": [{"source_id": "S1", "content": "入院初步判断为贫血及肾功能异常，原因待查。血红蛋白82 g/L。"}]}
+        c = parse_case(zh, 0)
+        L = build_ledger(c)
+        c0 = cfg()
+        p = Pipeline(c0, LLMClient(c0))
+        n = Note()
+        n.sections["case_features"] = [Statement("血红蛋白82 g/L。", ["S1"])]
+        n.sections["diagnostic_discussion"] = [Statement("贫血诊断明确。", ["S1"])]
+        n.sections["treatment_plan"] = [Statement("建议复查血常规。", ["S1"])]
+        p._finalise(n, c, L, V.verify_note(n, c, L), P._I18N["zh"], "zh")
+        self.assertTrue(any(r.get("official_visible") for r in n.review_items))
+        rec = to_official_record(n, c, status="success")
+        self.assertIn("记录中初步诊断的确定程度可能高于资料支持，请复核初步诊断表述。", rec["medical_record"]["review_items"])
+        self.assertFalse(any(x.startswith("请核实：") for x in rec["medical_record"]["review_items"]))
+
+    def test_official_sections_are_prose(self):
+        n = Note()
+        n.sections["case_features"] = [Statement("发热。", ["S1"]), Statement("咳嗽。", ["S1"])]
+        n.sections["diagnostic_discussion"] = [Statement("考虑感染。", ["S1"])]
+        n.sections["treatment_plan"] = [Statement("复查血常规。", ["S1"])]
+        rec = to_official_record(n, parse_case(CASE, 0), status="success")
+        self.assertEqual(rec["medical_record"]["case_features"], "发热。咳嗽。")
+        self.assertNotIn("1. ", rec["medical_record"]["case_features"])
+        n.sections["case_features"] = [Statement("Fever.", ["S1"]), Statement("Cough.", ["S1"])]
+        rec = to_official_record(n, parse_case(CASE, 0), status="success")
+        self.assertEqual(rec["medical_record"]["case_features"], "Fever. Cough.")
 
     def test_endpoint_overrides_mock_base(self):
         # PR#4 P1: an explicit ENDPOINT must reach the real service even when LLM_API_BASE=mock:// (copied .env.example).

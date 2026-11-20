@@ -48,6 +48,7 @@ _I18N = {
         "conflict": "Possible conflict or change over time regarding '{term}': {detail}. Verify which applies.",
         "cutoff": "{n} record statement(s) dated after the record cutoff were excluded from this note.",
         "verify": 'Verify: "{text}" - {msg}',
+        "overconfident": "The note states the working diagnosis more definitively than the records support; review the working diagnosis.",
     },
     "zh": {
         "lang": "简体中文",
@@ -61,8 +62,12 @@ _I18N = {
         "conflict": "关于“{term}”的信息可能存在矛盾或随时间变化：{detail}。请核实。",
         "cutoff": "有{n}条晚于资料截止时间的记录内容未纳入本记录。",
         "verify": "请核实：“{text}”——{msg}",
+        "overconfident": "记录中初步诊断的确定程度可能高于资料支持，请复核初步诊断表述。",
     },
 }
+# Verifier findings that are clinician-facing in the official medical_record. They use the
+# clean phrase below instead of quoting the draft; all other verifier findings stay in the run log.
+OFFICIAL_VERIFIER_CODES = {"overconfident"}
 _MSG_ZH = {
     "invalid_ref": "引用了不存在的来源编号", "post_cutoff": "涉及晚于资料截止时间的信息",
     "date_not_in_source": "日期未见于资料", "number_not_in_source": "数值未见于资料",
@@ -184,7 +189,8 @@ class Pipeline:
                 log["error"] = reason
                 note = Note()
                 note.sections["case_features"] = [Statement(tr["no_input"].format(reason=reason))]
-                note.review_items.append({"type": "missing", "description": tr["no_input"].format(reason=reason), "source_ids": []})
+                note.review_items.append({"type": "missing", "description": tr["no_input"].format(reason=reason),
+                                          "source_ids": [], "origin": "pipeline"})
                 L = None
             else:
                 L = build_ledger(case, context_mode=self.cfg.context_mode)
@@ -218,14 +224,17 @@ class Pipeline:
             status = "fallback"
             log["error"] = f"internal {type(e).__name__}: {e}"
             note = Note()
-            note.review_items.append({"type": "verify", "description": tr["fb_review"].format(reason="internal error"), "source_ids": []})
+            note.review_items.append({"type": "verify", "description": tr["fb_review"].format(reason="internal error"),
+                                      "source_ids": [], "origin": "pipeline"})
         audit = log.get("knowledge")
         if audit is not None:
             if audit["status"] == "degraded":
-                note.review_items.append({"type": "verify", "description": "知识检索失败，本例已退回原生成流程，需复核。", "source_ids": []})
+                note.review_items.append({"type": "verify", "description": "知识检索失败，本例已退回原生成流程，需复核。",
+                                          "source_ids": [], "origin": "pipeline"})
             for rule in audit["rules"]:
                 if rule["state"] != "not_triggered":
-                    note.review_items.append({"type": "verify", "description": rule["message"], "source_ids": rule["source_ids"]})
+                    note.review_items.append({"type": "verify", "description": rule["message"],
+                                              "source_ids": rule["source_ids"], "origin": "knowledge"})
             audit["citations"] = [{"section": sec, "index": i, "statement": st.text, "knowledge_ids": st.knowledge_ids,
                 "valid_ids": all(k in (L.knowledge_cards if L else {}) for k in st.knowledge_ids),
                 "clinical_support": "requires_clinician_review"}
@@ -233,16 +242,20 @@ class Pipeline:
             audit["citation_findings"] = [f.as_dict() for f in final if "knowledge" in f.code]
             if variant == "A1":
                 for finding in audit["citation_findings"]:
-                    note.review_items.append({"type": "verify", "description": finding["message"], "source_ids": []})
+                    note.review_items.append({"type": "verify", "description": finding["message"],
+                                              "source_ids": [], "origin": "verifier", "code": finding.get("code")})
         for sec in SECTIONS:
             if not note.sections[sec]:
                 note.sections[sec] = [Statement(tr["fb_disc"] if status != "ok" and sec == "diagnostic_discussion" else
                                                 tr["fb_plan"] if status != "ok" and sec == "treatment_plan" else tr["empty"])]
         log.update(status=status, calls=stats.calls, http_attempts=stats.http_attempts, retries=stats.retries,
+                   llm_compat=stats.compat,
                    prompt_tokens=stats.prompt_tokens, completion_tokens=stats.completion_tokens,
-                   total_tokens=stats.total_tokens, usage_missing=stats.usage_missing,
+                   total_tokens=stats.total_tokens, reasoning_tokens=stats.reasoning_tokens,
+                   cached_tokens=stats.cached_tokens, usage_missing=stats.usage_missing,
                    llm_latency=round(stats.latency, 3), latency=round(time.monotonic() - t0, 3),
-                   llm_errors=stats.errors[-3:], findings_initial=V.counts(initial), findings_final=V.counts(final))
+                   llm_errors=stats.errors[-3:], findings_initial=V.counts(initial), findings_final=V.counts(final),
+                   findings_final_detail=[f.as_dict() for f in final])
         log.update(started_at=started_at, finished_at=datetime.now(timezone.utc).isoformat(), attempts=stats.attempts)
         meta = {"status": status, "pipeline": variant, "prompt": prompt_fingerprint(self.cfg.prompt_version), "calls": stats.calls}
         if self.cfg.official:
@@ -376,39 +389,50 @@ class Pipeline:
                 # may leave the section empty: run_case then inserts the "clinician input required" placeholder
                 note.sections[sec] = [s for i, s in enumerate(note.sections[sec]) if i not in drop]
         have = " ".join(r["description"] for r in note.review_items)
-        add = lambda typ, desc, ids=(): note.review_items.append({"type": typ, "description": desc, "source_ids": list(ids)})
+        def add(typ, desc, ids=(), origin="ledger", **extra):
+            note.review_items.append({"type": typ, "description": desc, "source_ids": list(ids),
+                                      "origin": origin, **extra})
         # one review item per statement; every high-severity finding is always surfaced, medium ones are capped
         merged: dict = {}
         for f in sorted(unresolved, key=lambda f: f.severity != V.HIGH):
             if f.code == "empty_section":
                 continue
             msg = _MSG_ZH.get(f.code, f.message) if lang == "zh" else f.message
-            m = merged.setdefault((f.section, f.text), {"high": False, "msgs": []})
+            m = merged.setdefault((f.section, f.text), {"high": False, "msgs": [], "codes": []})
             m["high"] |= f.severity == V.HIGH
             if msg not in m["msgs"]:
                 m["msgs"].append(msg)
+            if f.code not in m["codes"]:
+                m["codes"].append(f.code)
         n_medium = 0
         for (_, text), m in merged.items():
             if not m["high"]:
                 n_medium += 1
                 if n_medium > 8:
                     continue
-            add("verify", tr["verify"].format(text=text[:200], msg="; ".join(m["msgs"])))
+            visible = [code for code in m["codes"] if code in OFFICIAL_VERIFIER_CODES]
+            add("verify",
+                tr["overconfident"] if visible else tr["verify"].format(text=text[:200], msg="; ".join(m["msgs"])),
+                origin="verifier", codes=m["codes"], severity="high" if m["high"] else "medium",
+                official_visible=bool(visible))
         for u in L.undocumented:
             if not re.search(_CORE_RX[u["key"]], have):
-                add("missing", tr["undoc"].format(item=u[lang]))
+                add("missing", tr["undoc"].format(item=u[lang]), origin="ledger")
         for c in L.conflicts[:5]:
             if c["term"] not in have.lower():
-                add("conflict", tr["conflict"].format(term=c["term"], detail=c["detail"][:300]), c["sources"])
+                add("conflict", tr["conflict"].format(term=c["term"], detail=c["detail"][:300]),
+                    c["sources"], origin="ledger")
         if case.redacted or case.excluded_sources:
-            add("verify", tr["cutoff"].format(n=len(case.redacted) + len(case.excluded_sources)))
+            add("verify", tr["cutoff"].format(n=len(case.redacted) + len(case.excluded_sources)),
+                origin="pipeline")
 
     def _fallback(self, case, L, tr, reason) -> Note:
         note = Note()
         note.sections["case_features"] = [Statement(f.text, [f.sid]) for f in L.facts[:60]]
         note.sections["diagnostic_discussion"] = [Statement(tr["fb_disc"])]
         note.sections["treatment_plan"] = [Statement(tr["fb_plan"])]
-        note.review_items.append({"type": "verify", "description": tr["fb_review"].format(reason=reason), "source_ids": []})
+        note.review_items.append({"type": "verify", "description": tr["fb_review"].format(reason=reason),
+                                  "source_ids": [], "origin": "pipeline"})
         return note
 
 

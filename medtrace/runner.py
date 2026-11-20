@@ -133,7 +133,8 @@ def main(argv=None) -> int:
     log.info("%d case(s), pipeline=%s, model=%s", len(cases), cfg.pipeline, cfg.model or "<mock>")
 
     results: list = [None] * len(cases)
-    totals = {k: 0 for k in ("prompt_tokens", "completion_tokens", "total_tokens", "usage_missing", "calls", "http_attempts", "retries")}
+    totals = {k: 0 for k in ("prompt_tokens", "completion_tokens", "total_tokens", "reasoning_tokens",
+                             "cached_tokens", "usage_missing", "calls", "http_attempts", "retries")}
     latencies: list = []
     deadline_all = started + cfg.total_timeout if cfg.total_timeout > 0 else None
 

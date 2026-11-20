@@ -13,6 +13,17 @@ from datetime import datetime, timezone
 
 _THINK = re.compile(r"<think>.*?</think>", re.S | re.I)
 _RETRY_STATUS = {408, 409, 425, 429, 500, 502, 503, 504, 529}
+# A 400 that explicitly names an unsupported request field is recoverable: strip that field
+# once, cache the decision, and retry. Other 400s remain non-retryable.
+_UNSUPPORTED_FIELD = re.compile(
+    r"(?i)(?:unrecognized|unknown|unexpected|unsupported|not supported|not permitted|"
+    r"not a valid\s+(?:field|parameter|argument)|"
+    r"extra\s+(?:input|field|parameter)|invalid\s+(?:field|parameter|argument))")
+_COMPAT_FIELDS = (
+    ("seed", re.compile(r"(?i)\bseed\b")),
+    ("chat_template_kwargs", re.compile(r"(?i)chat_template_kwargs|enable_thinking")),
+    ("reasoning_effort", re.compile(r"(?i)\breasoning_effort\b")),
+)
 
 
 class LLMError(Exception):
@@ -32,9 +43,12 @@ class CallStats:
     prompt_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
+    reasoning_tokens: int = 0   # when reported by the endpoint
+    cached_tokens: int = 0      # prompt-cache hits, when reported by the endpoint
     usage_missing: int = 0    # successful HTTP responses with no usable "usage" object
     errors: list = field(default_factory=list)
     attempts: list = field(default_factory=list)
+    compat: list = field(default_factory=list)   # request fields stripped after an explicit 400
 
     def add_usage(self, usage) -> None:
         """Accumulate server-reported usage; malformed or missing objects are only counted, never fatal."""
@@ -45,6 +59,22 @@ class CallStats:
         def num(key):
             v = usage.get(key)
             return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+
+        def detail(container, key):
+            d = usage.get(container)
+            if not isinstance(d, dict):
+                return None
+            v = d.get(key)
+            return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+
+        rt = detail("completion_tokens_details", "reasoning_tokens")
+        if rt is None:
+            rt = num("reasoning_tokens")
+        if rt is not None:
+            self.reasoning_tokens += int(rt)
+        ct = detail("prompt_tokens_details", "cached_tokens")
+        if ct is not None:
+            self.cached_tokens += int(ct)
 
         p, c, t = num("prompt_tokens"), num("completion_tokens"), num("total_tokens")
         if p is None and c is None and t is None:
@@ -98,6 +128,7 @@ class LLMClient:
         self.cfg = cfg
         self.mock = mock
         self.transport = transport or _post
+        self.compat_disabled: set[str] = set()   # payload fields rejected by this endpoint
         # An explicit official ENDPOINT outranks a legacy mock base: copying .env.example (LLM_API_BASE=mock://)
         # and filling ENDPOINT must reach the real service, not silently return synthetic mock output.
         if self.mock is None and not cfg.endpoint and cfg.api_base.lower().startswith("mock"):
@@ -132,6 +163,27 @@ class LLMClient:
         if limit > 0 and stats.http_attempts >= limit:
             raise BudgetExceeded(f"request budget for this case is exhausted ({stats.http_attempts}/{limit} HTTP attempts)")
 
+    def _payload(self, messages: list) -> dict:
+        payload = {"model": self.cfg.model, "messages": messages, "temperature": self.cfg.temperature, "stream": False}
+        if self.cfg.max_tokens > 0:
+            payload["max_tokens"] = self.cfg.max_tokens
+        if self.cfg.json_mode:
+            payload["response_format"] = {"type": "json_object"}
+        if self.cfg.seed is not None and "seed" not in self.compat_disabled:
+            payload["seed"] = self.cfg.seed
+        if self.cfg.enable_thinking is not None and "chat_template_kwargs" not in self.compat_disabled:
+            payload["chat_template_kwargs"] = {"enable_thinking": self.cfg.enable_thinking}
+        payload.update(self.cfg.extra_body or {})
+        for key in self.compat_disabled:
+            payload.pop(key, None)
+        return payload
+
+    def _compat_fields(self, body: str) -> set[str]:
+        text = str(body or "")
+        if not _UNSUPPORTED_FIELD.search(text):
+            return set()
+        return {key for key, rx in _COMPAT_FIELDS if key not in self.compat_disabled and rx.search(text)}
+
     def _chat(self, system, user, stats, deadline):
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         if self.mock is not None:
@@ -143,21 +195,12 @@ class LLMClient:
                 return self.mock.complete(messages)
             finally:
                 attempt["finished_at"] = datetime.now(timezone.utc).isoformat()
-        payload = {"model": self.cfg.model, "messages": messages, "temperature": self.cfg.temperature, "stream": False}
-        if self.cfg.max_tokens > 0:
-            payload["max_tokens"] = self.cfg.max_tokens
-        if self.cfg.json_mode:
-            payload["response_format"] = {"type": "json_object"}
-        if self.cfg.seed is not None:
-            payload["seed"] = self.cfg.seed
-        if self.cfg.enable_thinking is not None:
-            payload["chat_template_kwargs"] = {"enable_thinking": self.cfg.enable_thinking}
-        payload.update(self.cfg.extra_body or {})
         headers = {"Content-Type": "application/json"}
         if self.cfg.api_key and not self.cfg.official:
             headers["Authorization"] = f"Bearer {self.cfg.api_key}"
         last = "no attempt made"
         for attempt in range(self.cfg.max_retries + 1):
+            payload = self._payload(messages)
             timeout = self.cfg.timeout
             if deadline is not None:
                 remaining = deadline - time.monotonic()
@@ -176,7 +219,21 @@ class LLMClient:
                     stats.add_usage(_usage(body))
                     return self._content(body, detail)
                 last = f"HTTP {status}: {body[:200]}"
-                retryable = status in _RETRY_STATUS
+                if status == 400:
+                    stripped = self._compat_fields(body)
+                    if stripped:
+                        self.compat_disabled.update(stripped)
+                        note = f"HTTP 400 rejected {sorted(stripped)}; retrying without them"
+                        stats.compat.append(note)
+                        detail["compat"] = note
+                        last = note + f" ({body[:160]})"
+                        retryable = attempt < self.cfg.max_retries
+                        if retryable:
+                            detail["error"] = last
+                            stats.errors.append(last)
+                            stats.retries += 1
+                            continue
+                retryable = retryable and status in _RETRY_STATUS
             except ConnectionError as e:
                 last = str(e)
             except LLMError as e:      # 200 with unusable body

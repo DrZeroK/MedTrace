@@ -32,21 +32,20 @@ Local-only, git-ignored material that a fresh clone will **not** have:
 
 ## 2. Baseline, verified on the audited commit
 
-Commands were run from the repository root with Python 3.13.
+Commands were re-run from the repository root with Python 3.11.16 on 2026-11-19.
 
 | Check | Command | Result |
 |---|---|---|
-| Unit / integration tests | `env -u LLM_API_BASE python -m unittest discover -s tests` | 83 tests, all pass (about 10 s) |
+| Unit / integration tests | `python -m unittest discover -s tests` | 208 tests, all pass (about 27 s) |
 | End-to-end on mock | `LLM_API_BASE=mock:// python main.py --input input.example.json --output /tmp/out.json` | exit 0, 1 case, schema-valid |
 | Runtime import chain | import `medtrace.runner` and list loaded project modules | only `medtrace.*`; `eval/` and `data_pipeline/` are not imported at run time |
 | Request payload | local HTTP capture of one `LLMClient.chat` call | `POST {base}/chat/completions` with `model, messages, temperature, stream=false`; `response_format` only if `LLM_JSON_MODE=1`; anything in `LLM_EXTRA_BODY` is merged at top level (so `seed` and `chat_template_kwargs` *can* be sent, but only through that generic JSON option) |
-| Defaults with no `.env` | `load_config()` | `PIPELINE=A2`, prompts `v2`, `MAX_CALLS_PER_CASE=2`, `REPAIR_CALL` off, `LLM_TIMEOUT=600`, `LLM_MAX_RETRIES=2`, `temperature=0`, no `max_tokens`, no JSON mode, no case or total time limit, `output.json` |
+| Defaults with no `.env` | `load_config()` | `PIPELINE=A2`, prompts `v2`, `MAX_CALLS_PER_CASE=2`, `REPAIR_CALL` off, `LLM_TIMEOUT=600`, `LLM_MAX_RETRIES=2`, `temperature=0`, no `max_tokens`, no JSON mode, official safety ceilings 300 s/case and 3600 s/batch (development remains unlimited), `output.json` |
 
 Not re-run for this handoff (they need a model endpoint or local-only data): any real-model evaluation,
 `data_pipeline.*` builds, CHIP-CDEE negation scoring, MedCT stress test.
 
-**Python version caveat:** everything was run on 3.13 only. The code uses `X | None` annotations with
-`from __future__ import annotations`, so 3.10+ should work, but 3.11 (the version named in the project brief) is untested.
+**Python version:** the complete suite was re-run on Python 3.11.16 (the version named in the project brief) on 2026-11-19; 208 tests pass. The code uses `X | None` annotations with `from __future__ import annotations`, so 3.10+ should work.
 
 ## 3. Requirements: confirmed, assumed, unresolved
 
@@ -62,15 +61,23 @@ document URL or version). Later official specifications override it.
 | C3 | Local knowledge bases, rule bases, retrieval and multi-stage algorithms are permitted if lawfully sourced, version-pinned, bundled and offline (Q1) | No knowledge base or retrieval exists. The verifier is rule code, not a registered resource |
 | C4 | Resources must be registered (name, source, version, purpose, size, dependencies); teams with none state "None" (Q2). Template pending | No registration document exists (WP-4) |
 | C5 | Complete dependency documentation "such as `requirements.txt`" (Q3) | Only `requires.txt` exists (name taken from the original project brief). No `requirements.txt` (WP-4) |
-| C6 | `seed` may be passed at the top level of the request body; may be omitted with an explanation if unsupported (Q4) | **Done (WP-1, 0aaad62):** first-class `LLM_SEED`, sent top-level when set, omitted otherwise |
-| C7 | Thinking is controlled with `chat_template_kwargs: {"enable_thinking": false}`; omission means the server default, which is not necessarily "off" (Q7) | **Done (WP-1, 0aaad62):** first-class `LLM_ENABLE_THINKING`, sent as `chat_template_kwargs` when set, omitted otherwise |
-| C8 | Retries initiated by the participant's algorithm count toward the model-call budget, in principle (Q5) | **Done (WP-2, 0aaad62):** `MAX_REQUESTS_PER_CASE` counts every HTTP attempt incl. retries (default 0 = unlimited until the organiser publishes a limit); `MAX_CALLS_PER_CASE` still counts logical calls |
+| C6 | `seed` may be passed at the top level of the request body; may be omitted with an explanation if unsupported (Q4) | **Done (WP-1, 0aaad62; updated 2026-11-19):** first-class `LLM_SEED`; the official entry point sends 42 and, if a 400 explicitly rejects `seed`, strips it and retries once for the rest of the run |
+| C7 | Thinking is controlled with `chat_template_kwargs: {"enable_thinking": false}`; omission means the server default, which is not necessarily "off" (Q7) | **Done (WP-1, 0aaad62; updated 2026-11-19):** first-class `LLM_ENABLE_THINKING`; the official entry point sends `false`; development omits unless set; a 400 naming the field is stripped and retried once |
+| C8 | Retries initiated by the participant's algorithm count toward the model-call budget, in principle (Q5) | **Done (WP-2, 0aaad62):** `MAX_REQUESTS_PER_CASE` counts every HTTP attempt incl. retries (default 0 = unlimited until the organiser publishes a limit); `MAX_CALLS_PER_CASE` still counts logical calls; official time ceilings bound the practical total |
 
 ### 3.2 Permitted in principle, subject to the deployed version / unified API specification
 
 - `temperature` and `response_format` (Q6). Implemented as `LLM_TEMPERATURE` and `LLM_JSON_MODE`; untested against the competition service.
 - Selecting a Thinking mode per strategy (Q7); "specific support will be confirmed through unified API examples".
 - Reasonable third-party Python dependencies (Q3); compatibility requirements pending.
+
+### 3.2a Organizer answers Q10-Q13 (2026-11-18)
+
+- **Prefix caching (Q10):** centrally managed and planned to be disabled at official evaluation; no cachemark is needed. Do not rely on cache hits for latency or cost budgets.
+- **Reproducibility (Q11):** a fixed seed is permitted but does not guarantee identical output; pin code, dependencies and knowledge-resource versions and control in-algorithm randomness.
+- **Embedding (Q12):** an internal-network Embedding API (e.g. BGE-M3) is planned on the Ascend stack; self-deploying GPU/NPU embedding models is not supported in principle; local knowledge bases and pre-built indexes may be submitted within a size limit to be published.
+- **Hardware (Q13):** model inference runs on the organizer's Ascend stack; the participant algorithm runs in an isolated CPU-only environment and must not deploy additional LLMs or GPU/NPU inference services. OS/CPU/memory/storage/runtime limits are still pending.
+- **Design fit:** the current runtime uses a deterministic ledger plus optional SQLite FTS; it does not use embeddings, GPU/NPU work or prefix caching. Any future vector RAG must use the organizer's Embedding API.
 
 ### 3.3 Unresolved — awaiting the organizer. Do not hard-code assumed values
 
@@ -95,14 +102,20 @@ bearer-token auth, environment variable names (`LLM_API_BASE` and aliases).
 - Gaps: one output path only (no `results.json` alias); schema and exit codes are assumptions.
 
 ### 4.2 Designated Qwen / vLLM integration — generic, not yet targeted
-- `medtrace/llm.py` speaks OpenAI-compatible chat completions. `seed` and `chat_template_kwargs` are not first-class. `reasoning_content` in responses is ignored (correct), `<think>` blocks are stripped.
-- Never exercised against a vLLM server; all real calls went to a commercial hosted API.
+- `medtrace/llm.py` speaks OpenAI-compatible chat completions. `seed` and `chat_template_kwargs` are first-class; the official entry point sends seed 42 and `enable_thinking: false`. A 400 that explicitly names an unsupported field strips that field and retries once, caching the decision for the run. `reasoning_content` in responses is ignored (correct), `<think>` blocks are stripped.
+- Not yet exercised against the competition vLLM server; real-model evidence used commercial hosted endpoints.
+
+### 4.2a Endpoint acceptance script
+- `python scripts/api_acceptance.py` uses the official two-key `.env`; `--development` uses the development env; `--repeats 1-5`, `--timeout`, `--json-out`.
+- It sends only a tiny synthetic JSON prompt. It reports the endpoint used verbatim, Authorization presence, seed/thinking compatibility, HTTP/JSON status, latency, and prompt/completion/total/reasoning/cached tokens.
+- Exit 0 = HTTP and JSON checks pass (and official mode sent no Authorization); 1 = HTTP/JSON failure or official Authorization; 2 = configuration or mock-endpoint error.
+- The script is development-only and is not shipped in the submission ZIP.
 
 ### 4.3 Runtime, token, call, timeout, retry accounting — the weakest area
-- Tokens: the response `usage` object is **discarded**; nothing records prompt or completion tokens.
-- Calls: `CallStats` tracks `calls`, `http_attempts`, `retries`, but the budget check uses `calls` only (see C8).
-- Time: `CASE_TIMEOUT` and `TOTAL_TIMEOUT` exist and default to unlimited. Observed latency with Thinking on was 50–385 s per call on the commercial model; a 600 s request timeout is the default. No measurement exists with Thinking off.
-- `logs/run_log.jsonl` has per-case calls, attempts, retries, latency; no token fields, no run totals.
+- Tokens: `CallStats` accumulates prompt/completion/total tokens and `usage_missing`; `run_end` carries run totals.
+- Calls: `CallStats` tracks `calls`, `http_attempts`, `retries`; `MAX_REQUESTS_PER_CASE` counts every HTTP attempt and `MAX_CALLS_PER_CASE` counts logical calls (see C8).
+- Time: the official no-argument entry point applies safety ceilings of 300 s/case and 3600 s/batch; development `CASE_TIMEOUT`/`TOTAL_TIMEOUT` still default to unlimited. These are not the organizer's Q5 limits and must be updated when those are published. A deadline produces schema-valid fallback records and still writes the complete batch.
+- `logs/run_log.jsonl` records per-case calls, attempts, retries, token use, latency, payload-compatibility events and final verifier finding details; `run_end` carries run totals.
 
 ### 4.4 Offline deployment and resource registration — not started
 - No packaging script, no `requirements.txt`, no registration document, no offline-install check.
@@ -111,6 +124,9 @@ bearer-token auth, environment variable names (`LLM_API_BASE` and aliases).
 
 ### 4.5 Patient-fact traceability vs medical knowledge
 - Every generated statement carries `sources`; `evidence` is derived deterministically; invalid ids are dropped (A2).
+- Official `review_items` exclude verifier/QA messages that quote the draft; those findings remain in the run log. `overconfident` is allowlisted and surfaced with clean wording because diagnostic certainty affects management. Model, ledger, cutoff and knowledge-degradation items remain clinician-facing.
+- Official narrative sections are rendered as prose (one paragraph per section); legacy output keeps numbered lists. Evidence stays in the separate `evidence` array.
+- Batch A is **APPROVED** (2026-11-19): Change 1 approved; Change 2 approved with edits (add `初步诊断` / `working diagnosis` wording). The project owner waived the formal signature. Approval record and revised snapshot hashes: `docs/CLINICAL_REVIEW_BATCH_A.md` (Chinese: `docs/CLINICAL_REVIEW_BATCH_A.zh-CN.md`). Keep the approved wording frozen in regression tests.
 - The deterministic verifier checks Case Features strictly, the discussion lightly (unit-bearing numbers, negation flips at low severity), the plan almost not at all.
 - There is **no explicit separation** between patient facts and model medical knowledge inside the discussion and plan: a statement's `kind` is `assessment|differential|uncertainty|investigation|treatment|monitoring`, with no "knowledge" marker. There is no retrieved knowledge at all today, so nothing to register.
 - Verifier precision on unseen model prose is **not established**: each fresh batch produced new false-alarm patterns (`docs/REPORT.md` §2.6). High-severity findings are surfaced as review items only; the repair call is off by default.
@@ -156,7 +172,7 @@ Legend: **[ORG]** needs organizer clarification · **[MODEL]** needs designated-
 #### WP-2 Unified model-call budget (retries count)
 *Depends on: WP-1 (same files). Limit values **[ORG]**.*
 - Files: `medtrace/llm.py`, `medtrace/config.py`, `medtrace/pipeline.py`, tests.
-- Steps: introduce `MAX_REQUESTS_PER_CASE` (0 = unlimited) counting **every HTTP attempt**, retries included; refuse an attempt that would exceed it (raise `BudgetExceeded`, which already degrades to a flagged note); keep `MAX_CALLS_PER_CASE` semantics; record `budget_exhausted` in the case log. Do not invent an official number: default stays unlimited until the organizer publishes limits.
+- Steps: introduce `MAX_REQUESTS_PER_CASE` (0 = unlimited) counting **every HTTP attempt**, retries included; refuse an attempt that would exceed it (raise `BudgetExceeded`, which already degrades to a flagged note); keep `MAX_CALLS_PER_CASE` semantics; record `budget_exhausted` in the case log. Do not invent an official number. Update 2026-11-19: the official entry point enforces 300 s/case and 3600 s/batch safety ceilings (not organizer limits); `MAX_REQUESTS_PER_CASE` remains 0.
 - Acceptance: with `MAX_REQUESTS_PER_CASE=2` and a server failing every request, exactly 2 HTTP requests are made for the case and the output is still schema-valid; existing retry tests pass.
 
 #### WP-3 Result filename compatibility **[ORG]**

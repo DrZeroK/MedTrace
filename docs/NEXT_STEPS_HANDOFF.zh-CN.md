@@ -30,21 +30,20 @@
 
 ## 2. 基线，已在审计提交上验证
 
-命令均在仓库根目录下使用 Python 3.13 运行。
+命令已于 2026-11-19 在仓库根目录下使用 Python 3.11.16 重新运行。
 
 | 检查项 | 命令 | 结果 |
 |---|---|---|
-| 单元 / 集成测试 | `env -u LLM_API_BASE python -m unittest discover -s tests` | 83 个测试，全部通过（约 10 s） |
+| 单元 / 集成测试 | `python -m unittest discover -s tests` | 208 个测试，全部通过（约 27 s） |
 | mock 端到端 | `LLM_API_BASE=mock:// python main.py --input input.example.json --output /tmp/out.json` | 退出码 0，1 个病例，符合 schema |
 | 运行期导入链 | 导入 `medtrace.runner` 并列出已加载的项目模块 | 只有 `medtrace.*`；运行时不会导入 `eval/` 和 `data_pipeline/` |
 | 请求负载 | 对一次 `LLMClient.chat` 调用的本地 HTTP 抓包 | `POST {base}/chat/completions`，携带 `model, messages, temperature, stream=false`；仅当 `LLM_JSON_MODE=1` 时才有 `response_format`；`LLM_EXTRA_BODY` 中的任何内容都会在顶层合并（因此 `seed` 和 `chat_template_kwargs` *可以*发送，但只能通过这个通用 JSON 选项） |
-| 没有 `.env` 时的默认值 | `load_config()` | `PIPELINE=A2`，提示词 `v2`，`MAX_CALLS_PER_CASE=2`，`REPAIR_CALL` 关闭，`LLM_TIMEOUT=600`，`LLM_MAX_RETRIES=2`，`temperature=0`，无 `max_tokens`，无 JSON 模式，无单例或总时间限制，`output.json` |
+| 没有 `.env` 时的默认值 | `load_config()` | `PIPELINE=A2`，提示词 `v2`，`MAX_CALLS_PER_CASE=2`，`REPAIR_CALL` 关闭，`LLM_TIMEOUT=600`，`LLM_MAX_RETRIES=2`，`temperature=0`，无 `max_tokens`，无 JSON 模式，官方安全上限为每例 300 秒、整批 3600 秒（开发模式仍不限制），`output.json` |
 
 本次交接未重新运行（它们需要模型端点或仅本地的数据）：任何真实模型评测、
 `data_pipeline.*` 构建、CHIP-CDEE 否定评分、MedCT 压力测试。
 
-**Python 版本注意事项：** 所有内容都只在 3.13 上运行过。代码使用 `X | None` 注解并配合
-`from __future__ import annotations`，因此 3.10+ 应当可用，但 3.11（项目任务书中提到的版本）尚未测试。
+**Python 版本：** 2026-11-19 已在 Python 3.11.16（项目任务书指定的版本）上重新运行完整测试套件，208 个测试全部通过。代码使用 `X | None` 注解并配合 `from __future__ import annotations`，因此 3.10+ 应当可用。
 
 ## 3. 需求：已确认、假设、未解决
 
@@ -59,15 +58,23 @@
 | C3 | 若来源合法、版本锁定、随包捆绑并离线运行，则允许使用本地知识库、规则库、检索和多阶段算法（Q1） | 不存在知识库或检索。验证器是规则代码，不是已注册的资源 |
 | C4 | 资源必须登记（名称、来源、版本、用途、大小、依赖）；没有资源的团队填写 "None"（Q2）。模板待定 | 不存在登记文档（WP-4） |
 | C5 | 完整的依赖说明文档，"例如 `requirements.txt`"（Q3） | 只有 `requires.txt`（名称取自最初的项目任务书）。没有 `requirements.txt`（WP-4） |
-| C6 | `seed` 可在请求体顶层传递；若不支持，可省略并说明（Q4） | **已完成（WP-1，0aaad62）：** 一等参数 `LLM_SEED`，设置时以顶层发送，否则省略 |
-| C7 | Thinking 通过 `chat_template_kwargs: {"enable_thinking": false}` 控制；省略即表示服务器默认值，而服务器默认值不一定是"关闭"（Q7） | **已完成（WP-1，0aaad62）：** 一等参数 `LLM_ENABLE_THINKING`，设置时以 `chat_template_kwargs` 形式发送，否则省略 |
-| C8 | 原则上，参赛方算法发起的重试会计入模型调用预算（Q5） | **已完成（WP-2，0aaad62）：** `MAX_REQUESTS_PER_CASE` 统计每一次 HTTP 尝试，包括重试（默认 0 = 不限制，直至主办方公布上限）；`MAX_CALLS_PER_CASE` 仍统计逻辑调用 |
+| C6 | `seed` 可在请求体顶层传递；若不支持，可省略并说明（Q4） | **已完成（WP-1，0aaad62；2026-11-19 更新）：** 一等参数 `LLM_SEED`；官方入口默认发送 42；若 400 明确拒绝 `seed`，则剥离该字段并重试一次，本次运行后续请求沿用该决定 |
+| C7 | Thinking 通过 `chat_template_kwargs: {"enable_thinking": false}` 控制；省略即表示服务器默认值，而服务器默认值不一定是"关闭"（Q7） | **已完成（WP-1，0aaad62；2026-11-19 更新）：** 一等参数 `LLM_ENABLE_THINKING`；官方入口发送 `false`；开发模式未设置时省略；若 400 明确点名该字段，则剥离并重试一次 |
+| C8 | 原则上，参赛方算法发起的重试会计入模型调用预算（Q5） | **已完成（WP-2，0aaad62）：** `MAX_REQUESTS_PER_CASE` 统计每一次 HTTP 尝试，包括重试（默认 0 = 不限制，直至主办方公布上限）；`MAX_CALLS_PER_CASE` 仍统计逻辑调用；官方时间上限约束实际总量 |
 
 ### 3.2 原则上允许，但取决于部署版本 / 统一 API 规范
 
 - `temperature` 和 `response_format`（Q6）。已实现为 `LLM_TEMPERATURE` 和 `LLM_JSON_MODE`；尚未针对比赛服务测试。
 - 按策略选择 Thinking 模式（Q7）；"具体支持情况将通过统一 API 示例确认"。
 - 合理的第三方 Python 依赖（Q3）；兼容性要求待定。
+
+### 3.2a 主办方 Q10-Q13 答复（2026-11-18）
+
+- **前缀缓存（Q10）：** 由赛事方统一管理，正式评测拟关闭；请求输入/输出无需 cachemark。不要把缓存命中计入延迟或成本预算。
+- **可复现性（Q11）：** 允许固定 seed，但不保证逐字一致；参赛方须固定代码、依赖和知识资源版本，并控制算法内随机性。
+- **Embedding（Q12）：** 计划在昇腾技术栈提供内网 Embedding API（如 BGE-M3）；原则上不支持自部署 GPU/NPU Embedding 模型；可提交本地知识库和预构建索引，大小限制待公布。
+- **硬件（Q13）：** 模型推理由主办方昇腾技术栈统一部署；参赛算法在隔离的纯 CPU 环境运行，不得额外部署 LLM 或 GPU/NPU 推理服务；操作系统/CPU/内存/存储/时限仍待公布。
+- **与当前设计的关系：** 运行时使用确定性台账和可选 SQLite FTS，不使用 Embedding、GPU/NPU 或前缀缓存；未来若做向量 RAG，必须使用主办方的 Embedding API。
 
 ### 3.3 未解决 —— 等待组织方答复。不要硬编码假设的取值
 
@@ -92,14 +99,20 @@ bearer-token 鉴权、环境变量名（`LLM_API_BASE` 及别名）。
 - 缺口：只有一个输出路径（没有 `results.json` 别名）；schema 和退出码都是假设。
 
 ### 4.2 指定 Qwen / vLLM 集成 —— 通用实现，尚未针对性适配
-- `medtrace/llm.py` 使用 OpenAI 兼容的 chat completions 协议。`seed` 和 `chat_template_kwargs` 不是一等参数。响应中的 `reasoning_content` 被忽略（这是正确的），`<think>` 块会被剥离。
-- 从未针对 vLLM 服务器运行过；所有真实调用都发往一个商业托管 API。
+- `medtrace/llm.py` 使用 OpenAI 兼容的 chat completions 协议。`seed` 和 `chat_template_kwargs` 已是一等参数；官方入口发送 seed 42 和 `enable_thinking: false`。若 400 明确点名不支持的字段，则剥离该字段并重试一次，本次运行后续沿用。响应中的 `reasoning_content` 被忽略（这是正确的），`<think>` 块会被剥离。
+- 尚未针对比赛 vLLM 服务器运行；真实模型证据来自商业托管端点。
+
+### 4.2a 端点验收脚本
+- `python scripts/api_acceptance.py` 使用官方两键 `.env`；`--development` 使用开发环境；支持 `--repeats 1-5`、`--timeout`、`--json-out`。
+- 只发送一个极小的合成 JSON 提示，不上传病例。报告 endpoint 是否原样使用、是否携带 Authorization、seed/thinking 兼容性、HTTP/JSON 状态、延迟，以及 prompt/completion/total/reasoning/cached token。
+- 退出码 0 = HTTP 与 JSON 检查通过（官方模式且无 Authorization）；1 = HTTP/JSON 失败或官方模式带了 Authorization；2 = 配置错误或 mock 端点。
+- 脚本仅用于开发，不随提交 ZIP 分发。
 
 ### 4.3 运行时间、token、调用、超时、重试的核算 —— 最薄弱的环节
-- Token：响应中的 `usage` 对象被**丢弃**；没有任何地方记录 prompt token 或 completion token。
-- 调用：`CallStats` 跟踪 `calls`、`http_attempts`、`retries`，但预算检查只使用 `calls`（见 C8）。
-- 时间：`CASE_TIMEOUT` 和 `TOTAL_TIMEOUT` 存在，默认不限制。在商业模型上开启 Thinking 时观察到的延迟为每次调用 50–385 s；默认请求超时为 600 s。关闭 Thinking 时没有任何测量数据。
-- `logs/run_log.jsonl` 记录每例的调用数、尝试数、重试数、延迟；没有 token 字段，也没有运行总计。
+- Token：`CallStats` 累计 prompt/completion/total token 与 `usage_missing`；`run_end` 带有运行总计。
+- 调用：`CallStats` 跟踪 `calls`、`http_attempts`、`retries`；`MAX_REQUESTS_PER_CASE` 统计每次 HTTP 尝试，`MAX_CALLS_PER_CASE` 统计逻辑调用（见 C8）。
+- 时间：官方无参数入口应用每例 300 秒、整批 3600 秒的安全上限；开发模式的 `CASE_TIMEOUT`/`TOTAL_TIMEOUT` 仍默认不限制。这些不是主办方 Q5 的限额，公布后必须更新。到达截止时间时会生成符合 schema 的兜底记录，并仍写完整批次。
+- `logs/run_log.jsonl` 记录每例的调用数、尝试数、重试数、token 用量、延迟、请求字段兼容事件和最终校验发现详情；`run_end` 带有运行总计。
 
 ### 4.4 离线部署与资源登记 —— 尚未开始
 - 没有打包脚本，没有 `requirements.txt`，没有登记文档，没有离线安装检查。
@@ -108,6 +121,9 @@ bearer-token 鉴权、环境变量名（`LLM_API_BASE` 及别名）。
 
 ### 4.5 患者事实可追溯性与医学知识
 - 每条生成的陈述都携带 `sources`；`evidence` 以确定性方式派生；无效 id 会被丢弃（A2）。
+- 官方 `review_items` 不包含引用草稿原文的校验/QA 消息；这些发现保留在运行日志中。`overconfident` 因影响处理决策而进入白名单，以干净话术呈现。模型、台账、截止时间与知识降级提示仍面向临床复核。
+- 官方叙述段落按散文式输出（每节一段）；legacy 输出仍保留编号列表。证据仍在独立的 `evidence` 数组中。
+- 批次 A 已 **APPROVED**（2026-11-19）：改动一同意；改动二修改后同意（加入 `初步诊断` / `working diagnosis` 措辞）。项目负责人已豁免正式签名。批准记录与修订快照哈希见 `docs/CLINICAL_REVIEW_BATCH_A.zh-CN.md`（英文：`docs/CLINICAL_REVIEW_BATCH_A.md`）。已批准话术应在回归测试中保持冻结。
 - 确定性验证器严格检查病例特点，对拟诊讨论检查较轻（带单位的数字、低严重度的否定翻转），对诊疗计划几乎不检查。
 - 在拟诊讨论和诊疗计划内部，患者事实与模型的医学知识之间**没有显式区分**：陈述的 `kind` 为 `assessment|differential|uncertainty|investigation|treatment|monitoring`，没有 "knowledge" 标记。目前完全没有检索到的知识，因此没有可登记的内容。
 - 验证器在未见过的模型文本上的精确率**尚未确立**：每一批新数据都会产生新的误报模式（`docs/REPORT.md` §2.6）。高严重度的发现只作为待核事项呈现；修复调用默认关闭。
@@ -153,7 +169,7 @@ bearer-token 鉴权、环境变量名（`LLM_API_BASE` 及别名）。
 #### WP-2 统一的模型调用预算（重试计数）
 *依赖：WP-1（相同文件）。上限取值 **[ORG]**。*
 - 文件：`medtrace/llm.py`、`medtrace/config.py`、`medtrace/pipeline.py`、测试。
-- 步骤：引入 `MAX_REQUESTS_PER_CASE`（0 = 不限制），统计**每一次 HTTP 尝试**，含重试；拒绝会超过它的尝试（抛出 `BudgetExceeded`，它已会降级为带标记的记录）；保留 `MAX_CALLS_PER_CASE` 的语义；在病例日志中记录 `budget_exhausted`。不要臆造官方数字：在组织方公布限制之前，默认保持不限制。
+- 步骤：引入 `MAX_REQUESTS_PER_CASE`（0 = 不限制），统计**每一次 HTTP 尝试**，含重试；拒绝会超过它的尝试（抛出 `BudgetExceeded`，它已会降级为带标记的记录）；保留 `MAX_CALLS_PER_CASE` 的语义；在病例日志中记录 `budget_exhausted`。不要臆造官方数字。2026-11-19 更新：官方入口应用每例 300 秒、整批 3600 秒的安全上限（不是主办方限额）；`MAX_REQUESTS_PER_CASE` 仍为 0。
 - 验收：当 `MAX_REQUESTS_PER_CASE=2` 且服务器对每个请求都失败时，该病例恰好发出 2 个 HTTP 请求，且输出仍然符合 schema；现有重试测试通过。
 
 #### WP-3 结果文件名兼容性 **[ORG]**

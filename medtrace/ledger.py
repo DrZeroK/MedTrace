@@ -32,8 +32,9 @@ _CATS = [(n, re.compile(p)) for n, p in _CATS]
 _CORE = [
     ("allergy", r"(?i)allerg|nkda|过敏", "Drug allergy status", "药物过敏史"),
     ("medication", r"(?i)\bmedications?\b|\bmeds\b|\btaking\b|\bon [a-z]+ \d|\bmg\b|用药|服用|口服|服药", "Current medications", "当前用药情况"),
-    # a vital sign counts as documented only with a value next to it ("高血压病史" is not a blood pressure reading)
-    ("vitals", r"(?i)(?:\b(?:bp|blood pressure|hr|heart rate|pulse|spo2|temp(?:erature)?|t|p|r)\b|血压|心率|体温|脉搏|血氧)[^\n，,。；;]{0,10}?\d", "Vital signs", "生命体征"),
+    # A vital sign counts only when a value follows the label directly. The old {0,10} gap let
+    # "高血压病史10年" count as a blood-pressure reading; allow only punctuation/spacing/copulas.
+    ("vitals", r"(?i)(?:(?<![a-z])(?:bp|blood pressure|hr|heart rate|pulse|temp(?:erature)?|t|p|rr?|resp(?:iration)?|spo[₂2])(?![a-z])|血压|心率|体温|脉搏|血氧(?:饱和度)?|呼吸(?:频率)?)\s*(?::|：|=|约?为?|是)?\s*\d", "Vital signs", "生命体征"),
 ]
 _LABEL_EN = re.compile(r"([A-Za-z][A-Za-z0-9\-]*(?:\s+[A-Za-z][A-Za-z0-9\-]*)?)\s*(?:[:=(]|is|was|of|at)?\s*$")
 _LABEL_ZH = re.compile(r"([一-鿿A-Za-z0-9]{2,8})\s*[:：为是]?\s*$")
@@ -65,6 +66,10 @@ class Ledger:
     pos_text: str = ""                                  # all source text with negated spans blanked
     clear_pos_text: str = ""                            # only text that is positive beyond doubt (see textutil)
     all_text: str = ""
+    pos_text_norm: str = ""                             # whitespace-insensitive copies for term matching
+    clear_pos_text_norm: str = ""
+    all_text_norm: str = ""
+    neg_terms_norm: set = field(default_factory=set)
     tokens_all: set = field(default_factory=set)
     tokens_by_source: dict = field(default_factory=dict)
     conflicts: list = field(default_factory=list)       # [{kind, detail, sources}]
@@ -146,6 +151,10 @@ def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
     L.all_text = case.text.lower()
     L.pos_text = "\n".join(pos_parts)
     L.clear_pos_text = "\n".join(clear_parts)
+    L.pos_text_norm = T.squash(L.pos_text)
+    L.clear_pos_text_norm = T.squash(L.clear_pos_text)
+    L.all_text_norm = T.squash(case.text)
+    L.neg_terms_norm = {T.squash(t) for t in L.neg_terms}
     L.tokens_all = set().union(*L.tokens_by_source.values()) if L.tokens_by_source else set()
     L.neg_only = {t for t in L.neg_terms if t not in L.pos_text}
     _find_conflicts(L)

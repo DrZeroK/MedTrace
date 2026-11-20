@@ -29,6 +29,14 @@ def fw(text: str) -> str:
     return (text or "").translate(_FW)
 
 
+_WS = re.compile(r"\s+")
+
+
+def squash(text: str) -> str:
+    """Lower-case and remove whitespace for literal term comparisons ("ST 段" == "ST段")."""
+    return _WS.sub("", fw(text or "").lower())
+
+
 # ---------------------------------------------------------------- sentences
 _SPLIT = re.compile(r"(?<=[。！？!?；;])|\n+|(?<=\.)\s+(?=[A-Z0-9\[(])")
 _ENUM = re.compile(r"^\s*(?:\(?\d{1,2}[.)、．]\s*(?!\d)|[-*•]\s+)")
@@ -355,7 +363,7 @@ _NORMAL = re.compile(r"(?i)\b(?:normal|unremarkable|within normal limits|wnl)\b|
 _DONE = re.compile(r"(?i)\b(?:was|were|has been|have been|had been)\s+(?:\w+ly\s+)?(?:performed|done|given|"
                    r"administered|started|initiated|completed|obtained|placed|transfused|inserted)\b"
                    r"|已行|已予|已给予|已完成|已完善|已开始|已输注|已置入")
-_CERTAIN = re.compile(r"(?i)\b(?:confirmed|definite(?:ly)?|definitive|diagnostic of|certainly)\b|确诊|明确诊断|诊断明确")
+_CERTAIN = re.compile(r"(?i)\b(?:confirmed|definite(?:ly)?|definitive|diagnostic of|certainly)\b|确诊|明确诊断|诊断(?:已)?明确|诊断成立|确定诊断|可确诊")
 _MISSING = re.compile(r"(?i)\b(?:pending|not (?:yet )?(?:available|done|performed|obtained|documented|resulted|known|recorded)|"
                       r"unknown|unavailable|awaiting|unable to (?:obtain|recall)|not on file|to be (?:obtained|confirmed))\b"
                       r"|未查|未做|未提供|不详|未测|待查|结果未回|未回报|待回报|未记录|未记载|未提及|未说明|未描述|未载|未问及"
