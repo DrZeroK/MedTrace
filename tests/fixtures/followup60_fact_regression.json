@@ -1,0 +1,2270 @@
+{
+ "round": "followup60_20261118",
+ "source": "Frozen second-round outputs from the local dev run; text and source ids are as saved.",
+ "outputs": [
+  {
+   "case_id": "SYN012",
+   "arm": "plain",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "女性，74岁，活动耐量下降1个月，近3天夜间憋醒、需垫高枕头，双下肢水肿加重。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "无发热。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "查体：心率106次/分，血压162/92 mmHg，呼吸26次/分，室内空气下SpO₂ 91%。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "双肺底湿啰音，双下肢凹陷性水肿。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "实验室检查：NT-proBNP 4680 pg/mL；肌酐132 μmol/L。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "胸片示肺血管影增粗及少量双侧胸腔积液。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "本次超声心动图尚无结果。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "高血压20年，既往被告知“心脏扩大”但原报告未提供；近期利尿药服用情况不详；药物过敏史未记录。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "心功能不全加重可能性大。依据为夜间阵发性呼吸困难、端坐呼吸、双肺湿啰音、双下肢水肿、低氧血症及NT-proBNP显著升高。",
+      "source_ids": [
+       "S01",
+       "S02",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "射血分数类型（HFrEF或HFpEF）及具体诱因待查。因超声心动图结果尚未回报，且近期利尿药服用情况不详。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别肺部感染。患者有呼吸急促和肺部啰音，但资料明确记录无发热，不支持典型细菌感染，需结合后续炎症指标排除。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别慢性肾脏病致容量负荷过重。肌酐132 μmol/L提示肾功能受损，可能为心肾综合征或独立肾病，需评估尿量及电解质。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别肺栓塞。表现为突发呼吸困难和低氧，但缺乏胸痛、咯血等典型描述，且双肺湿啰音更支持心源性，需D-二聚体排查。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "急查超声心动图以明确心脏结构、室壁运动及射血分数，指导射血分数分类治疗。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "完善血常规、C反应蛋白、降钙素原及动脉血气分析，鉴别是否合并肺部感染及评估酸碱平衡。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "复查电解质（特别是钾、钠）及肾功能，监测利尿剂使用后的变化，防止电解质紊乱。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "拟给予利尿剂减轻容量负荷，改善呼吸困难。因近期用药史不详且肌酐升高，需从小剂量起始并严密监测尿量及肾功能。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "控制血压至目标范围，考虑使用血管扩张剂，但需警惕低血压风险，尤其在使用利尿剂后。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "持续心电监护，监测心率、血压、呼吸频率及SpO₂变化，每4小时记录一次出入量。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "密切观察肺部啰音及下肢水肿消退情况，若症状无改善或加重，需重新评估诊断或调整治疗方案。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": [
+    {
+     "code": "negation_flip",
+     "severity": "low",
+     "section": "diagnostic_discussion",
+     "index": 1,
+     "message": "records document '结果' only as absent/denied, but it is stated here without negation",
+     "text": "射血分数类型（HFrEF或HFpEF）及具体诱因待查。因超声心动图结果尚未回报，且近期利尿药服用情况不详。"
+    }
+   ]
+  },
+  {
+   "case_id": "SYN012",
+   "arm": "json",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "女性，74岁，活动耐量下降1个月，近3天夜间憋醒、需垫高枕头，双下肢水肿加重。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "无发热。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "心率106次/分，血压162/92 mmHg，呼吸26次/分，室内空气下SpO₂ 91%。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "双肺底湿啰音，双下肢凹陷性水肿。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "NT-proBNP 4680 pg/mL；肌酐132 μmol/L。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "胸片示肺血管影增粗及少量双侧胸腔积液。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "本次超声心动图尚无结果。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "高血压20年，既往被告知“心脏扩大”，原报告未提供；近期利尿药服用情况不详。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "初步考虑心功能不全加重，射血分数类型及诱因待查。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "急性左心衰竭：支持依据为夜间憋醒、双肺底湿啰音、SpO₂降低、NT-proBNP升高；不支持点暂无明确记录。",
+      "source_ids": [
+       "S01",
+       "S02",
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "慢性肾脏病：支持依据为肌酐132 μmol/L；需进一步评估肾功能与心功能关系。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "射血分数类型及具体诱因尚不明确，需等待超声心动图结果。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "拟行超声心动图检查，以明确射血分数及心脏结构异常。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议复查肾功能及电解质，评估利尿治疗安全性。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑给予利尿剂缓解水肿，但需核实近期用药史及过敏史。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "监测心率、血压、呼吸频率及SpO₂，每4小时一次，直至稳定。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "每日记录出入量及体重变化，评估液体平衡状态。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": [
+    {
+     "code": "negation_flip",
+     "severity": "low",
+     "section": "diagnostic_discussion",
+     "index": 3,
+     "message": "records document '结果' only as absent/denied, but it is stated here without negation",
+     "text": "射血分数类型及具体诱因尚不明确，需等待超声心动图结果。"
+    }
+   ]
+  },
+  {
+   "case_id": "SYN012",
+   "arm": "no_kb",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "女性，74岁，活动耐量下降1个月，近3天夜间憋醒、需垫高枕头，双下肢水肿加重。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "无发热。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "心率106次/分，血压162/92 mmHg，呼吸26次/分，室内空气下SpO₂ 91%。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "双肺底湿啰音，双下肢凹陷性水肿。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "NT-proBNP 4680 pg/mL；肌酐132 μmol/L。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "胸片示肺血管影增粗及少量双侧胸腔积液。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "本次超声心动图尚无结果。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "高血压20年，既往被告知“心脏扩大”，原报告未提供；近期利尿药服用情况不详。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "初步考虑心功能不全加重，射血分数类型及诱因待查。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别急性左心衰竭：支持点包括夜间憋醒、双肺底湿啰音、SpO₂降低；不支持点为无明确诱因记录。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别慢性肾脏病致水钠潴留：支持点为肌酐升高；不支持点为缺乏尿检及肾功能动态变化数据。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "射血分数类型及具体诱因尚未明确，需进一步检查确认。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "拟行超声心动图检查以评估心脏结构与功能，明确射血分数类型。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议完善尿常规及肾功能动态监测，排除或确认肾脏相关因素。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑给予利尿剂治疗，但需核实近期用药情况及过敏史后调整剂量。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "密切监测心率、血压、呼吸频率及SpO₂，每4小时一次，观察病情变化。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "每日记录出入量及体重变化，评估液体平衡状态。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": []
+  },
+  {
+   "case_id": "SYN012",
+   "arm": "lexical",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "女性，74岁，活动耐量下降1个月，近3天夜间憋醒、需垫高枕头，双下肢水肿加重。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "无发热。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "心率106次/分，血压162/92 mmHg，呼吸26次/分，室内空气下SpO₂ 91%。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "双肺底湿啰音，双下肢凹陷性水肿。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "NT-proBNP 4680 pg/mL；肌酐132 μmol/L。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "胸片示肺血管影增粗及少量双侧胸腔积液。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "本次超声心动图尚无结果。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "高血压20年，既往被告知“心脏扩大”，原报告未提供；近期利尿药服用情况不详。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "初步考虑心功能不全加重，射血分数类型及诱因待查。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "急性左心衰竭：支持依据为夜间憋醒、双肺底湿啰音、SpO₂ 91%、NT-proBNP升高；不支持点暂无明确记录。",
+      "source_ids": [
+       "S01",
+       "S02",
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "慢性肾脏病：支持依据为肌酐132 μmol/L；需进一步评估肾功能与心功能关系。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "射血分数类型及具体诱因尚未明确，需等待超声心动图结果。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "拟行超声心动图检查，以明确射血分数及心脏结构异常。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议复查肾功能及电解质，评估利尿剂使用安全性。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑给予利尿治疗，但需核实近期利尿药服用情况及过敏史。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "监测心率、血压、呼吸频率及SpO₂，每4小时一次，直至稳定。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "每日记录出入量及体重变化，评估液体负荷状态。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": [
+    {
+     "code": "negation_flip",
+     "severity": "low",
+     "section": "diagnostic_discussion",
+     "index": 3,
+     "message": "records document '结果' only as absent/denied, but it is stated here without negation",
+     "text": "射血分数类型及具体诱因尚未明确，需等待超声心动图结果。"
+    }
+   ]
+  },
+  {
+   "case_id": "SYN012",
+   "arm": "mixed",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "女性，74岁，活动耐量下降1个月，近3天夜间憋醒、需垫高枕头，双下肢水肿加重。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "无发热。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "心率106次/分，血压162/92 mmHg，呼吸26次/分，室内空气下SpO₂ 91%。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "双肺底湿啰音，双下肢凹陷性水肿。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "NT-proBNP 4680 pg/mL；肌酐132 μmol/L。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "胸片示肺血管影增粗及少量双侧胸腔积液。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "本次超声心动图尚无结果。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "高血压20年，既往被告知“心脏扩大”，原报告未提供；近期利尿药服用情况不详。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "初步考虑心功能不全加重，射血分数类型及诱因待查。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": [
+       "K042"
+      ]
+     },
+     {
+      "text": "需鉴别肺部感染：患者有低氧血症和肺底湿啰音，但无发热记录，需结合血常规和炎症指标进一步判断。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别肾功能不全导致的水肿：肌酐升高提示肾功能受损，但需结合尿常规和肾小球滤过率评估。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "射血分数类型及具体诱因尚未明确，需等待超声心动图结果。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": [
+       "K041"
+      ]
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "拟完善超声心动图检查，以明确射血分数类型及心脏结构改变。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": [
+       "K041"
+      ]
+     },
+     {
+      "text": "建议复查血常规、C反应蛋白等炎症指标，排除肺部感染可能。",
+      "source_ids": [
+       "S01",
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议完善尿常规及估算肾小球滤过率，评估肾功能状态。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑给予利尿剂治疗，缓解水肿症状，需根据肾功能调整剂量。",
+      "source_ids": [
+       "S02",
+       "S03",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": [
+       "K043"
+      ]
+     },
+     {
+      "text": "建议控制血压，目标值需结合患者耐受性及肾功能情况个体化设定。",
+      "source_ids": [
+       "S02",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "密切监测心率、血压、呼吸频率及SpO₂变化，每日至少2次。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "监测尿量及体重变化，评估利尿治疗效果。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "定期复查电解质及肾功能，防止利尿剂相关并发症。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [
+    {
+     "id": "K042",
+     "title": "心力衰竭：拟诊讨论",
+     "text": "端坐呼吸、夜间憋醒、肺循环淤血或外周水肿。说明支持和不支持当前判断的病例依据，保留可能性及不确定性。"
+    },
+    {
+     "id": "K043",
+     "title": "心力衰竭：计划组织",
+     "text": "端坐呼吸、夜间憋醒、肺循环淤血或外周水肿。把拟复核的资料与后续观察项目对应当前问题，标明尚待核实事项。"
+    },
+    {
+     "id": "K041",
+     "title": "心力衰竭：资料核对",
+     "text": "端坐呼吸、夜间憋醒、肺循环淤血或外周水肿。对照病例记录与检查来源，标出已知结果和待获得资料。"
+    }
+   ],
+   "round2_findings": [
+    {
+     "code": "negation_flip",
+     "severity": "low",
+     "section": "diagnostic_discussion",
+     "index": 3,
+     "message": "records document '结果' only as absent/denied, but it is stated here without negation",
+     "text": "射血分数类型及具体诱因尚未明确，需等待超声心动图结果。"
+    }
+   ]
+  },
+  {
+   "case_id": "LONG01",
+   "arm": "plain",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者男性，58岁。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "主诉腹胀、双下肢水肿2周，近3天食欲下降；无明确发热及腹痛。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "查体：血压106/66 mmHg，心率88次/分；腹部膨隆，移动性浊音阳性，双下肢凹陷性水肿。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "实验室检查：白蛋白25 g/L，总胆红素39 μmol/L，INR 1.5，血小板78 × 10^9/L。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "超声示肝表面不光滑、脾大及腹水。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "既往有慢性乙型肝炎病史，抗病毒用药及依从性不详。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "外院纸质检查附件尚未扫描，具体检查结果须以独立报告为准；腹水检查未提供。",
+      "source_ids": [
+       "H01",
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "初步考虑慢性肝病伴腹水。依据为慢性乙型肝炎史、低白蛋白血症、凝血功能异常、脾大及影像学腹水征象。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "有无腹水感染及其他诱因尚待排查。资料中未提供腹水常规及培养结果。",
+      "source_ids": [
+       "S04",
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别自发性细菌性腹膜炎。支持点为肝硬化腹水背景；不支持点为目前无发热及腹痛记录，但缺乏腹水化验证据。",
+      "source_ids": [
+       "S01",
+       "S03",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别门静脉血栓形成。支持点为脾大及腹水；不支持点为资料未提及腹痛或消化道出血，需影像学进一步确认。",
+      "source_ids": [
+       "S03",
+       "S01"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需排除肝癌可能。支持点为肝表面不光滑及脾大；不支持点为资料未提供甲胎蛋白或增强影像结果。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "拟行腹水穿刺检查（常规、生化、培养），以明确有无腹水感染及性质。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议完善腹部增强CT或MRI，评估肝脏占位及门静脉情况。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "拟复查血常规、肝功能、肾功能及电解质，监测病情变化。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议检测乙肝病毒DNA载量，评估抗病毒治疗需求。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "拟予利尿剂治疗腹水及水肿，需根据尿量及电解质调整剂量。",
+      "source_ids": [
+       "S02",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议补充人血白蛋白，改善低蛋白血症，前提是无药物过敏史。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "每日监测体重、腹围及尿量，评估利尿效果。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "密切观察神志变化，警惕肝性脑病发生。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": []
+  },
+  {
+   "case_id": "LONG01",
+   "arm": "json",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者男性，58岁，主诉腹胀、双下肢水肿2周，近3天食欲下降。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "无明确发热及腹痛。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "血压106/66 mmHg，心率88次/分。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "腹部膨隆，移动性浊音阳性，双下肢凹陷性水肿。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "白蛋白25 g/L，总胆红素39 μmol/L，INR 1.5，血小板78 × 10^9/L。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "超声示肝表面不光滑、脾大及腹水。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "既往慢性乙型肝炎，抗病毒用药及依从性不详。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "外院纸质检查附件尚未扫描，具体检查结果须以独立报告为准；腹水检查未提供。",
+      "source_ids": [
+       "H01",
+       "H02",
+       "H03",
+       "H04",
+       "H05",
+       "H06",
+       "H07",
+       "H08",
+       "H09",
+       "H10",
+       "H11",
+       "H12",
+       "H13",
+       "H14",
+       "H15",
+       "H16",
+       "H17",
+       "H18",
+       "H19",
+       "H20",
+       "H21",
+       "H22",
+       "H23",
+       "H24",
+       "H25",
+       "H26",
+       "H27",
+       "H28",
+       "H29",
+       "H30",
+       "H31",
+       "H32",
+       "H33",
+       "H34",
+       "H35",
+       "H36",
+       "H37",
+       "H38",
+       "H39",
+       "H40",
+       "H41",
+       "H42",
+       "H43",
+       "H44",
+       "H45",
+       "H46",
+       "H47",
+       "H48",
+       "H49",
+       "H50",
+       "H51",
+       "H52",
+       "H53",
+       "H54",
+       "H55",
+       "H56",
+       "H57",
+       "H58",
+       "H59",
+       "H60",
+       "H61",
+       "H62",
+       "H63",
+       "H64",
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "初步考虑慢性肝病伴腹水，依据为既往慢性乙型肝炎史、低白蛋白血症、高胆红素血症、凝血功能异常及影像学表现。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需鉴别腹水感染：目前无发热及腹痛，但腹水检查未提供，尚待排查。",
+      "source_ids": [
+       "S01",
+       "S03",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需排除其他诱因如门静脉血栓或肝癌：超声提示肝表面不光滑及脾大，但未见明确占位描述。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "抗病毒用药及依从性不详，可能影响病情评估与治疗策略。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "拟行腹水检查（常规、生化、培养）以明确是否存在感染及其他病因。",
+      "source_ids": [
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议完善肝功能全套、肾功能、电解质及凝血功能复查，动态监测病情变化。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑行腹部增强CT或MRI进一步评估肝脏形态及有无占位病变。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "拟给予利尿剂治疗腹水及水肿，需根据肾功能调整剂量。",
+      "source_ids": [
+       "S02",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "若确诊腹水感染，拟经验性使用抗生素，待药敏结果后调整。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "每日监测体重、尿量及腹围变化，评估利尿效果。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "定期复查血常规、肝功能、凝血功能，关注血小板及INR变化。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": [
+    {
+     "code": "negation_flip",
+     "severity": "low",
+     "section": "diagnostic_discussion",
+     "index": 1,
+     "message": "records document '腹水感染' only as absent/denied, but it is stated here without negation",
+     "text": "需鉴别腹水感染：目前无发热及腹痛，但腹水检查未提供，尚待排查。"
+    }
+   ]
+  },
+  {
+   "case_id": "SYN100",
+   "arm": "no_kb",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者为82岁女性，主诉食欲下降、体重减轻3个月，近2周出现双下肢水肿及乏力。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "家属称每日进食量约平日三分之一，无明确呕吐或腹泻。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "体格检查：身高158 cm，体重42 kg，血压106/64 mmHg，心率90次/分；皮下脂肪减少，双下肢凹陷性水肿，无明显肺部湿啰音。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "实验室检查：白蛋白24 g/L，血红蛋白102 g/L，钾3.3 mmol/L，磷0.62 mmol/L，肌酐69 μmol/L；尿蛋白阴性。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "肝功能及消化道评估不完整。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "义齿不合适，近期吞咽功能、抑郁症状、既往体重和肿瘤筛查资料未提供。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "入院判断为体重下降伴低白蛋白血症，营养不足及其他病因待明确。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "患者存在明显营养不良表现，包括体重减轻、皮下脂肪减少及低白蛋白血症（24 g/L）。",
+      "source_ids": [
+       "S01",
+       "S02",
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需考虑恶性肿瘤可能，因长期体重下降且肿瘤筛查资料未提供。",
+      "source_ids": [
+       "S01",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需排除慢性消化系统疾病，因食欲下降且消化道评估不完整。",
+      "source_ids": [
+       "S01",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "双下肢水肿原因尚不明确，可能与低白蛋白血症相关，但需进一步排查心肾功能。",
+      "source_ids": [
+       "S02",
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "吞咽功能及抑郁症状未评估，可能影响营养摄入及整体状况。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "建议完善肿瘤筛查，以排除潜在恶性疾病导致的体重下降。",
+      "source_ids": [
+       "S01",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议进行完整消化道评估，以明确是否存在器质性病变。",
+      "source_ids": [
+       "S01",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议评估心肾功能，以明确双下肢水肿的具体原因。",
+      "source_ids": [
+       "S02",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议评估吞咽功能及心理状态，以优化营养支持方案。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "拟给予肠内或肠外营养支持，改善低白蛋白血症及营养不良状态。",
+      "source_ids": [
+       "S01",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "监测电解质水平，尤其是钾（3.3 mmol/L）及磷（0.62 mmol/L），防止失衡加重。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "定期复查白蛋白及血红蛋白，评估营养干预效果。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": []
+  },
+  {
+   "case_id": "SYN100",
+   "arm": "lexical",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者为82岁女性，主诉食欲下降、体重减轻3个月，近2周出现双下肢水肿及乏力。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "家属称每日进食量约平日三分之一，无明确呕吐或腹泻。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "体格检查：身高158 cm，体重42 kg，血压106/64 mmHg，心率90次/分；皮下脂肪减少，双下肢凹陷性水肿，无明显肺部湿啰音。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "实验室检查：白蛋白24 g/L，血红蛋白102 g/L，钾3.3 mmol/L，磷0.62 mmol/L，肌酐69 μmol/L；尿蛋白阴性。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "肝功能及消化道评估不完整。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "义齿不合适，近期吞咽功能、抑郁症状、既往体重和肿瘤筛查资料未提供。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "入院判断为体重下降伴低白蛋白血症，营养不足及其他病因待明确。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "患者存在明显营养不良表现，包括体重减轻、皮下脂肪减少及低白蛋白血症（24 g/L）。",
+      "source_ids": [
+       "S01",
+       "S02",
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需考虑恶性肿瘤可能，因长期体重下降且肿瘤筛查资料未提供。",
+      "source_ids": [
+       "S01",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需排除慢性消化系统疾病，因食欲下降且消化道评估不完整。",
+      "source_ids": [
+       "S01",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "双下肢水肿原因尚不明确，可能与低白蛋白血症相关，但需进一步排查心肾功能。",
+      "source_ids": [
+       "S02",
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "吞咽功能及抑郁症状未评估，可能影响营养摄入及整体状况。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "建议完善肿瘤筛查，以排除潜在恶性疾病导致的体重下降。",
+      "source_ids": [
+       "S01",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议进行完整消化道评估，以明确是否存在器质性病变。",
+      "source_ids": [
+       "S01",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议评估心肾功能，以明确双下肢水肿的具体原因。",
+      "source_ids": [
+       "S02",
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议评估吞咽功能及心理状态，以指导营养支持方案。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "拟给予营养支持治疗，具体方案需根据吞咽功能评估结果调整。",
+      "source_ids": [
+       "S01",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "监测电解质水平，尤其是钾和磷，防止进一步紊乱。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "定期复查白蛋白及血红蛋白，评估营养改善情况。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": []
+  },
+  {
+   "case_id": "SYN100",
+   "arm": "mixed",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者为82岁女性，主诉食欲下降、体重减轻3个月，近2周出现双下肢水肿及乏力。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "家属称每日进食量约平日三分之一，无明确呕吐或腹泻。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "体格检查：身高158 cm，体重42 kg，血压106/64 mmHg，心率90次/分；皮下脂肪减少，双下肢凹陷性水肿，无明显肺部湿啰音。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "实验室检查：白蛋白24 g/L，血红蛋白102 g/L，钾3.3 mmol/L，磷0.62 mmol/L，肌酐69 μmol/L；尿蛋白阴性。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "肝功能及消化道评估不完整。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "义齿不合适，近期吞咽功能、抑郁症状、既往体重和肿瘤筛查资料未提供。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "入院判断为体重下降伴低白蛋白血症，营养不足及其他病因待明确。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "患者存在明显体重下降和低白蛋白血症，提示可能存在营养不良或其他消耗性疾病。",
+      "source_ids": [
+       "S01",
+       "S03",
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "需考虑心力衰竭可能，因有双下肢水肿，但无明显肺部湿啰音不支持肺循环淤血表现。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "恶性肿瘤不能除外，因长期体重减轻且肿瘤筛查资料未提供。",
+      "source_ids": [
+       "S01",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "吞咽功能及抑郁症状未评估，可能影响营养摄入及整体状况判断。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "肝功能及消化道评估不完整，无法排除相关疾病导致的低白蛋白血症。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "建议完善肿瘤筛查（如CT等），以排除潜在恶性肿瘤。",
+      "source_ids": [
+       "S01",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议进行吞咽功能评估，明确是否存在吞咽障碍导致进食减少。",
+      "source_ids": [
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "建议完善肝功能及消化道相关检查，以明确低白蛋白血症原因。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "拟给予营养支持治疗，具体方案需结合吞咽功能评估结果调整。",
+      "source_ids": [
+       "S01",
+       "S04"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "监测电解质水平，尤其是钾和磷，防止进一步紊乱。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "定期复查白蛋白及血红蛋白，评估营养干预效果。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "观察双下肢水肿变化，必要时行心脏超声检查评估心功能。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [
+    {
+     "id": "K042",
+     "title": "心力衰竭：拟诊讨论",
+     "text": "端坐呼吸、夜间憋醒、肺循环淤血或外周水肿。说明支持和不支持当前判断的病例依据，保留可能性及不确定性。"
+    }
+   ],
+   "round2_findings": []
+  },
+  {
+   "case_id": "NEG01",
+   "arm": "legacy",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者为52岁男性。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "自述否认胸痛和咯血，但护士今晨观察到少量咯血。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "入院时鼻部未见活动性出血。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "药物使用资料不详。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "血常规报告尚未提供。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "患者存在咯血症状，需进一步评估病因。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑支气管扩张、肺结核或肺癌等可能，需结合影像学及实验室检查鉴别。",
+      "source_ids": [],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "药物使用史不明，可能影响后续治疗选择。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "建议尽快完善血常规、胸部CT及痰液检查以明确诊断。",
+      "source_ids": [],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "密切观察咯血量及生命体征变化，必要时调整治疗方案。",
+      "source_ids": [],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "若确诊为感染相关疾病，拟根据药敏结果选用抗生素（前提：无过敏史）。",
+      "source_ids": [],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": []
+  },
+  {
+   "case_id": "NEG01",
+   "arm": "legacy",
+   "repeat": 2,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者为52岁男性。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "自述否认胸痛和咯血，但护士今晨观察到少量咯血。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "入院时鼻部未见活动性出血。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "药物使用资料不详。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "血常规报告尚未提供。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "患者存在咯血症状，需进一步评估病因。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑支气管扩张、肺结核或肺癌等可能，需结合影像学及实验室检查鉴别。",
+      "source_ids": [],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "药物使用史不明，可能影响后续治疗选择。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "建议尽快完善血常规、胸部CT及痰液检查以明确诊断。",
+      "source_ids": [],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "密切观察咯血量及生命体征变化，必要时调整治疗方案。",
+      "source_ids": [],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "若确诊为感染相关疾病，拟根据药敏结果选用抗生素（前提：无过敏史）。",
+      "source_ids": [],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": []
+  },
+  {
+   "case_id": "NEG01",
+   "arm": "context",
+   "repeat": 1,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者为52岁男性。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "自述否认胸痛，咯血。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "护士今晨观察到少量咯血。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "入院鼻部未见活动性出血。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "药物使用资料不详。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "血常规报告尚未提供。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "患者存在咯血症状，需进一步评估病因。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑支气管扩张、肺结核或肺癌等可能，需结合影像学及实验室检查鉴别。",
+      "source_ids": [],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "药物使用资料不详，可能影响后续治疗选择。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "建议尽快完善血常规、胸部CT等检查以明确诊断。",
+      "source_ids": [],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "密切观察咯血量及生命体征变化，必要时调整治疗方案。",
+      "source_ids": [],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "根据检查结果制定针对性止血及病因治疗措施。",
+      "source_ids": [],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": [
+    {
+     "code": "context_assertion",
+     "severity": "medium",
+     "section": "case_features",
+     "index": 2,
+     "message": "'护士今晨观察到少量咯血': assertion/person/time differs from the source context; review required",
+     "text": "护士今晨观察到少量咯血。"
+    }
+   ]
+  },
+  {
+   "case_id": "NEG01",
+   "arm": "context",
+   "repeat": 2,
+   "sections": {
+    "case_features": [
+     {
+      "text": "患者为52岁男性。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "自述否认胸痛，咯血。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "护士今晨观察到少量咯血。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "入院鼻部未见活动性出血。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "药物使用资料不详。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     },
+     {
+      "text": "血常规报告尚未提供。",
+      "source_ids": [
+       "S03"
+      ],
+      "basis": "",
+      "knowledge_ids": []
+     }
+    ],
+    "diagnostic_discussion": [
+     {
+      "text": "患者存在咯血症状，需进一步评估病因。",
+      "source_ids": [
+       "S01"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     },
+     {
+      "text": "考虑支气管扩张、肺结核或肺癌等可能，需结合影像学及实验室检查鉴别。",
+      "source_ids": [],
+      "basis": "inference",
+      "knowledge_ids": []
+     },
+     {
+      "text": "药物使用资料不详，可能影响后续治疗选择。",
+      "source_ids": [
+       "S02"
+      ],
+      "basis": "record",
+      "knowledge_ids": []
+     }
+    ],
+    "treatment_plan": [
+     {
+      "text": "建议尽快完善血常规、胸部CT等检查以明确诊断。",
+      "source_ids": [],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "密切观察咯血量及生命体征变化，必要时调整治疗方案。",
+      "source_ids": [],
+      "basis": "knowledge",
+      "knowledge_ids": []
+     },
+     {
+      "text": "根据检查结果制定针对性止血及病因治疗措施。",
+      "source_ids": [],
+      "basis": "inference",
+      "knowledge_ids": []
+     }
+    ]
+   },
+   "injected_cards": [],
+   "round2_findings": [
+    {
+     "code": "context_assertion",
+     "severity": "medium",
+     "section": "case_features",
+     "index": 2,
+     "message": "'护士今晨观察到少量咯血': assertion/person/time differs from the source context; review required",
+     "text": "护士今晨观察到少量咯血。"
+    }
+   ]
+  }
+ ]
+}

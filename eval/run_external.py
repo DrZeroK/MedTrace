@@ -37,6 +37,7 @@ from medtrace.pipeline import Pipeline, prompt_fingerprint
 from medtrace import verify as V
 from . import metrics as M
 from .run_ablation import BUDGET, md_table
+from .textbook_rag import TextbookIndex, TextbookRagPipeline
 
 ROOT = Path(__file__).resolve().parent.parent
 _norm = lambda s: re.sub(r"[\s（）()“”\"'、，,。/]", "", s or "").lower()
@@ -77,11 +78,14 @@ def main(argv=None) -> int:
     ap.add_argument("--tier", default="", help="comma list of quality tiers to include, e.g. A or A,B (default: all usable)")
     ap.add_argument("--mock", action="store_true", help="force the offline mock model even if .env configures a real endpoint")
     ap.add_argument("--workers", type=int, default=1, help="cases in parallel (mind the provider's rate limits)")
+    ap.add_argument("--textbook-rag", default="",
+                    help="development-only: absolute path to the local textbook FTS index; injects draft passages into A1/A2/S2/A3")
     a = ap.parse_args(argv)
     cfg0 = load_config(development=True)
     if a.mock or not cfg0.api_base:
         cfg0.api_base = "mock://"
     is_mock = cfg0.api_base.startswith("mock")
+    rag = TextbookIndex(a.textbook_rag) if a.textbook_rag else None
     items = load_dataset(a.dataset, a.split, a.tier, a.limit, a.offset)
     variants = [v.strip().upper() for v in a.variants.split(",") if v.strip()]
     rows, outputs, debug = [], {v: [] for v in variants}, {v: [] for v in variants}
@@ -91,7 +95,8 @@ def main(argv=None) -> int:
         cfg.output_field_map, cfg.output_fields, cfg.include_meta = {}, [], False
         def one(job):
             i, (raw, ref) = job
-            pipe = Pipeline(cfg, LLMClient(cfg, mock=MockLLM() if is_mock else None))
+            client = LLMClient(cfg, mock=MockLLM() if is_mock else None)
+            pipe = TextbookRagPipeline(cfg, client, rag) if (rag is not None and v != "A0") else Pipeline(cfg, client)
             case = parse_case(raw, i, cfg.cutoff_mode)
             res = pipe.run_case(case)
             rec = res.record
@@ -157,9 +162,13 @@ def main(argv=None) -> int:
     conf = {"name": a.name, "dataset": a.dataset, "split": a.split, "tier": a.tier, "limit": a.limit, "offset": a.offset, "n_cases": len(items), "variants": variants,
             "budget": {v: BUDGET[v] for v in variants}, "model": cfg0.model or "<mock>", "mock": is_mock,
             "prompt": prompt_fingerprint(cfg0.prompt_version), "config": cfg0.public(),
-            "dataset_manifest": json.loads((ROOT / "data" / "standardized" / a.dataset / "manifest.json").read_text("utf-8"))["raw_sha256"]}
+            "dataset_manifest": json.loads((ROOT / "data" / "standardized" / a.dataset / "manifest.json").read_text("utf-8"))["raw_sha256"],
+            "textbook_rag": rag.describe() if rag else None}
     (out / "config.json").write_text(json.dumps(conf, ensure_ascii=False, indent=2), "utf-8")
     note = ("**MOCK MODEL** - mechanics only; the mock does not reason, so dx_hit / ddx_recall are meaningless here.\n\n" if is_mock else "")
+    if rag is not None:
+        note += ("**UNAPPROVED TEXTBOOK RAG.** Context comes from a draft local textbook index "
+                 "(licenses pending, no clinical sign-off); it is not a knowledge release.\n\n")
     (out / "summary.md").write_text(f"# External evaluation `{a.name}`\n\n{note}Dataset `{a.dataset}` split `{a.split}` ({len(items)} cases) | "
                                     f"model `{conf['model']}` | prompts `{conf['prompt']}`\n\n" + md_table(summary) + "\n", "utf-8")
     print(md_table(summary))

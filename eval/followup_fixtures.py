@@ -22,7 +22,7 @@ CHECKS = [
     ("STATE01", "S02", "尿培养已采样，结果待回报", r"尿培养[^。；\n]{0,20}(?:待回报|尚无结果|结果未出|结果未回报)", r"未(?:行|做|查)尿培养|尿培养[^。；\n]{0,6}(?:为阳性|为阴性|结果正常)"),
     ("ONSET01", "S01", "起病迁延且近期加重", r"胸闷[^。；\n]{0,12}(?:半|六|6)个?月|半年[^。；\n]{0,12}胸闷", r"(?:突发|突然出现)胸闷"),
     ("NEG01", "S01", "明确否认胸痛，咯血另有肯定谓词", r"(?:无|否认|不伴)胸痛", r"(?:无|否认)(?:胸痛[、及和，,])?咯血"),
-    ("NEG01", "S01", "应保留少量咯血", r"(?:观察到|有|见到|出现|诉|一过性|少量)咯血", r"(?:无|否认)(?:胸痛[、及和，,])?咯血"),
+    ("NEG01", "S02", "应保留少量咯血并引用观察来源", r"(?:观察到|有|见到|出现|诉|一过性|少量)咯血", r"(?:无|否认)(?:胸痛[、及和，,])?咯血"),
 ]
 
 
@@ -58,8 +58,9 @@ def cases_from(reviewed):
                              "尿培养已采样，结果待回报；本次尿常规报告未提供。", "前天血培养未采样。")
     cases["ONSET01"] = _case("ONSET01", "男性，63岁，胸闷反复半年，近3天活动后加重。",
                              "昨晚突然出现头痛约10分钟，已自行缓解。", "今日心电图完成，报告待回报。")
-    cases["NEG01"] = _case("NEG01", "男性，52岁，自述否认胸痛，咯血，护士今晨观察到少量咯血。",
-                           "入院鼻部未见活动性出血，药物使用资料不详。", "血常规报告尚未提供。")
+    cases["NEG01"] = _case("NEG01", "男性，52岁，自述否认胸痛，咯血。",
+                           "护士今晨观察到少量咯血。", "入院鼻部未见活动性出血，药物使用资料不详。",
+                           "血常规报告尚未提供。")
     return cases
 
 
@@ -76,5 +77,7 @@ def check_anchors(case_id, sections):
                 if allowed or risky:
                     matches.append({"section": section, **st, "desired_match": allowed, "potential_error": risky})
         rows.append({"source": source, "goal": goal, "desired_match": any(m["desired_match"] for m in matches)
+                     if desired else None,
+                     "source_match": any(m["desired_match"] and source in m["source_ids"] for m in matches)
                      if desired else None, "matches": matches})
     return rows
