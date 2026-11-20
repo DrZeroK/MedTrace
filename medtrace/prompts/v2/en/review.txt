@@ -21,7 +21,10 @@ Review checklist
 2. Certainty: a diagnosis stated more firmly than the evidence allows.
 3. Differentials: irrelevant to this patient, or an important alternative missing.
 4. Plan: an item that does not address a documented problem; a documented problem with no plan; a proposal that conflicts with a documented allergy, medication, organ function, pregnancy or anticoagulation status; an urgent action that is missing.
-5. Omissions: a clinically important recorded fact (including important negatives and pending results) missing from Case Features.
+5. Omissions: a clinically important recorded fact (including positive exam findings, important negatives and pending results) missing from Case Features.
+6. Life-threatening differentials: for the presenting complaint and key abnormalities, add any dangerous diagnosis not yet excluded (e.g. pulmonary embolism, aortic syndrome, hypoglycaemia, intussusception, CNS infection) with the test that would exclude it.
+7. Drug and procedure safety: check every specific drug, contrast study or invasive procedure against age, pregnancy, allergy, liver/renal function, bleeding risk, co-medication and the working diagnosis; if unsafe, reduce it to a drug class with the precondition, or delete it. Suspected communicable disease needs isolation precautions.
+8. Inconsistencies: history vs exam, or between sources, not yet in review_items must be added.
 Do not rewrite for style. Do not add anything the records do not support. Write in <<lang>>.
 
 Return exactly one JSON object:

@@ -26,7 +26,8 @@ _SITE_DEPENDENT = set("扩张 肿大 压痛 增厚 异常 强化 积液 结节 �
                       "叩击痛 红肿 溃疡 糜烂 杂音 啰音 疼痛 肿胀 破溃 改变 病变 转移 复发 钙化 坏死 swelling tenderness mass lesion".split())
 # Record section headers, not clinical findings: a header on its own line ("个人史\n无特殊") is split from its
 # negation, so "个人史无特殊" must not be read as negating a positive finding. Section summaries are reviewer judgement.
-_SECTION_TERMS = {"个人", "个人史", "既往", "既往史", "家族", "家族史", "体格检查", "检查检验", "辅助检查", "专科检查", "婚育史", "月经史", "月经婚育史"}
+_SECTION_TERMS = {"个人", "个人史", "既往", "既往史", "家族", "家族史", "体格检查", "检查检验", "辅助检查", "专科检查", "婚育史", "月经史", "月经婚育史",
+                  "疾病", "病史", "其他", "其它", "不适", "特殊"}   # generic list words ("否认疾病、手术史") name no finding
 # Leading document-structure labels ("实验室检查：钾3.7") are formatting, not clinical content: they add
 # out-of-vocabulary bigrams that depressed lexical support and caused low_support false alarms. Strip only
 # a colon-suffixed, known section label at the very start; measurement labels such as "血压：…" are kept.
@@ -70,6 +71,10 @@ _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocument
 _META_COMMENT = re.compile(r"(?i)not (?:be )?(?:assumed|considered|taken as|read as|interpreted)"
                            r"|(?:不能|不可|不应|不得)(?:视为|认为|当作|作为)|(?:须|需|应|必须|请)(?:予以)?(?:核实|确认|复查)")
 _SHORT = {"case_features": "features", "diagnostic_discussion": "discussion", "treatment_plan": "plan"}
+# "A→B" / "由A降至B" with a direction word in the same clause; ranges ("4.8-5.3") use "-" and are not matched
+_TREND = re.compile(r"(?<![\d.])(\d+(?:\.\d+)?)\s*[^\d，,；;。]{0,8}?(?:→|->|—>|降至|升至|增至|减至|至|到)\s*(\d+(?:\.\d+)?)")
+_UP = re.compile(r"升高|上升|增高|增加|加重|升至|增至|进行性增|(?i:\b(?:rising|rose|increas\w*|worsen\w*)\b)")
+_DOWN = re.compile(r"下降|降低|减低|减少|好转|回落|降至|减至|(?i:\b(?:fell|falling|decreas\w*|declin\w*|improv\w*)\b)")
 
 
 def _assertive_text(text: str) -> tuple[str, str]:
@@ -152,6 +157,17 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             elif unit and L.units.get(val) and unit not in L.units[val]:
                 add("unit_mismatch", HIGH if sec == "features" else MEDIUM,
                     f"{raw!r}: records give this value with unit(s) {sorted(L.units[val])}", raw)
+
+    # ---- a trend word that contradicts the quoted values ("TBA 持续升高（14.2→11.8μmol/L）")
+    if sec in ("features", "discussion"):
+        for clause in re.split(r"[，,；;。！？\n]", T.mask_dates(text, year or 2000)):
+            m = _TREND.search(clause)
+            if not m:
+                continue
+            a, b = float(m.group(1)), float(m.group(2))
+            up, down = bool(_UP.search(clause)), bool(_DOWN.search(clause))
+            if a != b and up != down and (up and b < a or down and b > a):
+                add("trend_direction", HIGH, f"{m.group(0)!r}: the stated direction contradicts the values", m.group(0).strip())
 
     # ---- a knowledge statement must not carry patient-specific values from the records
     if st.basis == "knowledge" and sec in ("discussion", "plan") and not quoted_knowledge:
