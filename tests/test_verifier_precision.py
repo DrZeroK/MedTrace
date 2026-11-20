@@ -83,6 +83,18 @@ class NegationScope(unittest.TestCase):
         c = case("血常规：HGB 108g/L。")                       # the panel was never done: still flagged
         self.assertIn("undocumented_negative", codes(c, "肝炎病毒标志物均阴性。"))
 
+    def test_positive_test_result_flipped_to_negative_is_flagged(self):
+        # PR #10 review (P1): a documented test name must not exempt a contradicting result
+        self.assertIn("negation_flip", codes(case("乙肝表面抗原阳性。"), "乙肝表面抗原阴性。"))
+        self.assertIn("negation_flip", codes(case("乙肝表面抗原(+)，丙肝抗体阴性。"), "乙肝表面抗原阴性。"))
+        self.assertNotIn("negation_flip", codes(case("乙肝表面抗原阴性，丙肝抗体阳性。"), "乙肝表面抗原阴性。"))
+
+    def test_panel_with_a_positive_member_is_not_collectively_negative(self):
+        c = case("肝炎病毒标志物：乙肝表面抗原阳性，丙肝抗体阴性，甲戊肝抗体阴性。")
+        self.assertTrue(codes(c, "肝炎病毒标志物均阴性。") & {"negation_flip", "undocumented_negative"})
+        c = case("肿瘤标志物：CEA 未见异常，CA19-9 未见异常。")
+        self.assertFalse(codes(c, "肿瘤标志物均阴性。") & {"negation_flip", "undocumented_negative"})
+
     def test_abbreviation_map(self):
         c = case("否认哮喘、支气管扩张病史。")
         self.assertNotIn("undocumented_negative", codes(c, "无哮喘或支扩史。"))
@@ -106,6 +118,13 @@ class Certainty(unittest.TestCase):
     def test_definitive_claim_supported_by_record_diagnosis(self):
         c = case(*self.C)
         self.assertNotIn("overconfident", codes(c, "急性胃肠炎伴轻-中度脱水：依据呕吐、腹泻，支持诊断明确。", "diagnostic_discussion"))
+
+    def test_supported_heading_does_not_shield_another_claim(self):
+        # PR #10 review (P2): each definitive claim is checked against the diagnosis it names
+        c = case(*self.C)
+        self.assertIn("overconfident", codes(c, "急性胃肠炎：合并肺炎，肺炎诊断明确。", "diagnostic_discussion"))
+        self.assertIn("overconfident", codes(c, "急性胃肠炎：支持诊断明确，冠心病诊断明确。", "diagnostic_discussion"))
+        self.assertNotIn("overconfident", codes(c, "急性胃肠炎：依据呕吐腹泻，急性胃肠炎诊断明确。", "diagnostic_discussion"))
 
     def test_unsupported_definitive_claim_still_flagged(self):
         c = case(*self.C)
@@ -131,6 +150,16 @@ class LedgerConflicts(unittest.TestCase):
         self.assertFalse(self.kinds(case("慢性疾病史：否认高血压、糖尿病（孕前）。", "孕24周行OGTT，诊断妊娠期糖尿病。")))
         self.assertIn(("polarity", "糖尿病"), self.kinds(case("否认糖尿病史。", "糖尿病5年，口服二甲双胍。")))
         self.assertIn(("polarity", "手术"), self.kinds(case("否认手术史。", "2019年行阑尾切除手术。")))
+
+    def test_relative_finding_is_not_an_internal_contradiction(self):
+        # PR #10 review (P2): a relative's positive finding does not contradict the patient's negative one
+        for mode in ("legacy", "zh_context_v1"):
+            for text in ("现病史：患者无体重下降。家族史：父亲体重下降。", "患者无体重下降。其母亲近半年体重下降明显。",
+                         "父亲无体重下降。患者体重近2月下降约2kg。"):
+                kinds = {(x["kind"], x["term"]) for x in build_ledger(case(text), context_mode=mode).conflicts}
+                self.assertNotIn(("internal", "体重下降"), kinds, (mode, text))
+            c = case("现病史：上腹痛2月，无食欲减退、乏力、体重下降。自发病以来体重近2月下降约2kg。")
+            self.assertIn(("internal", "体重下降"), {(x["kind"], x["term"]) for x in build_ledger(c, context_mode=mode).conflicts}, mode)
 
     def test_intra_source_contradiction(self):
         c = case("现病史：上腹痛2月，无食欲减退、乏力、体重下降。自发病以来体重近2月下降约2kg。")

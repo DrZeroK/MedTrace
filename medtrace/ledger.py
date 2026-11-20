@@ -226,6 +226,21 @@ def _gapped(term: str) -> re.Pattern | None:
     return re.compile(re.escape(term[:2]) + r"[^，,；;。！？、\s]{0,6}?" + re.escape(term[2:]))
 
 
+def _patient_span(text: str, start: int, end: int, mode: str) -> bool:
+    """True if text[start:end] is about the patient. Experiencer scopes ("家族史：", "父亲…") apply in every mode;
+    zh_context_v1 additionally requires the mention to be affirmed (not uncertain or missing)."""
+    from . import context as C
+    state = C.attributes(text, start, end)
+    return state["experiencer"] == "patient" and (mode == "legacy" or state["assertion"] == "affirmed")
+
+
+def _patient_mention(text: str, term: str) -> bool:
+    """True if a negated term is said of the patient; a relative's absent finding is not the patient's."""
+    from . import context as C
+    states = C.term_attributes(text, term)
+    return not states or any(s["experiencer"] == "patient" for s in states)
+
+
 def _find_conflicts(L: Ledger) -> None:
     from . import context as C
     fact = {f.fid: f for f in L.facts}
@@ -257,7 +272,11 @@ def _find_conflicts(L: Ledger) -> None:
             rx = _gapped(term)
             if term in seen or not rx or term in _GENERIC_TERMS:
                 continue
-            g = next((g for g in L.facts if g.sid == f.sid and g is not f and rx.search(T.positive_text(g.text))), None)
+            if not _patient_mention(f.text, term):
+                continue
+            g = next((g for g in L.facts if g.sid == f.sid and g is not f
+                      and any(_patient_span(g.text, m.start(), m.end(), L.context_mode)
+                              for m in rx.finditer(T.positive_text(g.text)))), None)
             if g:
                 seen.add(term)
                 L.conflicts.append({"kind": "internal", "term": term, "detail": f'"{f.text}" vs "{g.text}"',

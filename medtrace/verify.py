@@ -37,6 +37,34 @@ _TEST_NAME = re.compile(r"(?i)^(?:毒)?(?:病毒)?(?:标志物|抗体|抗原|指
 # A negated term that names a test panel or score ("肝炎病毒标志物均阴性") reports a result set, not a condition; the
 # records name it as a label ("肝炎病毒标志物：乙肝表面抗原阴性…"). It is checked only for being documented at all.
 _TEST_TERM = re.compile(r"(?i)(?:标志物|抗体|抗原|指标|检测|筛查|系列|全套|评分|检查|dna|rna)$")
+# A collective test name whose results follow it ("肝炎病毒标志物：乙肝表面抗原阴性，丙肝抗体阴性").
+_PANEL_TERM = re.compile(r"(?i)(?:标志物|指标|系列|全套|筛查|检测|检查|[三四五六七八]项)$")
+# Result words, negative alternatives first so "未见异常"/"未检出" win over the "异常"/"检出" inside them.
+_RESULT = re.compile(r"(?P<neg>阴性|[（(][-－—][）)]|未见异常|无异常|未检出|正常)"
+                     r"|(?P<pos>阳性|[（(][+＋]+[）)]|升高|增高|偏高|降低|减低|偏低|异常|检出)")
+
+
+def _documented_results(variants: set, term_norm: str, L: Ledger) -> set:
+    """{'neg', 'pos'}: the results the records give for this test. An individual test takes the result word right
+    after its name; a panel takes every result in the rest of the sentence, so one positive member counts."""
+    states = set()
+    panel = bool(_PANEL_TERM.search(term_norm))
+    for f in L.facts:
+        s = T.squash(f.text)
+        for v in variants:
+            i = s.find(v)
+            while i >= 0:
+                after = s[i + len(v):]
+                if after[:1] in ("+", "＋"):
+                    states.add("pos")
+                else:
+                    near = _RESULT.search(after[:8])
+                    if near:
+                        states.add(near.lastgroup)
+                    if panel or not near:
+                        states.update(m.lastgroup for m in _RESULT.finditer(after))
+                i = s.find(v, i + 1)
+    return states
 _GENERIC_LABEL = re.compile(r"(?i)约|大小|直径|范围|长|宽|厚|高|共|为|右眼|左眼|双眼|左侧|右侧|about|approx|size|measur")   # "大小约 2.5cm" / "右眼" name no analyte
 _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
 _META_COMMENT = re.compile(r"(?i)not (?:be )?(?:assumed|considered|taken as|read as|interpreted)"
@@ -185,8 +213,8 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             variants = T.term_variants(term_norm)
             if variants & L.neg_terms_norm or any(T.concat_of(v, L.neg_terms_norm) for v in variants):
                 continue        # documented negative, possibly abbreviated or coordinated ("吸烟饮酒" = 吸烟 + 饮酒)
-            if _TEST_TERM.search(term_norm) and any(v in L.all_text_norm for v in variants):
-                continue        # a collective result for a documented test panel
+            if _TEST_TERM.search(term_norm) and _documented_results(variants, term_norm, L) == {"neg"}:
+                continue        # the records give only negative results for this test or panel
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS:
                 continue        # "无扩张" at one site does not contradict "扩张" at another; section headers are not findings
             if enhanced:
@@ -228,8 +256,9 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     # ---- diagnostic certainty: only a definitive claim (not "不能确诊…", "需…确诊") about a diagnosis that the
     # records do not themselves list without qualification
     if sec == "discussion" and not T.has_certain_cue(L.all_text):
-        claims = T.definitive_claims(text)
-        if claims and not _record_diagnosis(text, L):
+        heading = _subject(text)
+        unsupported = [c for c in T.definitive_claims(text) if not _record_diagnosis(_claim_subject(c) or heading, L)]
+        if unsupported:
             add("overconfident", MEDIUM, "uses definitive diagnostic wording not present in the records")
     if sec == "discussion" and index == 0 and is_copied_diagnosis_list(text, L):
         add("copied_diagnosis_list", MEDIUM, "discussion opens with a verbatim copy of the records' diagnosis list")
@@ -241,9 +270,21 @@ def _subject(text: str) -> str:
     return re.split(r"[：:，,。；;]", text, 1)[0]
 
 
-def _record_diagnosis(text: str, L: Ledger) -> bool:
-    """True if the statement's subject is one of the records' own diagnoses stated without uncertainty."""
-    subj = T.tokens(_subject(text))
+# Words around a certainty cue that do not name a diagnosis ("支持诊断明确", "故诊断成立").
+_CLAIM_FILLER = re.compile(r"支持|诊断|依据|结合|考虑|目前|本例|该病|此|已|可|基本|临床|即|为|成立|明确|确诊|确定|充分|可以|较|的|是|故|因此|综上")
+
+
+def _claim_subject(claim: str) -> str:
+    """The diagnosis a definitive clause names ("肺炎诊断明确" -> "肺炎"); "" when it names none ("支持诊断明确"),
+    in which case the claim is about the statement's heading."""
+    rest = _CLAIM_FILLER.sub("", T._CERTAIN.sub("", claim))
+    rest = re.sub(r"[\s、，,；;。！？!?：:（）()\-]", "", rest)
+    return rest if len(rest) >= 2 else ""
+
+
+def _record_diagnosis(subject: str, L: Ledger) -> bool:
+    """True if `subject` is one of the records' own diagnoses stated without uncertainty."""
+    subj = T.tokens(subject)
     certain = set().union(*[T.tokens(dx) for dx in L.diagnoses if not T.has_uncertain_cue(dx)], set())
     # union over items: a heading may combine a listed diagnosis and its sub-item ("急性胃肠炎" + "轻-中度脱水")
     return bool(subj) and len(subj & certain) / len(subj) >= 0.6
