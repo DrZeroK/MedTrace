@@ -57,6 +57,7 @@ _I18N = {
         "c_unit_mismatch": "The unit of {term} differs from the source records; check it.",
         "c_value_label_mismatch": "A value in the case features is attached to a different test than in the source records; check it.",
         "c_post_cutoff": "The note uses information dated after the record cutoff; check it.",
+        "c_trend_direction": "The direction of change stated for {term} contradicts the values; check it.",
         "c_unsupported_completed": "The plan describes an intervention as already done that the records do not document; confirm whether it was performed.",
         "c_false_missing": "The note says allergy information is not documented, but the records contain it; check it.",
     },
@@ -81,6 +82,7 @@ _I18N = {
         "c_unit_mismatch": "{term}的单位与原始资料不一致，请核对。",
         "c_value_label_mismatch": "病例特点中有数值与原始资料中的检查项目不对应，请核对。",
         "c_post_cutoff": "记录引用了晚于资料截止时间的信息，请核对。",
+        "c_trend_direction": "记录对{term}的变化方向（升高/下降）与数值不符，请核对。",
         "c_unsupported_completed": "诊疗计划将资料未记录的处置写为已完成，请核实是否已执行。",
         "c_false_missing": "记录称过敏信息未记录，但原始资料中已有记载，请核对。",
     },
@@ -90,7 +92,7 @@ _I18N = {
 # every other finding stays in the run log (findings_final_detail).
 # omitted_critical stays in the run log: on the practice run it fired mostly on "接种史不详" / "未查" lines.
 OFFICIAL_VERIFIER_CODES = {"overconfident"}
-CLINICIAN_HIGH_CODES = {"negation_flip", "number_not_in_source", "unit_mismatch", "value_label_mismatch", "post_cutoff",
+CLINICIAN_HIGH_CODES = {"negation_flip", "trend_direction", "number_not_in_source", "unit_mismatch", "value_label_mismatch", "post_cutoff",
                         "unsupported_completed", "false_missing"}
 MAX_REVIEW_ITEMS = 6
 # Lower ranks survive the cap: pipeline notices (fallback, cutoff), then record contradictions and high findings,
@@ -112,7 +114,7 @@ _MSG_ZH = {
     "unit_mismatch": "数值单位与资料不一致", "negation_flip": "阴性/阳性表述与资料相反",
     "undocumented_negative": "资料中未提及，却被表述为无", "undocumented_normal": "资料支持不足的“正常”表述",
     "low_support": "该陈述在资料中支持不足", "unsupported_completed": "计划中将未记录的处置表述为已完成",
-    "overconfident": "诊断表述过于肯定", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
+    "overconfident": "诊断表述过于肯定", "trend_direction": "变化方向描述与数值不符", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
     "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
     "false_missing": "资料中已有记录，却被表述为未记录",

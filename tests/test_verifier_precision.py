@@ -267,6 +267,40 @@ class LiveRunFollowUps(unittest.TestCase):
         self.assertNotIn("unsupported_completed", codes(c, text, "treatment_plan"))
         self.assertIn("unsupported_completed", codes(c, "已行冠状动脉造影，需评估支架情况。", "treatment_plan"))
 
+    def test_trend_direction_contradicting_values(self):
+        c = case("总胆汁酸14.2μmol/L。复查总胆汁酸11.8μmol/L。")
+        self.assertIn("trend_direction", codes(c, "总胆汁酸较前升高（14.2→11.8μmol/L）。", "diagnostic_discussion"))
+        # bare 升高 / 持续升高 / 降低 usually state a level, not a change: not compared
+        self.assertNotIn("trend_direction", codes(c, "总胆汁酸持续升高（14.2→11.8μmol/L）。", "diagnostic_discussion"))
+        self.assertNotIn("trend_direction", codes(c, "总胆汁酸升高（14.2μmol/L→11.8μmol/L）。", "diagnostic_discussion"))
+        self.assertNotIn("trend_direction", codes(case("血钾3.0mmol/L。复查血钾3.4mmol/L。"), "低钾血症，血钾降低（3.0→3.4mmol/L）。", "diagnostic_discussion"))
+        self.assertNotIn("trend_direction", codes(c, "总胆汁酸由14.2μmol/L降至11.8μmol/L。"))
+        self.assertNotIn("trend_direction", codes(c, "总胆汁酸较前下降（14.2→11.8μmol/L）。"))
+        self.assertNotIn("trend_direction", codes(c, "自测空腹血糖4.8-5.3mmol/L，较前升高。"))   # a range, not a trend
+
+    def test_trend_ignores_clinical_improvement_words(self):
+        # PR #11 review: recovery can be a rise, worsening a fall; only numeric-direction words are compared
+        c = case("血红蛋白80g/L。复查血红蛋白100g/L。SpO2 88%，吸氧后SpO2 95%。")
+        for text in ("贫血好转（血红蛋白80→100g/L）。", "Hypoxaemia improved (SpO2 88→95%).",
+                     "贫血加重（血红蛋白100→80g/L）。"):
+            self.assertNotIn("trend_direction", codes(c, text, "diagnostic_discussion"), text)
+        self.assertIn("trend_direction", codes(c, "血红蛋白下降（80→100g/L）。", "diagnostic_discussion"))
+        self.assertIn("trend_direction", codes(c, "SpO2 fell (88->95%).", "diagnostic_discussion"))
+
+    def test_trend_respects_negated_direction(self):
+        # PR #11 review: "未升高" asserts no rise, which falling values do not contradict
+        c = case("总胆汁酸14.2μmol/L。复查总胆汁酸11.8μmol/L。")
+        for text in ("总胆汁酸未较前升高（14.2→11.8μmol/L）。", "总胆汁酸无明显上升（14.2→11.8μmol/L）。",
+                     "Bile acids did not rise (14.2->11.8 umol/L)."):
+            self.assertNotIn("trend_direction", codes(c, text, "diagnostic_discussion"), text)
+        self.assertIn("trend_direction", codes(c, "总胆汁酸未下降，反而较前升高（14.2→11.8μmol/L）。", "diagnostic_discussion"))
+
+    def test_label_colon_denial(self):
+        c = case("既往史：一般健康状况良好。疾病史：否认。手术/外伤史：否认。输血史：否认。")
+        self.assertFalse(codes(c, "既往史：一般健康良好，否认疾病、手术、外伤、输血史。") & {"negation_flip", "undocumented_negative"})
+        c = case("2019年行阑尾切除手术。")
+        self.assertIn("negation_flip", codes(c, "否认手术、输血史。"))
+
     def test_deng_bing_shi_suffix(self):
         self.assertIn("肝炎", T.negated_terms("否认高血压、糖尿病、肝炎等病史"))
         c = case("否认高血压、糖尿病、肝炎、结核病史。")
