@@ -73,8 +73,18 @@ _META_COMMENT = re.compile(r"(?i)not (?:be )?(?:assumed|considered|taken as|read
 _SHORT = {"case_features": "features", "diagnostic_discussion": "discussion", "treatment_plan": "plan"}
 # "A→B" / "由A降至B" with a direction word in the same clause; ranges ("4.8-5.3") use "-" and are not matched
 _TREND = re.compile(r"(?<![\d.])(\d+(?:\.\d+)?)\s*[^\d，,；;。]{0,8}?(?:→|->|—>|降至|升至|增至|减至|至|到)\s*(\d+(?:\.\d+)?)")
-_UP = re.compile(r"升高|上升|增高|增加|加重|升至|增至|进行性增|(?i:\b(?:rising|rose|increas\w*|worsen\w*)\b)")
-_DOWN = re.compile(r"下降|降低|减低|减少|好转|回落|降至|减至|(?i:\b(?:fell|falling|decreas\w*|declin\w*|improv\w*)\b)")
+# Words that state a CHANGE in the number only. Clinical words (好转/加重/improved/worsened) are excluded: recovery
+# can be a rise ("贫血好转（血红蛋白80→100g/L）") and worsening a fall. Bare 升高/增高/降低/减低/增加/减少 are excluded
+# too: they usually state a level ("总胆汁酸升高（14.2→11.8）" = elevated on both dates; "血钾降低" = hypokalaemia).
+_UP = re.compile(r"上升|升至|增至|(?:较前|进行性|逐渐)(?:上升|升高|增高|增加)|(?i:\b(?:ris(?:e|es|ing)|rose|increas\w*)\b)")
+_DOWN = re.compile(r"下降|回落|降至|减至|(?:较前|进行性|逐渐)(?:下降|降低|减低|减少)|(?i:\b(?:fall(?:s|ing)?|fell|decreas\w*|declin\w*)\b)")
+# a negated direction word ("未升高", "无明显下降", "did not rise") asserts no direction
+_DIR_NEG = re.compile(r"(?:未|无|不|没有|并未|并无|否认)(?:明显|显著|进一步)?$|(?i:\b(?:not|no|without|never)\s+(?:\w+\s+)?)$")
+
+
+def _direction(rx: re.Pattern, clause: str) -> bool:
+    """True if `clause` asserts the direction `rx` names (some occurrence not under a negation)."""
+    return any(not _DIR_NEG.search(clause[:m.start()]) for m in rx.finditer(clause))
 
 
 def _assertive_text(text: str) -> tuple[str, str]:
@@ -165,7 +175,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             if not m:
                 continue
             a, b = float(m.group(1)), float(m.group(2))
-            up, down = bool(_UP.search(clause)), bool(_DOWN.search(clause))
+            up, down = _direction(_UP, clause), _direction(_DOWN, clause)
             if a != b and up != down and (up and b < a or down and b > a):
                 add("trend_direction", HIGH, f"{m.group(0)!r}: the stated direction contradicts the values", m.group(0).strip())
 
