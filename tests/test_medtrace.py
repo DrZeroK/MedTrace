@@ -535,6 +535,16 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(set(rec), {"case_id", "case_features", "plan"})
         self.assertIn("[S1]", rec["case_features"])
 
+    def test_development_output_is_prose(self):
+        n = Note()
+        n.sections["case_features"] = [Statement("患者发热。", ["S1"]), Statement("患者咳嗽。", ["S2"])]
+        n.sections["diagnostic_discussion"] = [Statement("考虑感染。", ["S1"])]
+        n.sections["treatment_plan"] = [Statement("完善检查。", ["S2"])]
+        rec = to_record(n, parse_case(CASE, 0), cfg())
+        self.assertEqual(rec["case_features"], "患者发热。患者咳嗽。")
+        self.assertNotIn("1. ", rec["case_features"])
+        self.assertNotIn("\n", rec["case_features"])
+
 
 class Update(unittest.TestCase):
     def test_diff(self):

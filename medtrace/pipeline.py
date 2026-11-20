@@ -46,9 +46,19 @@ _I18N = {
         "no_input": "No usable admission records were supplied for this case ({reason}); no note could be generated.",
         "undoc": "{item}: not documented in the supplied records; confirm before acting on the plan.",
         "conflict": "Possible conflict or change over time regarding '{term}': {detail}. Verify which applies.",
+        "conflict_polarity": "The records both deny and document '{term}' ({sources}); verify which applies.",
+        "conflict_internal": "{sources} records '{term}' as absent and later describes it as present; verify with the patient.",
+        "conflict_numeric": "'{term}' has different values ({values}) in {sources} with no distinguishing time; verify.",
         "cutoff": "{n} record statement(s) dated after the record cutoff were excluded from this note.",
         "verify": 'Verify: "{text}" - {msg}',
         "overconfident": "The note states the working diagnosis more definitively than the records support; review the working diagnosis.",
+        "c_negation_flip": "'{term}' is stated with the opposite polarity to the source records; check the original record.",
+        "c_number_not_in_source": "The value {term} in the case features does not appear in the source records; check it.",
+        "c_unit_mismatch": "The unit of {term} differs from the source records; check it.",
+        "c_value_label_mismatch": "A value in the case features is attached to a different test than in the source records; check it.",
+        "c_post_cutoff": "The note uses information dated after the record cutoff; check it.",
+        "c_unsupported_completed": "The plan describes an intervention as already done that the records do not document; confirm whether it was performed.",
+        "c_false_missing": "The note says allergy information is not documented, but the records contain it; check it.",
     },
     "zh": {
         "lang": "简体中文",
@@ -63,11 +73,39 @@ _I18N = {
         "cutoff": "有{n}条晚于资料截止时间的记录内容未纳入本记录。",
         "verify": "请核实：“{text}”——{msg}",
         "overconfident": "记录中初步诊断的确定程度可能高于资料支持，请复核初步诊断表述。",
+        "conflict_polarity": "资料中对“{term}”既有否认记载又有阳性记载（{sources}），请核实。",
+        "conflict_internal": "{sources}对“{term}”的记载前后不一致（先记为无，后有阳性描述），请向患者核实。",
+        "conflict_numeric": "“{term}”在{sources}中的数值不一致（{values}），且未注明不同测量时间，请核实。",
+        "c_negation_flip": "“{term}”的有无表述与原始资料相反，请核对原始资料。",
+        "c_number_not_in_source": "病例特点中的数值{term}未见于原始资料，请核对。",
+        "c_unit_mismatch": "{term}的单位与原始资料不一致，请核对。",
+        "c_value_label_mismatch": "病例特点中有数值与原始资料中的检查项目不对应，请核对。",
+        "c_post_cutoff": "记录引用了晚于资料截止时间的信息，请核对。",
+        "c_unsupported_completed": "诊疗计划将资料未记录的处置写为已完成，请核实是否已执行。",
+        "c_false_missing": "记录称过敏信息未记录，但原始资料中已有记载，请核对。",
     },
 }
-# Verifier findings that are clinician-facing in the official medical_record. They use the
-# clean phrase below instead of quoting the draft; all other verifier findings stay in the run log.
+# Verifier findings that are clinician-facing in the official medical_record: high-severity record contradictions and
+# value errors, plus overconfident wording. They use the clean `c_<code>` phrase above instead of quoting the draft;
+# every other finding stays in the run log (findings_final_detail).
+# omitted_critical stays in the run log: on the practice run it fired mostly on "接种史不详" / "未查" lines.
 OFFICIAL_VERIFIER_CODES = {"overconfident"}
+CLINICIAN_HIGH_CODES = {"negation_flip", "number_not_in_source", "unit_mismatch", "value_label_mismatch", "post_cutoff",
+                        "unsupported_completed", "false_missing"}
+MAX_REVIEW_ITEMS = 6
+# Lower ranks survive the cap: pipeline notices (fallback, cutoff), then record contradictions and high findings,
+# undocumented core items, the model's own items, and last numeric discrepancies and certainty wording.
+def _review_rank(r: dict) -> int:
+    origin = r.get("origin", "model")
+    if origin == "pipeline":
+        return 0
+    if (origin == "verifier" and r.get("severity") == "high") or r.get("conflict_kind") in ("internal", "polarity"):
+        return 1
+    if origin == "ledger" and r.get("type") == "missing":
+        return 2
+    if origin in ("model", "knowledge"):
+        return 3
+    return 4
 _MSG_ZH = {
     "invalid_ref": "引用了不存在的来源编号", "post_cutoff": "涉及晚于资料截止时间的信息",
     "date_not_in_source": "日期未见于资料", "number_not_in_source": "数值未见于资料",
@@ -257,6 +295,11 @@ class Pipeline:
                    llm_errors=stats.errors[-3:], findings_initial=V.counts(initial), findings_final=V.counts(final),
                    findings_final_detail=[f.as_dict() for f in final])
         log.update(started_at=started_at, finished_at=datetime.now(timezone.utc).isoformat(), attempts=stats.attempts)
+        visible = lambda r: (not self.cfg.official or r.get("origin", "model") not in ("verifier", "internal")
+                             or r.get("official_visible"))
+        ranked = sorted((r for r in note.review_items if visible(r) and r.get("description")), key=_review_rank)
+        log["review_items_dropped"] = [r["description"] for r in ranked[MAX_REVIEW_ITEMS:]]
+        note.review_items = ranked[:MAX_REVIEW_ITEMS]
         meta = {"status": status, "pipeline": variant, "prompt": prompt_fingerprint(self.cfg.prompt_version), "calls": stats.calls}
         if self.cfg.official:
             if status == "ok":
@@ -319,11 +362,13 @@ class Pipeline:
                          "with all three sections. Escape double quotes inside strings with a backslash. Do not output fences or commentary. "
                          "Correct the format while preserving the original facts, cutoff, source IDs and fixed fields above.")
         log["raw_parse_retries"] = len(log.get("parse_errors", []))
+        log["statements_split"] = V.split_long_statements(note)
         log["basis_normalised"] = _normalise_basis(note, L)
         initial = V.verify_note(note, case, L)
         if variant in ("A0", "A1"):
             return note, initial, initial
         log["refs_dropped"] = V.safe_repair(note, case)
+        log["copied_diagnosis_dropped"] = V.drop_copied_diagnosis(note, L)
         findings = V.verify_note(note, case, L)
         actionable = [f for f in findings if f.severity in (V.HIGH, V.MEDIUM) and f.section in SECTIONS and f.index >= 0]
         mode = ("review" if variant == "A3" else
@@ -383,6 +428,10 @@ class Pipeline:
     def _finalise(self, note, case, L: Ledger, findings, tr, lang):
         """Surface what could not be resolved, plus ledger-derived review items. No clinical rewriting."""
         unresolved = [f for f in findings if f.severity in (V.HIGH, V.MEDIUM)]
+        sources_of = {(f.section, f.text): note.sections[f.section][f.index].sources
+                      for f in unresolved if f.section in SECTIONS and 0 <= f.index < len(note.sections[f.section])}
+        fact_sid = {x.text: x.sid for x in L.facts}
+        sources_of.update({(f.section, f.text): [fact_sid[f.text]] for f in unresolved if f.index < 0 and f.text in fact_sid})
         if self.cfg.on_unresolved == "drop":
             for sec in SECTIONS:
                 drop = {f.index for f in unresolved if f.section == sec and f.severity == V.HIGH}
@@ -392,36 +441,48 @@ class Pipeline:
         def add(typ, desc, ids=(), origin="ledger", **extra):
             note.review_items.append({"type": typ, "description": desc, "source_ids": list(ids),
                                       "origin": origin, **extra})
-        # one review item per statement; every high-severity finding is always surfaced, medium ones are capped
+        conflicts = [c for c in L.conflicts if c["term"] not in have.lower()][:5]   # model already explained the rest
+        conflict_terms = {c["term"] for c in conflicts}
+        # one review item per statement. Development output quotes the draft for debugging; the clinician-facing text
+        # (`clinician`, used by the official record) never does, and only clinician-relevant findings get one.
         merged: dict = {}
         for f in sorted(unresolved, key=lambda f: f.severity != V.HIGH):
             if f.code == "empty_section":
                 continue
             msg = _MSG_ZH.get(f.code, f.message) if lang == "zh" else f.message
-            m = merged.setdefault((f.section, f.text), {"high": False, "msgs": [], "codes": []})
+            m = merged.setdefault((f.section, f.text), {"high": False, "msgs": [], "codes": [], "findings": []})
             m["high"] |= f.severity == V.HIGH
+            m["findings"].append(f)
             if msg not in m["msgs"]:
                 m["msgs"].append(msg)
             if f.code not in m["codes"]:
                 m["codes"].append(f.code)
-        n_medium = 0
-        for (_, text), m in merged.items():
-            if not m["high"]:
-                n_medium += 1
-                if n_medium > 8:
-                    continue
-            visible = [code for code in m["codes"] if code in OFFICIAL_VERIFIER_CODES]
-            add("verify",
-                tr["overconfident"] if visible else tr["verify"].format(text=text[:200], msg="; ".join(m["msgs"])),
-                origin="verifier", codes=m["codes"], severity="high" if m["high"] else "medium",
-                official_visible=bool(visible))
+        said = set()
+        for key, m in merged.items():
+            clean = None
+            for f in m["findings"]:
+                relevant = (f.severity == V.HIGH and f.code in CLINICIAN_HIGH_CODES) or f.code in OFFICIAL_VERIFIER_CODES
+                if relevant and (f.code, f.term) not in said and f.term not in conflict_terms:
+                    said.add((f.code, f.term))
+                    clean = tr["overconfident"] if f.code == "overconfident" else tr["c_" + f.code].format(term=f.term[:60])
+                    break
+            if self.cfg.official and clean is None:
+                continue                      # internal QA finding: run log only
+            desc = (clean if self.cfg.official or (clean and "overconfident" in m["codes"]) else
+                    tr["verify"].format(text=key[1][:200], msg="; ".join(m["msgs"])))
+            add("verify", desc, sources_of.get(key, ()), origin="verifier", codes=m["codes"],
+                severity="high" if m["high"] else "medium", official_visible=clean is not None, clinician=clean)
         for u in L.undocumented:
             if not re.search(_CORE_RX[u["key"]], have):
                 add("missing", tr["undoc"].format(item=u[lang]), origin="ledger")
-        for c in L.conflicts[:5]:
-            if c["term"] not in have.lower():
-                add("conflict", tr["conflict"].format(term=c["term"], detail=c["detail"][:300]),
-                    c["sources"], origin="ledger")
+        rid = case.raw_id
+        for c in conflicts:
+            fmt = dict(term=c["term"], sources="、".join(rid(s) for s in c["sources"]) if lang == "zh" else
+                       ", ".join(rid(s) for s in c["sources"]))
+            if c["kind"] == "numeric":
+                fmt["values"] = "、".join(f"{v:g}" for v in c["values"]) + f" {c['unit']}"
+            add("conflict", tr.get("conflict_" + c["kind"], tr["conflict"]).format(detail=c["detail"][:300], **fmt),
+                c["sources"], origin="ledger", conflict_kind=c["kind"])
         if case.redacted or case.excluded_sources:
             add("verify", tr["cutoff"].format(n=len(case.redacted) + len(case.excluded_sources)),
                 origin="pipeline")

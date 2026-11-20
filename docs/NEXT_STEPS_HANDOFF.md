@@ -135,7 +135,7 @@ bearer-token auth, environment variable names (`LLM_API_BASE` and aliases).
 ### 4.5 Patient-fact traceability vs medical knowledge
 - Every generated statement carries `sources`; `evidence` is derived deterministically; invalid ids are dropped (A2).
 - Official `review_items` exclude verifier/QA messages that quote the draft; those findings remain in the run log. `overconfident` is allowlisted and surfaced with clean wording because diagnostic certainty affects management. Model, ledger, cutoff and knowledge-degradation items remain clinician-facing.
-- Official narrative sections are rendered as prose (one paragraph per section); legacy output keeps numbered lists. Evidence stays in the separate `evidence` array.
+- Narrative sections are rendered as prose (one paragraph per section) in both development and official output. Evidence stays in the separate `evidence` array.
 - Batch A is **APPROVED** (2026-11-19): Change 1 approved; Change 2 approved with edits (add `初步诊断` / `working diagnosis` wording). The project owner waived the formal signature. Approval record and revised snapshot hashes: `docs/CLINICAL_REVIEW_BATCH_A.md` (Chinese: `docs/CLINICAL_REVIEW_BATCH_A.zh-CN.md`). Keep the approved wording frozen in regression tests.
 - The deterministic verifier checks Case Features strictly, the discussion lightly (unit-bearing numbers, negation flips at low severity), the plan almost not at all.
 - There is **no explicit separation** between patient facts and model medical knowledge inside the discussion and plan: a statement's `kind` is `assessment|differential|uncertainty|investigation|treatment|monitoring`, with no "knowledge" marker. There is no retrieved knowledge at all today, so nothing to register.

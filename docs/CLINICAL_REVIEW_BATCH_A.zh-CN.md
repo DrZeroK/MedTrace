@@ -30,6 +30,7 @@
 - `medical_record.case_features`、`medical_record.diagnostic_discussion` 和 `medical_record.plan` 将各自的多条陈述拼接为一段。
 - 陈述顺序、措辞、evidence 和待核事项均不变；不重写任何临床文本。
 - legacy/开发输出仍保留编号列表。
+- 2026-11-20 更新：按项目负责人要求，开发输出也改为散文式，并移除编号列表渲染器和 `NUMBERED` 选项。
 
 改前（示意）：
 

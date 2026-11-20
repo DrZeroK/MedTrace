@@ -29,12 +29,40 @@ def fw(text: str) -> str:
     return (text or "").translate(_FW)
 
 
-_WS = re.compile(r"\s+")
+_WS = re.compile(r"[\s、，,；;。！？!?：:·•]+")
 
 
 def squash(text: str) -> str:
-    """Lower-case and remove whitespace for literal term comparisons ("ST 段" == "ST段")."""
+    """Lower-case and remove whitespace and list/clause punctuation for literal term comparisons
+    ("ST 段" == "ST段"; "恶心呕吐" matches "恶心、呕吐")."""
     return _WS.sub("", fw(text or "").lower())
+
+
+# Abbreviations seen in generated notes for terms the records spell out. Explicit pairs only: a fuzzy match could
+# hide a genuine contradiction. Extend only with pairs observed on real output.
+_SYNONYMS = [("支扩", "支气管扩张"), ("rf", "类风湿因子"), ("aso", "抗链球菌溶血素o"), ("家族中", "家族"),
+             ("吸烟", "嗜烟"), ("饮酒", "嗜酒")]
+
+
+def term_variants(term_norm: str) -> set[str]:
+    """`term_norm` (squashed) plus its spelling variants under the explicit abbreviation map."""
+    out = {term_norm}
+    for a, b in _SYNONYMS:
+        for t in list(out):
+            if a in t:
+                out.add(t.replace(a, b))
+            if b in t:
+                out.add(t.replace(b, a))
+    return out
+
+
+def concat_of(term_norm: str, parts: set[str]) -> bool:
+    """True if `term_norm` is a concatenation of two or more `parts` ("吸烟饮酒" = "吸烟" + "饮酒")."""
+    ok = [False] * (len(term_norm) + 1)
+    ok[0] = True
+    for i in range(1, len(term_norm) + 1):
+        ok[i] = any(ok[j] and term_norm[j:i] in parts and term_norm[j:i] != term_norm for j in range(i))
+    return ok[-1] and term_norm not in parts
 
 
 # ---------------------------------------------------------------- sentences
@@ -232,7 +260,8 @@ _NEG_PRE = re.compile(
     r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触)|不伴|不会|没有"
     r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
 _NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)"
-                       r"|未引出|(?:均|暂|尚)?无特殊|暂无|无殊|(?<=[\u4e00-\u9fff])史无(?=[。；;，,、]|$)")   # postfix absence predicates negate the preceding subject ("病理征未引出", "家族史均无特殊")
+                       r"|未引出|(?:均|暂|尚)?无特殊|暂无|无殊|(?<=[\u4e00-\u9fff])史无(?=[。；;，,、]|$)"
+                       r"|(?<=[一-鿿A-Za-z])(?:均|亦|也)?否认(?=[。；;，,]|$)")   # postfix absence predicates negate the preceding subject ("病理征未引出", "家族史均无特殊")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
                      r"reported|has|had|presents?|complains?|with|positive|present)\b")
 _END_ZH = re.compile(r"[，,；;。！？（(]|但|伴有")
@@ -243,7 +272,7 @@ _CLAUSE_START = re.compile(r"[,，;；。:：]|\s{2,}|\t")     # runs of spaces 
 _TERM_SPLIT = re.compile(r"(?i)、|/|及|或|和|与|,|\bor\b|\band\b|\bnor\b")
 _TERM_CUT = re.compile(r"(?i)\s+(?:on|at|in|since|for|during|prior|before|after|to|of the)\b.*$")
 _TERM_LEAD = re.compile(r"(?i)^(?:any|a|an|the|known|prior|previous|recent|history of|明显|既往|其他|其它)\s*")
-_TERM_TAIL = re.compile(r"(?i)(?:\s+history|史|等)$")
+_TERM_TAIL = re.compile(r"(?i)(?:\s+history|史|等|均)$")   # "Brudzinski征均阴性": 均 is a quantifier, not the term
 _TERM_BING = re.compile(r"(?<=[^尿心肝肾肺胃脑肠胆疾脏])病$")   # "高血压病(史)" -> "高血压", but keep 糖尿病 / 冠心病 / 疾病
 
 
@@ -257,7 +286,8 @@ def neg_spans(sentence: str) -> list[tuple[int, int]]:
         if ender is _END_ZH:
             pos = m.end()
             for item in sentence[m.end():end].split("、"):
-                if pos > m.end() and (_POS_ITEM.search(item) or len(item) > 14):
+                # judged per coordinated part: "内分泌系统等重要脏器疾病史及传染病史" is two list items, not one long statement
+                if pos > m.end() and (_POS_ITEM.search(item) or max(len(x) for x in re.split(r"及|和|与|或", item)) > 14):
                     end = pos - 1
                     break
                 pos += len(item) + 1
@@ -280,8 +310,8 @@ def _clean_term(t: str) -> str:
         prev = t
         t = _TERM_LEAD.sub("", t)
         t = _TERM_TAIL.sub("", t).strip()
-    if len(t) >= 4:
-        t = _TERM_BING.sub("", t)
+        if len(t) >= 4:
+            t = _TERM_BING.sub("", t)          # inside the loop: "肝炎等病史" -> "肝炎等病" -> "肝炎等" -> "肝炎"
     return t
 
 
@@ -375,5 +405,20 @@ _UNCERTAIN = re.compile(r"(?i)\b(?:possibl[ey]|probabl[ey]|suspected|suspicious|
 has_normal_cue = lambda t: bool(_NORMAL.search(t or ""))
 has_done_cue = lambda t: bool(_DONE.search(t or ""))
 has_certain_cue = lambda t: bool(_CERTAIN.search(t or ""))
+# A certainty word in a negated, pending or planned clause is not a definitive claim: "不能确诊糖尿病",
+# "需G/GM试验及培养确诊", "待病理明确诊断".
+_CERTAIN_VOID = re.compile(r"(?i)不能|不可|无法|未能|尚未|未|难以|不足以|需|须|有待|待|拟|建议|以便|以|进一步|方可|才能"
+                           r"|\b(?:not|cannot|no|until|pending|to be|needs?|requires?|awaiting)\b")
+_CLAUSE = re.compile(r"[，,；;。！？!?：:\n]")
+
+
+def definitive_claims(text: str) -> list[str]:
+    """Clauses that make a definitive diagnostic claim: a certainty cue not voided by negation, intent or uncertainty."""
+    out = []
+    for clause in _CLAUSE.split(text or ""):
+        m = _CERTAIN.search(clause)
+        if m and not _CERTAIN_VOID.search(clause[:m.start()]) and not has_uncertain_cue(clause):
+            out.append(clause.strip())
+    return out
 has_missing_cue = lambda t: bool(_MISSING.search(t or ""))
 has_uncertain_cue = lambda t: bool(_UNCERTAIN.search(t or ""))
