@@ -127,7 +127,6 @@ class Config:
     cutoff_mode: str = "redact"     # redact | flag | off
     output_lang: str = "auto"       # auto | en | zh
     inline_citations: bool = False
-    numbered: bool = True
     include_meta: bool = False
     output_envelope: str = "auto"   # auto | list | <key name>
     output_field_map: dict = field(default_factory=dict)
@@ -237,7 +236,6 @@ def load_config(*, development: bool = False, **overrides) -> Config:
         cutoff_mode=str(_get("CUTOFF_MODE", default="redact")).lower(),
         output_lang=str(_get("OUTPUT_LANG", default="auto")).lower(),
         inline_citations=_flag("INLINE_CITATIONS"),
-        numbered=_flag("NUMBERED", default=True),
         include_meta=_flag("INCLUDE_META"),
         output_envelope=_get("OUTPUT_ENVELOPE", default="auto"),
         on_unresolved=str(_get("ON_UNRESOLVED", default="flag")).lower(),

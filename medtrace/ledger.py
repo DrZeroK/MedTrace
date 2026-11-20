@@ -52,6 +52,7 @@ class Fact:
     dates: list = field(default_factory=list)
     neg_terms: list = field(default_factory=list)
     contexts: list = field(default_factory=list)
+    as_of: tuple = ()               # dates of this sentence, else of the latest dated line before it in the same source
 
 
 @dataclass
@@ -75,6 +76,7 @@ class Ledger:
     conflicts: list = field(default_factory=list)       # [{kind, detail, sources}]
     label_values: dict = field(default_factory=dict)    # measurement label -> {values recorded under that label}
     undocumented: list = field(default_factory=list)    # core elements with no mention at all
+    diagnoses: list = field(default_factory=list)       # the records' own diagnosis list items (verbatim, enumeration removed)
     lang: str = "en"
     knowledge_cards: dict = field(default_factory=dict)
 
@@ -118,6 +120,8 @@ def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
     n = 0
     pos_parts, clear_parts = [], []
     for src in case.sources:
+        as_of = ()
+        L.diagnoses += _diagnosis_items(src.content)
         L.tokens_by_source[src.sid] = T.tokens(src.content)
         L.numbers |= T.all_number_values(src.content)
         for val, units in T.all_number_units(src.content).items():
@@ -129,6 +133,9 @@ def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
             f = Fact(fid=f"F{n}", sid=src.sid, text=sent, category=_category(sent))
             f.numerics = numerics(sent, year)
             f.dates = [d[0] for d in T.find_dates(sent, year)]
+            if f.dates:
+                as_of = tuple(sorted({d.date() for d in f.dates}))
+            f.as_of = as_of
             enhanced = context_mode == C.VERSION and T.detect_lang(sent) == "zh"
             f.contexts = [s.as_dict() for s in C.analyze(sent)] if enhanced else []
             f.neg_terms = C.negated_terms(sent) if enhanced else T.negated_terms(sent)
@@ -156,8 +163,11 @@ def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
     L.all_text_norm = T.squash(case.text)
     L.neg_terms_norm = {T.squash(t) for t in L.neg_terms}
     L.tokens_all = set().union(*L.tokens_by_source.values()) if L.tokens_by_source else set()
-    L.neg_only = {t for t in L.neg_terms if t not in L.pos_text}
     _find_conflicts(L)
+    # a term the same source also asserts (e.g. "无…体重下降" / "体重近2月下降约1.5kg") is a record conflict, surfaced as
+    # such; it is not "documented only as absent", so a note that reports the positive statement is not a negation flip
+    internal = {c["term"] for c in L.conflicts if c["kind"] == "internal"}
+    L.neg_only = {t for t in L.neg_terms if t not in L.pos_text and t not in internal}
     for key, rx, en, zh in _CORE:
         if not re.search(rx, case.text):
             L.undocumented.append({"key": key, "en": en, "zh": zh})
@@ -173,15 +183,62 @@ _NEG_RESULT = re.compile(r"(?i)未见(?:明显)?异常|无异常|阴性|无阳�
 _GENERIC_TERMS = {"药物", "食物", "其他", "其它", "异常", "不适", "特殊", "家族", "drug", "food", "other"}   # list fragments, not conditions
 
 
-def _asserts(term: str, text: str) -> bool:
+_DX_HEAD = re.compile(r"(?:初步|入院|门诊|临床|目前)?诊断\s*[：:]")
+# A denial scoped to before pregnancy ("糖尿病（孕前）", "孕前否认糖尿病") is not contradicted by a pregnancy-period
+# diagnosis ("妊娠期糖尿病"): a normal temporal distinction, not a conflict.
+_PRE_PREG = re.compile(r"孕前")
+_PREG_PREFIX = re.compile(r"(?:妊娠期?|孕期)$")
+
+
+def _diagnosis_items(text: str) -> list[str]:
+    """Items of a "初步诊断：1. …\n2. …" list (one per line, or "；"-separated on the header line)."""
+    out = []
+    for m in _DX_HEAD.finditer(text):
+        lines = text[m.end():].split("\n")
+        first = [x for x in re.split(r"[；;]\s*(?=\d{1,2}[.)、．])", lines[0]) if x.strip()]
+        rest = []
+        for line in lines[1:]:          # numbered items and their un-numbered sub-items, up to the next labelled line
+            if not line.strip() or re.search(r"[：:]", line):
+                break
+            rest.append(line)
+        out += [T.strip_enum(x).rstrip("；;。 ") for x in first + rest if T.strip_enum(x).strip()]
+    return out
+
+
+def _asserts(term: str, text: str, pre_pregnancy: bool = False) -> bool:
     pos = T.positive_text(text)
     i = pos.find(term)
     while i >= 0:
-        after = pos[i + len(term):]
-        if not _TEST_SUFFIX.match(after) and not _NEG_RESULT.search(after[:60]):
+        after, before = pos[i + len(term):], pos[:i]
+        if (not _TEST_SUFFIX.match(after) and not _NEG_RESULT.search(after[:60])
+                and not before.endswith("非")                      # "非手术患者Padua评分" names a risk group
+                and not (pre_pregnancy and _PREG_PREFIX.search(before))):
             return True
         i = pos.find(term, i + 1)
     return False
+
+
+def _gapped(term: str) -> re.Pattern | None:
+    """A 4+ character Chinese finding written with a short interjection: "体重下降" ~ "体重近2月下降".
+    shortcut: head = first two characters, gap <= 6 non-punctuation characters; extend only on observed misses."""
+    if len(term) < 4 or not all("\u4e00" <= ch <= "\u9fff" for ch in term):
+        return None
+    return re.compile(re.escape(term[:2]) + r"[^，,；;。！？、\s]{0,6}?" + re.escape(term[2:]))
+
+
+def _patient_span(text: str, start: int, end: int, mode: str) -> bool:
+    """True if text[start:end] is about the patient. Experiencer scopes ("家族史：", "父亲…") apply in every mode;
+    zh_context_v1 additionally requires the mention to be affirmed (not uncertain or missing)."""
+    from . import context as C
+    state = C.attributes(text, start, end)
+    return state["experiencer"] == "patient" and (mode == "legacy" or state["assertion"] == "affirmed")
+
+
+def _patient_mention(text: str, term: str) -> bool:
+    """True if a negated term is said of the patient; a relative's absent finding is not the patient's."""
+    from . import context as C
+    states = C.term_attributes(text, term)
+    return not states or any(s["experiencer"] == "patient" for s in states)
 
 
 def _find_conflicts(L: Ledger) -> None:
@@ -199,25 +256,50 @@ def _find_conflicts(L: Ledger) -> None:
             if L.context_mode != "legacy" and not any(s["assertion"] == "negated" and s["experiencer"] == "patient"
                                                       for s in C.term_attributes(f.text, term)):
                 continue
-            pos = [g for g in L.facts if g.sid != f.sid and _asserts(term, g.text)
+            pre = bool(_PRE_PREG.search(f.text))
+            pos = [g for g in L.facts if g.sid != f.sid and _asserts(term, g.text, pre)
                    and (L.context_mode == "legacy" or any(s["assertion"] == "affirmed" and s["experiencer"] == "patient"
                                                         for s in C.term_attributes(g.text, term)))]
             if pos:
                 seen.add(term)
                 L.conflicts.append({"kind": "polarity", "term": term, "detail": f'"{f.text}" vs "{pos[0].text}"',
                                     "sources": sorted({f.sid, pos[0].sid})})
-    # (2) same labelled measurement, same unit, different value, different source
+    # (2) a finding one source records as absent and, in another sentence of the SAME source, as present
+    #     ("无…体重下降" then "体重近2月下降约1.5kg"). Only 4+ character findings: 2-character symptoms recur
+    #     in site- or time-specific negatives and produce noise.
+    for f in L.facts:
+        for term in f.neg_terms:
+            rx = _gapped(term)
+            if term in seen or not rx or term in _GENERIC_TERMS:
+                continue
+            if not _patient_mention(f.text, term):
+                continue
+            g = next((g for g in L.facts if g.sid == f.sid and g is not f
+                      and any(_patient_span(g.text, m.start(), m.end(), L.context_mode)
+                              for m in rx.finditer(T.positive_text(g.text)))), None)
+            if g:
+                seen.add(term)
+                L.conflicts.append({"kind": "internal", "term": term, "detail": f'"{f.text}" vs "{g.text}"',
+                                    "sources": [f.sid], "values": []})
+    # (3) same labelled measurement, same unit, different value, different source, at the same or an unknown time.
+    #     Values at distinct documented times are a trend (ALT 86 -> 65 U/L), not a conflict; an undated value equal
+    #     to a dated one is the same result restated (HPI quoting the outside lab).
     table: dict = {}
     for f in L.facts:
         for num in f.numerics:
             if len(num["label"]) >= 2:
                 table.setdefault((num["label"], num["unit"]), []).append((num["value"], f))
     for (label, unit), rows in table.items():
-        vals = {v for v, _ in rows}
-        sids = {f.sid for _, f in rows}
-        if len(vals) > 1 and len(sids) > 1:
-            L.conflicts.append({"kind": "numeric", "term": label,
-                                "detail": "; ".join(f'{f.sid}: "{f.text}"' for _, f in rows[:4]),
+        dated = {v for v, f in rows if f.as_of}
+        rows = [(v, f) for v, f in rows if f.as_of or v not in dated]
+        clash = [(a, b) for i, a in enumerate(rows) for b in rows[i + 1:]
+                 if a[0] != b[0] and (not a[1].as_of or not b[1].as_of or a[1].as_of == b[1].as_of)]
+        sids = {f.sid for pair in clash for _, f in pair}
+        if len(sids) > 1:
+            involved = [r for pair in clash for r in pair]
+            L.conflicts.append({"kind": "numeric", "term": label, "unit": unit,
+                                "values": sorted({v for v, _ in involved}),
+                                "detail": "; ".join(dict.fromkeys(f'{f.sid}: "{f.text}"' for _, f in involved[:4])),
                                 "sources": sorted(sids)})
 
 

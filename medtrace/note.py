@@ -41,11 +41,10 @@ class Note:
     sections: dict = field(default_factory=lambda: {s: [] for s in SECTIONS})
     review_items: list = field(default_factory=list)     # [{type, description, source_ids}]
     extra_evidence: list = field(default_factory=list)   # model-supplied evidence list (baseline format)
-    structured: bool = True                              # False when the model returned free prose
 
     def copy(self) -> "Note":
         return Note({k: [Statement(s.text, list(s.sources), s.kind, s.basis, list(s.knowledge_ids)) for s in v] for k, v in self.sections.items()},
-                    [dict(r) for r in self.review_items], [dict(e) for e in self.extra_evidence], self.structured)
+                    [dict(r) for r in self.review_items], [dict(e) for e in self.extra_evidence])
 
     def text(self, section=None) -> str:
         secs = [section] if section else SECTIONS
@@ -129,7 +128,6 @@ def note_from_model(obj: dict, require_complete: bool = False) -> Note:
             continue
         found = True
         if isinstance(val, str):
-            note.structured = False
             items = [l for l in val.split("\n") if l.strip()]
             if len(items) == 1:
                 items = split_sentences(val)
@@ -162,20 +160,20 @@ def note_from_model(obj: dict, require_complete: bool = False) -> Note:
     return note
 
 
-def render_section(stmts: list[Statement], numbered: bool, inline: bool) -> str:
-    lines = []
-    for i, s in enumerate(stmts, 1):
-        t = s.text + (f" [{', '.join(s.sources)}]" if inline and s.sources else "")
-        lines.append(f"{i}. {t}" if numbered and len(stmts) > 1 else t)
-    return "\n".join(lines)
-
-
 _TERMINAL = re.compile(r"[。！？；.!?;][\"'”’）)]*$")
 
 
-def render_prose(stmts: list[Statement]) -> str:
-    """Official sections read as one paragraph; evidence remains in the separate evidence array."""
-    texts = [s.text.strip() for s in stmts if s.text and s.text.strip()]
+def render_prose(stmts: list[Statement], inline: bool = False) -> str:
+    """One paragraph per section; development and official outputs share this renderer.
+    Evidence remains in the separate evidence array; inline citations stay attached to their statement."""
+    texts = []
+    for s in stmts:
+        text = s.text.strip()
+        if not text:
+            continue
+        if inline and s.sources:
+            text += f" [{', '.join(s.sources)}]"
+        texts.append(text)
     if not texts:
         return ""
     zh = detect_lang(" ".join(texts)) == "zh"
@@ -191,10 +189,9 @@ def render_prose(stmts: list[Statement]) -> str:
 def to_record(note: Note, case, cfg, meta: dict | None = None) -> dict:
     """Serialise to the output contract. Field names/selection are configurable (official schema TBC)."""
     rid = case.raw_id
-    numbered = cfg.numbered and note.structured
     rec = {"case_id": case.case_id}
     for sec in SECTIONS:
-        rec[sec] = render_section(note.sections[sec], numbered, cfg.inline_citations)
+        rec[sec] = render_prose(note.sections[sec], cfg.inline_citations)
     evidence = []
     for sec in SECTIONS:
         for s in note.sections[sec]:
@@ -257,9 +254,9 @@ def to_official_record(note: Note, case, meta: dict | None = None, status: str =
                     "kind": _kind(e.get("section", ""), e.get("basis", ""))}
                    for e in note.extra_evidence if e["source_ids"]]
     evidence = _select_evidence(candidates)
-    review = [r["description"] for r in note.review_items
+    review = [r.get("clinician") or r["description"] for r in note.review_items
               if r.get("description")
-              and (r.get("origin", "model") not in OFFICIAL_REVIEW_EXCLUDE or r.get("official_visible"))]
+              and (r.get("origin", "model") not in OFFICIAL_REVIEW_EXCLUDE or r.get("official_visible"))][:6]
     return {
         "case_id": case.case_id,
         "status": "success",

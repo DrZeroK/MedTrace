@@ -132,7 +132,7 @@ bearer-token 鉴权、环境变量名（`LLM_API_BASE` 及别名）。
 ### 4.5 患者事实可追溯性与医学知识
 - 每条生成的陈述都携带 `sources`；`evidence` 以确定性方式派生；无效 id 会被丢弃（A2）。
 - 官方 `review_items` 不包含引用草稿原文的校验/QA 消息；这些发现保留在运行日志中。`overconfident` 因影响处理决策而进入白名单，以干净话术呈现。模型、台账、截止时间与知识降级提示仍面向临床复核。
-- 官方叙述段落按散文式输出（每节一段）；legacy 输出仍保留编号列表。证据仍在独立的 `evidence` 数组中。
+- 开发与官方输出的叙述段落都按散文式输出（每节一段）。证据仍在独立的 `evidence` 数组中。
 - 批次 A 已 **APPROVED**（2026-11-19）：改动一同意；改动二修改后同意（加入 `初步诊断` / `working diagnosis` 措辞）。项目负责人已豁免正式签名。批准记录与修订快照哈希见 `docs/CLINICAL_REVIEW_BATCH_A.zh-CN.md`（英文：`docs/CLINICAL_REVIEW_BATCH_A.md`）。已批准话术应在回归测试中保持冻结。
 - 确定性验证器严格检查病例特点，对拟诊讨论检查较轻（带单位的数字、低严重度的否定翻转），对诊疗计划几乎不检查。
 - 在拟诊讨论和诊疗计划内部，患者事实与模型的医学知识之间**没有显式区分**：陈述的 `kind` 为 `assessment|differential|uncertainty|investigation|treatment|monitoring`，没有 "knowledge" 标记。目前完全没有检索到的知识，因此没有可登记的内容。

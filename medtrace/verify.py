@@ -34,6 +34,37 @@ _LABEL_PREFIX = re.compile(r"^\s*(?:实验室检查|检查检验|体格检查|�
                            r"实验室|检验|检查|查体|病史|主诉|辅助|影像|心电图|一般情况|"
                            r"history|physical exam|examination|vitals?|laboratory|labs?|investigations)\s*[：:]\s*", re.I)
 _TEST_NAME = re.compile(r"(?i)^(?:毒)?(?:病毒)?(?:标志物|抗体|抗原|指标|检测|筛查|系列|全套|谱|dna|rna)")
+# A negated term that names a test panel or score ("肝炎病毒标志物均阴性") reports a result set, not a condition; the
+# records name it as a label ("肝炎病毒标志物：乙肝表面抗原阴性…"). It is checked only for being documented at all.
+_TEST_TERM = re.compile(r"(?i)(?:标志物|抗体|抗原|指标|检测|筛查|系列|全套|评分|检查|dna|rna)$")
+# A collective test name whose results follow it ("肝炎病毒标志物：乙肝表面抗原阴性，丙肝抗体阴性").
+_PANEL_TERM = re.compile(r"(?i)(?:标志物|指标|系列|全套|筛查|检测|检查|[三四五六七八]项)$")
+# Result words, negative alternatives first so "未见异常"/"未检出" win over the "异常"/"检出" inside them.
+_RESULT = re.compile(r"(?P<neg>阴性|[（(][-－—][）)]|未见异常|无异常|未检出|正常)"
+                     r"|(?P<pos>阳性|[（(][+＋]+[）)]|升高|增高|偏高|降低|减低|偏低|异常|检出)")
+
+
+def _documented_results(variants: set, term_norm: str, L: Ledger) -> set:
+    """{'neg', 'pos'}: the results the records give for this test. An individual test takes the result word right
+    after its name; a panel takes every result in the rest of the sentence, so one positive member counts."""
+    states = set()
+    panel = bool(_PANEL_TERM.search(term_norm))
+    for f in L.facts:
+        s = T.squash(f.text)
+        for v in variants:
+            i = s.find(v)
+            while i >= 0:
+                after = s[i + len(v):]
+                if after[:1] in ("+", "＋"):
+                    states.add("pos")
+                else:
+                    near = _RESULT.search(after[:8])
+                    if near:
+                        states.add(near.lastgroup)
+                    if panel or not near:
+                        states.update(m.lastgroup for m in _RESULT.finditer(after))
+                i = s.find(v, i + 1)
+    return states
 _GENERIC_LABEL = re.compile(r"(?i)约|大小|直径|范围|长|宽|厚|高|共|为|右眼|左眼|双眼|左侧|右侧|about|approx|size|measur")   # "大小约 2.5cm" / "右眼" name no analyte
 _SAYS_ABSENT = re.compile(r"(?i)not (?:documented|recorded|available)|undocumented|未记录|未提及|未记载|未提供|不详")
 _META_COMMENT = re.compile(r"(?i)not (?:be )?(?:assumed|considered|taken as|read as|interpreted)"
@@ -65,6 +96,7 @@ class Finding:
     index: int
     message: str
     text: str = ""
+    term: str = ""          # the clinical term concerned, when there is one (clinician-facing wording, dedupe)
 
     def as_dict(self):
         return asdict(self)
@@ -75,7 +107,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     sec = _SHORT[section]
     text = st.text
     low = text.lower()
-    add = lambda code, sev, msg: out.append(Finding(code, sev, section, index, msg, text))
+    add = lambda code, sev, msg, term="": out.append(Finding(code, sev, section, index, msg, text, term))
     year = case.cutoff.year if case.cutoff else None
 
     # ---- evidence references
@@ -116,10 +148,10 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                               # only unit-bearing values are checked there
             if val not in L.numbers:
                 add("number_not_in_source", HIGH if sec == "features" else MEDIUM,
-                    f"value {raw!r} does not appear in the records")
+                    f"value {raw!r} does not appear in the records", raw)
             elif unit and L.units.get(val) and unit not in L.units[val]:
                 add("unit_mismatch", HIGH if sec == "features" else MEDIUM,
-                    f"{raw!r}: records give this value with unit(s) {sorted(L.units[val])}")
+                    f"{raw!r}: records give this value with unit(s) {sorted(L.units[val])}", raw)
 
     # ---- a knowledge statement must not carry patient-specific values from the records
     if st.basis == "knowledge" and sec in ("discussion", "plan") and not quoted_knowledge:
@@ -164,10 +196,10 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS or len(term) < 2:
                 continue
             i = pos.find(term)
-            # "否认肝炎病史" is not contradicted by "肝炎病毒标志物": skip the term inside a test name
-            if i >= 0 and not _TEST_NAME.match(pos[i + len(term):]):
+            # "否认肝炎病史" is not contradicted by "肝炎病毒标志物" (a test name) or "非手术患者" (a risk group)
+            if i >= 0 and not _TEST_NAME.match(pos[i + len(term):]) and not pos[:i].endswith("非"):
                 add("negation_flip", HIGH if sec == "features" else LOW,
-                    f"records document {term!r} only as absent/denied, but it is stated here without negation")
+                    f"records document {term!r} only as absent/denied, but it is stated here without negation", term)
     # What a missing-information statement must not do is claim a core item is undocumented when the records
     # do document it.
     if meta_missing and T.support(text, L.tokens_all) < 0.9:      # >= 0.9: the records' own sentence, quoted (e.g. "具体用药不详")
@@ -178,8 +210,11 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     if sec == "features" and checked.strip():
         for term in (C.negated_terms(checked) if enhanced else T.negated_terms(checked)):
             term_norm = T.squash(term)
-            if term_norm in L.neg_terms_norm:
-                continue
+            variants = T.term_variants(term_norm)
+            if variants & L.neg_terms_norm or any(T.concat_of(v, L.neg_terms_norm) for v in variants):
+                continue        # documented negative, possibly abbreviated or coordinated ("吸烟饮酒" = 吸烟 + 饮酒)
+            if _TEST_TERM.search(term_norm) and _documented_results(variants, term_norm, L) == {"neg"}:
+                continue        # the records give only negative results for this test or panel
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS:
                 continue        # "无扩张" at one site does not contradict "扩张" at another; section headers are not findings
             if enhanced:
@@ -187,12 +222,12 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 if source_states and all(s["assertion"] == "unknown" for s in source_states):
                     add("context_scope_ambiguous", MEDIUM, f"{term!r}: the source assertion scope is ambiguous; review required")
                     continue
-            if term_norm in L.clear_pos_text_norm:
-                add("negation_flip", HIGH, f"{term!r} is negated here but the records document it as present")
-            elif term_norm in L.pos_text_norm:
+            if any(v in L.clear_pos_text_norm for v in variants):
+                add("negation_flip", HIGH, f"{term!r} is negated here but the records document it as present", term)
+            elif any(v in L.pos_text_norm for v in variants):
                 continue        # the records mention it after a negation cue: ambiguous, not flagged
-            elif term_norm not in L.all_text_norm:
-                add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records")
+            elif not any(v in L.all_text_norm for v in variants):
+                add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records", term)
     if enhanced and sec == "features":
         for code, term in C.context_conflicts(checked, L.facts):
             add(code, MEDIUM, f"{term!r}: assertion/person/time differs from the source context; review required")
@@ -212,15 +247,62 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
 
     # ---- proposed vs completed
     if sec == "plan":
-        for clause in re.split(r"[；;。！？\n]", text):
+        # scored on the comma-clause carrying the "已…" cue: reasoning after it ("…，需重新评估…") is not the action
+        for clause in re.split(r"[，,；;。！？\n]", text):
             if T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5:
                 add("unsupported_completed", HIGH, "plan describes an intervention as already done, without support in the records")
                 break
 
-    # ---- diagnostic certainty
-    if sec == "discussion" and T.has_certain_cue(text) and not T.has_certain_cue(L.all_text):
-        add("overconfident", MEDIUM, "uses definitive diagnostic wording not present in the records")
+    # ---- diagnostic certainty: only a definitive claim (not "不能确诊…", "需…确诊") about a diagnosis that the
+    # records do not themselves list without qualification
+    if sec == "discussion" and not T.has_certain_cue(L.all_text):
+        heading = _subject(text)
+        unsupported = [c for c in T.definitive_claims(text) if not _record_diagnosis(_claim_subject(c) or heading, L)]
+        if unsupported:
+            add("overconfident", MEDIUM, "uses definitive diagnostic wording not present in the records")
+    if sec == "discussion" and index == 0 and is_copied_diagnosis_list(text, L):
+        add("copied_diagnosis_list", MEDIUM, "discussion opens with a verbatim copy of the records' diagnosis list")
     return out
+
+
+def _subject(text: str) -> str:
+    """The diagnosis a discussion statement is about: its heading before the first colon, else its first clause."""
+    return re.split(r"[：:，,。；;]", text, 1)[0]
+
+
+# Words around a certainty cue that do not name a diagnosis ("支持诊断明确", "故诊断成立").
+_CLAIM_FILLER = re.compile(r"支持|诊断|依据|结合|考虑|目前|本例|该病|此|已|可|基本|临床|即|为|成立|明确|确诊|确定|充分|可以|较|的|是|故|因此|综上")
+
+
+def _claim_subject(claim: str) -> str:
+    """The diagnosis a definitive clause names ("肺炎诊断明确" -> "肺炎"); "" when it names none ("支持诊断明确"),
+    in which case the claim is about the statement's heading."""
+    rest = _CLAIM_FILLER.sub("", T._CERTAIN.sub("", claim))
+    rest = re.sub(r"[\s、，,；;。！？!?：:（）()\-]", "", rest)
+    return rest if len(rest) >= 2 else ""
+
+
+def _record_diagnosis(subject: str, L: Ledger) -> bool:
+    """True if `subject` is one of the records' own diagnoses stated without uncertainty."""
+    subj = T.tokens(subject)
+    certain = set().union(*[T.tokens(dx) for dx in L.diagnoses if not T.has_uncertain_cue(dx)], set())
+    # union over items: a heading may combine a listed diagnosis and its sub-item ("急性胃肠炎" + "轻-中度脱水")
+    return bool(subj) and len(subj & certain) / len(subj) >= 0.6
+
+
+_DX_COPY = re.compile(r"^\s*(?:初步|入院|门诊)?诊断\s*[：:]|^\s*\(?\d{1,2}[.)、．]")
+
+
+def is_copied_diagnosis_list(text: str, L: Ledger) -> bool:
+    """A discussion statement that reproduces the records' diagnosis list (header and/or enumerated items) instead of
+    discussing it. Judged by bigram overlap with the list, so reasoning text that merely names a diagnosis is kept."""
+    if not L.diagnoses or not _DX_COPY.search(text):
+        return False
+    body = re.sub(r"^\s*(?:初步|入院|门诊)?诊断\s*[：:]", "", text)
+    if len(re.findall(r"(?<!\d)\d{1,2}[.)、．](?!\d)", body)) < 2 and not re.match(r"^\s*(?:初步|入院|门诊)?诊断", text):
+        return False
+    body = re.sub(r"(?<!\d)\d{1,2}[.)、．](?!\d)", " ", body)      # list numbers are not content tokens
+    return T.support(body, T.tokens("\n".join(L.diagnoses))) >= 0.85
 
 
 def verify_note(note: Note, case: Case, L: Ledger) -> list[Finding]:
@@ -283,6 +365,50 @@ def safe_repair(note: Note, case: Case) -> int:
         removed += len(r.get("source_ids", [])) - len(keep)
         r["source_ids"] = keep
     return removed
+
+
+def drop_copied_diagnosis(note: Note, L: Ledger) -> int:
+    """Remove a leading verbatim copy of the records' diagnosis list from the discussion ("初步诊断：1. …；2. …"),
+    when real discussion follows. The removed text restates record content, not reasoning, so nothing clinical
+    is lost; the diagnoses remain the subject of the statements that follow. Returns #statements removed."""
+    stmts = note.sections["diagnostic_discussion"]
+    if not stmts or not is_copied_diagnosis_list(stmts[0].text, L):
+        return 0
+    dx = T.tokens("\n".join(L.diagnoses))
+    n = 1
+    # list items keep going while they are bare restatements (enumeration may already be stripped); a headed
+    # statement ("胃早期癌：依据…") is discussion and ends the run
+    while (n < len(stmts) and not re.search(r"[：:]", T.strip_enum(stmts[n].text))
+           and T.support(T.strip_enum(stmts[n].text), dx) >= 0.85):
+        n += 1
+    if n >= len(stmts):
+        return 0                   # nothing else to keep: left to the copied_diagnosis_list finding
+    note.sections["diagnostic_discussion"] = stmts[n:]
+    return n
+
+
+_SENT_END = re.compile(r"(?<=[。；;！？!?])")
+
+
+def split_long_statements(note: Note, limit: int = 100) -> int:
+    """Split statements longer than `limit` characters at sentence boundaries into consecutive statements with the
+    same sources and labels. Wording is unchanged and prose rendering is identical; only statement (and evidence)
+    granularity changes. A single sentence over the limit stays whole. Returns #statements added."""
+    added = 0
+    for sec in SECTIONS:
+        out = []
+        for st in note.sections[sec]:
+            parts = [x for x in _SENT_END.split(st.text) if x.strip()] if len(st.text) > limit else [st.text]
+            chunks: list[str] = []
+            for x in parts:
+                if chunks and len(chunks[-1]) + len(x) <= limit:
+                    chunks[-1] += x
+                else:
+                    chunks.append(x)
+            out += [Statement(c.strip(), list(st.sources), st.kind, st.basis, list(st.knowledge_ids)) for c in chunks]
+            added += len(chunks) - 1
+        note.sections[sec] = out
+    return added
 
 
 def counts(findings: list[Finding]) -> dict:

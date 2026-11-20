@@ -24,7 +24,8 @@ HARD RULES (a violation makes the note unusable)
 
 CLINICAL QUALITY
 - Organise the reasoning by clinical problem, most urgent first. For each problem: the supporting evidence, the evidence against (including relevant documented negatives), your graded assessment, and what is still unknown.
-- Differentials must be specific to this patient: 2-4 alternatives, each with the recorded finding that raises it and the finding (or missing test) that argues against or would settle it. No generic lists.
+- Differentials must be specific to this patient: 2-4 alternatives, each with the recorded finding that raises it and the finding (or missing test) that argues against or would settle it. No generic lists. Do not list a condition the records explicitly deny as an unresolved cause; if it must be mentioned, state that the records deny it and nothing supports it.
+- Do not open the discussion by copying the records' diagnosis list ("Initial diagnosis: 1. ... 2. ..."); go straight to the problem-by-problem analysis.
 - Each plan item must respond to a documented problem or a stated uncertainty, and say what it is for. Cover investigations, treatment and monitoring (what, how often, and what result would change management).
 - Check every proposed treatment against the documented allergies, medications, organ function, pregnancy status and anticoagulation. If one of these is undocumented and matters for the proposal, make the proposal conditional on it and add a review item. Name a drug dose only when it is standard and nothing in the records argues against it.
 - Explicitly flag time-critical or life-threatening conditions suggested by the records.

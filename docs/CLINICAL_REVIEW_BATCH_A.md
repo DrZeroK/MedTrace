@@ -30,6 +30,7 @@ What changes:
 - `medical_record.case_features`, `medical_record.diagnostic_discussion` and `medical_record.plan` join their statements into one paragraph.
 - Order, wording, evidence and review items are unchanged. No clinical text is rewritten.
 - Legacy/development output keeps the numbered list.
+- Update 2026-11-20: development output also switched to prose at the project owner's request; the numbered-list renderer and `NUMBERED` option were removed.
 
 Before (illustrative):
 
