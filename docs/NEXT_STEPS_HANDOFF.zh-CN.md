@@ -64,7 +64,7 @@
 
 ### 3.2 原则上允许，但取决于部署版本 / 统一 API 规范
 
-- `temperature` 和 `response_format`（Q6）。已实现为 `LLM_TEMPERATURE` 和 `LLM_JSON_MODE`；尚未针对比赛服务测试。
+- `temperature` 和 `response_format`（Q6/Q14）。`json_object` 已实现为 `LLM_JSON_MODE`；`json_schema` 尚未实现。官方路径目前不发送 `response_format`；具体参数与 JSON Schema 特性待确认。
 - 按策略选择 Thinking 模式（Q7）；"具体支持情况将通过统一 API 示例确认"。
 - 合理的第三方 Python 依赖（Q3）；兼容性要求待定。
 
@@ -76,12 +76,21 @@
 - **硬件（Q13）：** 模型推理由主办方昇腾技术栈统一部署；参赛算法在隔离的纯 CPU 环境运行，不得额外部署 LLM 或 GPU/NPU 推理服务；操作系统/CPU/内存/存储/时限仍待公布。
 - **与当前设计的关系：** 运行时使用确定性台账和可选 SQLite FTS，不使用 Embedding、GPU/NPU 或前缀缓存；未来若做向量 RAG，必须使用主办方的 Embedding API。
 
+### 3.2b 主办方 Q14-Q16 答复（2026-11-20）
+
+- **response_format（Q14）：** vLLM Ascend 原生支持 `text`、`json_object`、`json_schema`；原则上允许使用 `json_schema`。具体参数范围及 JSON Schema 特性以部署版本兼容性验证为准。官方路径目前不发送 `response_format`；开发模式可用 `json_object`；`json_schema` 尚未实现。待参数清单和示例公布后扩展验收探测。
+- **Embedding 资源评分（Q15）：** 内网 Embedding API 的 NPU 资源由赛事方管理，显存和算力占用不计入参赛方硬件评分。调用次数和使用量统一管理，因此约束是配额和延迟，而不是硬件分。
+- **BGE-M3（Q16）：** BAAI/bge-m3，昇腾 910B；Dense 1024 维、最长 8192 tokens、中文/多语言、FP16、常规检索无需 Instruction，先开放 Dense API。计划提供低频 HTTP 测试接口；endpoint、认证、示例、配额和最终模型版本待公布。当前运行时不使用 Embedding；BM25 教材实验为纯 CPU、draft、位于提交包之外。
+- **决定：** 保持无 Embedding/BM25 默认；在最终模型版本、endpoint/认证/配额和索引大小限制公布前，不打包向量索引。先测试 `json_object`，再视 Schema 特性决定是否使用 `json_schema`。
+
 ### 3.3 未解决 —— 等待组织方答复。不要硬编码假设的取值
 
 - 每请求超时、每例总运行时长、token 预算、模型调用上限、重试上限（Q5）。
 - 最终结果文件名（`output.json` 还是 `results.json`）以及结果数据结构（Q9）。
 - 算法包大小限制、依赖兼容性规则、资源登记模板（Q2、Q3）。
-- 模型名称、端点配置方式、默认 Thinking 模式、支持的参数、API 示例。
+- Qwen 模型名称、端点配置方式、默认 Thinking 模式、支持的参数、API 示例。
+- `response_format`/`json_schema` 参数清单、支持的 Schema 特性及示例。
+- Embedding endpoint、认证方式、调用示例、配额，以及最终 BGE-M3 版本/精度。
 - 完整的输入和输出 schema、退出码规则、平台故障处理。
 
 ### 3.4 实现假设（我们自己的，而非组织方的）
@@ -101,6 +110,7 @@ bearer-token 鉴权、环境变量名（`LLM_API_BASE` 及别名）。
 ### 4.2 指定 Qwen / vLLM 集成 —— 通用实现，尚未针对性适配
 - `medtrace/llm.py` 使用 OpenAI 兼容的 chat completions 协议。`seed` 和 `chat_template_kwargs` 已是一等参数；官方入口发送 seed 42 和 `enable_thinking: false`。若 400 明确点名不支持的字段，则剥离该字段并重试一次，本次运行后续沿用。响应中的 `reasoning_content` 被忽略（这是正确的），`<think>` 块会被剥离。
 - 尚未针对比赛 vLLM 服务器运行；真实模型证据来自商业托管端点。
+- 官方路径仍不发送 `response_format`。开发模式可用 `json_object`；`json_schema` 尚未实现。待主办方公布参数清单和示例后，扩展 `scripts/api_acceptance.py` 探测；复用现有 400 字段兼容回退。
 
 ### 4.2a 端点验收脚本
 - `python scripts/api_acceptance.py` 使用官方两键 `.env`；`--development` 使用开发环境；支持 `--repeats 1-5`、`--timeout`、`--json-out`。
@@ -126,6 +136,7 @@ bearer-token 鉴权、环境变量名（`LLM_API_BASE` 及别名）。
 - 批次 A 已 **APPROVED**（2026-11-19）：改动一同意；改动二修改后同意（加入 `初步诊断` / `working diagnosis` 措辞）。项目负责人已豁免正式签名。批准记录与修订快照哈希见 `docs/CLINICAL_REVIEW_BATCH_A.zh-CN.md`（英文：`docs/CLINICAL_REVIEW_BATCH_A.md`）。已批准话术应在回归测试中保持冻结。
 - 确定性验证器严格检查病例特点，对拟诊讨论检查较轻（带单位的数字、低严重度的否定翻转），对诊疗计划几乎不检查。
 - 在拟诊讨论和诊疗计划内部，患者事实与模型的医学知识之间**没有显式区分**：陈述的 `kind` 为 `assessment|differential|uncertainty|investigation|treatment|monitoring`，没有 "knowledge" 标记。目前完全没有检索到的知识，因此没有可登记的内容。
+- 运行时不使用 Embedding；BM25 教材 RAG 仍为 draft、纯 CPU、位于提交包之外。若以后加入 dense RAG，必须调用主办方的 Embedding API（BGE-M3 Dense 1024、8192 tokens、无需 Instruction），并保留 BM25/无向量回退。
 - 验证器在未见过的模型文本上的精确率**尚未确立**：每一批新数据都会产生新的误报模式（`docs/REPORT.md` §2.6）。高严重度的发现只作为待核事项呈现；修复调用默认关闭。
 
 ### 4.6 中文临床数据与评测
@@ -147,7 +158,7 @@ bearer-token 鉴权、环境变量名（`LLM_API_BASE` 及别名）。
 
 每个工作包的规则：保持无参数运行 `python main.py` 可用；保持输出记录字段以及
 `OUTPUT_FIELD_MAP` / `OUTPUT_FIELDS` 的行为不变；除非工作包明确说明，否则不要更改影响生成文本的
-默认值；添加或更新测试；现有 50 个测试必须仍全部通过；绝不要提交 `.env`、`data/raw/`
+默认值；添加或更新测试；现有全部测试必须仍通过；绝不要提交 `.env`、`data/raw/`
 或任何天池下载内容；绝不要将比赛用例发送到指定服务以外的任何端点。
 
 图例：**[ORG]** 需要组织方澄清 · **[MODEL]** 需要指定模型的访问权限 · **[CLIN]** 需要临床评审。

@@ -93,3 +93,45 @@ class TextbookSearch(unittest.TestCase):
         self.assertEqual(search(db, '推荐阅读'), [])
         self.assertEqual(search(db, 'JOEE'), [])
         self.assertEqual(search(db, '本章数字资源'), [])
+
+    def test_filter_config_cutoff_ranges_and_exercise_pages(self):
+        root = Path(tempfile.mkdtemp(prefix='medtrace-textbook-cutoff-'))
+        pages = [
+            (1, 1, 'header', '第一章 总论\n正文1'),
+            (2, 2, 'header', '参考文献\n［1］某书'),
+            (3, 3, 'header', '中英文名词对照索引\n条目 1'),
+            (4, 4, 'header', '人卫官网\n定价：10元\n策划编辑 某人'),
+            (5, 5, 'header', '思考题解题思路 本章目标测试 本章思维导图\n思考题 1'),
+            (6, 6, 'header', '第二章 低血糖\n正文2'),
+            (7, 7, 'header', '练习题与复习题参考答案\n1. 2'),
+            (8, 8, 'header', '附录\n公式'),
+            (9, 9, 'header', '第10版\n封底'),
+        ]
+        corpus = make_paged_corpus(root, {'A': pages})
+        config = root / 'cutoffs.json'
+        config.write_text(json.dumps({'A': {'cut_page': 9, 'drop_ranges': [[7, 7]]}}), encoding='utf-8')
+        filtered = root / 'filtered'
+        filter_corpus(str(corpus), str(filtered), str(config))
+        _, kept = parse_book(filtered / 'A.txt')
+        self.assertEqual([p[0] for p in kept], [1, 6, 8])
+        manifest = json.loads((filtered / 'corpus.manifest.json').read_text('utf-8'))
+        self.assertEqual(manifest['books'][0]['cutoff'], 9)
+        categories = manifest['books'][0]['removed_categories']
+        self.assertEqual(categories['reference'], 1)
+        self.assertEqual(categories['index'], 1)
+        self.assertEqual(categories['advertisement'], 1)
+        self.assertEqual(categories['exercise'], 1)
+        self.assertEqual(categories['exercise_or_answer'], 1)
+        self.assertEqual(categories['cutoff'], 1)
+
+    def test_build_can_exclude_book(self):
+        root = Path(tempfile.mkdtemp(prefix='medtrace-textbook-exclude-'))
+        corpus = make_corpus(root)
+        db = str(root / 'excluded.sqlite')
+        build(db, str(corpus), exclude_books=['A'])
+        self.assertEqual(search(db, 'BNP', book='A'), [])
+        self.assertTrue(search(db, 'BNP', book='B'))
+        manifest = json.loads(Path(db).with_suffix('.manifest.json').read_text('utf-8'))
+        self.assertEqual(manifest['excluded_books'], ['A'])
+        self.assertEqual([item['book'] for item in manifest['books']], ['B'])
+

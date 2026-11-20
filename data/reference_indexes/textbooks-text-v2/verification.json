@@ -1,0 +1,240 @@
+{
+  "pages_indexed": 1515,
+  "chunks": 3250,
+  "database_bytes": 32915456,
+  "corpus_bytes": 5496656,
+  "integrity_check": "ok",
+  "pdf_free": true,
+  "filtered": true,
+  "removed_pages": {
+    "内科学第10版": [
+      168,
+      354,
+      464,
+      538,
+      652,
+      806,
+      873,
+      936,
+      937,
+      938,
+      939,
+      940,
+      941,
+      942,
+      943,
+      944,
+      945,
+      946,
+      947,
+      948,
+      949,
+      950,
+      951
+    ],
+    "诊断学第10版": [
+      82,
+      589,
+      590,
+      591,
+      592,
+      593,
+      594,
+      595,
+      596,
+      597,
+      598,
+      599,
+      600,
+      601,
+      602,
+      603
+    ]
+  },
+  "probes": [
+    {
+      "query": "心力衰竭",
+      "book": null,
+      "milliseconds": 4.22,
+      "results": [
+        {
+          "book": "内科学第10版",
+          "page": 180,
+          "printed_page": 180
+        },
+        {
+          "book": "诊断学第10版",
+          "page": 165,
+          "printed_page": 165
+        },
+        {
+          "book": "内科学第10版",
+          "page": 176,
+          "printed_page": 176
+        },
+        {
+          "book": "内科学第10版",
+          "page": 249,
+          "printed_page": 249
+        },
+        {
+          "book": "内科学第10版",
+          "page": 721,
+          "printed_page": 721
+        }
+      ]
+    },
+    {
+      "query": "低血糖",
+      "book": "内科学第10版",
+      "milliseconds": 1.16,
+      "results": [
+        {
+          "book": "内科学第10版",
+          "page": 750,
+          "printed_page": 750
+        },
+        {
+          "book": "内科学第10版",
+          "page": 748,
+          "printed_page": 748
+        },
+        {
+          "book": "内科学第10版",
+          "page": 751,
+          "printed_page": 751
+        },
+        {
+          "book": "内科学第10版",
+          "page": 749,
+          "printed_page": 749
+        },
+        {
+          "book": "内科学第10版",
+          "page": 752,
+          "printed_page": 752
+        }
+      ]
+    },
+    {
+      "query": "血糖",
+      "book": "诊断学第10版",
+      "milliseconds": 0.84,
+      "results": [
+        {
+          "book": "诊断学第10版",
+          "page": 356,
+          "printed_page": 356
+        },
+        {
+          "book": "诊断学第10版",
+          "page": 357,
+          "printed_page": 357
+        },
+        {
+          "book": "诊断学第10版",
+          "page": 295,
+          "printed_page": 295
+        },
+        {
+          "book": "诊断学第10版",
+          "page": 359,
+          "printed_page": 359
+        },
+        {
+          "book": "诊断学第10版",
+          "page": 355,
+          "printed_page": 355
+        }
+      ]
+    },
+    {
+      "query": "BNP",
+      "book": null,
+      "milliseconds": 0.4,
+      "results": [
+        {
+          "book": "内科学第10版",
+          "page": 181,
+          "printed_page": 181
+        },
+        {
+          "book": "内科学第10版",
+          "page": 113,
+          "printed_page": 113
+        },
+        {
+          "book": "内科学第10版",
+          "page": 345,
+          "printed_page": 345
+        },
+        {
+          "book": "内科学第10版",
+          "page": 114,
+          "printed_page": 114
+        },
+        {
+          "book": "内科学第10版",
+          "page": 186,
+          "printed_page": 186
+        }
+      ]
+    },
+    {
+      "query": "钾",
+      "book": null,
+      "milliseconds": 10.66,
+      "results": [
+        {
+          "book": "内科学第10版",
+          "page": 36,
+          "printed_page": 36
+        },
+        {
+          "book": "内科学第10版",
+          "page": 60,
+          "printed_page": 60
+        },
+        {
+          "book": "内科学第10版",
+          "page": 65,
+          "printed_page": 65
+        },
+        {
+          "book": "内科学第10版",
+          "page": 83,
+          "printed_page": 83
+        },
+        {
+          "book": "内科学第10版",
+          "page": 90,
+          "printed_page": 90
+        }
+      ]
+    },
+    {
+      "query": "推荐阅读",
+      "book": null,
+      "milliseconds": 0.3,
+      "results": []
+    },
+    {
+      "query": "中英文名词对照索引",
+      "book": null,
+      "milliseconds": 0.29,
+      "results": []
+    },
+    {
+      "query": "本章数字资源",
+      "book": null,
+      "milliseconds": 0.24,
+      "results": []
+    },
+    {
+      "query": "不存在的试验词xyz987654",
+      "book": null,
+      "milliseconds": 0.27,
+      "results": []
+    }
+  ]
+}

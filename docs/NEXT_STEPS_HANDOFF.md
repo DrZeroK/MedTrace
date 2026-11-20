@@ -67,7 +67,7 @@ document URL or version). Later official specifications override it.
 
 ### 3.2 Permitted in principle, subject to the deployed version / unified API specification
 
-- `temperature` and `response_format` (Q6). Implemented as `LLM_TEMPERATURE` and `LLM_JSON_MODE`; untested against the competition service.
+- `temperature` and `response_format` (Q6/Q14). `json_object` is implemented as `LLM_JSON_MODE`; `json_schema` is not implemented. The official path sends no `response_format` yet; the exact parameter and JSON Schema feature subset is pending.
 - Selecting a Thinking mode per strategy (Q7); "specific support will be confirmed through unified API examples".
 - Reasonable third-party Python dependencies (Q3); compatibility requirements pending.
 
@@ -79,12 +79,21 @@ document URL or version). Later official specifications override it.
 - **Hardware (Q13):** model inference runs on the organizer's Ascend stack; the participant algorithm runs in an isolated CPU-only environment and must not deploy additional LLMs or GPU/NPU inference services. OS/CPU/memory/storage/runtime limits are still pending.
 - **Design fit:** the current runtime uses a deterministic ledger plus optional SQLite FTS; it does not use embeddings, GPU/NPU work or prefix caching. Any future vector RAG must use the organizer's Embedding API.
 
+### 3.2b Organizer answers Q14-Q16 (2026-11-20)
+
+- **response_format (Q14):** vLLM Ascend natively supports `text`, `json_object`, and `json_schema`; `json_schema` is permitted in principle. The exact parameter range and JSON Schema features are subject to compatibility validation of the deployed version. The official path currently sends no `response_format`; `json_object` exists as a development option; `json_schema` is not implemented. Extend the acceptance probe after the parameter list and examples are published.
+- **Embedding resource scoring (Q15):** the internal Embedding API's NPU resources are organizer-managed; their memory and compute usage are not counted in the participant hardware score. Call count and usage are centrally managed, so quota and latency remain the constraints, not hardware score.
+- **BGE-M3 (Q16):** BAAI/bge-m3 on Ascend 910B; Dense 1024, max 8192 tokens, Chinese/multilingual, FP16, no Instruction for normal retrieval, Dense API first. A low-frequency HTTP test API is planned; endpoint, authentication, examples, quota, and final model version are pending. Current runtime uses no embedding; the BM25 textbook experiment is CPU-only, draft and outside the submission.
+- **Decision:** keep the no-embedding/BM25 default; do not bundle a vector index until the final model version, endpoint/auth/quota, and index size limit are published. Test `json_object` first, then `json_schema` if the subset is suitable.
+
 ### 3.3 Unresolved — awaiting the organizer. Do not hard-code assumed values
 
 - Per-request timeout, total runtime per case, token budget, model-call limit, retry limit (Q5).
 - Final result filename (`output.json` vs `results.json`) and result data structure (Q9).
 - Algorithm package size limit, dependency compatibility rules, resource registration template (Q2, Q3).
-- Model name, endpoint configuration method, default Thinking mode, supported parameters, API examples.
+- Qwen model name, endpoint configuration method, default Thinking mode, supported parameters, API examples.
+- `response_format`/`json_schema` parameter list, supported Schema feature subset, and examples.
+- Embedding endpoint, authentication, call examples, quota, and final BGE-M3 version/precision.
 - Complete input and output schemas, exit-code rules, platform-fault handling.
 
 ### 3.4 Implementation assumptions (ours, not the organizer's)
@@ -104,6 +113,7 @@ bearer-token auth, environment variable names (`LLM_API_BASE` and aliases).
 ### 4.2 Designated Qwen / vLLM integration — generic, not yet targeted
 - `medtrace/llm.py` speaks OpenAI-compatible chat completions. `seed` and `chat_template_kwargs` are first-class; the official entry point sends seed 42 and `enable_thinking: false`. A 400 that explicitly names an unsupported field strips that field and retries once, caching the decision for the run. `reasoning_content` in responses is ignored (correct), `<think>` blocks are stripped.
 - Not yet exercised against the competition vLLM server; real-model evidence used commercial hosted endpoints.
+- The official path still sends no `response_format`. `json_object` is available in development; `json_schema` is not implemented. After the organizer publishes the parameter list and examples, extend `scripts/api_acceptance.py` to probe them; reuse the 400 field-compatibility fallback.
 
 ### 4.2a Endpoint acceptance script
 - `python scripts/api_acceptance.py` uses the official two-key `.env`; `--development` uses the development env; `--repeats 1-5`, `--timeout`, `--json-out`.
@@ -129,6 +139,7 @@ bearer-token auth, environment variable names (`LLM_API_BASE` and aliases).
 - Batch A is **APPROVED** (2026-11-19): Change 1 approved; Change 2 approved with edits (add `初步诊断` / `working diagnosis` wording). The project owner waived the formal signature. Approval record and revised snapshot hashes: `docs/CLINICAL_REVIEW_BATCH_A.md` (Chinese: `docs/CLINICAL_REVIEW_BATCH_A.zh-CN.md`). Keep the approved wording frozen in regression tests.
 - The deterministic verifier checks Case Features strictly, the discussion lightly (unit-bearing numbers, negation flips at low severity), the plan almost not at all.
 - There is **no explicit separation** between patient facts and model medical knowledge inside the discussion and plan: a statement's `kind` is `assessment|differential|uncertainty|investigation|treatment|monitoring`, with no "knowledge" marker. There is no retrieved knowledge at all today, so nothing to register.
+- No embedding is used at runtime; the BM25 textbook RAG remains draft, CPU-only and outside the submission. If dense RAG is added, call the organizer's Embedding API (BGE-M3 Dense 1024, 8192 tokens, no Instruction) and keep a BM25/no-embedding fallback.
 - Verifier precision on unseen model prose is **not established**: each fresh batch produced new false-alarm patterns (`docs/REPORT.md` §2.6). High-severity findings are surfaced as review items only; the repair call is off by default.
 
 ### 4.6 Chinese clinical data and evaluation
@@ -150,7 +161,7 @@ bearer-token auth, environment variable names (`LLM_API_BASE` and aliases).
 
 Rules for every package: keep `python main.py` working with no arguments; keep the output record fields and
 `OUTPUT_FIELD_MAP` / `OUTPUT_FIELDS` behaviour; do not change defaults that affect generated text unless the
-package says so; add or update tests; all 50 existing tests must still pass; never commit `.env`, `data/raw/`,
+package says so; add or update tests; all existing tests must still pass; never commit `.env`, `data/raw/`,
 or anything from Tianchi downloads; never send competition cases to any endpoint other than the designated service.
 
 Legend: **[ORG]** needs organizer clarification · **[MODEL]** needs designated-model access · **[CLIN]** needs clinical review.

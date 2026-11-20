@@ -1,0 +1,459 @@
+{
+  "corpus_books": 21,
+  "searchable_books": 20,
+  "excluded_books": [
+    "人体寄生虫学第10版"
+  ],
+  "corpus_pages": 7965,
+  "pages_indexed": 7683,
+  "chars_indexed": 10105699,
+  "chunks": 15146,
+  "database_bytes": 158121984,
+  "integrity": "ok",
+  "pdf_path_free": true,
+  "probes": [
+    {
+      "book": "医学生物学第10版",
+      "query": "细胞周期",
+      "results": [
+        {
+          "book": "医学生物学第10版",
+          "page": 43,
+          "printed_page": 43
+        },
+        {
+          "book": "医学生物学第10版",
+          "page": 42,
+          "printed_page": 42
+        },
+        {
+          "book": "医学生物学第10版",
+          "page": 48,
+          "printed_page": 48
+        }
+      ]
+    },
+    {
+      "book": "内科学第10版",
+      "query": "心力衰竭",
+      "results": [
+        {
+          "book": "内科学第10版",
+          "page": 180,
+          "printed_page": 180
+        },
+        {
+          "book": "内科学第10版",
+          "page": 176,
+          "printed_page": 176
+        },
+        {
+          "book": "内科学第10版",
+          "page": 249,
+          "printed_page": 249
+        }
+      ]
+    },
+    {
+      "book": "有机化学第10版",
+      "query": "有机化学",
+      "results": [
+        {
+          "book": "有机化学第10版",
+          "page": 2,
+          "printed_page": 2
+        },
+        {
+          "book": "有机化学第10版",
+          "page": 29,
+          "printed_page": 29
+        },
+        {
+          "book": "有机化学第10版",
+          "page": 30,
+          "printed_page": 30
+        }
+      ]
+    },
+    {
+      "book": "病理生理学第10版",
+      "query": "休克",
+      "results": [
+        {
+          "book": "病理生理学第10版",
+          "page": 166,
+          "printed_page": 166
+        },
+        {
+          "book": "病理生理学第10版",
+          "page": 168,
+          "printed_page": 168
+        },
+        {
+          "book": "病理生理学第10版",
+          "page": 159,
+          "printed_page": 159
+        }
+      ]
+    },
+    {
+      "book": "皮肤性病学第10版",
+      "query": "银屑病",
+      "results": [
+        {
+          "book": "皮肤性病学第10版",
+          "page": 135,
+          "printed_page": 135
+        },
+        {
+          "book": "皮肤性病学第10版",
+          "page": 138,
+          "printed_page": 138
+        },
+        {
+          "book": "皮肤性病学第10版",
+          "page": 137,
+          "printed_page": 137
+        }
+      ]
+    },
+    {
+      "book": "外科学第10版",
+      "query": "阑尾炎",
+      "results": [
+        {
+          "book": "外科学第10版",
+          "page": 403,
+          "printed_page": 403
+        },
+        {
+          "book": "外科学第10版",
+          "page": 408,
+          "printed_page": 408
+        },
+        {
+          "book": "外科学第10版",
+          "page": 404,
+          "printed_page": 404
+        }
+      ]
+    },
+    {
+      "book": "病理学第10版",
+      "query": "炎症",
+      "results": [
+        {
+          "book": "病理学第10版",
+          "page": 63,
+          "printed_page": 63
+        },
+        {
+          "book": "病理学第10版",
+          "page": 62,
+          "printed_page": 62
+        },
+        {
+          "book": "病理学第10版",
+          "page": 75,
+          "printed_page": 75
+        }
+      ]
+    },
+    {
+      "book": "生理学第10版",
+      "query": "动作电位",
+      "results": [
+        {
+          "book": "生理学第10版",
+          "page": 272,
+          "printed_page": 272
+        },
+        {
+          "book": "生理学第10版",
+          "page": 32,
+          "printed_page": 32
+        },
+        {
+          "book": "生理学第10版",
+          "page": 39,
+          "printed_page": 39
+        }
+      ]
+    },
+    {
+      "book": "诊断学第10版",
+      "query": "血糖",
+      "results": [
+        {
+          "book": "诊断学第10版",
+          "page": 356,
+          "printed_page": 356
+        },
+        {
+          "book": "诊断学第10版",
+          "page": 357,
+          "printed_page": 357
+        },
+        {
+          "book": "诊断学第10版",
+          "page": 295,
+          "printed_page": 295
+        }
+      ]
+    },
+    {
+      "book": "儿科学第10版",
+      "query": "小儿",
+      "results": [
+        {
+          "book": "儿科学第10版",
+          "page": 35,
+          "printed_page": 35
+        },
+        {
+          "book": "儿科学第10版",
+          "page": 34,
+          "printed_page": 34
+        },
+        {
+          "book": "儿科学第10版",
+          "page": 153,
+          "printed_page": 153
+        }
+      ]
+    },
+    {
+      "book": "医学遗传学第8版",
+      "query": "遗传病",
+      "results": [
+        {
+          "book": "医学遗传学第8版",
+          "page": 219,
+          "printed_page": 219
+        },
+        {
+          "book": "医学遗传学第8版",
+          "page": 8,
+          "printed_page": 8
+        },
+        {
+          "book": "医学遗传学第8版",
+          "page": 12,
+          "printed_page": 12
+        }
+      ]
+    },
+    {
+      "book": "医患沟通第3版",
+      "query": "沟通",
+      "results": [
+        {
+          "book": "医患沟通第3版",
+          "page": 61,
+          "printed_page": 61
+        },
+        {
+          "book": "医患沟通第3版",
+          "page": 64,
+          "printed_page": 64
+        },
+        {
+          "book": "医患沟通第3版",
+          "page": 9,
+          "printed_page": 9
+        }
+      ]
+    },
+    {
+      "book": "生物化学与分子生物学第10版",
+      "query": "氨基酸",
+      "results": [
+        {
+          "book": "生物化学与分子生物学第10版",
+          "page": 176,
+          "printed_page": 176
+        },
+        {
+          "book": "生物化学与分子生物学第10版",
+          "page": 179,
+          "printed_page": 179
+        },
+        {
+          "book": "生物化学与分子生物学第10版",
+          "page": 11,
+          "printed_page": 11
+        }
+      ]
+    },
+    {
+      "book": "组织学与胚胎学第10版",
+      "query": "上皮",
+      "results": [
+        {
+          "book": "组织学与胚胎学第10版",
+          "page": 18,
+          "printed_page": 18
+        },
+        {
+          "book": "组织学与胚胎学第10版",
+          "page": 9,
+          "printed_page": 9
+        },
+        {
+          "book": "组织学与胚胎学第10版",
+          "page": 12,
+          "printed_page": 12
+        }
+      ]
+    },
+    {
+      "book": "药理学第10版",
+      "query": "阿托品",
+      "results": [
+        {
+          "book": "药理学第10版",
+          "page": 68,
+          "printed_page": 68
+        },
+        {
+          "book": "药理学第10版",
+          "page": 69,
+          "printed_page": 69
+        },
+        {
+          "book": "药理学第10版",
+          "page": 70,
+          "printed_page": 70
+        }
+      ]
+    },
+    {
+      "book": "医用高等数学第8版",
+      "query": "导数",
+      "results": [
+        {
+          "book": "医用高等数学第8版",
+          "page": 89,
+          "printed_page": 89
+        },
+        {
+          "book": "医用高等数学第8版",
+          "page": 87,
+          "printed_page": 87
+        },
+        {
+          "book": "医用高等数学第8版",
+          "page": 29,
+          "printed_page": 29
+        }
+      ]
+    },
+    {
+      "book": "基础化学第10版",
+      "query": "平衡",
+      "results": [
+        {
+          "book": "基础化学第10版",
+          "page": 107,
+          "printed_page": 107
+        },
+        {
+          "book": "基础化学第10版",
+          "page": 105,
+          "printed_page": 105
+        },
+        {
+          "book": "基础化学第10版",
+          "page": 104,
+          "printed_page": 104
+        }
+      ]
+    },
+    {
+      "book": "医学心理学第8版",
+      "query": "心理",
+      "results": [
+        {
+          "book": "医学心理学第8版",
+          "page": 116,
+          "printed_page": 116
+        },
+        {
+          "book": "医学心理学第8版",
+          "page": 3,
+          "printed_page": 3
+        },
+        {
+          "book": "医学心理学第8版",
+          "page": 13,
+          "printed_page": 13
+        }
+      ]
+    },
+    {
+      "book": "麻醉学第5版",
+      "query": "全身麻醉",
+      "results": [
+        {
+          "book": "麻醉学第5版",
+          "page": 61,
+          "printed_page": 61
+        },
+        {
+          "book": "麻醉学第5版",
+          "page": 159,
+          "printed_page": 159
+        },
+        {
+          "book": "麻醉学第5版",
+          "page": 62,
+          "printed_page": 62
+        }
+      ]
+    },
+    {
+      "book": "妇产科学第10版",
+      "query": "子痫",
+      "results": [
+        {
+          "book": "妇产科学第10版",
+          "page": 88,
+          "printed_page": 88
+        },
+        {
+          "book": "妇产科学第10版",
+          "page": 93,
+          "printed_page": 93
+        },
+        {
+          "book": "妇产科学第10版",
+          "page": 94,
+          "printed_page": 94
+        }
+      ]
+    }
+  ],
+  "noise": [
+    {
+      "query": "参考文献",
+      "results": 0
+    },
+    {
+      "query": "中英文名词对照索引",
+      "results": 0
+    },
+    {
+      "query": "推荐阅读",
+      "results": 0
+    },
+    {
+      "query": "本章目标测试",
+      "results": 0
+    }
+  ],
+  "excluded_probe": {
+    "book": "人体寄生虫学第10版",
+    "query": "寄生虫",
+    "results": 0
+  }
+}

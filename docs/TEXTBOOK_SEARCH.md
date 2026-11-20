@@ -2,6 +2,21 @@
 
 [English](TEXTBOOK_SEARCH.en.md) | **简体中文**
 
+## 21 本教材统一检索
+
+过滤后的 21 本纯文本语料位于 `data/reference_indexes/textbooks-text-21-v2/`，共 7,965 页、
+10,491,035 字；检索数据库排除人体寄生虫学，实际收录 20 本、7,683 页、10,105,699 字、15,146 个片段。
+已删除参考文献/推荐阅读、索引、习题/答案、广告/封底和重复页眉，保留正文附录与工具表；
+逐本后置切点、抽取方式和 OCR 说明见 [TEXTBOOK_LIBRARY_21.md](TEXTBOOK_LIBRARY_21.md)。
+
+```bash
+python3 /Users/zerok/Documents/GitHub/MedTrace/scripts/textbook_search.py search --db /Users/zerok/Documents/GitHub/MedTrace/data/reference_indexes/textbooks-text-21-v2/textbooks.sqlite --query '阑尾炎' --book 外科学第10版 --limit 5
+```
+
+去掉 `--book` 可跨书检索。人体寄生虫学仅保留语料/OCR，不进入检索数据库，按书名查询为空；
+其余教材的临床或教学核对仍须回合法取得的原 PDF。本文件其余部分描述两本教材的结构化知识卡与
+term/lab/rule 类型库。
+
 已完成筛选后的离线纯文本语料与检索索引：2 本教材、1515 页、2,176,489 字。
 语料位于 `data/reference_indexes/textbooks-text-v2/`，由 `内科学第10版.txt`、`诊断学第10版.txt`
 和 `corpus.manifest.json` 组成；`textbooks.sqlite` 及其 `.manifest.json` 是由语料生成的可重建索引，

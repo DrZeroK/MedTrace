@@ -16,8 +16,24 @@ PAGE_MARKER = re.compile(r'^--- 页 (\d+)(?:（书页 (\d+)，(页眉|推算)）
 TITLE_PREFIX = '# 书名：'
 BASIS_IN = {'页眉': 'header', '推算': 'offset_inferred'}
 BASIS_OUT = {v: k for k, v in BASIS_IN.items()}
-NAV_LINES = {'本章数字资源', '本节数字资源', '本章目标测试', '本节目标测试'}
-HEADING_RE = re.compile(r'^第[一二三四五六七八九十百]+[篇章节]')
+NAV_LINES = {
+    '本章数字资源', '本节数字资源', '本章目标测试', '本节目标测试',
+    '本章思维导图', '本节思维导图', '本篇思维导图',
+    '人民卫生出版社', '卫生出版社', '人民卫生出版社有限公司', '版社',
+}
+PUBLISHER_PREFIXES = (
+    '人民卫生出版社', '卫生出版社', '民卫生出版社', '人卫官网', '人卫官方资讯发布平台',
+    '策划编辑', '责任编辑', '数字编辑', '书籍设计', '定价：', '获取海量医学学习资源',
+    '人卫APP', 'PMPH',
+)
+AD_MARKERS = ('人卫官网', '获取海量医学学习资源', '策划编辑', '责任编辑', '书籍设计',
+              '定价：', '图书在版编目', '版权所有', '人卫APP', 'PMPH')
+REF_MARKERS = ('推荐阅读', '参考文献', '参考书目')
+EXERCISE_MARKERS = ('思考题解题思路', '本章目标测试')
+INDEX_MARKERS = ('中英文名词对照索引', '英中文名词对照索引', '索引', '名词索引', '中英文索引')
+REF_ENTRY = re.compile(r'^[［\[]\d+[］\]]')
+AUTHOR_LINE = re.compile(r'^（[\u4e00-\u9fff·\s]{1,20}）$')
+HEADING_RE = re.compile(r'^第(?:\d+|[一二三四五六七八九十百]+)[篇章节]')
 
 
 def digest_file(path):
@@ -174,27 +190,67 @@ def norm_line(line):
     return re.sub(r'\s+', '', line)
 
 
-def filter_corpus(corpus_dir, out_dir):
+def filter_corpus(corpus_dir, out_dir, cutoff_path=None):
     """Drop non-body pages and navigation noise; keep original page ordinals as gaps."""
     books, manifest_path = load_corpus(corpus_dir)
+    cutoffs = {}
+    if cutoff_path:
+        cutoffs = json.loads(Path(cutoff_path).read_text('utf-8'))
     dest = Path(out_dir)
     if not dest.is_absolute() or dest.exists():
         raise ValueError('use a new absolute corpus directory')
     dest.mkdir(parents=True)
     entries = []
-    for book, pages, _ in books:
+    for book, pages, item in books:
         plain_title = re.sub(r'第\d+版$', '', book)
-        ref_pages = {page for page, _, _, text in pages if '推荐阅读' in page_heads(text)}
-        index_pages = {page for page, _, _, text in pages if '中英文名词对照索引' in page_heads(text)}
-        cutoff = max(ref_pages) if ref_pages else (min(index_pages) if index_pages else None)
-        removed = set()
+        configured = cutoffs.get(book)
+        extra_drop = set()
+        if isinstance(configured, dict):
+            extra_drop.update(int(page) for page in configured.get('drop_pages', []))
+            for start, end in configured.get('drop_ranges', []):
+                extra_drop.update(range(int(start), int(end) + 1))
+            configured = configured.get('cut_page')
+        configured = int(configured) if configured is not None else None
+        ref_pages, index_pages, ad_pages, exercise_pages = set(), set(), set(), set()
+        for page, _, _, text in pages:
+            heads = page_heads(text)
+            if any(any(line == marker or line.startswith(marker) for marker in REF_MARKERS) for line in heads):
+                ref_pages.add(page)
+            if any(any(line == marker or line.startswith(marker) for marker in INDEX_MARKERS) for line in heads):
+                index_pages.add(page)
+            if sum(1 for marker in AD_MARKERS if marker in text) >= 2:
+                ad_pages.add(page)
+            if sum(1 for line in heads if REF_ENTRY.match(line)) >= 2:
+                ref_pages.add(page)
+            if any(any(marker in line for marker in EXERCISE_MARKERS) for line in heads[:3]):
+                exercise_pages.add(page)
+        auto_cut = min(index_pages) if index_pages else None
+        cutoff = configured if configured is not None else auto_cut
+        if configured is None and auto_cut is not None and ref_pages and max(ref_pages) == auto_cut - 1:
+            cutoff = auto_cut - 1
+        removed, categories = set(), Counter()
         for page, _, _, text in pages:
             if not text.strip():
                 removed.add(page)
+                categories['blank'] += 1
+            elif page in extra_drop:
+                removed.add(page)
+                categories['exercise_or_answer'] += 1
+            elif page in exercise_pages:
+                removed.add(page)
+                categories['exercise'] += 1
             elif cutoff is not None and page >= cutoff:
                 removed.add(page)
+                categories['cutoff'] += 1
             elif page in ref_pages:
                 removed.add(page)
+                categories['reference'] += 1
+            elif page in index_pages:
+                removed.add(page)
+                categories['index'] += 1
+            elif page in ad_pages:
+                removed.add(page)
+                categories['advertisement'] += 1
         cleaned, removed_lines = {}, Counter()
         for page, _, _, text in pages:
             if page in removed:
@@ -204,7 +260,12 @@ def filter_corpus(corpus_dir, out_dir):
                 line = line.strip()
                 if not line:
                     continue
-                if line in NAV_LINES or 'JOEE' in line:
+                if (line in NAV_LINES or 'JOEE' in line or re.fullmatch(r'第\d+版', line)
+                        or AUTHOR_LINE.fullmatch(line)
+                        or (len(line) <= 60 and any(marker in line for marker in (
+                            '本章思维导图', '本节思维导图', '本篇思维导图', '本章目标测试',
+                            '本节目标测试', '思考题解题思路', '书末有推荐阅读')))
+                        or any(line.startswith(prefix) for prefix in PUBLISHER_PREFIXES)):
                     removed_lines['navigation_or_artifact'] += 1
                     continue
                 lines.append(line)
@@ -216,7 +277,8 @@ def filter_corpus(corpus_dir, out_dir):
         first_counts = Counter(norm_line(lines[0]) for lines in cleaned.values() if lines)
         headers = {key for key, count in first_counts.items()
                    if count >= 3 and len(key) <= 60 and
-                   (HEADING_RE.match(key) or key in {book, plain_title})}
+                   (HEADING_RE.match(key) or key in {book, plain_title} or
+                    (len(key) <= 30 and not re.search(r'[。；！？，,:：]', key)))}
         seen_headers = set()
         for lines in cleaned.values():
             for _ in range(4):
@@ -240,6 +302,7 @@ def filter_corpus(corpus_dir, out_dir):
         for page, lines in cleaned.items():
             if not lines:
                 removed.add(page)
+                categories['empty_after_clean'] += 1
         kept = [(page, printed, basis, '\n'.join(cleaned[page]))
                 for page, printed, basis, _ in pages if page not in removed]
         target = dest / book_filename(book)
@@ -248,30 +311,41 @@ def filter_corpus(corpus_dir, out_dir):
         entries.append({"book": book, "text_file": target.name, "sha256": digest_file(target),
                         "bytes": target.stat().st_size, "chars": sum(len(p[3]) for p in written),
                         "pages": len(written), "source_pages": len(pages),
-                        "removed_pages": sorted(removed), "removed_lines": dict(removed_lines),
-                        "empty_pages": [], "label_basis": {k: sum(p[2] == k for p in written) for k in BASIS_IN.values()}})
+                        "cutoff": cutoff, "removed_pages": sorted(removed),
+                        "removed_categories": dict(categories), "removed_lines": dict(removed_lines),
+                        "empty_pages": [],
+                        "label_basis": {k: sum(p[2] == k for p in written) for k in BASIS_IN.values()}})
     manifest = {"schema": 1, "kind": "textbook-text-corpus", "state": "ready", "books": entries,
-                "filter": {"version": 1, "source_corpus_manifest_sha256": digest_file(manifest_path),
-                           "rules": ["drop the last 推荐阅读 page and every page after it",
-                                     "drop other 推荐阅读 pages and blank pages",
-                                     "drop 本章/本节数字资源 and 本章/本节目标测试 lines",
-                                     "drop JOEE font-artifact lines",
-                                     "drop leading page numbers and repeated running headers, keeping the first heading occurrence"]},
+                "filter": {"version": 2, "source_corpus_manifest_sha256": digest_file(manifest_path),
+                           "cutoffs": {item['book']: item['cutoff'] for item in entries if item['cutoff'] is not None},
+                           "rules": ["drop pages from the configured back-matter cutoff or first index page",
+                                     "drop reference/推荐阅读 pages, index pages, blank pages, advertisement pages and exercise pages",
+                                     "drop configured exercise/answer page ranges",
+                                     "drop navigation, publisher, author-signature and JOEE artifact lines",
+                                     "drop leading page numbers and repeated running headers, keeping the first occurrence"]},
                 "created_at": time.strftime('%Y-%m-%dT%H:%M:%S%z'),
-                "provenance": "filtered from an exported plain-text corpus; no PDF path or page number is retained",
+                "provenance": "filtered plain-text corpus; no PDF path retained",
                 "redistribution": "not established; local research index"}
     (dest / 'corpus.manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(json.dumps({"corpus": str(dest),
                       "books": [{"book": b["book"], "source_pages": b["source_pages"], "pages": b["pages"],
-                                 "removed_pages": len(b["removed_pages"]), "chars": b["chars"]} for b in entries]},
+                                 "cutoff": b["cutoff"], "removed_pages": len(b["removed_pages"]),
+                                 "removed_categories": b["removed_categories"], "chars": b["chars"]} for b in entries]},
                      ensure_ascii=False))
 
-
-def build(db_path, corpus_dir):
+def build(db_path, corpus_dir, exclude_books=None):
     dest = Path(db_path)
     if not dest.is_absolute() or dest.exists():
         raise ValueError('use a new absolute database path; existing indexes are preserved')
     books, manifest_path = load_corpus(corpus_dir)
+    excluded = set(exclude_books or [])
+    known = {book for book, _, _ in books}
+    missing = excluded - known
+    if missing:
+        raise ValueError(f'unknown excluded books: {sorted(missing)}')
+    books = [item for item in books if item[0] not in excluded]
+    if not books:
+        raise ValueError('no books left after exclusion')
     dest.parent.mkdir(parents=True, exist_ok=True)
     db = sqlite3.connect(dest)
     try:
@@ -295,6 +369,7 @@ def build(db_path, corpus_dir):
             metadata.append({"book": book, "text_file": item['text_file'], "text_sha256": item['sha256'],
                              "pages": len(pages), "chunks": chunks, "chars": sum(len(p[3]) for p in pages)})
         manifest = {"schema": 1, "state": "ready", "books": metadata,
+                    "excluded_books": sorted(excluded),
                     "corpus_manifest_sha256": digest_file(manifest_path),
                     "created_at": time.strftime('%Y-%m-%dT%H:%M:%S%z'),
                     "dependencies": ["Python >=3.10", "SQLite FTS5"],
@@ -351,9 +426,11 @@ def main():
     f = sub.add_parser('filter', help='drop back matter and navigation noise into a new corpus')
     f.add_argument('--corpus', required=True)
     f.add_argument('--out', required=True)
+    f.add_argument('--cutoffs')
     b = sub.add_parser('build')
     b.add_argument('--db', required=True)
     b.add_argument('--corpus', required=True)
+    b.add_argument('--exclude-book', action='append', default=[])
     s = sub.add_parser('search')
     s.add_argument('--db', required=True)
     s.add_argument('--query', required=True)
@@ -364,9 +441,9 @@ def main():
     if a.command == 'export':
         export_legacy(a.db, a.corpus)
     elif a.command == 'filter':
-        filter_corpus(a.corpus, a.out)
+        filter_corpus(a.corpus, a.out, a.cutoffs)
     elif a.command == 'build':
-        build(a.db, a.corpus)
+        build(a.db, a.corpus, a.exclude_book)
     else:
         print(json.dumps(search(a.db, a.query, a.limit, a.book, a.full_page), ensure_ascii=False, indent=2))
 

@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "state": "ready",
+  "books": [
+    {
+      "book": "内科学第10版",
+      "text_file": "内科学第10版.txt",
+      "text_sha256": "a698d173c32241502b5511872924163158f91dd6e457ae4d4311fd2ac25e8a26",
+      "pages": 928,
+      "chunks": 2128,
+      "chars": 1436521
+    },
+    {
+      "book": "诊断学第10版",
+      "text_file": "诊断学第10版.txt",
+      "text_sha256": "0f92407b1343f37c9175c439d40385b96815f6423dfd2ac3cf019319b31211ea",
+      "pages": 587,
+      "chunks": 1118,
+      "chars": 736836
+    },
+    {
+      "book": "医学生物学第10版",
+      "text_file": "医学生物学第10版.txt",
+      "text_sha256": "ddc3206293e7a33abd5b1e421077f2b920a69f30e17e583fbad028d42f195de1",
+      "pages": 228,
+      "chunks": 470,
+      "chars": 319231
+    },
+    {
+      "book": "有机化学第10版",
+      "text_file": "有机化学第10版.txt",
+      "text_sha256": "3f86eaae45eef4f36736726835808b00eb14949ab590616433293c3ad0f6d962",
+      "pages": 258,
+      "chunks": 370,
+      "chars": 211820
+    },
+    {
+      "book": "病理生理学第10版",
+      "text_file": "病理生理学第10版.txt",
+      "text_sha256": "458a5d8176046c603927190b51769eb01d3588b10314f347adeda115ae27efd3",
+      "pages": 244,
+      "chunks": 516,
+      "chars": 349263
+    },
+    {
+      "book": "皮肤性病学第10版",
+      "text_file": "皮肤性病学第10版.txt",
+      "text_sha256": "ce68aabe0970af14e7ba617242e6dae9e2fe4af4dccd3bb723e3944531dd3d18",
+      "pages": 227,
+      "chunks": 371,
+      "chars": 226456
+    },
+    {
+      "book": "外科学第10版",
+      "text_file": "外科学第10版.txt",
+      "text_sha256": "5e926a1de19592d7b94b6edc508989ab535bc57d42d760017976a9bf75dc7262",
+      "pages": 767,
+      "chunks": 1449,
+      "chars": 964024
+    },
+    {
+      "book": "病理学第10版",
+      "text_file": "病理学第10版.txt",
+      "text_sha256": "54d1dcd8b0322e018d677ad2cab0cffd1175fdedbe66f16dc26f3d64bacb327a",
+      "pages": 378,
+      "chunks": 739,
+      "chars": 487599
+    },
+    {
+      "book": "生理学第10版",
+      "text_file": "生理学第10版.txt",
+      "text_sha256": "277cf5973c75ff183348c44a276d7e7f0936b3339edc6d33606912809e5c2c18",
+      "pages": 409,
+      "chunks": 848,
+      "chars": 572828
+    },
+    {
+      "book": "儿科学第10版",
+      "text_file": "儿科学第10版.txt",
+      "text_sha256": "a1a0180440eb5e1e6df092889c67abe01d4962d6b367811118c47f779b8915a3",
+      "pages": 462,
+      "chunks": 973,
+      "chars": 692834
+    },
+    {
+      "book": "医学遗传学第8版",
+      "text_file": "医学遗传学第8版.txt",
+      "text_sha256": "80a8eeda5a7bc08af487c45c42c851aaebfdb34da3c51cc75a03ebdf39e501ea",
+      "pages": 241,
+      "chunks": 494,
+      "chars": 327276
+    },
+    {
+      "book": "医患沟通第3版",
+      "text_file": "医患沟通第3版.txt",
+      "text_sha256": "5dbbb2ee0c81a6437152537b8aab7c57c4b01265ac7a20c1f5ac22c997b08b2a",
+      "pages": 185,
+      "chunks": 371,
+      "chars": 278418
+    },
+    {
+      "book": "生物化学与分子生物学第10版",
+      "text_file": "生物化学与分子生物学第10版.txt",
+      "text_sha256": "1af4d14847cf93d8034de524e7f88d9a9198a2967eb821992639bc904fa116e9",
+      "pages": 530,
+      "chunks": 1058,
+      "chars": 689386
+    },
+    {
+      "book": "组织学与胚胎学第10版",
+      "text_file": "组织学与胚胎学第10版.txt",
+      "text_sha256": "2941da8e3b8721cdcaa3414a422c17a89665929e93db98b86caa936626676aeb",
+      "pages": 280,
+      "chunks": 440,
+      "chars": 260283
+    },
+    {
+      "book": "药理学第10版",
+      "text_file": "药理学第10版.txt",
+      "text_sha256": "e3db93414b581b7da9c1006e3782819b9bda98d34a231846f46e37fd25e52f84",
+      "pages": 467,
+      "chunks": 926,
+      "chars": 643728
+    },
+    {
+      "book": "医用高等数学第8版",
+      "text_file": "医用高等数学第8版.txt",
+      "text_sha256": "8e2f4b6df0d78dbd057b72ea6ae558efb7ed88328c068cf66d70b149237d7e01",
+      "pages": 249,
+      "chunks": 347,
+      "chars": 205442
+    },
+    {
+      "book": "基础化学第10版",
+      "text_file": "基础化学第10版.txt",
+      "text_sha256": "2be2aecc43ef5f17b63611053ca012828bd1b90ba206c89adddcbab65202dd33",
+      "pages": 293,
+      "chunks": 603,
+      "chars": 395389
+    },
+    {
+      "book": "医学心理学第8版",
+      "text_file": "医学心理学第8版.txt",
+      "text_sha256": "c9aa961f723170970791ce9114821b396aec2bcd05ec0690c60b4b332bb0eabe",
+      "pages": 193,
+      "chunks": 395,
+      "chars": 284189
+    },
+    {
+      "book": "麻醉学第5版",
+      "text_file": "麻醉学第5版.txt",
+      "text_sha256": "9287be34a02dabb61917062d73fcacd4a34b6eb0300b1acc1ff75b03868410f2",
+      "pages": 285,
+      "chunks": 584,
+      "chars": 391192
+    },
+    {
+      "book": "妇产科学第10版",
+      "text_file": "妇产科学第10版.txt",
+      "text_sha256": "f162456cab7a0b903b17f5f25e396bd187eaf1e23c0ac86011f5413251e0af0d",
+      "pages": 472,
+      "chunks": 946,
+      "chars": 632984
+    }
+  ],
+  "excluded_books": [
+    "人体寄生虫学第10版"
+  ],
+  "corpus_manifest_sha256": "952bcf2882d3e07df98731bf7145786613fea8c4a3425e5956683548dafaeb9f",
+  "created_at": "2026-11-20T20:17:20+0800",
+  "dependencies": [
+    "Python >=3.10",
+    "SQLite FTS5"
+  ],
+  "redistribution": "not established; local research index"
+}

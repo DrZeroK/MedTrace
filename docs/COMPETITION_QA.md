@@ -2,8 +2,8 @@
 
 **English** | [简体中文](COMPETITION_QA.zh-CN.md)
 
-- Compiled on: 2026-11-17. Updated on: 2026-11-18: the Chinese Q&A now reproduces the organizer's original text verbatim, plus four supplementary organizer answers (Q10-Q13).
-- Source: the organizer's full Q&A supplied by the project owner in conversation, plus the supplementary answers supplied on 2026-11-18. No original announcement URL, publication date, or version number was provided.
+- Compiled on: 2026-11-17. Updated on: 2026-11-18: the Chinese Q&A now reproduces the organizer's original text verbatim, plus four supplementary organizer answers (Q10-Q13). Updated on 2026-11-20 with three additional answers (Q14-Q16 are project-side working numbers; the organizer did not number them).
+- Source: the organizer's full Q&A supplied by the project owner in conversation, plus the supplementary answers supplied on 2026-11-18 and 2026-11-20. No original announcement URL, publication date, or version number was provided.
 - Editorial approach: the Chinese Q&A text is reproduced verbatim from the organizer (only heading levels and Q numbering are normalized); the English version is a paragraph-by-paragraph translation with consistent headings and code formatting.
 - Applicability: this document records the supplied answers. Subsequent unified technical specifications, actual API examples, and official evaluation configurations take precedence. This document does not certify that the repository implements or satisfies every requirement.
 
@@ -18,10 +18,12 @@
 | `seed` | May be passed at the top level of the request body | May be omitted with an explanation if unsupported; exact reproducibility is not guaranteed |
 | vLLM automatic prefix caching | Native to the self-deployed service; centrally managed | No cachemark needs to be manually added to request input or output; planned to be disabled for official evaluation; final published environment configuration prevails |
 | Reproducibility | Model version, inference framework, runtime environment, and evaluation conditions are unified; fixed random seed permitted within interface support | A fixed seed does not guarantee identical outputs; organizers guarantee consistent conditions and verifiable results, not word-for-word-identical generations; participants must pin their own code, dependency, and knowledge-resource versions and control internal randomness |
-| Embedding models (e.g., BGE-M3) | Unified internal-network Embedding API planned on the Huawei Ascend stack | Self-deployment of embedding models requiring GPU/NPU not supported in principle; local knowledge bases and pre-built indexes may be submitted, size limits pending |
+| Embedding models (e.g., BGE-M3) | Unified internal-network Embedding API planned on the Huawei Ascend stack; BGE-M3 on Ascend 910B planned | Self-deployment of embedding models requiring GPU/NPU not supported in principle; local knowledge bases and pre-built indexes may be submitted, size limits pending; Dense 1024, max 8192 tokens, FP16, no Instruction for normal retrieval; Dense API first |
+| Embedding resource scoring | NPU resources underlying the Embedding service are managed by the organizer | Their memory and compute usage are not directly counted in the participant's hardware-resource score; call counts and usage are managed uniformly for fair resource conditions |
+| Embedding test API | Low-frequency internal-network HTTP test API planned | For vector generation, index construction, and RAG retrieval tests; endpoint, authentication, examples, quota, and final model version pending |
 | Enterprise-track hardware | Model inference served by a unified Huawei Ascend stack deployment; participant algorithms run in an isolated CPU environment without direct GPU/NPU allocation | Python, rule computation, local retrieval, and lightweight computing allowed within resource limits; no additional self-deployed LLMs or GPU/NPU inference services; special CPU dependencies require advance declaration and compatibility assessment; OS, CPU, memory, storage, and runtime limits pending |
 | Token, call, and runtime budgets | No explicit total token limit during the current development and testing stage | Official timeout, runtime, token, call, and retry limits pending; retries actively initiated by participant algorithms count toward the call budget |
-| `temperature` and `response_format` | Participants permitted to set them independently in principle | Subject to the actual deployed version and unified interface specification |
+| `temperature` and `response_format` | vLLM natively supports `text`, `json_object`, `json_schema`, and other output formats; `json_schema` permitted in principle | Exact parameter range and JSON Schema features subject to compatibility validation of the deployed version; a unified parameter list and examples will be provided |
 | Thinking | Strategy-dependent selection permitted in principle | Controlled through `chat_template_kwargs`; omission uses the actual server-side default configuration |
 | External third-party APIs | Prohibited | Includes commercial large models, online Embedding, and online retrieval; competition cases must not be uploaded to third-party platforms |
 | Result filename | Not yet unified | Prechecks will accommodate `output.json` and `results.json` where possible; official submissions must follow the updated unified technical specification |
@@ -167,6 +169,44 @@ Participants may not self-deploy and run additional large models or GPU/NPU infe
 
 The specific operating system, CPU, memory, storage, and runtime limits will be clarified uniformly in the official evaluation environment specification.
 
+## 6. Supplementary Answers: Output Format and Embedding Service (2026-11-20)
+
+The following three answers were supplied on 2026-11-20. Q14-Q16 are project-side working numbers; the organizer did not number them.
+
+### Q14. On the scope of response_format support
+
+The competition uses a self-deployed vLLM Ascend inference service. vLLM natively supports `text`, `json_object`, `json_schema`, and other output formats.
+
+In principle, participants may use `json_schema` for structured-output constraints. The exact supported parameter range and JSON Schema features are subject to compatibility validation of the actually deployed version; a unified parameter list and call examples will be provided.
+
+### Q15. On hardware-resource scoring for the internal Embedding service
+
+The competition provides a unified internal-network Embedding API; participants do not need to deploy vector models themselves.
+
+The NPU resources underlying the Embedding service are managed uniformly by the organizer; their memory and compute usage are not directly counted in the participant's hardware-resource score.
+
+The organizer will manage call counts and usage uniformly to ensure that different solutions operate under the same resource conditions.
+
+### Q16. On the Embedding model, precision, and test API
+
+The competition plans to use the open-source BGE-M3 (BAAI/bge-m3) model, deployed on Huawei Ascend 910B.
+
+Official model weights: https://huggingface.co/BAAI/bge-m3
+
+Main model parameters:
+- Dense Embedding: 1024 dimensions
+- Maximum model sequence length: 8192 tokens
+- Supports Chinese and multilingual retrieval
+- Provides Dense, Sparse, and ColBERT retrieval capabilities
+
+Inference precision will preferably use FP16 without additional quantization; the final configuration is subject to deployment validation.
+
+Normal BGE-M3 retrieval does not require an additional Instruction. The competition plans to open a unified Dense Embedding API first and will not provide a separate Instruction parameter.
+
+A low-frequency internal-network test API will be provided through a unified HTTP API, allowing participants to test vector generation, knowledge-base index construction, and RAG retrieval logic in advance.
+
+The specific endpoint, authentication method, call examples, quota, and final model version will be published uniformly after service validation and kept consistent during official evaluation.
+
 ## Items Awaiting Organizer Clarification
 
 The following items were not finalized in this Q&A and must not be replaced with assumed official limits:
@@ -174,11 +214,11 @@ The following items were not finalized in this Q&A and must not be replaced with
 - Algorithm package size limit, Python dependency compatibility requirements, and resource registration template.
 - Per-request timeout, total runtime per case, token consumption, model-call limits, and retry limits.
 - How platform faults are confirmed and handled under the unified exception-handling rules.
-- Actual model configuration, default Thinking mode, supported parameters, and unified API examples.
+- Actual model configuration, default Thinking mode, Thinking/`response_format` support parameters, and unified API examples; the specific JSON Schema features supported by `json_schema`.
 - Final result filename and data structure.
 - Final evaluation environment configuration, including whether vLLM automatic prefix caching is disabled for official evaluation.
-- Specification of the unified internal-network Embedding API, including endpoint, model name, vector dimensions, batching, and rate limits.
+- Specification of the unified internal-network Embedding API, including endpoint, authentication, call examples, batching/quota, and the final BGE-M3 version and precision configuration.
 - Size limits for local knowledge bases and pre-built indexes submitted with the algorithm.
 - Operating system, CPU, memory, storage, and runtime limits of the isolated CPU evaluation environment.
 
-This Q&A does not specify the exact model name, ENDPOINT configuration method, complete input/output schemas, or exit-code rules. These items must be checked separately against the official technical specification.
+This Q&A does not specify the exact Qwen model name, ENDPOINT configuration method, complete input/output schemas, or exit-code rules. These items must be checked separately against the official technical specification.

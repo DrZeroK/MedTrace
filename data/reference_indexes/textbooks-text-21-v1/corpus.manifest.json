@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "kind": "textbook-text-corpus",
+  "state": "ready",
+  "books": [
+    {
+      "book": "内科学第10版",
+      "text_file": "内科学第10版.txt",
+      "sha256": "15d14d513bc746873801dc03a4fe62c5c1a72f9451ef85102fbc9dfde20c52af",
+      "bytes": 3608433,
+      "chars": 1438834,
+      "pages": 928,
+      "source_pages": 951,
+      "removed_pages": [
+        168,
+        354,
+        464,
+        538,
+        652,
+        806,
+        873,
+        936,
+        937,
+        938,
+        939,
+        940,
+        941,
+        942,
+        943,
+        944,
+        945,
+        946,
+        947,
+        948,
+        949,
+        950,
+        951
+      ],
+      "removed_lines": {
+        "navigation_or_artifact": 744,
+        "page_number": 873,
+        "repeated_header": 738
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 917,
+        "offset_inferred": 11
+      }
+    },
+    {
+      "book": "诊断学第10版",
+      "text_file": "诊断学第10版.txt",
+      "sha256": "75b4b7fce314127f96c48ba81b4a34e7cacc57d655877310b1baa06b93cbfd85",
+      "bytes": 1885833,
+      "chars": 737655,
+      "pages": 587,
+      "source_pages": 603,
+      "removed_pages": [
+        82,
+        589,
+        590,
+        591,
+        592,
+        593,
+        594,
+        595,
+        596,
+        597,
+        598,
+        599,
+        600,
+        601,
+        602,
+        603
+      ],
+      "removed_lines": {
+        "navigation_or_artifact": 159,
+        "page_number": 564,
+        "repeated_header": 503
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 578,
+        "offset_inferred": 9
+      }
+    },
+    {
+      "book": "医学生物学第10版",
+      "text_file": "医学生物学第10版.txt",
+      "sha256": "d4aefecec7ac6c689cdb0576da1abad7b65207c2e22965d6eef163a7f7fe219b",
+      "pages": 236,
+      "chars": 339241
+    },
+    {
+      "book": "有机化学第10版",
+      "text_file": "有机化学第10版.txt",
+      "sha256": "d2676a7d2679994feed9de7acbe7e1482e54633eb48291ea33268326b57862d3",
+      "pages": 266,
+      "chars": 224072
+    },
+    {
+      "book": "病理生理学第10版",
+      "text_file": "病理生理学第10版.txt",
+      "sha256": "1cc72adbc13b5b52549fe48f2d01b3963362c20898cc16d0c53c63f677da5198",
+      "pages": 265,
+      "chars": 370395
+    },
+    {
+      "book": "皮肤性病学第10版",
+      "text_file": "皮肤性病学第10版.txt",
+      "sha256": "211ec98f034a35a988f81ea45d57355593c8115ebec84d9f154bd0baee833a72",
+      "pages": 236,
+      "chars": 249072
+    },
+    {
+      "book": "外科学第10版",
+      "text_file": "外科学第10版.txt",
+      "sha256": "35572e1988f01ade47a954928975bf718455b4aa9e085fcc389f7be50d6283b1",
+      "pages": 791,
+      "chars": 1029667
+    },
+    {
+      "book": "病理学第10版",
+      "text_file": "病理学第10版.txt",
+      "sha256": "73eafeac9c4b5590f295f3ab8d72377846564b3ab74cd53afb078933483d92bb",
+      "pages": 392,
+      "chars": 525460
+    },
+    {
+      "book": "生理学第10版",
+      "text_file": "生理学第10版.txt",
+      "sha256": "d8123bfa571306f85dc70de5227cba8273f8a023610c9a298ae8fd1e28645512",
+      "pages": 426,
+      "chars": 618290
+    },
+    {
+      "book": "儿科学第10版",
+      "text_file": "儿科学第10版.txt",
+      "sha256": "ed86c41286f903ed287e2fef7ad521ffc3cdbbd5505bfa0d92a985af4464c0d3",
+      "pages": 470,
+      "chars": 716791
+    },
+    {
+      "book": "医学遗传学第8版",
+      "text_file": "医学遗传学第8版.txt",
+      "sha256": "71002650871914851c34b171ba11c98b9d1e06c6a31a3b3011c01d334eba67d1",
+      "pages": 248,
+      "chars": 346446
+    },
+    {
+      "book": "人体寄生虫学第10版",
+      "text_file": "人体寄生虫学第10版.txt",
+      "sha256": "f4e7723e29918584e469efb7e4470e047c5a8fdcbf6c96b2b257559be429ad12",
+      "pages": 305,
+      "chars": 432272
+    },
+    {
+      "book": "医患沟通第3版",
+      "text_file": "医患沟通第3版.txt",
+      "sha256": "4f246ecf0c246ada4e4bc9537e2cd2985705d6e2f602513386e148397b6dd3e1",
+      "pages": 188,
+      "chars": 282824
+    },
+    {
+      "book": "生物化学与分子生物学第10版",
+      "text_file": "生物化学与分子生物学第10版.txt",
+      "sha256": "67a31f6eccea1b379eb879ecea625fc105656f11d8f1afd6aee05ddf5721cbc4",
+      "pages": 548,
+      "chars": 738700
+    },
+    {
+      "book": "组织学与胚胎学第10版",
+      "text_file": "组织学与胚胎学第10版.txt",
+      "sha256": "0351292e965b3ebf79f005cdd564eedb042290c2641a71344acf839e69643d66",
+      "pages": 296,
+      "chars": 296136
+    },
+    {
+      "book": "药理学第10版",
+      "text_file": "药理学第10版.txt",
+      "sha256": "1861fed2f4ebbeea5708c57a94623c1df908b8110aa9596d7a554658fef2c37d",
+      "pages": 499,
+      "chars": 706360
+    },
+    {
+      "book": "医用高等数学第8版",
+      "text_file": "医用高等数学第8版.txt",
+      "sha256": "4b56430f1c37a6b74f77a33856903905c64a9190c1107407c9c7d40c37fb42b0",
+      "pages": 268,
+      "chars": 228262
+    },
+    {
+      "book": "基础化学第10版",
+      "text_file": "基础化学第10版.txt",
+      "sha256": "cb687563d6e4f6c4b85419a518185e14f41ccb80d583580efe9da7f6c8d17060",
+      "pages": 315,
+      "chars": 430368
+    },
+    {
+      "book": "医学心理学第8版",
+      "text_file": "医学心理学第8版.txt",
+      "sha256": "8c81f3e70d03b78d756c8700972e7da597aa6583dfec415dc62e1dc5876d2842",
+      "pages": 202,
+      "chars": 300431
+    },
+    {
+      "book": "麻醉学第5版",
+      "text_file": "麻醉学第5版.txt",
+      "sha256": "d6a9105998bee0685c33a51810dcbdf3e8f2fb4626f8433c55d245fe380e039b",
+      "pages": 293,
+      "chars": 411686
+    },
+    {
+      "book": "妇产科学第10版",
+      "text_file": "妇产科学第10版.txt",
+      "sha256": "4d43dda7cda33e1d6b2271c1ff05e19b4cf06323c5308ac0a62e6a341ad1c9d3",
+      "pages": 488,
+      "chars": 678015
+    }
+  ],
+  "created_at": "2026-11-18T22:03:01+0800",
+  "provenance": "Two previously filtered books plus 19 supplied books from verified body start through end, skipping empty pages and common navigation/print artifacts",
+  "redistribution": "not established; local research index"
+}

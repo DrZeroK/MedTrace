@@ -1,0 +1,198 @@
+{
+  "内科学第10版": {
+    "pdf_page_offset": 31,
+    "method": "existing verified corpus"
+  },
+  "诊断学第10版": {
+    "pdf_page_offset": 23,
+    "method": "existing verified corpus"
+  },
+  "医学生物学第10版": {
+    "pdf_page_offset": 21,
+    "method": "PDF text",
+    "source_sha256": "1aedc9c5f3475ab304b6c495d4b6434a9b3ac12bac0c8216f1caf10bac90bd07",
+    "pdf_pages": 258,
+    "body_start_pdf_page": 22,
+    "empty_pdf_pages": [
+      258
+    ]
+  },
+  "有机化学第10版": {
+    "pdf_page_offset": 22,
+    "method": "PDF text",
+    "source_sha256": "74995becf0720645b7c5a15ddc15f6f491ae986f2d4596c027abe5c8212f7afa",
+    "pdf_pages": 289,
+    "body_start_pdf_page": 23,
+    "empty_pdf_pages": [
+      289
+    ]
+  },
+  "病理生理学第10版": {
+    "pdf_page_offset": 24,
+    "method": "PDF text",
+    "source_sha256": "8d6c06b96388f8de787757003ff8d7692e10e2c318d8075a46e7144f8e4672bb",
+    "pdf_pages": 291,
+    "body_start_pdf_page": 25,
+    "empty_pdf_pages": [
+      288,
+      291
+    ]
+  },
+  "皮肤性病学第10版": {
+    "pdf_page_offset": 21,
+    "method": "PDF text",
+    "source_sha256": "49313784a7b20ea26e41e456b8b407aa67ee4192a96324517ce1a8a0d0fc926c",
+    "pdf_pages": 258,
+    "body_start_pdf_page": 22,
+    "empty_pdf_pages": [
+      258
+    ]
+  },
+  "外科学第10版": {
+    "pdf_page_offset": 39,
+    "method": "PDF text",
+    "source_sha256": "f50a05251fa2e25cc8b8caa065531a8d105e5ad6d822782cb2039551b0ef8648",
+    "pdf_pages": 834,
+    "body_start_pdf_page": 40,
+    "empty_pdf_pages": [
+      293,
+      379,
+      637,
+      834
+    ]
+  },
+  "病理学第10版": {
+    "pdf_page_offset": 25,
+    "method": "PDF text",
+    "source_sha256": "ab05b412123d4f7d71379adc39d0c96fbc300d8339b71a52407d6560872f19a1",
+    "pdf_pages": 418,
+    "body_start_pdf_page": 26,
+    "empty_pdf_pages": [
+      418
+    ]
+  },
+  "生理学第10版": {
+    "pdf_page_offset": 23,
+    "method": "PDF text",
+    "source_sha256": "63675d737616aeffd6732afd94bd6b53483ff00f45186ccfb0d158374d3b2661",
+    "pdf_pages": 450,
+    "body_start_pdf_page": 24,
+    "empty_pdf_pages": [
+      450
+    ]
+  },
+  "儿科学第10版": {
+    "pdf_page_offset": 27,
+    "method": "PDF text",
+    "source_sha256": "f7a625ecbcdbb29fc9fe09952b7b4f2d47c7918337ebe6dd59c670956573082e",
+    "pdf_pages": 498,
+    "body_start_pdf_page": 28,
+    "empty_pdf_pages": [
+      498
+    ]
+  },
+  "医学遗传学第8版": {
+    "pdf_page_offset": 25,
+    "method": "PDF text",
+    "source_sha256": "e5553bcb774c2f1f7a39c5d237260fc2cdf1a71e959bee3e8d71157108e10b97",
+    "pdf_pages": 274,
+    "body_start_pdf_page": 26,
+    "empty_pdf_pages": [
+      274
+    ]
+  },
+  "人体寄生虫学第10版": {
+    "pdf_page_offset": 18,
+    "method": "Apple Vision OCR",
+    "source_sha256": "2ff29babfa1c7377b4b17f9a88bc879bd390620d9ea544ded28cdf72c2b9666a",
+    "pdf_pages": 323,
+    "body_start_pdf_page": 19,
+    "empty_pdf_pages": []
+  },
+  "医患沟通第3版": {
+    "pdf_page_offset": 19,
+    "method": "PDF text",
+    "source_sha256": "f5b42353c49b77d80ead89cfd6ce197f0f4d4289b1947c4a62bb12a23d651030",
+    "pdf_pages": 208,
+    "body_start_pdf_page": 20,
+    "empty_pdf_pages": [
+      208
+    ]
+  },
+  "生物化学与分子生物学第10版": {
+    "pdf_page_offset": 29,
+    "method": "PDF text",
+    "source_sha256": "2eb4432b6d8876c539d55875679d0f40998ee3bc92393ac9bede20a273874fe6",
+    "pdf_pages": 577,
+    "body_start_pdf_page": 30,
+    "empty_pdf_pages": []
+  },
+  "组织学与胚胎学第10版": {
+    "pdf_page_offset": 23,
+    "method": "PDF text",
+    "source_sha256": "1e6796f85a0aa06ce26edc5c59e92acffe72375677bc5b7c8279cea641b615b2",
+    "pdf_pages": 319,
+    "body_start_pdf_page": 24,
+    "empty_pdf_pages": []
+  },
+  "药理学第10版": {
+    "pdf_page_offset": 29,
+    "method": "PDF text",
+    "source_sha256": "2f3a2d7eef0eb8eed03d1c22d4912038f8cfbc135fff5b9d91ab5ed5289ea76a",
+    "pdf_pages": 528,
+    "body_start_pdf_page": 30,
+    "empty_pdf_pages": []
+  },
+  "医用高等数学第8版": {
+    "pdf_page_offset": 19,
+    "method": "PDF text",
+    "source_sha256": "2859a56d223419cf5f3dfc52a88b39ea7f013ee0770c9ae64b064544c0ac78ba",
+    "pdf_pages": 290,
+    "body_start_pdf_page": 20,
+    "empty_pdf_pages": [
+      288,
+      289,
+      290
+    ]
+  },
+  "基础化学第10版": {
+    "pdf_page_offset": 23,
+    "method": "PDF text",
+    "source_sha256": "af60fa3e5b93aa6666d2936f4049a50180fd3e53f3365f4a982c1567bfcee821",
+    "pdf_pages": 339,
+    "body_start_pdf_page": 24,
+    "empty_pdf_pages": [
+      338
+    ]
+  },
+  "医学心理学第8版": {
+    "pdf_page_offset": 19,
+    "method": "PDF text",
+    "source_sha256": "d8c5efc4b3eb8cfdda9b1111786fe44c1f1c9144fef76d3670567e8cd9daf4dd",
+    "pdf_pages": 226,
+    "body_start_pdf_page": 20,
+    "empty_pdf_pages": [
+      221,
+      222,
+      223,
+      224,
+      225
+    ]
+  },
+  "麻醉学第5版": {
+    "pdf_page_offset": 29,
+    "method": "PDF text",
+    "source_sha256": "a53b1e06659759772b5a94d0e2329faf7d4678a2602a34305ec97f98e51efc6d",
+    "pdf_pages": 322,
+    "body_start_pdf_page": 30,
+    "empty_pdf_pages": []
+  },
+  "妇产科学第10版": {
+    "pdf_page_offset": 23,
+    "method": "PDF text",
+    "source_sha256": "cb2b0a63bc6c4a80562dedd29941d9875ae51cba281ae3ab3a6b1bea1ff32374",
+    "pdf_pages": 511,
+    "body_start_pdf_page": 24,
+    "empty_pdf_pages": []
+  }
+}

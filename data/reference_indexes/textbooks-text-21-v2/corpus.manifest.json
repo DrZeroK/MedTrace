@@ -1,0 +1,833 @@
+{
+  "schema": 1,
+  "kind": "textbook-text-corpus",
+  "state": "ready",
+  "books": [
+    {
+      "book": "内科学第10版",
+      "text_file": "内科学第10版.txt",
+      "sha256": "a698d173c32241502b5511872924163158f91dd6e457ae4d4311fd2ac25e8a26",
+      "bytes": 3602646,
+      "chars": 1436521,
+      "pages": 928,
+      "source_pages": 928,
+      "cutoff": null,
+      "removed_pages": [],
+      "removed_categories": {},
+      "removed_lines": {
+        "navigation_or_artifact": 168,
+        "page_number": 1,
+        "repeated_header": 13
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 917,
+        "offset_inferred": 11
+      }
+    },
+    {
+      "book": "诊断学第10版",
+      "text_file": "诊断学第10版.txt",
+      "sha256": "0f92407b1343f37c9175c439d40385b96815f6423dfd2ac3cf019319b31211ea",
+      "bytes": 1883778,
+      "chars": 736836,
+      "pages": 587,
+      "source_pages": 587,
+      "cutoff": null,
+      "removed_pages": [],
+      "removed_categories": {},
+      "removed_lines": {
+        "navigation_or_artifact": 92,
+        "repeated_header": 24
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 578,
+        "offset_inferred": 9
+      }
+    },
+    {
+      "book": "医学生物学第10版",
+      "text_file": "医学生物学第10版.txt",
+      "sha256": "ddc3206293e7a33abd5b1e421077f2b920a69f30e17e583fbad028d42f195de1",
+      "bytes": 826707,
+      "chars": 319231,
+      "pages": 228,
+      "source_pages": 236,
+      "cutoff": 230,
+      "removed_pages": [
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236
+      ],
+      "removed_categories": {
+        "reference": 1,
+        "cutoff": 7
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 34,
+        "repeated_header": 196
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 228,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "有机化学第10版",
+      "text_file": "有机化学第10版.txt",
+      "sha256": "3f86eaae45eef4f36736726835808b00eb14949ab590616433293c3ad0f6d962",
+      "bytes": 538596,
+      "chars": 211820,
+      "pages": 258,
+      "source_pages": 266,
+      "cutoff": 261,
+      "removed_pages": [
+        62,
+        99,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266
+      ],
+      "removed_categories": {
+        "exercise": 2,
+        "cutoff": 6
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 53,
+        "repeated_header": 225
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 251,
+        "offset_inferred": 7
+      }
+    },
+    {
+      "book": "病理生理学第10版",
+      "text_file": "病理生理学第10版.txt",
+      "sha256": "458a5d8176046c603927190b51769eb01d3588b10314f347adeda115ae27efd3",
+      "bytes": 919005,
+      "chars": 349263,
+      "pages": 244,
+      "source_pages": 265,
+      "cutoff": 258,
+      "removed_pages": [
+        16,
+        29,
+        40,
+        50,
+        64,
+        87,
+        180,
+        194,
+        207,
+        217,
+        234,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        265,
+        266
+      ],
+      "removed_categories": {
+        "exercise": 12,
+        "reference": 1,
+        "cutoff": 8
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 36,
+        "repeated_header": 216
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 244,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "皮肤性病学第10版",
+      "text_file": "皮肤性病学第10版.txt",
+      "sha256": "ce68aabe0970af14e7ba617242e6dae9e2fe4af4dccd3bb723e3944531dd3d18",
+      "bytes": 609923,
+      "chars": 226456,
+      "pages": 227,
+      "source_pages": 236,
+      "cutoff": 228,
+      "removed_pages": [
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236
+      ],
+      "removed_categories": {
+        "cutoff": 9
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 49,
+        "repeated_header": 188
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 224,
+        "offset_inferred": 3
+      }
+    },
+    {
+      "book": "外科学第10版",
+      "text_file": "外科学第10版.txt",
+      "sha256": "5e926a1de19592d7b94b6edc508989ab535bc57d42d760017976a9bf75dc7262",
+      "bytes": 2665318,
+      "chars": 964024,
+      "pages": 767,
+      "source_pages": 791,
+      "cutoff": 771,
+      "removed_pages": [
+        771,
+        772,
+        773,
+        774,
+        775,
+        776,
+        777,
+        778,
+        779,
+        780,
+        781,
+        782,
+        783,
+        784,
+        785,
+        786,
+        787,
+        788,
+        789,
+        790,
+        791,
+        792,
+        793,
+        794
+      ],
+      "removed_categories": {
+        "cutoff": 24
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 127,
+        "repeated_header": 660
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 757,
+        "offset_inferred": 10
+      }
+    },
+    {
+      "book": "病理学第10版",
+      "text_file": "病理学第10版.txt",
+      "sha256": "54d1dcd8b0322e018d677ad2cab0cffd1175fdedbe66f16dc26f3d64bacb327a",
+      "bytes": 1301856,
+      "chars": 487599,
+      "pages": 378,
+      "source_pages": 392,
+      "cutoff": 380,
+      "removed_pages": [
+        379,
+        380,
+        381,
+        382,
+        383,
+        384,
+        385,
+        386,
+        387,
+        388,
+        389,
+        390,
+        391,
+        392
+      ],
+      "removed_categories": {
+        "reference": 1,
+        "cutoff": 13
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 22,
+        "repeated_header": 357
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 378,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "生理学第10版",
+      "text_file": "生理学第10版.txt",
+      "sha256": "277cf5973c75ff183348c44a276d7e7f0936b3339edc6d33606912809e5c2c18",
+      "bytes": 1516530,
+      "chars": 572828,
+      "pages": 409,
+      "source_pages": 426,
+      "cutoff": 410,
+      "removed_pages": [
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426
+      ],
+      "removed_categories": {
+        "cutoff": 17
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 56,
+        "repeated_header": 396
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 409,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "儿科学第10版",
+      "text_file": "儿科学第10版.txt",
+      "sha256": "a1a0180440eb5e1e6df092889c67abe01d4962d6b367811118c47f779b8915a3",
+      "bytes": 1819171,
+      "chars": 692834,
+      "pages": 462,
+      "source_pages": 470,
+      "cutoff": 463,
+      "removed_pages": [
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470
+      ],
+      "removed_categories": {
+        "cutoff": 8
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 88,
+        "repeated_header": 442
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 462,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "医学遗传学第8版",
+      "text_file": "医学遗传学第8版.txt",
+      "sha256": "80a8eeda5a7bc08af487c45c42c851aaebfdb34da3c51cc75a03ebdf39e501ea",
+      "bytes": 818836,
+      "chars": 327276,
+      "pages": 241,
+      "source_pages": 248,
+      "cutoff": 242,
+      "removed_pages": [
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248
+      ],
+      "removed_categories": {
+        "cutoff": 7
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 41,
+        "repeated_header": 215
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 239,
+        "offset_inferred": 2
+      }
+    },
+    {
+      "book": "人体寄生虫学第10版",
+      "text_file": "人体寄生虫学第10版.txt",
+      "sha256": "79af35e1314db8eb63e646e3987ca988d02b124f8221d24e73e6bbd07d3583a4",
+      "bytes": 980105,
+      "chars": 385336,
+      "pages": 282,
+      "source_pages": 305,
+      "cutoff": 283,
+      "removed_pages": [
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305
+      ],
+      "removed_categories": {
+        "cutoff": 23
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 152,
+        "repeated_header": 221
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 0,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "医患沟通第3版",
+      "text_file": "医患沟通第3版.txt",
+      "sha256": "5dbbb2ee0c81a6437152537b8aab7c57c4b01265ac7a20c1f5ac22c997b08b2a",
+      "bytes": 813886,
+      "chars": 278418,
+      "pages": 185,
+      "source_pages": 188,
+      "cutoff": 186,
+      "removed_pages": [
+        186,
+        187,
+        188
+      ],
+      "removed_categories": {
+        "cutoff": 3
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 26,
+        "repeated_header": 174
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 185,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "生物化学与分子生物学第10版",
+      "text_file": "生物化学与分子生物学第10版.txt",
+      "sha256": "1af4d14847cf93d8034de524e7f88d9a9198a2967eb821992639bc904fa116e9",
+      "bytes": 1731307,
+      "chars": 689386,
+      "pages": 530,
+      "source_pages": 548,
+      "cutoff": 532,
+      "removed_pages": [
+        531,
+        532,
+        533,
+        534,
+        535,
+        536,
+        537,
+        538,
+        539,
+        540,
+        541,
+        542,
+        543,
+        544,
+        545,
+        546,
+        547,
+        548
+      ],
+      "removed_categories": {
+        "reference": 1,
+        "cutoff": 17
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 59,
+        "repeated_header": 486,
+        "page_number": 3
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 526,
+        "offset_inferred": 4
+      }
+    },
+    {
+      "book": "组织学与胚胎学第10版",
+      "text_file": "组织学与胚胎学第10版.txt",
+      "sha256": "2941da8e3b8721cdcaa3414a422c17a89665929e93db98b86caa936626676aeb",
+      "bytes": 695665,
+      "chars": 260283,
+      "pages": 280,
+      "source_pages": 296,
+      "cutoff": 282,
+      "removed_pages": [
+        198,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296
+      ],
+      "removed_categories": {
+        "advertisement": 1,
+        "cutoff": 15
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 28,
+        "repeated_header": 247
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 278,
+        "offset_inferred": 2
+      }
+    },
+    {
+      "book": "药理学第10版",
+      "text_file": "药理学第10版.txt",
+      "sha256": "e3db93414b581b7da9c1006e3782819b9bda98d34a231846f46e37fd25e52f84",
+      "bytes": 1688983,
+      "chars": 643728,
+      "pages": 467,
+      "source_pages": 499,
+      "cutoff": 470,
+      "removed_pages": [
+        87,
+        259,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487,
+        488,
+        489,
+        490,
+        491,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499
+      ],
+      "removed_categories": {
+        "exercise": 2,
+        "cutoff": 30
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 106,
+        "repeated_header": 402
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 467,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "医用高等数学第8版",
+      "text_file": "医用高等数学第8版.txt",
+      "sha256": "8e2f4b6df0d78dbd057b72ea6ae558efb7ed88328c068cf66d70b149237d7e01",
+      "bytes": 477070,
+      "chars": 205442,
+      "pages": 249,
+      "source_pages": 268,
+      "cutoff": 266,
+      "removed_pages": [
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        266,
+        267,
+        268
+      ],
+      "removed_categories": {
+        "exercise_or_answer": 16,
+        "cutoff": 3
+      },
+      "removed_lines": {
+        "repeated_header": 238
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 249,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "基础化学第10版",
+      "text_file": "基础化学第10版.txt",
+      "sha256": "2be2aecc43ef5f17b63611053ca012828bd1b90ba206c89adddcbab65202dd33",
+      "bytes": 865424,
+      "chars": 395389,
+      "pages": 293,
+      "source_pages": 315,
+      "cutoff": 294,
+      "removed_pages": [
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        316
+      ],
+      "removed_categories": {
+        "cutoff": 22
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 37,
+        "repeated_header": 275
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 293,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "医学心理学第8版",
+      "text_file": "医学心理学第8版.txt",
+      "sha256": "c9aa961f723170970791ce9114821b396aec2bcd05ec0690c60b4b332bb0eabe",
+      "bytes": 807219,
+      "chars": 284189,
+      "pages": 193,
+      "source_pages": 202,
+      "cutoff": 196,
+      "removed_pages": [
+        89,
+        172,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        207
+      ],
+      "removed_categories": {
+        "exercise": 2,
+        "cutoff": 7
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 54,
+        "repeated_header": 182
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 193,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "麻醉学第5版",
+      "text_file": "麻醉学第5版.txt",
+      "sha256": "9287be34a02dabb61917062d73fcacd4a34b6eb0300b1acc1ff75b03868410f2",
+      "bytes": 1053809,
+      "chars": 391192,
+      "pages": 285,
+      "source_pages": 293,
+      "cutoff": 286,
+      "removed_pages": [
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293
+      ],
+      "removed_categories": {
+        "cutoff": 8
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 61,
+        "repeated_header": 247
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 285,
+        "offset_inferred": 0
+      }
+    },
+    {
+      "book": "妇产科学第10版",
+      "text_file": "妇产科学第10版.txt",
+      "sha256": "f162456cab7a0b903b17f5f25e396bd187eaf1e23c0ac86011f5413251e0af0d",
+      "bytes": 1703333,
+      "chars": 632984,
+      "pages": 472,
+      "source_pages": 488,
+      "cutoff": 473,
+      "removed_pages": [
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487,
+        488
+      ],
+      "removed_categories": {
+        "cutoff": 16
+      },
+      "removed_lines": {
+        "navigation_or_artifact": 92,
+        "repeated_header": 428
+      },
+      "empty_pages": [],
+      "label_basis": {
+        "header": 472,
+        "offset_inferred": 0
+      }
+    }
+  ],
+  "filter": {
+    "version": 2,
+    "source_corpus_manifest_sha256": "8aa90cd3788a98ac2137848cf12a2958bc7764be0a6780e2445f52eca5012b66",
+    "cutoffs": {
+      "医学生物学第10版": 230,
+      "有机化学第10版": 261,
+      "病理生理学第10版": 258,
+      "皮肤性病学第10版": 228,
+      "外科学第10版": 771,
+      "病理学第10版": 380,
+      "生理学第10版": 410,
+      "儿科学第10版": 463,
+      "医学遗传学第8版": 242,
+      "人体寄生虫学第10版": 283,
+      "医患沟通第3版": 186,
+      "生物化学与分子生物学第10版": 532,
+      "组织学与胚胎学第10版": 282,
+      "药理学第10版": 470,
+      "医用高等数学第8版": 266,
+      "基础化学第10版": 294,
+      "医学心理学第8版": 196,
+      "麻醉学第5版": 286,
+      "妇产科学第10版": 473
+    },
+    "rules": [
+      "drop pages from the configured back-matter cutoff or first index page",
+      "drop reference/推荐阅读 pages, index pages, blank pages, advertisement pages and exercise pages",
+      "drop configured exercise/answer page ranges",
+      "drop navigation, publisher, author-signature and JOEE artifact lines",
+      "drop leading page numbers and repeated running headers, keeping the first occurrence"
+    ]
+  },
+  "created_at": "2026-11-20T19:47:30+0800",
+  "provenance": "filtered plain-text corpus; no PDF path retained",
+  "redistribution": "not established; local research index"
+}

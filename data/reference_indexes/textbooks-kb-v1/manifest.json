@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "kind": "textbook-knowledge-cards",
+  "state": "draft",
+  "created_at": "2026-11-18T22:20:53+0800",
+  "source_corpus_manifest_sha256": "5869a4c22ebf53eafa5d9275000fe3ca579009296d6f92b83d8e58f865f43e0c",
+  "entries_sha256": "071223ee7996f4cb20e773767330aab1ade5a91424136450609d19f3b12c75c8",
+  "entries_bytes": 13149972,
+  "sources": [
+    {
+      "source_id": "PMPH-IM10",
+      "book": "内科学第10版",
+      "text_file": "内科学第10版.txt",
+      "text_sha256": "15d14d513bc746873801dc03a4fe62c5c1a72f9451ef85102fbc9dfde20c52af",
+      "pages": 928,
+      "cards": 2640
+    },
+    {
+      "source_id": "PMPH-DX10",
+      "book": "诊断学第10版",
+      "text_file": "诊断学第10版.txt",
+      "text_sha256": "75b4b7fce314127f96c48ba81b4a34e7cacc57d655877310b1baa06b93cbfd85",
+      "pages": 587,
+      "cards": 1853
+    }
+  ],
+  "counts": {
+    "cards": 4493,
+    "by_book": {
+      "内科学第10版": 2640,
+      "诊断学第10版": 1853
+    },
+    "approved": 0,
+    "draft": 4493
+  },
+  "validation": {
+    "validate_entry": "passed",
+    "duplicate_ids": 0
+  },
+  "rights": "not granted; drafts only; local research, not a release",
+  "structure": {
+    "levels": [
+      "part",
+      "chapter",
+      "section",
+      "topic",
+      "subtopic",
+      "label"
+    ],
+    "max_card_chars": 1800,
+    "split_suffix": "（1/N）…（N/N）"
+  }
+}

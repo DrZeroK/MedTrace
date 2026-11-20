@@ -2,6 +2,22 @@
 
 **English** | [简体中文](TEXTBOOK_SEARCH.md)
 
+## 21-textbook unified search
+
+The filtered 21-book plain-text corpus is at `data/reference_indexes/textbooks-text-21-v2/`:
+7,965 pages and 10,491,035 characters. The searchable database excludes human parasitology and contains 20 books,
+7,683 pages, 10,105,699 characters and 15,146 chunks. References/recommended reading, indexes, exercise/answer pages,
+advertisements/back covers and repeated headers are removed; body appendices and utility tables are kept.
+See [TEXTBOOK_LIBRARY_21.en.md](TEXTBOOK_LIBRARY_21.en.md) for per-book cutoffs, extraction and OCR details.
+
+```bash
+python3 /Users/zerok/Documents/GitHub/MedTrace/scripts/textbook_search.py search --db /Users/zerok/Documents/GitHub/MedTrace/data/reference_indexes/textbooks-text-21-v2/textbooks.sqlite --query '阑尾炎' --book 外科学第10版 --limit 5
+```
+
+Drop `--book` to search across books. Human parasitology is retained only as corpus/OCR and is not in the searchable
+database, so a book-filtered query returns nothing; verify clinical or teaching content against a lawfully obtained PDF.
+The rest of this file describes the two-book structured cards and term/lab/rule store.
+
 A filtered offline plain-text corpus and search index are complete: 2 textbooks, 1515 pages, 2,176,489 characters.
 The corpus is at `data/reference_indexes/textbooks-text-v2/`, consisting of `内科学第10版.txt`, `诊断学第10版.txt`
 and `corpus.manifest.json`. `textbooks.sqlite` and its `.manifest.json` are a rebuildable index generated from that corpus,
