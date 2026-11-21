@@ -379,10 +379,12 @@ class Pipeline:
                     + "下列固定任务、事实约束和输出协议优先于上述组织建议。\n" + user)
         user += kb_context
         note = None
+        optional_fields_dropped = {}
         for attempt in (1, 2):
             raw = self.client.chat(system, user, stats, deadline)
             try:
-                note = note_from_model(parse_json_object(raw), require_complete=self.cfg.official)
+                note = note_from_model(parse_json_object(raw), require_complete=self.cfg.official,
+                                       optional_fields_dropped=optional_fields_dropped)
                 break
             except ParseError as e:
                 log.setdefault("parse_errors", []).append(str(e))
@@ -401,6 +403,8 @@ class Pipeline:
                          "Correct the format while preserving the original facts, cutoff, source IDs and fixed fields above.")
         log["raw_parse_retries"] = len(log.get("parse_errors", []))
         log["statements_split"] = V.split_long_statements(note)
+        if optional_fields_dropped:
+            log["optional_fields_dropped"] = optional_fields_dropped
         log["basis_normalised"] = _normalise_basis(note, L)
         initial = V.verify_note(note, case, L)
         if variant in ("A0", "A1"):
