@@ -23,6 +23,7 @@ from pathlib import Path
 from . import verify as V
 from . import textutil as T
 from .knowledge import KnowledgeBase, knowledge_block
+from .retrieval import case_query
 from .config import ConfigError, prompt_version
 from .inputs import Case
 from .ledger import build_ledger, digest, Ledger
@@ -241,7 +242,7 @@ class Pipeline:
                     audit = {"case_id": case.case_id, "index": case.index, "status": "ok", "retrieved": [], "rules": []}
                     log["knowledge"] = audit
                     try:
-                        cards = self.kb.retrieve(case.text)
+                        cards = self.kb.retrieve(case_query(L))
                         normalized = [{"fact_id": f.fid, "source_id": f.sid, "polarity": f.polarity,
                                       "matches": self.kb.normalize(f.text)} for f in L.facts]
                         rules = self.kb.check_rules(L)

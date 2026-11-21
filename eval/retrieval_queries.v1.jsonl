@@ -1,0 +1,50 @@
+{"id": "q01", "group": "targeted", "query": {"symptoms": "成人久咳十周，主要是干咳"}, "relevant": ["kb:cough-2021:assessment", "kb:cough-2021:causes"]}
+{"id": "q02", "group": "targeted", "query": {"symptoms": "夜间喘息反复", "exams": "支气管舒张试验需解读"}, "relevant": ["kb:asthma-2024:airflow"], "categories": ["diagnosis"]}
+{"id": "q03", "group": "targeted", "query": "已确诊哮喘，希望了解吸入激素与长期控制", "relevant": ["kb:asthma-2024:controller"], "categories": ["treatment"]}
+{"id": "q04", "group": "targeted", "query": {"symptoms": "孕晚期手脚发痒", "labs": "餐后总胆汁酸 27 μmol/L"}, "relevant": ["kb:icp-2024:bile-acids"], "categories": ["diagnosis"]}
+{"id": "q05", "group": "targeted", "query": {"history": "妊娠32周", "labs": "TBA偏高，ALT也高"}, "relevant": ["kb:icp-2024:exclude"], "categories": ["differential"]}
+{"id": "q06", "group": "targeted", "query": "确诊ICP后安排胎动与胆汁酸随访", "relevant": ["kb:icp-2024:monitor"], "categories": ["tests"]}
+{"id": "q07", "group": "targeted", "query": "孕妇胆汁淤积，咨询熊去氧胆酸及分娩安排", "relevant": ["kb:icp-2024:management"], "categories": ["treatment"]}
+{"id": "q08", "group": "targeted", "query": {"history": "孕26周", "labs": "75 g 口服糖耐量，0/1/2 h 分别为4.9、10.2、8.1 mmol/L"}, "relevant": ["kb:hip-2022-i:ogtt"], "categories": ["diagnosis"]}
+{"id": "q09", "group": "targeted", "query": "妊娠期糖尿病确诊后营养和胰岛素选择", "relevant": ["kb:hip-2022-i:glycemic-control"], "categories": ["treatment"]}
+{"id": "q10", "group": "targeted", "query": "短暂失语恢复，判断短暂性脑缺血和脑梗死", "relevant": ["kb:stroke-2024:tia-definition"], "categories": ["diagnosis"]}
+{"id": "q11", "group": "targeted", "query": {"symptoms": "一过性黑矇后恢复", "exams": "能否行MRI DWI"}, "relevant": ["kb:tia-2021:workup"], "categories": ["tests"]}
+{"id": "q12", "group": "targeted", "query": "短暂言语不清，考虑偏头痛先兆或低血糖", "relevant": ["kb:tia-2021:mimics"], "categories": ["differential"]}
+{"id": "q13", "group": "targeted", "query": {"labs": "SAAG 15 g/L"}, "relevant": ["kb:ascites-2025:saag"], "categories": ["tests"]}
+{"id": "q14", "group": "targeted", "query": {"history": "肝病史", "exams": "腹腔积液", "labs": "白蛋白偏低"}, "relevant": ["kb:ascites-2025:edema"], "categories": ["differential"]}
+{"id": "q15", "group": "targeted", "query": "顽固性腹水评估腹腔放液", "relevant": ["kb:ascites-2025:diuretics"], "categories": ["treatment"]}
+{"id": "q16", "group": "targeted", "query": {"symptoms": "夜间憋醒、下肢水肿", "labs": "NT-proBNP 升高"}, "relevant": ["kb:hf-2024:congestion"], "categories": ["tests"]}
+{"id": "q17", "group": "targeted", "query": {"symptoms": "突发撕裂样胸痛", "exams": "评估主动脉CTA"}, "relevant": ["kb:aas-cta-2026:cta"], "categories": ["tests"]}
+{"id": "q18", "group": "targeted", "query": {"exams": "主动脉壁新月形增厚，内膜片不清"}, "relevant": ["kb:imh-2017:wall"], "categories": ["differential"]}
+{"id": "q19", "group": "targeted", "query": {"history": "PCI术后", "symptoms": "再发胸痛", "labs": "肌钙蛋白动态复测"}, "relevant": ["kb:nsteacs-2024:ecg-troponin"], "categories": ["tests"]}
+{"id": "q20", "group": "targeted", "query": "支架术后新发胸痛，需同时排查哪些急症", "relevant": ["kb:nsteacs-2024:chest-pain"], "categories": ["differential"]}
+{"id": "q21", "group": "targeted", "query": "NSTE-ACS反复缺血，评估冠脉介入时机", "relevant": ["kb:nsteacs-2024:risk"], "categories": ["treatment"]}
+{"id": "q22", "group": "targeted", "query": {"exams": "胃窦组织见轻度异型增生"}, "relevant": ["kb:gastric-precancer-2020:pathology"], "categories": ["diagnosis"]}
+{"id": "q23", "group": "targeted", "query": "胃内镜初次活检提示LGIN，了解靶向活检", "relevant": ["kb:gastric-precancer-2020:endoscopy"], "categories": ["tests"]}
+{"id": "q24", "group": "targeted", "query": "明确病灶，胃高级别上皮内瘤变，是否考虑ESD", "relevant": ["kb:gastric-screen-2024:early-treatment"], "categories": ["treatment"]}
+{"id": "q25", "group": "targeted", "query": {"symptoms": "婴儿水样便，眼窝凹陷，尿少"}, "relevant": ["kb:peds-diarrhea-2020:dehydration"], "categories": ["tests"]}
+{"id": "q26", "group": "targeted", "query": "儿童轻度脱水，咨询低渗口服补液盐", "relevant": ["kb:peds-diarrhea-2020:rehydration"], "categories": ["treatment"]}
+{"id": "q27", "group": "targeted", "query": {"symptoms": "幼儿发热后短时肢体强直，醒后反应好"}, "relevant": ["kb:febrile-seizure-2017:differential"], "categories": ["differential"]}
+{"id": "q28", "group": "targeted", "query": {"history": "长期肾功能不全", "labs": "血红蛋白下降、铁蛋白待查"}, "relevant": ["kb:renal-anemia-2018:workup"], "categories": ["tests"]}
+{"id": "q29", "group": "targeted", "query": "血红蛋白低伴肌酐升高，需进一步找贫血原因", "relevant": ["kb:renal-anemia-2018:causes"], "categories": ["differential"]}
+{"id": "b01", "group": "mixed", "query": {"history": "孕30周，既往糖耐量异常", "symptoms": "手掌足底发痒", "labs": "总胆汁酸升高"}, "relevant": ["kb:icp-2024:bile-acids", "kb:icp-2024:exclude", "kb:icp-2024:monitor", "kb:icp-2024:management", "kb:hip-2022-i:ogtt"]}
+{"id": "b02", "group": "mixed", "query": {"history": "既往冠脉内支架术后", "symptoms": "撕裂样背痛伴胸痛", "exams": "壁内高密度影"}, "relevant": ["kb:aas-cta-2026:cta", "kb:imh-2017:wall", "kb:nsteacs-2024:chest-pain", "kb:nsteacs-2024:ecg-troponin"]}
+{"id": "b03", "group": "mixed", "query": {"symptoms": "婴幼儿腹泻伴肢体强直", "labs": "血钠偏低"}, "relevant": ["kb:peds-diarrhea-2020:dehydration", "kb:peds-diarrhea-2020:rehydration", "kb:febrile-seizure-2017:differential"]}
+{"id": "b04", "group": "mixed", "query": {"symptoms": ["下肢水肿", "活动后乏力"], "labs": "血红蛋白偏低和肌酐异常"}, "relevant": ["kb:hf-2024:congestion", "kb:renal-anemia-2018:workup", "kb:renal-anemia-2018:causes"]}
+{"id": "b05", "group": "mixed", "query": "长期干咳数月，片子未见异常。夜里喘不过气，肺量测定后怀疑气道可逆", "relevant": ["kb:cough-2021:assessment", "kb:cough-2021:causes", "kb:asthma-2024:airflow"]}
+{"id": "b06", "group": "mixed", "query": "老人突然说不出话，来院途中完全缓解", "relevant": ["kb:stroke-2024:tia-definition", "kb:tia-2021:workup", "kb:tia-2021:mimics"]}
+{"id": "b07", "group": "mixed", "query": "既往慢性肝病，肚围迅速增大，超声显示腹腔游离液体", "relevant": ["kb:ascites-2025:saag", "kb:ascites-2025:edema"]}
+{"id": "b08", "group": "mixed", "query": "两周内反复大声打鼾，白天开会总睡着。否认胸闷和反复喘息", "relevant": []}
+{"id": "n01", "group": "negative", "query": "新近手腕疼痛，X线提示桡骨远端骨折", "relevant": []}
+{"id": "n02", "group": "negative", "query": "否认胸痛、胸闷气促，下肢擦伤", "relevant": []}
+{"id": "n03", "group": "negative", "query": "未提供：肌钙蛋白、心电图", "relevant": []}
+{"id": "n04", "group": "negative", "query": "术后更换伤口敷料，拆线时间如何安排", "relevant": []}
+{"id": "n05", "group": "negative", "query": "附件下载失败，请查浏览器缓存", "relevant": []}
+{"id": "n06", "group": "negative", "query": "", "relevant": []}
+{"id": "n07", "group": "negative", "query": "成人饮食后出现水样便，考虑细菌性食物中毒", "relevant": []}
+{"id": "n08", "group": "negative", "query": {"history": "成年男性，肥胖", "labs": "75 g OGTT结果待回报"}, "relevant": []}
+{"id": "q30", "group": "targeted", "query": {"symptoms": "成人发热咳痰", "exams": "胸部影像新发浸润影"}, "categories": ["diagnosis"], "relevant": ["kb:adult-cap-2016:diagnosis"]}
+{"id": "q31", "group": "targeted", "query": {"history": "社区获得性肺炎入院", "labs": "痰标本送检"}, "categories": ["tests"], "relevant": ["kb:adult-cap-2016:workup"]}
+{"id": "q32", "group": "targeted", "query": {"history": "双下肢水肿一个月", "labs": "24h大量蛋白尿，白蛋白19g/L，抗PLA2R阳性"}, "categories": ["tests"], "relevant": ["kb:pmn-2026:nephrotic-workup"]}
+{"id": "b09", "group": "mixed", "query": {"history": "社区起病，长期咳嗽后新近加重", "symptoms": "发热咳痰", "exams": "右下肺新发浸润影"}, "relevant": ["kb:cough-2021:assessment", "kb:cough-2021:causes", "kb:adult-cap-2016:workup", "kb:adult-cap-2016:diagnosis"]}
+{"id": "b10", "group": "mixed", "query": {"symptoms": "双下肢水肿并少尿", "labs": "大量蛋白尿，血清白蛋白偏低"}, "relevant": ["kb:hf-2024:congestion", "kb:pmn-2026:nephrotic-workup"]}

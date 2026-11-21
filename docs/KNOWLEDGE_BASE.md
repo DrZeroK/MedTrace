@@ -21,6 +21,8 @@ tests) on Python 3.14.7 / SQLite 3.53.4. The 15 knowledge tests were rerun after
 final log-handle fix and passed. New modules also parse with Python 3.10 syntax;
 the target Python/runtime, designated model and clinical quality are not validated.
 
+The [clinical retrieval update](CLINICAL_RETRIEVAL.zh-CN.md) documents the experimental guideline corpus, textbook preparation, offline benchmark, and current release status.
+
 ## Content review and release
 
 1. Review `knowledge/sources.json` and each entry. Obtain permission to use and
@@ -72,8 +74,7 @@ Retrieval uses case text **after record cutoff filtering**, Chinese bigrams with
 frequency, whole English terms and short aliases; FTS5 BM25 ranks titles above bodies.
 It requires an exact topic/alias anchor and selects at most 5 complete cards totaling
 2,500 text characters. An adult card requires an explicitly documented age 18–120;
-unknown or conflicting ages do not enable it. Negative/pending terms may retrieve
-context, but their original polarity is preserved in the ledger and audit.
+unknown or conflicting ages do not enable it. Explicitly negated or missing clues are suppressed in retrieval; the ledger and audit retain their original polarity.
 Symptom-only semantic matching and cross-sentence rule applicability are deliberately
 not inferred. Improve aliases using the dev split before considering embeddings.
 
