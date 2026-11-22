@@ -39,25 +39,39 @@ def _intake(content):
     raise ValueError("practice chart lacks a recognized cutoff heading")
 
 
+def load_practice_cases(archive_path):
+    cases = []
+    seen = set()
+    with ZipFile(archive_path) as archive:
+        for member in sorted(archive.infolist(), key=lambda item: item.filename):
+            name = member.filename.rsplit("/", 1)[-1]
+            match = re.fullmatch(r"(\d{2})_.*\.txt", name)
+            if member.is_dir() or not match:
+                continue
+            sample_id = match[1]
+            if sample_id in seen:
+                raise ValueError("duplicate practice chart ID")
+            seen.add(sample_id)
+            lines = _intake(archive.read(member).decode("utf-8-sig"))
+            cases.append({"case_id": sample_id, "record_cutoff": "T0",
+                          "sources": [{"source_id": f"S{i:03d}", "content": line}
+                                      for i, line in enumerate(lines, 1)]})
+    if not cases:
+        raise ValueError("practice ZIP contains no matching admission records")
+    return cases
+
+
 def evaluate(index_path, archive_path, labels):
     index = TextbookIndex(index_path)
     if index.describe()["state"] != "draft":
         raise ValueError("practice evaluation expects the local draft index")
     samples = []
-    seen = set()
-    with ZipFile(archive_path) as archive, patch("socket.socket", side_effect=AssertionError("network disabled")):
-        for member in sorted(archive.infolist(), key=lambda item: item.filename):
-            name = member.filename.rsplit("/", 1)[-1]
-            match = re.match(r"^(\d{2})_.*\.txt$", name)
-            if member.is_dir() or not match:
-                continue
-            sample_id = match[1]
-            if sample_id not in labels or sample_id in seen:
-                raise ValueError("unexpected or duplicate practice chart ID")
-            seen.add(sample_id)
-            lines = _intake(archive.read(member).decode("utf-8-sig"))
-            intake = {"case_id": sample_id, "record_cutoff": "T0",
-                      "sources": [{"source_id": f"S{i:03d}", "content": line} for i, line in enumerate(lines, 1)]}
+    cases = load_practice_cases(archive_path)
+    if {case["case_id"] for case in cases} != set(labels):
+        raise ValueError("practice ZIP does not contain the labeled practice charts")
+    with patch("socket.socket", side_effect=AssertionError("network disabled")):
+        for intake in cases:
+            sample_id = intake["case_id"]
             ledger = build_ledger(parse_case(intake, len(samples)))
             result = index.retrieve(case_query(ledger))
             coverage = {}
@@ -66,8 +80,6 @@ def evaluate(index_path, archive_path, labels):
                                         if re.search(pattern, card["title"])), None)
             samples.append({"sample_id": sample_id, "topic_first_rank": coverage,
                             "retrieved_evidence_ids": [card["id"] for card in result]})
-    if seen != set(labels):
-        raise ValueError("practice ZIP does not contain the labeled practice charts")
     ranks = [rank for sample in samples for rank in sample["topic_first_rank"].values()]
     return {
         "index_sha256": index.sha256,
