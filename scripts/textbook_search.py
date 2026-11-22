@@ -154,7 +154,7 @@ def export_legacy(db_path, corpus_dir):
                      ensure_ascii=False))
 
 
-def load_corpus(corpus_dir):
+def load_corpus(corpus_dir, *, selected_books=None):
     corpus = Path(corpus_dir)
     manifest_path = corpus / 'corpus.manifest.json'
     manifest = json.loads(manifest_path.read_text('utf-8'))
@@ -162,7 +162,10 @@ def load_corpus(corpus_dir):
         raise ValueError('unsupported corpus manifest')
     books = []
     seen_books = set()
+    requested = None if selected_books is None else set(selected_books)
     for item in manifest['books']:
+        if requested is not None and item['book'] not in requested:
+            continue
         path = corpus / item['text_file']
         if digest_file(path) != item['sha256']:
             raise ValueError(f'text hash mismatch: {path}')
@@ -173,6 +176,8 @@ def load_corpus(corpus_dir):
             raise ValueError(f'duplicate book: {book}')
         seen_books.add(book)
         books.append((book, pages, item))
+    if requested is not None and (missing := requested - seen_books):
+        raise ValueError(f'textbooks not in corpus: {sorted(missing)}')
     return books, manifest_path
 
 

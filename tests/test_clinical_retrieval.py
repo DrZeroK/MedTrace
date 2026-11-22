@@ -7,8 +7,9 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from eval.rag_benchmark import benchmark
+from eval.rag_benchmark import ROOT, benchmark
 from medtrace.knowledge import KnowledgeBase, KnowledgeError, build_database
+from medtrace.retrieval import expand_findings, prepare_query
 from scripts.textbook_kb import organize_drafts
 from test_knowledge import entry
 
@@ -23,6 +24,17 @@ class ClinicalRetrievalTests(unittest.TestCase):
         self.assertGreater(reranked["recall"], .90)
         self.assertLess(reranked["irrelevant_ratio"], baseline["irrelevant_ratio"])
         self.assertEqual(reranked["negative_abstention"], 1)
+
+    def test_finding_expansion_retains_scope_and_improves_paraphrase_recall(self):
+        result = benchmark(question_path=ROOT / "eval/retrieval_variants.v2.jsonl")
+        base = result["modes"]["reranked_without_expansion"]["at_k"][5]
+        tuned = result["modes"]["reranked"]["at_k"][5]
+        self.assertGreater(tuned["recall"], base["recall"])
+        self.assertEqual(tuned["negative_abstention"], 1)
+        for text in ("干咳持续一个月", "其父亲突然讲不出话，随后恢复说话", "否认腹腔游离液体"):
+            with self.subTest(text=text):
+                clauses, _ = prepare_query(text)
+                self.assertEqual(expand_findings(clauses), clauses)
 
     def test_structured_query_and_negation_for_approved_cards(self):
         with TemporaryDirectory() as directory:

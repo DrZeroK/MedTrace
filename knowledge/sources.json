@@ -322,5 +322,65 @@
     "pmph_product_reference": "https://inside.pmphai.com/inside/application/knowInside",
     "partnership_primary_verification": false,
     "access_note": "用户明确授权在已登录网页提炼知识卡。控制连接失败，未发送问题；不能将准备的问题登记为实际问答或可发布知识。"
+  },
+  {
+    "id": "PMPH-PED10",
+    "title": "儿科学（第10版）",
+    "source": "https://medu.pmph.com/readdetail/todetail.action?id=32450",
+    "version_candidate": "第10版",
+    "kind": "textbook",
+    "topics": [
+      "儿科常见病",
+      "儿童急症"
+    ],
+    "authority": "人民卫生出版社",
+    "verification_level": "official_catalog_metadata_checked",
+    "locator": "原书章节和印刷页码见本地卡片",
+    "checked_at": "2026-11-22",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "isbn": "9787117365345",
+    "access_note": "出版社目录核对版次和书号；正文来自私有仓库的本地文本。"
+  },
+  {
+    "id": "PMPH-OBG10",
+    "title": "妇产科学（第10版）",
+    "source": "https://www.pmphmall.com/gdsdetail/653036-331633",
+    "version_candidate": "第10版",
+    "kind": "textbook",
+    "topics": [
+      "妊娠合并症",
+      "妇科疾病"
+    ],
+    "authority": "人民卫生出版社",
+    "verification_level": "official_catalog_metadata_checked",
+    "locator": "原书章节和印刷页码见本地卡片",
+    "checked_at": "2026-11-22",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "isbn": "9787117364362",
+    "access_note": "出版社目录核对版次和书号；正文来自私有仓库的本地文本。"
+  },
+  {
+    "id": "PMPH-SUR10",
+    "title": "外科学（第10版）",
+    "source": "https://wap.pmphmall.com/gdsdetail/653274-331871",
+    "version_candidate": "第10版",
+    "kind": "textbook",
+    "topics": [
+      "外科急症",
+      "围手术期处理"
+    ],
+    "authority": "人民卫生出版社",
+    "verification_level": "official_catalog_metadata_checked",
+    "locator": "原书章节和印刷页码见本地卡片",
+    "checked_at": "2026-11-22",
+    "license_status": "not_granted",
+    "clinical_review": "not_signed",
+    "permission_evidence": [],
+    "isbn": "9787117365925",
+    "access_note": "出版社目录核对版次和书号；正文来自私有仓库的本地文本。"
   }
 ]

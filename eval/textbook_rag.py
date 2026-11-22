@@ -7,13 +7,12 @@ context only; this is not a knowledge release and must not be distributed.
 from __future__ import annotations
 
 from contextlib import closing
-import hashlib
 import json
 import sqlite3
 from pathlib import Path
 
-from medtrace.knowledge import KnowledgeError, adult_documented, alias_hit, search_tokens
-from medtrace.retrieval import candidates, case_query, lexical_tokens, prepare_query, select_cards
+from medtrace.knowledge import KnowledgeError, adult_documented, alias_hit, digest_file, search_tokens
+from medtrace.retrieval import candidates, case_query, expand_findings, lexical_tokens, prepare_query, select_cards
 from medtrace.pipeline import Pipeline
 
 # Procedural/normal-finding pages crowd out disease knowledge in BM25 rankings.
@@ -25,7 +24,7 @@ class TextbookIndex:
         self.path = Path(path).resolve()
         if not self.path.is_file():
             raise KnowledgeError(f"textbook index not found: {self.path}")
-        self.sha256 = hashlib.sha256(self.path.read_bytes()).hexdigest()
+        self.sha256 = digest_file(self.path)
         manifest_path = self.path.with_suffix(".manifest.json")
         if not manifest_path.is_file():
             manifest_path = self.path.with_name("index.manifest.json")
@@ -44,6 +43,7 @@ class TextbookIndex:
 
     def retrieve(self, query, limit=5, max_chars=2500, max_card_chars=800, *, categories=None):
         clauses, original = prepare_query(query)
+        clauses = expand_findings(clauses)
         with closing(self.connect()) as db:
             rows = candidates(db, lexical_tokens(clauses, search_tokens), maximum=max(160, limit * 12))
         eligible = [(e, score) for e, score in rows

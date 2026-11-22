@@ -1,0 +1,16 @@
+{"id": "v01", "group": "paraphrase", "query": {"history": "退休人员，糖尿病病史", "symptoms": "晨起骤然讲不出话，过了一会儿恢复如常"}, "relevant": ["kb:stroke-2024:tia-definition", "kb:tia-2021:workup", "kb:tia-2021:mimics"]}
+{"id": "v02", "group": "paraphrase", "query": "突发口齿不清，约10分钟后恢复说话", "relevant": ["kb:stroke-2024:tia-definition", "kb:tia-2021:workup", "kb:tia-2021:mimics"]}
+{"id": "v03", "group": "paraphrase", "query": {"history": "既往肝炎", "exams": "超声提示腹腔大量液性暗区"}, "relevant": ["kb:ascites-2025:saag", "kb:ascites-2025:edema"]}
+{"id": "v04", "group": "paraphrase", "query": {"history": "慢性肝病", "symptoms": "腹胀加重", "exams": "超声见腹腔少量游离液"}, "relevant": ["kb:ascites-2025:saag", "kb:ascites-2025:edema"]}
+{"id": "v05", "group": "paraphrase", "query": "35岁，干咳持续三个月，胸片未见异常", "relevant": ["kb:cough-2021:assessment", "kb:cough-2021:causes"]}
+{"id": "v06", "group": "paraphrase", "query": "反复干咳了2月，查肺功能提示气流受限具有可逆性", "relevant": ["kb:cough-2021:assessment", "kb:cough-2021:causes", "kb:asthma-2024:airflow"]}
+{"id": "v07", "group": "paraphrase", "query": {"history": "孕中期", "labs": "75g糖负荷试验异常", "symptoms": "掌跖瘙痒"}, "relevant": ["kb:hip-2022-i:ogtt", "kb:icp-2024:bile-acids"], "categories": ["diagnosis"]}
+{"id": "v08", "group": "paraphrase", "query": "儿童反复水样便。体检发现眼窝凹陷，尿量减少", "relevant": ["kb:peds-diarrhea-2020:dehydration", "kb:peds-diarrhea-2020:rehydration"]}
+{"id": "v09", "group": "guard", "query": "醉酒后声嘶，话说不出来已两周", "relevant": []}
+{"id": "v10", "group": "guard", "query": "活动后喘得突然说不出完整句子，休息后完全缓解", "relevant": []}
+{"id": "v11", "group": "guard", "query": "患者否认突发口齿不清。偶尔耳鸣。", "relevant": []}
+{"id": "v12", "group": "guard", "query": "其父亲突然说不出话，随后恢复说话。患者本人因踝关节扭伤就诊", "relevant": []}
+{"id": "v13", "group": "guard", "query": "报告未提供：腹腔大量液性暗区。疼痛局限于指甲。", "relevant": []}
+{"id": "v14", "group": "guard", "query": "检查未查气道可逆。现有记录只见手指擦伤。", "relevant": []}
+{"id": "v15", "group": "guard", "query": "患者表示如果突然讲不出话，想知道是否应挂号。", "relevant": []}
+{"id": "v16", "group": "guard", "query": "成人右下腹痛两天。否认眼窝凹陷和水样便。", "relevant": []}

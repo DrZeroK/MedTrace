@@ -40,6 +40,9 @@ CROSS_REF = re.compile(r'(参见|参照|详见|见)(本篇|本章|本节|第[一
 SOURCE_MAP = {
     '内科学第10版': {'id': 'PMPH-IM10', 'scope': 'adult'},
     '诊断学第10版': {'id': 'PMPH-DX10', 'scope': 'general'},
+    '儿科学第10版': {'id': 'PMPH-PED10', 'scope': 'general', 'population': 'pediatric'},
+    '妇产科学第10版': {'id': 'PMPH-OBG10', 'scope': 'general'},
+    '外科学第10版': {'id': 'PMPH-SUR10', 'scope': 'general'},
 }
 REQUESTED_USES = ['offline_index', 'rag_context', 'derived_cards', 'competition_distribution']
 MAX_CARD_CHARS = 1800
@@ -370,8 +373,8 @@ def outline_for(book, source_id, cards):
     return root
 
 
-def structure_corpus(corpus_dir, out_dir):
-    books, manifest_path = load_corpus(corpus_dir)
+def structure_corpus(corpus_dir, out_dir, *, selected_books=None):
+    books, manifest_path = load_corpus(corpus_dir, selected_books=selected_books)
     sources = {item['id']: item for item in json.loads((ROOT / 'knowledge' / 'sources.json').read_text('utf-8'))}
     dest = Path(out_dir)
     if not dest.is_absolute() or dest.exists():
@@ -388,6 +391,11 @@ def structure_corpus(corpus_dir, out_dir):
             raise ValueError(f'missing source metadata: {mapping["id"]}')
         cards = parse_structure(book, pages, source_info['source'], source_info.get('version_candidate', ''),
                                 mapping['scope'], mapping['id'])
+        for card in cards:
+            card['source_url'] = source_info['source']
+            card['isbn'] = source_info.get('isbn')
+            if 'population' in mapping:
+                card['population'] = mapping['population']
         all_cards.extend(cards)
         outline_books.append(outline_for(book, mapping['id'], cards))
         source_entries.append({'source_id': mapping['id'], 'book': book, 'text_file': item['text_file'],
@@ -584,6 +592,7 @@ def main():
     organize.add_argument('--output', type=Path, required=True)
     s = sub.add_parser('structure', help='convert filtered plain text into draft knowledge cards')
     s.add_argument('--corpus', required=True)
+    s.add_argument('--book', action='append', help='only structure named books from this corpus')
     s.add_argument('--out', required=True)
     b = sub.add_parser('build', help='build a local draft knowledge index')
     b.add_argument('--supplement', type=Path, action='append', default=[])
@@ -599,7 +608,7 @@ def main():
         print(json.dumps(organize_drafts(args.entries, args.output), ensure_ascii=False))
         return
     if args.command == 'structure':
-        structure_corpus(args.corpus, args.out)
+        structure_corpus(args.corpus, args.out, selected_books=args.book)
     elif args.command == 'build':
         build_index(args.entries, args.db, args.supplement)
     else:

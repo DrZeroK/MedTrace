@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from . import textutil as T
-from .retrieval import CATEGORIES, candidates, lexical_tokens, prepare_query, select_cards
+from .retrieval import CATEGORIES, candidates, expand_findings, lexical_tokens, prepare_query, select_cards
 
 
 class KnowledgeError(ValueError):
@@ -26,7 +26,11 @@ def search_tokens(text: str) -> list[str]:
 
 
 def digest_file(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def validate_entry(e):
@@ -162,6 +166,7 @@ class KnowledgeBase:
         positive = " ".join(clause for clause, _ in clauses)
         normalized = self.normalize(positive)
         clauses += [(entry["canonical"], 1.0) for entry in normalized]
+        clauses = expand_findings(clauses)
         tokens = lexical_tokens(clauses, search_tokens)
         with self.connect() as db:
             rows = candidates(db, tokens)

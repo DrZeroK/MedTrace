@@ -63,6 +63,18 @@ class TextbookKnowledgeCards(unittest.TestCase):
         self.assertEqual(interval[0]['text'], '3.5～5.3mmol/L。')
         self.assertFalse(any('思维导图' in entry['text'] or '张三' in entry['text'] for entry in self.entries))
 
+    def test_select_one_verified_book_from_larger_manifest(self):
+        manifest_path = self.corpus / 'corpus.manifest.json'
+        manifest = json.loads(manifest_path.read_text('utf-8'))
+        manifest['books'].append({'book': '儿科学第10版', 'text_file': 'missing.txt', 'sha256': 'bad'})
+        manifest_path.write_text(json.dumps(manifest), encoding='utf-8')
+        selected = self.root / 'selected'
+        structure_corpus(self.corpus, selected, selected_books=[BOOK])
+        self.assertEqual(json.loads((selected / 'manifest.json').read_text('utf-8'))['counts']['cards'],
+                         len(self.entries))
+        with self.assertRaisesRegex(ValueError, 'textbooks not in corpus'):
+            structure_corpus(self.corpus, self.root / 'unknown', selected_books=['未知书名'])
+
     def test_outline_and_index(self):
         outline = json.loads((self.out / 'outline.json').read_text('utf-8'))
         self.assertEqual(outline['books'][0]['book'], BOOK)

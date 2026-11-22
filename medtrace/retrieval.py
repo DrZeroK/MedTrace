@@ -13,6 +13,7 @@ FIELDS = {"history": 1.0, "symptoms": 1.25, "labs": 1.2, "exams": 1.15, "other":
 CLAUSE = re.compile(r"[，,。；;！？!?\n]")
 GENERIC_ALIASES = {"诊断", "鉴别诊断", "治疗", "检查", "评估", "慢性", "急性", "轻度", "中度", "重度"}
 GENERIC_PATTERN = re.compile(r"鉴别诊断|辅助检查|实验室检查|治疗原则|诊断标准|临床表现|评估")
+PEDIATRIC = re.compile(r"儿童|患儿|新生儿|婴幼儿|婴儿|(?<![\d.])(?:[1-9]|1[0-7])\s*岁")
 NONPREGNANT = re.compile(r"成年男性|成人男性|非妊娠|未妊娠|未怀孕|未孕")
 
 
@@ -34,6 +35,34 @@ def prepare_query(query):
                 if clause.strip():
                     clauses.append((clause, FIELDS[field]))
     return clauses, "\n".join(originals)
+
+
+# These query-only synonyms describe findings. The fact ledger keeps the original wording.
+_FINDING_VARIANTS = (
+    (re.compile(r"长期干咳|慢性干咳|干咳(?:持续|了)?(?:数|几|[2-9]|[二三四五六七八九十](?:[一二三四五六七八九十])?)个?月"), "慢性咳嗽"),
+    (re.compile(r"气道可逆|气流受限(?:有|具有)?可逆性|用支气管扩张剂后气流明显改善"), "气流受限"),
+    (re.compile(r"腹腔(?:的)?(?:少量|中量|大量)?(?:游离液(?:体)?|液性暗区|有积液)"), "腹腔积液"),
+)
+_SPEECH = re.compile(r"说不出话|说不出完整句子|话说不出来|讲不出话|不能言语|吐字不清|口齿不清")
+_ACUTE = re.compile(r"突然|突发|骤然|一下子|一过性")
+_RECOVERED_SPEECH = re.compile(r"恢复(?:语言|言语|说话|如常|正常)|重新(?:能)?说话|又能(?:讲|说)话|完全缓解")
+_BREATH_LIMITED_SPEECH = re.compile(r"喘得|喘到|气喘|气短|喘不上气|呼吸困难|憋得")
+
+
+def expand_findings(clauses):
+    """Add lower-weight search terms to already scoped patient findings."""
+    expansions = {}
+    positive = " ".join(clause for clause, _ in clauses)
+    for position, (clause, weight) in enumerate(clauses):
+        for pattern, term in _FINDING_VARIANTS:
+            if pattern.search(clause) and term not in positive:
+                expansions[term] = max(expansions.get(term, 0.0), 0.8 * weight)
+        nearby = " ".join(part for part, _ in clauses[position:position + 3])
+        if (_SPEECH.search(clause) and not _BREATH_LIMITED_SPEECH.search(clause)
+                and _ACUTE.search(clause) and _RECOVERED_SPEECH.search(nearby)):
+            term = "短暂失语" if not re.search(r"吐字不清|口齿不清", clause) else "短暂言语不清"
+            expansions[term] = max(expansions.get(term, 0.0), 0.8 * weight)
+    return [*clauses, *expansions.items()]
 
 
 def case_query(ledger):
@@ -75,6 +104,8 @@ def _scope_matches(item, original, positive, adult_documented):
     if item["scope"] == "adult" and not adult_documented(positive):
         return False
     population = item.get("population")
+    if population == "adult":
+        return not PEDIATRIC.search(positive)
     if population == "pregnancy":
         return not NONPREGNANT.search(original)
     if population == "pediatric":
@@ -109,8 +140,13 @@ def select_cards(rows, clauses, original, *, alias_hit, adult_documented, search
                     score += weight * (1 + min(len(alias), 8) / 8)
             title = text_trigrams(item["title"])
             body = text_trigrams(item["text"])
-            context_score = max((weight * (len(grams & title) * 2 + len(grams & body))
-                                 for grams, weight in fingerprints), default=0)
+            matches = [(weight, grams & title, grams & body) for grams, weight in fingerprints]
+            context_score = max((weight * (len(title_hits) * 2 + len(body_hits))
+                                 for weight, title_hits, body_hits in matches), default=0)
+            if textbook and item.get("book"):
+                # Accept several distinct findings spread across the same query.
+                shared = set().union(*(title_hits | body_hits for _, title_hits, body_hits in matches))
+                context_score = max(context_score, len(shared))
             if not matched and not (textbook and item.get("book") and context_score >= 5):
                 continue
             score = 2.5 * score + 0.35 * min(context_score, 8) + 0.2 * math.log1p(abs(lexical))

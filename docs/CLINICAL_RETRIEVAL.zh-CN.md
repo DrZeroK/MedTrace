@@ -2,6 +2,36 @@
 
 本分支把本地检索接入现有 MedTrace 生成流水线。检索器使用 Python 标准库和 SQLite FTS5。输入支持自由文本，或 `history`、`symptoms`、`labs`、`exams` 字段。比赛流水线使用已按截止点处理的事实账本，检索无额外模型调用。返回的知识卡 `id` 标识证据片段，`source_id`、`version` 和 `locator` 用于审计和回查。正式输出的 `medical_record.evidence[].source_ids` 仍按赛题协议引用本病例的资料 ID。
 
+## 第二阶段扩展
+
+本地草稿索引增加第十版《儿科学》《妇产科学》《外科学》的 6,225 个片段。五册教材共 11,941 个片段，加上 33 条指南、共识和参考摘要，共 11,974 个片段。三册新增来源的书号与出版社目录核对，原文定位和页码置信来源随卡保存。页码可能来自页眉或页码偏移推算。资料仍为开发草稿。
+
+口语检索在识别否定、缺失和家属线索后，再补充低权重的医学检索词。短暂言语障碍的扩展需要同处的突然起病线索和附近的恢复信息。检索词扩展只参与候选排序，病例账本保留原始文字。教材排序允许不同子句提供互补的匹配线索。
+
+| 数据集 | Recall@5 扩展前 → 后 | 证据相关准确率@5 扩展后 | 无关信息比例@5 扩展后 |
+| --- | ---: | ---: | ---: |
+| 原 50 条开发查询 | 93.50% → 100% | 96.88% | 3.13% |
+| 16 条定向口语及反例查询 | 39.58% → 100% | 100% | 0% |
+
+以上是同一指南语料的合成相关性对照。16 条定向集含 8 条可回答查询和 8 条反例，8 条反例均返回空结果。该集合覆盖这次选择测试的语言现象，尚无正式病例或独立临床评估。五册混合索引另做了 6 条教材来源抽查，5 条在前五命中预期教材；儿童肾病综合征检查分类仍有漏召。
+
+构建五册索引时，先参考下方命令生成两册原有索引的 `textbook-cards.jsonl`，再处理三册补充教材。
+
+```bash
+python scripts/textbook_kb.py structure \
+  --corpus data/reference_indexes/textbooks-text-21-v2 \
+  --book 儿科学第10版 --book 妇产科学第10版 --book 外科学第10版 \
+  --out "$work_dir/specialty"
+python scripts/textbook_kb.py organize \
+  --entries "$work_dir/specialty/entries.jsonl" --output "$work_dir/specialty-cards.jsonl"
+python scripts/textbook_kb.py build \
+  --entries "$work_dir/textbook-cards.jsonl" \
+  --supplement "$work_dir/specialty-cards.jsonl" \
+  --supplement knowledge/guidelines.v1.jsonl \
+  --db "$work_dir/clinical-drafts-v2.sqlite"
+python -m eval.rag_benchmark --queries eval/retrieval_variants.v2.jsonl
+```
+
 ## 知识入库
 
 - [指南与共识草稿](../knowledge/guidelines.v1.jsonl) 收录国家卫健委、中华医学会和其他专业机构的 18 份指南、共识及参考来源，共 33 条独立编写的摘要。来源链接、具体版本、定位、适用范围及审核状态随卡保存。覆盖诊断标准、鉴别诊断、检查建议和治疗建议。
@@ -32,13 +62,13 @@ PY
 
 教材分块优先保留整句及检验值单位。过长且无可用句界的片段单独保留，开发检索通过上下文长度上限控制进入提示的内容。召回由 FTS5 BM25 完成，随后按医学术语、单句同现、字段权重和适用人群重排。明确否定、缺失或属于家属的线索不作为患者阳性召回依据。按来源去除近重复片段，并限制同一教材章节和父卡占用的名额。
 
-## 检索评估
+## 第一阶段检索基准
 
 ```bash
 python -m eval.rag_benchmark --output /tmp/medtrace-rag-report.json
 ```
 
-[50 条合成查询及标签](../eval/retrieval_queries.v1.jsonl) 含 41 条有相关证据、9 条无相关证据的查询。两种排序共用同一指导资料、FTS5 候选、上下文处理及返回预算。
+[50 条合成查询及标签](../eval/retrieval_queries.v1.jsonl) 含 41 条有相关证据、9 条无相关证据的查询。以下为第一阶段结果。两种排序共用同一指导资料、FTS5 候选、上下文处理及返回预算。
 
 | 指标 | BM25 | 重排及过滤 |
 | --- | ---: | ---: |

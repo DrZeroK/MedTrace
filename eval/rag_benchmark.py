@@ -8,7 +8,7 @@ from pathlib import Path
 import sqlite3
 
 from medtrace.knowledge import adult_documented, alias_hit, digest_file, index_card, search_tokens, validate_entry
-from medtrace.retrieval import candidates, lexical_tokens, prepare_query, select_cards
+from medtrace.retrieval import candidates, expand_findings, lexical_tokens, prepare_query, select_cards
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_QUERIES = ROOT / "eval" / "retrieval_queries.v1.jsonl"
@@ -67,7 +67,7 @@ def benchmark(card_path=DEFAULT_CARDS, question_path=DEFAULT_QUERIES):
             db.execute("INSERT INTO entries VALUES (?,?)", (card["id"], json.dumps(card, ensure_ascii=False)))
             index_card(db, card)
 
-        runs = {"bm25": [], "reranked": []}
+        runs = {"bm25": [], "reranked_without_expansion": [], "reranked": []}
         for question in questions:
             identifier = question["id"]
             relevant = question["relevant"]
@@ -76,8 +76,11 @@ def benchmark(card_path=DEFAULT_CARDS, question_path=DEFAULT_QUERIES):
             seen_questions.add(identifier)
             clauses, original = prepare_query(question["query"])
             pool = candidates(db, lexical_tokens(clauses, search_tokens))
+            expanded = expand_findings(clauses)
+            expanded_pool = candidates(db, lexical_tokens(expanded, search_tokens)) if expanded != clauses else pool
             for mode, rows in runs.items():
-                selected = select_cards(pool, clauses, original, alias_hit=alias_hit,
+                query_clauses, query_pool = (expanded, expanded_pool) if mode == "reranked" else (clauses, pool)
+                selected = select_cards(query_pool, query_clauses, original, alias_hit=alias_hit,
                                         adult_documented=adult_documented, search_tokens=search_tokens,
                                         categories=question.get("categories"), baseline=mode == "bm25")
                 rows.append({"id": identifier, "group": question["group"], "relevant": relevant,
