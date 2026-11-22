@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
+from eval.practice_retrieval import _intake
 from eval.rag_benchmark import ROOT, benchmark
 from medtrace.knowledge import KnowledgeBase, KnowledgeError, build_database
 from medtrace.retrieval import expand_findings, prepare_query
@@ -35,6 +36,20 @@ class ClinicalRetrievalTests(unittest.TestCase):
             with self.subTest(text=text):
                 clauses, _ = prepare_query(text)
                 self.assertEqual(expand_findings(clauses), clauses)
+
+    def test_practice_intake_keeps_only_disclosed_evidence(self):
+        chart = "姓名：模拟姓名\n年龄：55岁\n主  诉：胸痛\n辅助检查\n心电图已查\n初步诊断：\n后续结论"
+        self.assertEqual(_intake(chart), ["年龄：55岁", "主  诉：胸痛", "辅助检查", "心电图已查"])
+        with self.assertRaises(ValueError):
+            _intake("主诉：胸痛")
+        with self.assertRaises(ValueError):
+            _intake("初步诊断：\n主诉：胸痛")
+
+    def test_measurement_unit_cannot_trigger_an_unrelated_card(self):
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "unit.sqlite"
+            build_database([entry(title="甲状旁腺检查", aliases=["mmol/L"], scope="general")], path, "fixture")
+            self.assertEqual(KnowledgeBase(path).retrieve("血糖 6 mmol/L"), [])
 
     def test_structured_query_and_negation_for_approved_cards(self):
         with TemporaryDirectory() as directory:

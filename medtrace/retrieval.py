@@ -9,9 +9,9 @@ from collections.abc import Mapping
 from . import context, textutil as T
 
 CATEGORIES = {"diagnosis", "differential", "tests", "treatment"}
-FIELDS = {"history": 1.0, "symptoms": 1.25, "labs": 1.2, "exams": 1.15, "other": 1.0}
+FIELDS = {"chief": 1.65, "pathology": 1.65, "history": 1.0, "symptoms": 1.25, "labs": 1.2, "exams": 1.15, "other": 1.0}
 CLAUSE = re.compile(r"[，,。；;！？!?\n]")
-GENERIC_ALIASES = {"诊断", "鉴别诊断", "治疗", "检查", "评估", "慢性", "急性", "轻度", "中度", "重度"}
+GENERIC_ALIASES = {"诊断", "鉴别诊断", "治疗", "检查", "评估", "慢性", "急性", "轻度", "中度", "重度", "病史", "一般情况", "知识要点"}
 GENERIC_PATTERN = re.compile(r"鉴别诊断|辅助检查|实验室检查|治疗原则|诊断标准|临床表现|评估")
 PEDIATRIC = re.compile(r"儿童|患儿|新生儿|婴幼儿|婴儿|(?<![\d.])(?:[1-9]|1[0-7])\s*岁")
 NONPREGNANT = re.compile(r"成年男性|成人男性|非妊娠|未妊娠|未怀孕|未孕")
@@ -39,11 +39,18 @@ def prepare_query(query):
 
 # These query-only synonyms describe findings. The fact ledger keeps the original wording.
 _FINDING_VARIANTS = (
-    (re.compile(r"长期干咳|慢性干咳|干咳(?:持续|了)?(?:数|几|[2-9]|[二三四五六七八九十](?:[一二三四五六七八九十])?)个?月"), "慢性咳嗽"),
+    (re.compile(r"咳嗽[、伴]咳痰(?:持续|了)?(?:[2-9]|[两二三四五六七八九十])个?月"
+                r"|长期干咳|慢性干咳"
+                r"|干咳(?:持续|了)?(?:数|几|[2-9]|[二三四五六七八九十](?:[一二三四五六七八九十])?)个?月"),
+     "慢性咳嗽"),
     (re.compile(r"气道可逆|气流受限(?:有|具有)?可逆性|用支气管扩张剂后气流明显改善"), "气流受限"),
     (re.compile(r"腹腔(?:的)?(?:少量|中量|大量)?(?:游离液(?:体)?|液性暗区|有积液)"), "腹腔积液"),
 )
 _SPEECH = re.compile(r"说不出话|说不出完整句子|话说不出来|讲不出话|不能言语|吐字不清|口齿不清")
+_LATERAL_NUMBNESS = re.compile(r"(?:左侧|右侧|单侧|一侧|偏侧|半身)(?:肢体|上肢|下肢|手臂)?(?:的)?麻木")
+_RELIEVED = re.compile(r"缓解|消退|恢复|每次持续(?:约)?(?:数十|几|[一二三四五]|[1-5])(?:秒|分钟)")
+_CHIEF = re.compile(r"^主\s*诉\s*[：:]")
+_PATHOLOGY_RESULT = re.compile(r"病理(?:检查)?(?:提示|报告|结果|示|[：:])|活检(?:提示|示|见)")
 _ACUTE = re.compile(r"突然|突发|骤然|一下子|一过性")
 _RECOVERED_SPEECH = re.compile(r"恢复(?:语言|言语|说话|如常|正常)|重新(?:能)?说话|又能(?:讲|说)话|完全缓解")
 _BREATH_LIMITED_SPEECH = re.compile(r"喘得|喘到|气喘|气短|喘不上气|呼吸困难|憋得")
@@ -53,11 +60,16 @@ def expand_findings(clauses):
     """Add lower-weight search terms to already scoped patient findings."""
     expansions = {}
     positive = " ".join(clause for clause, _ in clauses)
+    chief_numbness = max((weight for clause, weight in clauses
+                          if weight == FIELDS["chief"] and _LATERAL_NUMBNESS.search(clause)), default=0.0)
     for position, (clause, weight) in enumerate(clauses):
         for pattern, term in _FINDING_VARIANTS:
             if pattern.search(clause) and term not in positive:
                 expansions[term] = max(expansions.get(term, 0.0), 0.8 * weight)
         nearby = " ".join(part for part, _ in clauses[position:position + 3])
+        if _LATERAL_NUMBNESS.search(clause) and _ACUTE.search(clause) and _RELIEVED.search(nearby):
+            term = "一过性偏侧麻木"
+            expansions[term] = max(expansions.get(term, 0.0), 0.8 * max(weight, chief_numbness))
         if (_SPEECH.search(clause) and not _BREATH_LIMITED_SPEECH.search(clause)
                 and _ACUTE.search(clause) and _RECOVERED_SPEECH.search(nearby)):
             term = "短暂失语" if not re.search(r"吐字不清|口齿不清", clause) else "短暂言语不清"
@@ -68,8 +80,12 @@ def expand_findings(clauses):
 def case_query(ledger):
     query = {}
     for fact in ledger.facts:
-        field = {"complaint": "symptoms", "history": "history", "exam": "exams",
+        field = {"history": "history", "exam": "exams",
                  "imaging": "exams", "lab": "labs"}.get(fact.category, "other")
+        if fact.category == "complaint" or _CHIEF.match(fact.text):
+            field = "chief"
+        elif _PATHOLOGY_RESULT.search(fact.text):
+            field = "pathology"
         query.setdefault(field, []).append(fact.text)
     return query
 
@@ -132,7 +148,8 @@ def select_cards(rows, clauses, original, *, alias_hit, adult_documented, search
         if not baseline:
             aliases = sorted(set([item["title"], *item.get("aliases", [])]), key=lambda a: (-len(a), a))
             for alias in aliases:
-                if len(alias.strip()) < 2 or alias in GENERIC_ALIASES or any(alias in term for term in matched):
+                if (len(alias.strip()) < 2 or alias in GENERIC_ALIASES or T.is_measurement_only(alias)
+                        or any(alias in term for term in matched)):
                     continue
                 weight = max((weight for clause, weight in clauses if alias_hit(alias, clause)), default=0)
                 if weight:

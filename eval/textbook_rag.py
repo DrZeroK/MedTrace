@@ -31,6 +31,8 @@ class TextbookIndex:
         self.manifest = json.loads(manifest_path.read_text("utf-8")) if manifest_path.is_file() else {}
         with closing(self.connect()) as db:
             db.execute("SELECT count(*) FROM search").fetchone()
+            guide_rows = db.execute("SELECT body FROM entries WHERE book = '' ORDER BY id")
+            self.guidelines = [json.loads(body) for body, in guide_rows]
 
     def connect(self):
         return sqlite3.connect(self.path.as_uri() + "?mode=ro", uri=True)
@@ -44,8 +46,18 @@ class TextbookIndex:
     def retrieve(self, query, limit=5, max_chars=2500, max_card_chars=800, *, categories=None):
         clauses, original = prepare_query(query)
         clauses = expand_findings(clauses)
+        tokens = lexical_tokens(clauses, search_tokens)
         with closing(self.connect()) as db:
-            rows = candidates(db, lexical_tokens(clauses, search_tokens), maximum=max(160, limit * 12))
+            rows = candidates(db, tokens, maximum=max(160, limit * 12))
+            priority = [(clause, weight) for clause, weight in clauses if weight >= 1.3]
+            by_id = {entry["id"]: (entry, score) for entry, score in rows}
+            for entry, score in candidates(db, lexical_tokens(priority, search_tokens), maximum=60):
+                by_id.setdefault(entry["id"], (entry, score))
+            # A long note can exhaust the FTS token and candidate budgets before a specific
+            # guideline is considered. Exact anchors still have to pass shared reranking.
+            for entry in self.guidelines:
+                by_id.setdefault(entry["id"], (entry, 0.0))
+            rows = list(by_id.values())
         eligible = [(e, score) for e, score in rows
                     if e["type"] == "card" and len(e["text"]) <= max_card_chars
                     and not any(s in e["title"] for s in _SKIP_TITLE)]
