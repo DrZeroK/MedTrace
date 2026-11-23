@@ -225,3 +225,14 @@ clinician-scored batches before any later change is judged by it.
   that is fixed and has a test.
 - Not done: the comparison-phrase rule (高于/超过 + value). In P05 the invented `160/100` is already caught by
   the number check (medium in Discussion); it stays flagged, not removed.
+
+### 2026-11-23: F3 planned vs performed
+
+- The existing `unsupported_completed` check (a plan clause worded as done, with record support below 0.5) now
+  recognises more Chinese forms: 已/已经 + 行/予/给予/完成/完善/开始/输注/置入/使用/应用/静滴/静推/口服/注射/送检/留取,
+  and 已于.
+- `retense_completed` (A2/S2/A3) rewrites an unsupported "已(经)+verb" clause as "拟+verb" ("已行冠状动脉造影" →
+  "拟行冠状动脉造影") and adds one review item asking whether it was performed. Done-actions the records support are
+  untouched. "已于…" and English wording stay flagged and are not rewritten.
+- Real notes: the 18 qwen3:8b plans contain no done-wording at all; the only match was "拟予…". So F3 is a guard
+  against a failure the rubric names, not a fix for one observed on this model.

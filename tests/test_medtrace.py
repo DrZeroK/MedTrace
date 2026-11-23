@@ -307,6 +307,23 @@ class Verifier(unittest.TestCase):
         self.assertEqual(n.sections["diagnostic_discussion"][0].text, "糖尿病：血糖10.8mmol/L。")
         self.assertEqual(n.sections["diagnostic_discussion"][1].text, "空腹血糖10.8mmol/L提示控制不佳。")
 
+    def test_unsupported_completed_plan_is_retensed(self):
+        c = parse_case({"case_id": "D", "sources": [{"source_id": "S1", "content":
+            "胸痛2小时。急诊已予阿司匹林300mg嚼服。心电图示ST段抬高。"}]}, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("已行冠状动脉造影，评估罪犯血管。", ["S1"]),
+                                        Statement("已予阿司匹林300mg嚼服，继续双联抗血小板。", ["S1"]),
+                                        Statement("已经静滴硝酸甘油，监测血压。", ["S1"]),
+                                        Statement("Coronary angiography was performed.", ["S1"])]
+        self.assertEqual(V.retense_completed(n, L), 2)
+        self.assertEqual([s.text for s in n.sections["treatment_plan"][:3]],
+                         ["拟行冠状动脉造影，评估罪犯血管。", "已予阿司匹林300mg嚼服，继续双联抗血小板。", "拟静滴硝酸甘油，监测血压。"])
+        codes = lambda i: {f.code for f in V.check_statement("treatment_plan", i, n.sections["treatment_plan"][i], c, L)}
+        self.assertNotIn("unsupported_completed", codes(0) | codes(1) | codes(2))
+        self.assertIn("unsupported_completed", codes(3))            # English stays flagged, not rewritten
+        self.assertTrue(T.has_done_cue("已使用头孢曲松") and T.has_done_cue("已于5月3日行造影") and not T.has_done_cue("拟予抗感染治疗"))
+
     def test_repair_numbers_drops_whole_negated_statement(self):
         c = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "否认胸痛、咯血。呼吸28次/分。"}]}, 0)
         L = build_ledger(c)

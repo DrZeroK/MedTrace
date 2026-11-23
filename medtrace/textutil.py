@@ -390,9 +390,10 @@ def support(statement: str, source_tokens: set[str]) -> float:
 
 
 _NORMAL = re.compile(r"(?i)\b(?:normal|unremarkable|within normal limits|wnl)\b|正常|未见异常|无异常|无殊")
+ZH_DONE_VERBS = "行|予|给予|完成|完善|开始|输注|置入|使用|应用|静滴|静推|口服|注射|送检|留取"
 _DONE = re.compile(r"(?i)\b(?:was|were|has been|have been|had been)\s+(?:\w+ly\s+)?(?:performed|done|given|"
                    r"administered|started|initiated|completed|obtained|placed|transfused|inserted)\b"
-                   r"|已行|已予|已给予|已完成|已完善|已开始|已输注|已置入")
+                   r"|已(?:经)?(?:" + ZH_DONE_VERBS + r")|已于")
 _CERTAIN = re.compile(r"(?i)\b(?:confirmed|definite(?:ly)?|definitive|diagnostic of|certainly)\b|确诊|明确诊断|诊断(?:已)?明确|诊断成立|确定诊断|可确诊")
 _MISSING = re.compile(r"(?i)\b(?:pending|not (?:yet )?(?:available|done|performed|obtained|documented|resulted|known|recorded)|"
                       r"unknown|unavailable|awaiting|unable to (?:obtain|recall)|not on file|to be (?:obtained|confirmed))\b"

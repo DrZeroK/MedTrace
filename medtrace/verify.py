@@ -282,7 +282,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     if sec == "plan":
         # scored on the comma-clause carrying the "已…" cue: reasoning after it ("…，需重新评估…") is not the action
         for clause in re.split(r"[，,；;。！？\n]", text):
-            if T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5:
+            if _unsupported_done(clause, L):
                 add("unsupported_completed", HIGH, "plan describes an intervention as already done, without support in the records")
                 break
 
@@ -431,6 +431,28 @@ def strip_unsupported_qualifiers(note: Note, case: Case) -> list[str]:
                 st.text = st.text[:start] + st.text[end:]
                 removed.append(qual)
     return removed
+
+
+_ZH_DONE_PREFIX = re.compile(r"已(?:经)?(?=" + T.ZH_DONE_VERBS + ")")
+
+
+def _unsupported_done(clause: str, L: Ledger) -> bool:
+    return T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5
+
+
+def retense_completed(note: Note, L: Ledger) -> int:
+    """A plan item the records do not show as done but worded as done ("已行冠脉造影") becomes a plan ("拟行冠脉造影").
+    Only the Chinese "已/已经 + verb" form is rewritten; other forms ("已于…", English) stay flagged. Returns #rewritten."""
+    n = 0
+    for st in note.sections["treatment_plan"]:
+        parts = re.split(r"([，,；;。！？\n])", st.text)
+        for j in range(0, len(parts), 2):
+            if _unsupported_done(parts[j], L):
+                new = _ZH_DONE_PREFIX.sub("拟", parts[j])
+                n += new != parts[j]
+                parts[j] = new
+        st.text = "".join(parts)
+    return n
 
 
 _SPLIT_NUM = re.compile(r"(?<![\d.])(\d+)\s*([、，,])\s*(\d+)(?![\d.])")
