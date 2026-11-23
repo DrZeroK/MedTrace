@@ -54,8 +54,11 @@ _I18N = {
         "overconfident": "The note states the working diagnosis more definitively than the records support; review the working diagnosis.",
         "c_negation_flip": "'{term}' is stated with the opposite polarity to the source records; check the original record.",
         "c_number_not_in_source": "The value {term} in the case features does not appear in the source records; check it.",
+        "retensed": "The plan described an intervention the records do not document as already done; it is now worded as planned. Confirm whether it was performed.",
+        "number_removed": "{n} value(s) in the draft case features could not be matched to the source records and were removed; check the original records for them.",
         "c_unit_mismatch": "The unit of {term} differs from the source records; check it.",
         "c_value_label_mismatch": "A value in the case features is attached to a different test than in the source records; check it.",
+        "c_qualifier_not_in_source": "The qualifier '{term}' on a value in the case features is not in the source records; check it.",
         "c_post_cutoff": "The note uses information dated after the record cutoff; check it.",
         "c_trend_direction": "The direction of change stated for {term} contradicts the values; check it.",
         "c_unsupported_completed": "The plan describes an intervention as already done that the records do not document; confirm whether it was performed.",
@@ -79,8 +82,11 @@ _I18N = {
         "conflict_numeric": "“{term}”在{sources}中的数值不一致（{values}），且未注明不同测量时间，请核实。",
         "c_negation_flip": "“{term}”的有无表述与原始资料相反，请核对原始资料。",
         "c_number_not_in_source": "病例特点中的数值{term}未见于原始资料，请核对。",
+        "retensed": "诊疗计划中有资料未记录的处置被写为已完成，已改为拟行，请核实是否已执行。",
+        "number_removed": "草稿病例特点中有{n}处数值未能与原始资料对应，已删除，请查阅原始资料补充。",
         "c_unit_mismatch": "{term}的单位与原始资料不一致，请核对。",
         "c_value_label_mismatch": "病例特点中有数值与原始资料中的检查项目不对应，请核对。",
+        "c_qualifier_not_in_source": "病例特点中数值的限定词“{term}”未见于原始资料，请核对。",
         "c_post_cutoff": "记录引用了晚于资料截止时间的信息，请核对。",
         "c_trend_direction": "记录对{term}的变化方向（升高/下降）与数值不符，请核对。",
         "c_unsupported_completed": "诊疗计划将资料未记录的处置写为已完成，请核实是否已执行。",
@@ -93,7 +99,7 @@ _I18N = {
 # omitted_critical stays in the run log: on the practice run it fired mostly on "接种史不详" / "未查" lines.
 OFFICIAL_VERIFIER_CODES = {"overconfident"}
 CLINICIAN_HIGH_CODES = {"negation_flip", "trend_direction", "number_not_in_source", "unit_mismatch", "value_label_mismatch", "post_cutoff",
-                        "unsupported_completed", "false_missing"}
+                        "unsupported_completed", "false_missing", "qualifier_not_in_source"}
 MAX_REVIEW_ITEMS = 6
 # Lower ranks survive the cap: pipeline notices (fallback, cutoff), then record contradictions and high findings,
 # undocumented core items, the model's own items, and last numeric discrepancies and certainty wording.
@@ -116,6 +122,7 @@ _MSG_ZH = {
     "low_support": "该陈述在资料中支持不足", "unsupported_completed": "计划中将未记录的处置表述为已完成",
     "overconfident": "诊断表述过于肯定", "trend_direction": "变化方向描述与数值不符", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
     "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
+    "qualifier_not_in_source": "数值的限定词（如空腹、持续）未见于资料",
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
     "false_missing": "资料中已有记录，却被表述为未记录",
     "knowledge_record_value": "知识性陈述含病人记录中的特定数值",
@@ -371,6 +378,16 @@ class Pipeline:
             return note, initial, initial
         log["refs_dropped"] = V.safe_repair(note, case)
         log["copied_diagnosis_dropped"] = V.drop_copied_diagnosis(note, L)
+        log["numbers_rejoined"], removed = V.repair_numbers(note, case, L)
+        log["number_clauses_removed"] = removed
+        log["qualifiers_removed"] = V.strip_unsupported_qualifiers(note, case)
+        log["completed_retensed"] = V.retense_completed(note, L)
+        if log["completed_retensed"]:
+            note.review_items.append({"type": "verify", "description": tr["retensed"], "source_ids": [],
+                                      "origin": "verifier", "official_visible": True})
+        if removed:
+            note.review_items.append({"type": "verify", "description": tr["number_removed"].format(n=len(removed)),
+                                      "source_ids": [], "origin": "verifier", "official_visible": True})
         findings = V.verify_note(note, case, L)
         actionable = [f for f in findings if f.severity in (V.HIGH, V.MEDIUM) and f.section in SECTIONS and f.index >= 0]
         mode = ("review" if variant == "A3" else

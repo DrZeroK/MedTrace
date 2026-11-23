@@ -7,6 +7,7 @@ to the model as a targeted repair request or surfaced to the clinician as review
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, asdict
 
 from . import textutil as T
@@ -202,6 +203,12 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                     add("value_label_mismatch", HIGH,
                         f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
 
+    # ---- qualifier attached to a value that the records give without it ("GLU 10.8" written as "空腹血糖10.8")
+    if sec in ("features", "discussion") and st.basis != "knowledge":
+        for _, _, qual, raw in unsupported_qualifiers(text, case):
+            add("qualifier_not_in_source", HIGH if sec == "features" else MEDIUM,
+                f"'{qual}' is not recorded with the value {raw!r} in the records", qual)
+
     # ---- negation
     # A clause that reports something as not documented / pending is a statement ABOUT the record, not a
     # negative finding: it is exempt from the negation and grounding checks. The rest of the statement is still
@@ -275,7 +282,7 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
     if sec == "plan":
         # scored on the comma-clause carrying the "已…" cue: reasoning after it ("…，需重新评估…") is not the action
         for clause in re.split(r"[，,；;。！？\n]", text):
-            if T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5:
+            if _unsupported_done(clause, L):
                 add("unsupported_completed", HIGH, "plan describes an intervention as already done, without support in the records")
                 break
 
@@ -391,6 +398,112 @@ def safe_repair(note: Note, case: Case) -> int:
         removed += len(r.get("source_ids", [])) - len(keep)
         r["source_ids"] = keep
     return removed
+
+
+_QUALIFIER = re.compile(r"空腹|餐后|随机|持续|最高|最低|平均|峰值")
+
+
+def unsupported_qualifiers(text: str, case: Case) -> list[tuple[int, int, str, str]]:
+    """(start, end, qualifier, value) for each qualifier whose next value (same clause, within 10 characters) is
+    recorded, but never with that qualifier in the 15 characters before it in the same clause. Values absent from
+    the records are left to the number check."""
+    t, src = T.fw(text), T.fw("\n".join(s.content for s in case.sources))
+    out = []
+    for m in _QUALIFIER.finditer(t):
+        n = re.search(r"\d+(?:\.\d+)?", re.split(r"[，,。；;\n]", t[m.end():])[0])
+        if not n or n.start() >= 10:   # whole value, starting within 10 characters ("0.61", not a truncated "0")
+            continue
+        hits = list(re.finditer(rf"(?<![\d.]){re.escape(n.group(0))}(?!\.?\d)", src))
+        if hits and not any(m.group(0) in re.split(r"[。；;\n]", src[max(0, h.start() - 15):h.start()])[-1] for h in hits):
+            out.append((m.start(), m.end(), m.group(0), n.group(0)))
+    return out
+
+
+def strip_unsupported_qualifiers(note: Note, case: Case) -> list[str]:
+    """Delete a qualifier the records do not give with its value: "空腹血糖10.8" -> "血糖10.8". Removing it only
+    weakens the claim back to what the records say. Returns the removed qualifiers."""
+    removed = []
+    for sec in ("case_features", "diagnostic_discussion"):
+        for st in note.sections[sec]:
+            if st.basis == "knowledge":
+                continue
+            for start, end, qual, _ in reversed(unsupported_qualifiers(st.text, case)):
+                st.text = st.text[:start] + st.text[end:]
+                removed.append(qual)
+    return removed
+
+
+_ZH_DONE_PREFIX = re.compile(r"已(?:经)?(?=" + T.ZH_DONE_VERBS + ")")
+
+
+def _unsupported_done(clause: str, L: Ledger) -> bool:
+    return T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5
+
+
+def retense_completed(note: Note, L: Ledger) -> int:
+    """A plan item the records do not show as done but worded as done ("已行冠脉造影") becomes a plan ("拟行冠脉造影").
+    Only the Chinese "已/已经 + verb" form is rewritten; other forms ("已于…", English) stay flagged. Returns #rewritten."""
+    n = 0
+    for st in note.sections["treatment_plan"]:
+        parts = re.split(r"([，,；;。！？\n])", st.text)
+        for j in range(0, len(parts), 2):
+            if _unsupported_done(parts[j], L):
+                new = _ZH_DONE_PREFIX.sub("拟", parts[j])
+                n += new != parts[j]
+                parts[j] = new
+        st.text = "".join(parts)
+    return n
+
+
+_SPLIT_NUM = re.compile(r"(?<![\d.])(\d+)\s*([、，,])\s*(\d+)(?![\d.])")
+
+
+def repair_numbers(note: Note, case: Case, L: Ledger) -> tuple[int, list[str]]:
+    """Case features carry patient values, and one wrong value caps a case. Small models sometimes split a value with
+    punctuation ("SpO₂ 93%" -> "SpO₂ 9、3%"). (1) Rejoin a split value when the joined form, with the characters
+    around it, is in the records and the split form is not. (2) Remove any clause whose value is still not in the
+    records. Returns (#rejoined, removed clause texts)."""
+    src = re.sub(r"\s", "", "".join(s.content for s in case.sources))
+    year = case.cutoff.year if case.cutoff else None
+
+    def rejoin(m):
+        a, p, b = m.groups()
+        before = re.sub(r"\s", "", m.string[:m.start()])[-2:]
+        after = m.string[m.end():m.end() + 1]
+        ok = (float(a + b) in L.numbers and (before + a + b + after) in src and (a + p + b) not in src)
+        return a + b if ok else m.group(0)
+
+    joined, removed = 0, []
+    for st in note.sections["case_features"]:
+        new = _SPLIT_NUM.sub(rejoin, st.text)
+        joined += new != st.text
+        st.text = new
+    kept, original = [], copy.deepcopy(note.sections["case_features"])
+    for i, st in enumerate(note.sections["case_features"]):
+        bad = {f.term for f in check_statement("case_features", i, st, case, L) if f.code == "number_not_in_source"}
+        if not bad:
+            kept.append(st)
+            continue
+        if any(T.neg_spans(s) for s in T.split_sentences(st.text)):
+            removed.append(st.text)   # a fragment could lose the negation it was under ("否认胸痛X、咯血" -> "咯血")
+            continue
+        parts = re.split(r"([，,；;。、])", st.text)
+        keep = []
+        for j in range(0, len(parts), 2):
+            clause, delim = parts[j], parts[j + 1] if j + 1 < len(parts) else ""
+            if {raw for _, _, raw in T.extract_numbers(T.mask_dates(clause, year or 2000))} & bad:
+                removed.append(clause.strip())
+            else:
+                keep.append(clause + delim)
+        text = "".join(keep).strip().strip("，,；;")
+        if text:
+            st.text = text if text[-1] in "。.!?！？" else text + ("。" if re.search(r"[一-鿿]", text) else ".")
+            kept.append(st)
+    if not kept:   # an empty section scores 0, worse than a flagged value: keep the draft, findings stay visible
+        note.sections["case_features"] = original
+        return joined, []
+    note.sections["case_features"] = kept
+    return joined, removed
 
 
 def drop_copied_diagnosis(note: Note, L: Ledger) -> int:

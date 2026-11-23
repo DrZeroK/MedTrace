@@ -270,6 +270,70 @@ class Verifier(unittest.TestCase):
         self.assertEqual((n.sections["case_features"][0].text, n.sections["case_features"][0].sources), ("Temp 99 °C.", ["S2"]))
 
 
+    def test_repair_numbers_rejoins_split_values_and_removes_unmatched(self):
+        # seen with qwen3:8b: "SpO₂ 93%" -> "9、3%", "心率112次/分" -> "11，2次/分" or truncated to "11"
+        c = parse_case({"case_id": "N", "sources": [
+            {"source_id": "S1", "content": "心率112次/分，呼吸28次/分，SpO₂ 93%。腰椎L3、4椎间盘突出。"}]}, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["case_features"] = [Statement("静息SpO₂ 9、3%，心率11，2次/分。", ["S1"]),
+                                       Statement("心率11、呼吸28次/分。", ["S1"]),
+                                       Statement("腰椎L3、4椎间盘突出。", ["S1"])]
+        joined, removed = V.repair_numbers(n, c, L)
+        self.assertEqual(joined, 1)
+        self.assertEqual(removed, ["心率11"])
+        self.assertEqual([s.text for s in n.sections["case_features"]],
+                         ["静息SpO₂ 93%，心率112次/分。", "呼吸28次/分。", "腰椎L3、4椎间盘突出。"])
+        self.assertFalse([f for f in V.verify_note(n, c, L) if f.code == "number_not_in_source"])
+
+    def test_unsupported_qualifier_flagged_and_stripped(self):
+        # P05 with qwen3:8b: record "GLU 10.8mmol/L" (and "空腹血糖控制在7-8mmol/L") written as "空腹血糖10.8mmol/L"
+        c = parse_case({"case_id": "Q", "sources": [{"source_id": "S1", "content":
+            "糖尿病史5年，空腹血糖控制在7-8mmol/L。体温最高38.5℃。生化：GLU 10.8mmol/L，餐后血糖12.1mmol/L。"}]}, 0)
+        L = build_ledger(c)
+        fs = V.check_statement("case_features", 0, Statement("空腹血糖10.8mmol/L。", ["S1"]), c, L)
+        self.assertIn(("qualifier_not_in_source", V.HIGH), {(f.code, f.severity) for f in fs})
+        for ok in ("最高体温38.5℃。", "体温最高38.5℃。", "空腹血糖控制在7-8mmol/L。", "餐后血糖12.1mmol/L。", "持续发热，体温38.5℃。"):
+            self.assertNotIn("qualifier_not_in_source",
+                             {f.code for f in V.check_statement("case_features", 0, Statement(ok, ["S1"]), c, L)}, ok)
+        c2 = parse_case({"case_id": "R", "sources": [{"source_id": "S1", "content": "随机体位：肾素活性 0.61ng/（ml·h），醛固酮 37.60pg/ml，血钾 4.0mmol/L。"}]}, 0)
+        self.assertEqual(V.unsupported_qualifiers("随机体位：肾素活性 0.61ng/（ml·h）。", c2), [])   # whole "0.61", not "0"
+        n = Note()
+        n.sections["case_features"] = [Statement("空腹血糖10.8mmol/L，最高体温38.5℃。", ["S1"])]
+        n.sections["diagnostic_discussion"] = [Statement("糖尿病：空腹血糖10.8mmol/L。", ["S1"], basis="record"),
+                                               Statement("空腹血糖10.8mmol/L提示控制不佳。", [], basis="knowledge")]
+        self.assertEqual(V.strip_unsupported_qualifiers(n, c), ["空腹", "空腹"])
+        self.assertEqual(n.sections["case_features"][0].text, "血糖10.8mmol/L，最高体温38.5℃。")
+        self.assertEqual(n.sections["diagnostic_discussion"][0].text, "糖尿病：血糖10.8mmol/L。")
+        self.assertEqual(n.sections["diagnostic_discussion"][1].text, "空腹血糖10.8mmol/L提示控制不佳。")
+
+    def test_unsupported_completed_plan_is_retensed(self):
+        c = parse_case({"case_id": "D", "sources": [{"source_id": "S1", "content":
+            "胸痛2小时。急诊已予阿司匹林300mg嚼服。心电图示ST段抬高。"}]}, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("已行冠状动脉造影，评估罪犯血管。", ["S1"]),
+                                        Statement("已予阿司匹林300mg嚼服，继续双联抗血小板。", ["S1"]),
+                                        Statement("已经静滴硝酸甘油，监测血压。", ["S1"]),
+                                        Statement("Coronary angiography was performed.", ["S1"])]
+        self.assertEqual(V.retense_completed(n, L), 2)
+        self.assertEqual([s.text for s in n.sections["treatment_plan"][:3]],
+                         ["拟行冠状动脉造影，评估罪犯血管。", "已予阿司匹林300mg嚼服，继续双联抗血小板。", "拟静滴硝酸甘油，监测血压。"])
+        codes = lambda i: {f.code for f in V.check_statement("treatment_plan", i, n.sections["treatment_plan"][i], c, L)}
+        self.assertNotIn("unsupported_completed", codes(0) | codes(1) | codes(2))
+        self.assertIn("unsupported_completed", codes(3))            # English stays flagged, not rewritten
+        self.assertTrue(T.has_done_cue("已使用头孢曲松") and T.has_done_cue("已于5月3日行造影") and not T.has_done_cue("拟予抗感染治疗"))
+
+    def test_repair_numbers_drops_whole_negated_statement(self):
+        c = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "否认胸痛、咯血。呼吸28次/分。"}]}, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["case_features"] = [Statement("否认胸痛99天、咯血。", ["S1"]), Statement("呼吸28次/分。", ["S1"])]
+        _, removed = V.repair_numbers(n, c, L)
+        self.assertEqual(removed, ["否认胸痛99天、咯血。"])
+        self.assertEqual([s.text for s in n.sections["case_features"]], ["呼吸28次/分。"])
+
+
 class ChineseAndNewChecks(unittest.TestCase):
     ZH = {"case_id": "Z1", "sources": [
         {"source_id": "a", "content": "患者男，60岁。否认糖尿病史。无头晕、头痛。青霉素过敏。血常规：WBC 12.5×109／L，N 85％。血钾 3.1 mmol/L，血钠 138 mmol/L。病理结果未回。"},
@@ -461,10 +525,18 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(schema_errors(r.record), [])
 
     def test_single_call_budget_flags_instead_of_repairing(self):
-        p, m = pipe({"wrong_number": 1.0}, max_calls_per_case=1)
+        p, m = pipe({"unit_swap": 1.0}, max_calls_per_case=1)
         r = p.run_case(parse_case(CASE, 0))
         self.assertEqual((r.status, r.log["calls"]), ("ok", 1))
         self.assertTrue(any(m.fault_log[0]["needle"][:60] in i["description"] for i in r.record["review_items"]))
+
+    def test_wrong_number_clause_removed_without_a_call(self):
+        p, m = pipe({"wrong_number": 1.0}, max_calls_per_case=1)
+        r = p.run_case(parse_case(CASE, 0))
+        self.assertEqual((r.status, r.log["calls"]), ("ok", 1))
+        self.assertTrue(r.log["number_clauses_removed"])
+        self.assertNotIn(m.fault_log[0]["needle"], r.record["case_features"])
+        self.assertTrue(any("could not be matched" in i["description"] for i in r.record["review_items"]))
 
     def test_bad_json_retry_then_fallback(self):
         c = parse_case(CASE, 0)
@@ -698,13 +770,13 @@ class Http(unittest.TestCase):
         self.assertEqual(schema_errors(r.record), [])
 
     def test_reserve_skips_repair(self):
-        p, _ = pipe({"wrong_number": 1.0}, repair_call=True, time_reserve=1.0)
+        p, _ = pipe({"unit_swap": 1.0}, repair_call=True, time_reserve=1.0)
         r = p.run_case(parse_case(CASE, 0), deadline=time.monotonic() + 0.5)
         self.assertEqual(r.status, "ok")
         self.assertIn("repair", r.log.get("time_budget_skipped", []))
 
     def test_no_deadline_never_skips(self):
-        p, _ = pipe({"wrong_number": 1.0}, repair_call=True)
+        p, _ = pipe({"unit_swap": 1.0}, repair_call=True)
         r = p.run_case(parse_case(CASE, 0))
         self.assertNotIn("time_budget_skipped", r.log)
 
