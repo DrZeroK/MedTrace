@@ -2,6 +2,36 @@
 
 本分支把本地检索接入现有 MedTrace 生成流水线。检索器使用 Python 标准库和 SQLite FTS5。输入支持自由文本，或 `history`、`symptoms`、`labs`、`exams` 字段。比赛流水线使用已按截止点处理的事实账本，检索无额外模型调用。返回的知识卡 `id` 标识证据片段，`source_id`、`version` 和 `locator` 用于审计和回查。正式输出的 `medical_record.evidence[].source_ids` 仍按赛题协议引用本病例的资料 ID。
 
+## 指南与共识扩库
+
+截至 2026-11-23 核对并新增 30 份来源，含 25 份指南或诊疗方案、5 份专家共识。[纯文字条目](../knowledge/guidelines.v2.jsonl) 有 54 条可检索知识卡，分别为诊断 15 条、鉴别 5 条、检查 12 条、治疗 22 条。来源包括国家卫健委、中华医学会及相关专业组织。重点补充慢阻肺、儿童肺炎支原体肺炎、高血压、房颤、慢性肾脏病、肝硬化、风湿免疫病、睡眠障碍、重症肌无力及部分肿瘤筛查。诊疗指南、专项治疗共识、筛查方案按原文适用范围分别取材。罕见病、眼科、皮肤科、精神科及肿瘤分型治疗仍有明显覆盖缺口。
+
+正文为独立撰写的纯文本摘要，来源链接只存于 `source_url`。每条带 `id`、`source_id`、发布组织、版本、核验日期、原文章节、用途及适用人群。成人基层高血压卡限定非孕人群。新条目通过仓库原有 schema 校验，并额外检查纯正文、HTTPS 溯源和新条目的出版元数据。正式库需完成许可和临床签审。
+
+把下方五册构建命令的 `build` 步骤加上 `--supplement knowledge/guidelines.v2.jsonl` 并指定新的绝对输出路径，得到与本轮一致的混合草稿结构。五册教材、第一批来源和本次新卡合计 12,028 条。来源核验不要求评测时联网。
+
+```bash
+python -m eval.rag_benchmark --cards knowledge/guidelines.v2.jsonl \
+  --queries eval/retrieval_guidelines.v2.jsonl --output /tmp/medtrace-guideline-retrieval-v2.json
+```
+
+该合成定向集有 14 条带证据的查询和 4 条反例。仅用新版条目测试时，重排的 Recall@5 和证据相关准确率@5 均为 100%，无关信息比例为 0%，四条反例均为空返回。证据标签由项目编写，覆盖指定的检索和过滤场景。五册混合草稿在 8 份官方练习病历上覆盖 10 个主题中的 9 个，较上轮少 1 个。漏召的是短暂性局灶神经症状主题。
+
+## 全量目录审计与离线拟合
+
+```bash
+python -m eval.fit_clinical_retrieval \
+  --output /tmp/medtrace-anchor-idf.json --audit /tmp/medtrace-data-audit.json
+python -m eval.clinical_intake_retrieval --index /absolute/path/to/clinical-drafts-v6.sqlite \
+  --anchor-profile /tmp/medtrace-anchor-idf.json --output /tmp/medtrace-external-retrieval.json
+```
+
+`data/` 下 97 个 Git 跟踪文件按用途盘点。原始和复核合成集是一批病例的两个版本，按病例编号取复核后的 100 条唯一输入，使用截止点处理后的病例文字拟合医学检索词频率权重。词表来自指南证据卡。此实验只拟合离线检索排序的权重，生成模型继续使用赛方指定的调用方式。52 个文件在稀疏工作区未展开，审计按 Git 文件登记统计。教材作为索引语料，仓库中的数据说明、导出副本和评测报告不计作独立样本。
+
+CMB-Clin 34 例及 TypicalCase-DC 1,319 例全部通过标准化输入与参考标签的编号对账。CMB-Clin 的仓库 NOTICE 将其限定为基准评测用途；TypicalCase-DC 的期刊正文训练许可尚待明确。两套数据留作本地评估。CHIP-CDEE 和 MedCT 的标准化目录只有报告。外部集的截止字段不同于官方输入规范，因此结果仅用于开发。TypicalCase-DC 有 603 例具备诊断评测资格，其中 13 例能严格映射到本次结构化指南的诊断相关来源，前五命中 6 例，两组相同。该指标只统计已知目标来源，不能衡量整条证据的质量或判断未映射病例是否有教材证据。
+
+拟合权重在练习集也与原排序同为 9/10。本轮通过独立参数保留实验路径，默认排序沿用未拟合权重。病例、拟合文件和逐例练习报告均留在本地。
+
 ## 开关检索的同病例对照
 
 实验使用同一个 A2 生成流程、同一个模型、同一份截止时点的病例输入以及同样的采样设置和调用预算。两组交替先跑，程序逐例核对第一次生成请求的基础提示词哈希；开启组额外加入检索到的知识片段。对照只测量检索上下文的作用，因此实验关闭知识库规则触发的待核项。

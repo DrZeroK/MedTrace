@@ -7,9 +7,12 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
+from eval.fit_clinical_retrieval import read_guides
 from eval.practice_retrieval import _intake
 from eval.rag_benchmark import ROOT, benchmark
+from medtrace.inputs import parse_case
 from medtrace.knowledge import KnowledgeBase, KnowledgeError, adult_documented, alias_hit, build_database, search_tokens
+from medtrace.ranking_profile import fit_anchor_weights
 from medtrace.retrieval import expand_findings, prepare_query, select_cards
 from scripts.textbook_kb import organize_drafts
 from test_knowledge import entry
@@ -52,6 +55,28 @@ class ClinicalRetrievalTests(unittest.TestCase):
                 self.assertNotIn("pregnancy", hits({"chief": sex + "，皮肤巩膜黄染2周", "labs": "总胆汁酸 85 μmol/L"}))
         self.assertIn("pregnancy", hits({"chief": "女，30岁，孕32周，手足心痒1周，男性伴侣体健",
                                          "labs": "总胆汁酸 85 μmol/L"}))
+
+    def test_expanded_guidelines_validate_and_match_their_scopes(self):
+        cards = ROOT / "knowledge" / "guidelines.v2.jsonl"
+        entries = read_guides([cards])
+        self.assertEqual({row["source_kind"] for row in entries.values()}, {"guideline", "consensus"})
+        result = benchmark(cards, ROOT / "eval" / "retrieval_guidelines.v2.jsonl")
+        ranked = result["modes"]["reranked"]["at_k"][5]
+        self.assertEqual(ranked["recall"], 1)
+        self.assertEqual(ranked["negative_abstention"], 1)
+        self.assertEqual(ranked["irrelevant_ratio"], 0)
+
+    def test_offline_profile_uses_affirmed_case_text(self):
+        notes = [
+            "既往明确高血压。否认哮喘。其父亲患房颤。",
+            "高血压随访，合并糖尿病。",
+        ]
+        cases = [parse_case({"case_id": i, "record_cutoff": "T0",
+                             "sources": [{"source_id": "s1", "content": note}]}, i)
+                 for i, note in enumerate(notes)]
+        weights = fit_anchor_weights(cases, {"高血压", "哮喘", "房颤", "糖尿病"})
+        self.assertEqual(set(weights), {"高血压", "糖尿病"})
+        self.assertLess(weights["高血压"], weights["糖尿病"])
 
     def test_practice_intake_keeps_only_disclosed_evidence(self):
         chart = "姓名：模拟姓名\n年龄：55岁\n主  诉：胸痛\n辅助检查\n心电图已查\n初步诊断：\n后续结论"

@@ -14,6 +14,7 @@ CLAUSE = re.compile(r"[，,。；;！？!?\n]")
 GENERIC_ALIASES = {"诊断", "鉴别诊断", "治疗", "检查", "评估", "慢性", "急性", "轻度", "中度", "重度", "病史", "一般情况", "知识要点"}
 GENERIC_PATTERN = re.compile(r"鉴别诊断|辅助检查|实验室检查|治疗原则|诊断标准|临床表现|评估")
 PEDIATRIC = re.compile(r"儿童|患儿|新生儿|婴幼儿|婴儿|(?<![\d.])(?:[1-9]|1[0-7])\s*岁")
+PREGNANCY = re.compile(r"怀孕|妊娠(?:期|中|早期|晚期)|孕(?:妇|期|早期|晚期|\s*[0-9]+\s*周)")
 NONPREGNANT = re.compile(r"成年男性|成人男性|非妊娠|未妊娠|未怀孕|未孕")
 # The patient's own sex; a partner ("男方", "男性伴侣") does not count.
 MALE = re.compile(r"性别\s*[：:]\s*男|男(?:性|患|士|[，,、\s\d])(?!伴侣|配偶)")
@@ -122,8 +123,10 @@ def _scope_matches(item, original, positive, adult_documented):
     if item["scope"] == "adult" and not adult_documented(positive):
         return False
     population = item.get("population")
-    if population == "adult":
-        return not PEDIATRIC.search(positive)
+    if population in {"adult", "nonpregnant_adult"}:
+        if PEDIATRIC.search(positive):
+            return False
+        return population == "adult" or bool(NONPREGNANT.search(positive)) or not PREGNANCY.search(positive)
     if population == "pregnancy":
         return not (NONPREGNANT.search(original) or MALE.search(positive))
     if population == "pediatric":
@@ -132,8 +135,9 @@ def _scope_matches(item, original, positive, adult_documented):
 
 
 def select_cards(rows, clauses, original, *, alias_hit, adult_documented, search_tokens,
-                 categories=None, limit=5, max_chars=2500, baseline=False, textbook=False):
+                 categories=None, limit=5, max_chars=2500, baseline=False, textbook=False, anchor_weights=None):
     """Return complete passages; the original case and entry objects remain intact."""
+    anchor_weights = anchor_weights or {}
     wanted = None if categories is None else set(categories)
     if wanted is not None and not wanted <= CATEGORIES:
         raise ValueError("unknown evidence category")
@@ -156,7 +160,7 @@ def select_cards(rows, clauses, original, *, alias_hit, adult_documented, search
                 weight = max((weight for clause, weight in clauses if alias_hit(alias, clause)), default=0)
                 if weight:
                     matched.append(alias)
-                    score += weight * (1 + min(len(alias), 8) / 8)
+                    score += weight * anchor_weights.get(T.fw(alias).lower(), 1.0) * (1 + min(len(alias), 8) / 8)
             title = text_trigrams(item["title"])
             body = text_trigrams(item["text"])
             matches = [(weight, grams & title, grams & body) for grams, weight in fingerprints]
