@@ -259,7 +259,7 @@ _NEG_PRE = re.compile(
     #  - "无尿" alone is anuria (a positive finding) but "无尿频、尿急、尿痛" is a negated list
     r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触)|不伴|不会|没有"
     r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
-_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及)(?=[\s，,。；;]|$)"
+_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及|否认)(?=[\s，,。；;]|$)"
                        r"|未引出|(?:均|暂|尚)?无特殊|暂无|无殊|(?<=[\u4e00-\u9fff])史无(?=[。；;，,、]|$)"
                        r"|(?<=[一-鿿A-Za-z])(?:均|亦|也)?否认(?=[。；;，,]|$)")   # postfix absence predicates negate the preceding subject ("病理征未引出", "家族史均无特殊")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
