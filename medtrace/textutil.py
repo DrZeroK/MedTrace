@@ -20,6 +20,10 @@ def detect_lang(text: str) -> str:
 # Full-width forms common in Chinese records (％ ／ ． ０-９ Ａ-Ｚ) are mapped 1:1 to ASCII for *matching only*;
 # the mapping preserves length, so offsets into the original text stay valid and the text itself is never altered.
 _FW = {0xFF05: "%", 0xFF0F: "/", 0xFF0E: ".", 0xFF0B: "+", 0xFF0D: "-", 0xFF1C: "<", 0xFF1E: ">", 0x3000: " "}
+# Hyphen variants seen in records ("2026‑06‑02 10:35" uses U+2011): without them a timestamp is not a date, so a
+# valid record_cutoff is rejected and dated statements escape the cutoff check. The em dash (U+2014) is left alone:
+# it is prose punctuation, not a numeric separator.
+_FW.update({0x2010: "-", 0x2011: "-", 0x2012: "-", 0x2013: "-", 0x2212: "-", 0xFE63: "-"})
 _FW.update({0xFF10 + i: str(i) for i in range(10)})
 _FW.update({0xFF21 + i: chr(65 + i) for i in range(26)})
 _FW.update({0xFF41 + i: chr(97 + i) for i in range(26)})

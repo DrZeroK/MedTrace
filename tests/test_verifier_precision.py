@@ -326,3 +326,23 @@ class OmittedCritical(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class UnicodeHyphenDates(unittest.TestCase):
+    """Practice records write timestamps with U+2011 ("2026‑06‑02 10:35"); they must count as dates."""
+
+    def test_cutoff_with_non_breaking_hyphen_is_valid(self):
+        for cutoff in ("2026\u201106\u201102 10:35", "2026\u201306\u201302 10:35", "2026-06-02 10:35"):
+            c = parse_case({"case_id": "X", "record_cutoff": cutoff, "sources": [{"source_id": "S01", "content": "发热1天。"}]}, 0)
+            self.assertEqual((str(c.cutoff), c.protocol_errors), ("2026-06-02 10:35:00", []), cutoff)
+
+    def test_post_cutoff_statement_with_unicode_hyphen_is_withheld(self):
+        c = parse_case({"case_id": "X", "record_cutoff": "2026\u201106\u201102 10:35", "sources": [
+            {"source_id": "S01", "content": "2026\u201106\u201101 血常规正常。"},
+            {"source_id": "S02", "content": "2026\u201106\u201105 复查CT示病灶吸收。"}]}, 0)
+        self.assertIn("2026\u201106\u201101", c.text)                  # source text is not rewritten
+        self.assertNotIn("复查CT", c.text)
+        self.assertEqual([sid for sid, _ in c.redacted], ["S02"])
+
+    def test_em_dash_is_not_a_date_separator(self):
+        self.assertEqual(T.find_dates("2026\u201406\u201402"), [])
