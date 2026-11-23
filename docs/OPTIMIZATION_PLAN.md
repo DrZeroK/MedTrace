@@ -210,3 +210,18 @@ discrepancy that is in the record itself; "尿路感染待排" called a serious 
 therefore not meaningful in absolute terms. Next for E1: a stronger judge (designated model, or a larger local
 model with thinking on), clinician reference points for the 8 practice cases, and calibration against two
 clinician-scored batches before any later change is judged by it.
+
+### 2026-11-23: F2 qualifier binding
+
+- `qualifier_not_in_source` (high in Case Features, medium in Discussion; knowledge statements exempt): a
+  qualifier (空腹/餐后/随机/持续/最高/最低/平均/峰值) followed within 10 characters by a value that the records give,
+  but never with that qualifier in the 15 characters before it in the same clause. Values absent from the records
+  stay with the number check.
+- `strip_unsupported_qualifiers` (A2/S2/A3): deletes such a qualifier, which only weakens the claim back to what the
+  records say ("空腹血糖10.8" → "血糖10.8").
+- Real notes: on the 18 qwen3:8b notes it flags exactly one statement, the P05 `空腹血糖10.8` error, with no false
+  alarms. Verbatim guard: 33,537 record sentences (CMB-Clin, TypicalCase-DC, practice, synthetic 100) copied as
+  statements raise 0 findings. The first version raised 2 there, because it read a truncated "0" from "0.61";
+  that is fixed and has a test.
+- Not done: the comparison-phrase rule (高于/超过 + value). In P05 the invented `160/100` is already caught by
+  the number check (medium in Discussion); it stays flagged, not removed.

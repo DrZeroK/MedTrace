@@ -286,6 +286,27 @@ class Verifier(unittest.TestCase):
                          ["静息SpO₂ 93%，心率112次/分。", "呼吸28次/分。", "腰椎L3、4椎间盘突出。"])
         self.assertFalse([f for f in V.verify_note(n, c, L) if f.code == "number_not_in_source"])
 
+    def test_unsupported_qualifier_flagged_and_stripped(self):
+        # P05 with qwen3:8b: record "GLU 10.8mmol/L" (and "空腹血糖控制在7-8mmol/L") written as "空腹血糖10.8mmol/L"
+        c = parse_case({"case_id": "Q", "sources": [{"source_id": "S1", "content":
+            "糖尿病史5年，空腹血糖控制在7-8mmol/L。体温最高38.5℃。生化：GLU 10.8mmol/L，餐后血糖12.1mmol/L。"}]}, 0)
+        L = build_ledger(c)
+        fs = V.check_statement("case_features", 0, Statement("空腹血糖10.8mmol/L。", ["S1"]), c, L)
+        self.assertIn(("qualifier_not_in_source", V.HIGH), {(f.code, f.severity) for f in fs})
+        for ok in ("最高体温38.5℃。", "体温最高38.5℃。", "空腹血糖控制在7-8mmol/L。", "餐后血糖12.1mmol/L。", "持续发热，体温38.5℃。"):
+            self.assertNotIn("qualifier_not_in_source",
+                             {f.code for f in V.check_statement("case_features", 0, Statement(ok, ["S1"]), c, L)}, ok)
+        c2 = parse_case({"case_id": "R", "sources": [{"source_id": "S1", "content": "随机体位：肾素活性 0.61ng/（ml·h），醛固酮 37.60pg/ml，血钾 4.0mmol/L。"}]}, 0)
+        self.assertEqual(V.unsupported_qualifiers("随机体位：肾素活性 0.61ng/（ml·h）。", c2), [])   # whole "0.61", not "0"
+        n = Note()
+        n.sections["case_features"] = [Statement("空腹血糖10.8mmol/L，最高体温38.5℃。", ["S1"])]
+        n.sections["diagnostic_discussion"] = [Statement("糖尿病：空腹血糖10.8mmol/L。", ["S1"], basis="record"),
+                                               Statement("空腹血糖10.8mmol/L提示控制不佳。", [], basis="knowledge")]
+        self.assertEqual(V.strip_unsupported_qualifiers(n, c), ["空腹", "空腹"])
+        self.assertEqual(n.sections["case_features"][0].text, "血糖10.8mmol/L，最高体温38.5℃。")
+        self.assertEqual(n.sections["diagnostic_discussion"][0].text, "糖尿病：血糖10.8mmol/L。")
+        self.assertEqual(n.sections["diagnostic_discussion"][1].text, "空腹血糖10.8mmol/L提示控制不佳。")
+
     def test_repair_numbers_drops_whole_negated_statement(self):
         c = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "否认胸痛、咯血。呼吸28次/分。"}]}, 0)
         L = build_ledger(c)

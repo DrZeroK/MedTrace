@@ -57,6 +57,7 @@ _I18N = {
         "number_removed": "{n} value(s) in the draft case features could not be matched to the source records and were removed; check the original records for them.",
         "c_unit_mismatch": "The unit of {term} differs from the source records; check it.",
         "c_value_label_mismatch": "A value in the case features is attached to a different test than in the source records; check it.",
+        "c_qualifier_not_in_source": "The qualifier '{term}' on a value in the case features is not in the source records; check it.",
         "c_post_cutoff": "The note uses information dated after the record cutoff; check it.",
         "c_unsupported_completed": "The plan describes an intervention as already done that the records do not document; confirm whether it was performed.",
         "c_false_missing": "The note says allergy information is not documented, but the records contain it; check it.",
@@ -82,6 +83,7 @@ _I18N = {
         "number_removed": "草稿病例特点中有{n}处数值未能与原始资料对应，已删除，请查阅原始资料补充。",
         "c_unit_mismatch": "{term}的单位与原始资料不一致，请核对。",
         "c_value_label_mismatch": "病例特点中有数值与原始资料中的检查项目不对应，请核对。",
+        "c_qualifier_not_in_source": "病例特点中数值的限定词“{term}”未见于原始资料，请核对。",
         "c_post_cutoff": "记录引用了晚于资料截止时间的信息，请核对。",
         "c_unsupported_completed": "诊疗计划将资料未记录的处置写为已完成，请核实是否已执行。",
         "c_false_missing": "记录称过敏信息未记录，但原始资料中已有记载，请核对。",
@@ -93,7 +95,7 @@ _I18N = {
 # omitted_critical stays in the run log: on the practice run it fired mostly on "接种史不详" / "未查" lines.
 OFFICIAL_VERIFIER_CODES = {"overconfident"}
 CLINICIAN_HIGH_CODES = {"negation_flip", "number_not_in_source", "unit_mismatch", "value_label_mismatch", "post_cutoff",
-                        "unsupported_completed", "false_missing"}
+                        "unsupported_completed", "false_missing", "qualifier_not_in_source"}
 MAX_REVIEW_ITEMS = 6
 # Lower ranks survive the cap: pipeline notices (fallback, cutoff), then record contradictions and high findings,
 # undocumented core items, the model's own items, and last numeric discrepancies and certainty wording.
@@ -116,6 +118,7 @@ _MSG_ZH = {
     "low_support": "该陈述在资料中支持不足", "unsupported_completed": "计划中将未记录的处置表述为已完成",
     "overconfident": "诊断表述过于肯定", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
     "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
+    "qualifier_not_in_source": "数值的限定词（如空腹、持续）未见于资料",
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
     "false_missing": "资料中已有记录，却被表述为未记录",
     "knowledge_record_value": "知识性陈述含病人记录中的特定数值",
@@ -373,6 +376,7 @@ class Pipeline:
         log["copied_diagnosis_dropped"] = V.drop_copied_diagnosis(note, L)
         log["numbers_rejoined"], removed = V.repair_numbers(note, case, L)
         log["number_clauses_removed"] = removed
+        log["qualifiers_removed"] = V.strip_unsupported_qualifiers(note, case)
         if removed:
             note.review_items.append({"type": "verify", "description": tr["number_removed"].format(n=len(removed)),
                                       "source_ids": [], "origin": "verifier", "official_visible": True})

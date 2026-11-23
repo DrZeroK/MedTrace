@@ -177,6 +177,12 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                     add("value_label_mismatch", HIGH,
                         f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
 
+    # ---- qualifier attached to a value that the records give without it ("GLU 10.8" written as "空腹血糖10.8")
+    if sec in ("features", "discussion") and st.basis != "knowledge":
+        for _, _, qual, raw in unsupported_qualifiers(text, case):
+            add("qualifier_not_in_source", HIGH if sec == "features" else MEDIUM,
+                f"'{qual}' is not recorded with the value {raw!r} in the records", qual)
+
     # ---- negation
     # A clause that reports something as not documented / pending is a statement ABOUT the record, not a
     # negative finding: it is exempt from the negation and grounding checks. The rest of the statement is still
@@ -365,6 +371,39 @@ def safe_repair(note: Note, case: Case) -> int:
         keep = [s for s in r.get("source_ids", []) if s in valid]
         removed += len(r.get("source_ids", [])) - len(keep)
         r["source_ids"] = keep
+    return removed
+
+
+_QUALIFIER = re.compile(r"空腹|餐后|随机|持续|最高|最低|平均|峰值")
+
+
+def unsupported_qualifiers(text: str, case: Case) -> list[tuple[int, int, str, str]]:
+    """(start, end, qualifier, value) for each qualifier whose next value (same clause, within 10 characters) is
+    recorded, but never with that qualifier in the 15 characters before it in the same clause. Values absent from
+    the records are left to the number check."""
+    t, src = T.fw(text), T.fw("\n".join(s.content for s in case.sources))
+    out = []
+    for m in _QUALIFIER.finditer(t):
+        n = re.search(r"\d+(?:\.\d+)?", re.split(r"[，,。；;\n]", t[m.end():])[0])
+        if not n or n.start() >= 10:   # whole value, starting within 10 characters ("0.61", not a truncated "0")
+            continue
+        hits = list(re.finditer(rf"(?<![\d.]){re.escape(n.group(0))}(?!\.?\d)", src))
+        if hits and not any(m.group(0) in re.split(r"[。；;\n]", src[max(0, h.start() - 15):h.start()])[-1] for h in hits):
+            out.append((m.start(), m.end(), m.group(0), n.group(0)))
+    return out
+
+
+def strip_unsupported_qualifiers(note: Note, case: Case) -> list[str]:
+    """Delete a qualifier the records do not give with its value: "空腹血糖10.8" -> "血糖10.8". Removing it only
+    weakens the claim back to what the records say. Returns the removed qualifiers."""
+    removed = []
+    for sec in ("case_features", "diagnostic_discussion"):
+        for st in note.sections[sec]:
+            if st.basis == "knowledge":
+                continue
+            for start, end, qual, _ in reversed(unsupported_qualifiers(st.text, case)):
+                st.text = st.text[:start] + st.text[end:]
+                removed.append(qual)
     return removed
 
 
