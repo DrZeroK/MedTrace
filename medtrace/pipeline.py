@@ -54,6 +54,7 @@ _I18N = {
         "overconfident": "The note states the working diagnosis more definitively than the records support; review the working diagnosis.",
         "c_negation_flip": "'{term}' is stated with the opposite polarity to the source records; check the original record.",
         "c_number_not_in_source": "The value {term} in the case features does not appear in the source records; check it.",
+        "number_removed": "{n} value(s) in the draft case features could not be matched to the source records and were removed; check the original records for them.",
         "c_unit_mismatch": "The unit of {term} differs from the source records; check it.",
         "c_value_label_mismatch": "A value in the case features is attached to a different test than in the source records; check it.",
         "c_post_cutoff": "The note uses information dated after the record cutoff; check it.",
@@ -78,6 +79,7 @@ _I18N = {
         "conflict_numeric": "“{term}”在{sources}中的数值不一致（{values}），且未注明不同测量时间，请核实。",
         "c_negation_flip": "“{term}”的有无表述与原始资料相反，请核对原始资料。",
         "c_number_not_in_source": "病例特点中的数值{term}未见于原始资料，请核对。",
+        "number_removed": "草稿病例特点中有{n}处数值未能与原始资料对应，已删除，请查阅原始资料补充。",
         "c_unit_mismatch": "{term}的单位与原始资料不一致，请核对。",
         "c_value_label_mismatch": "病例特点中有数值与原始资料中的检查项目不对应，请核对。",
         "c_post_cutoff": "记录引用了晚于资料截止时间的信息，请核对。",
@@ -369,6 +371,11 @@ class Pipeline:
             return note, initial, initial
         log["refs_dropped"] = V.safe_repair(note, case)
         log["copied_diagnosis_dropped"] = V.drop_copied_diagnosis(note, L)
+        log["numbers_rejoined"], removed = V.repair_numbers(note, case, L)
+        log["number_clauses_removed"] = removed
+        if removed:
+            note.review_items.append({"type": "verify", "description": tr["number_removed"].format(n=len(removed)),
+                                      "source_ids": [], "origin": "verifier", "official_visible": True})
         findings = V.verify_note(note, case, L)
         actionable = [f for f in findings if f.severity in (V.HIGH, V.MEDIUM) and f.section in SECTIONS and f.index >= 0]
         mode = ("review" if variant == "A3" else

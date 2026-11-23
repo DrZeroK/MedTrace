@@ -7,6 +7,7 @@ to the model as a targeted repair request or surfaced to the clinician as review
 """
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, asdict
 
 from . import textutil as T
@@ -365,6 +366,54 @@ def safe_repair(note: Note, case: Case) -> int:
         removed += len(r.get("source_ids", [])) - len(keep)
         r["source_ids"] = keep
     return removed
+
+
+_SPLIT_NUM = re.compile(r"(?<![\d.])(\d+)\s*([、，,])\s*(\d+)(?![\d.])")
+
+
+def repair_numbers(note: Note, case: Case, L: Ledger) -> tuple[int, list[str]]:
+    """Case features carry patient values, and one wrong value caps a case. Small models sometimes split a value with
+    punctuation ("SpO₂ 93%" -> "SpO₂ 9、3%"). (1) Rejoin a split value when the joined form, with the characters
+    around it, is in the records and the split form is not. (2) Remove any clause whose value is still not in the
+    records. Returns (#rejoined, removed clause texts)."""
+    src = re.sub(r"\s", "", "".join(s.content for s in case.sources))
+    year = case.cutoff.year if case.cutoff else None
+
+    def rejoin(m):
+        a, p, b = m.groups()
+        before = re.sub(r"\s", "", m.string[:m.start()])[-2:]
+        after = m.string[m.end():m.end() + 1]
+        ok = (float(a + b) in L.numbers and (before + a + b + after) in src and (a + p + b) not in src)
+        return a + b if ok else m.group(0)
+
+    joined, removed = 0, []
+    for st in note.sections["case_features"]:
+        new = _SPLIT_NUM.sub(rejoin, st.text)
+        joined += new != st.text
+        st.text = new
+    kept, original = [], copy.deepcopy(note.sections["case_features"])
+    for i, st in enumerate(note.sections["case_features"]):
+        bad = {f.term for f in check_statement("case_features", i, st, case, L) if f.code == "number_not_in_source"}
+        if not bad:
+            kept.append(st)
+            continue
+        parts = re.split(r"([，,；;。、])", st.text)
+        keep = []
+        for j in range(0, len(parts), 2):
+            clause, delim = parts[j], parts[j + 1] if j + 1 < len(parts) else ""
+            if {raw for _, _, raw in T.extract_numbers(T.mask_dates(clause, year or 2000))} & bad:
+                removed.append(clause.strip())
+            else:
+                keep.append(clause + delim)
+        text = "".join(keep).strip().strip("，,；;")
+        if text:
+            st.text = text if text[-1] in "。.!?！？" else text + ("。" if re.search(r"[一-鿿]", text) else ".")
+            kept.append(st)
+    if not kept:   # an empty section scores 0, worse than a flagged value: keep the draft, findings stay visible
+        note.sections["case_features"] = original
+        return joined, []
+    note.sections["case_features"] = kept
+    return joined, removed
 
 
 def drop_copied_diagnosis(note: Note, L: Ledger) -> int:

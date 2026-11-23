@@ -270,6 +270,23 @@ class Verifier(unittest.TestCase):
         self.assertEqual((n.sections["case_features"][0].text, n.sections["case_features"][0].sources), ("Temp 99 °C.", ["S2"]))
 
 
+    def test_repair_numbers_rejoins_split_values_and_removes_unmatched(self):
+        # seen with qwen3:8b: "SpO₂ 93%" -> "9、3%", "心率112次/分" -> "11，2次/分" or truncated to "11"
+        c = parse_case({"case_id": "N", "sources": [
+            {"source_id": "S1", "content": "心率112次/分，呼吸28次/分，SpO₂ 93%。腰椎L3、4椎间盘突出。"}]}, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["case_features"] = [Statement("静息SpO₂ 9、3%，心率11，2次/分。", ["S1"]),
+                                       Statement("心率11、呼吸28次/分。", ["S1"]),
+                                       Statement("腰椎L3、4椎间盘突出。", ["S1"])]
+        joined, removed = V.repair_numbers(n, c, L)
+        self.assertEqual(joined, 1)
+        self.assertEqual(removed, ["心率11"])
+        self.assertEqual([s.text for s in n.sections["case_features"]],
+                         ["静息SpO₂ 93%，心率112次/分。", "呼吸28次/分。", "腰椎L3、4椎间盘突出。"])
+        self.assertFalse([f for f in V.verify_note(n, c, L) if f.code == "number_not_in_source"])
+
+
 class ChineseAndNewChecks(unittest.TestCase):
     ZH = {"case_id": "Z1", "sources": [
         {"source_id": "a", "content": "患者男，60岁。否认糖尿病史。无头晕、头痛。青霉素过敏。血常规：WBC 12.5×109／L，N 85％。血钾 3.1 mmol/L，血钠 138 mmol/L。病理结果未回。"},
@@ -461,10 +478,18 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(schema_errors(r.record), [])
 
     def test_single_call_budget_flags_instead_of_repairing(self):
-        p, m = pipe({"wrong_number": 1.0}, max_calls_per_case=1)
+        p, m = pipe({"unit_swap": 1.0}, max_calls_per_case=1)
         r = p.run_case(parse_case(CASE, 0))
         self.assertEqual((r.status, r.log["calls"]), ("ok", 1))
         self.assertTrue(any(m.fault_log[0]["needle"][:60] in i["description"] for i in r.record["review_items"]))
+
+    def test_wrong_number_clause_removed_without_a_call(self):
+        p, m = pipe({"wrong_number": 1.0}, max_calls_per_case=1)
+        r = p.run_case(parse_case(CASE, 0))
+        self.assertEqual((r.status, r.log["calls"]), ("ok", 1))
+        self.assertTrue(r.log["number_clauses_removed"])
+        self.assertNotIn(m.fault_log[0]["needle"], r.record["case_features"])
+        self.assertTrue(any("could not be matched" in i["description"] for i in r.record["review_items"]))
 
     def test_bad_json_retry_then_fallback(self):
         c = parse_case(CASE, 0)
@@ -698,13 +723,13 @@ class Http(unittest.TestCase):
         self.assertEqual(schema_errors(r.record), [])
 
     def test_reserve_skips_repair(self):
-        p, _ = pipe({"wrong_number": 1.0}, repair_call=True, time_reserve=1.0)
+        p, _ = pipe({"unit_swap": 1.0}, repair_call=True, time_reserve=1.0)
         r = p.run_case(parse_case(CASE, 0), deadline=time.monotonic() + 0.5)
         self.assertEqual(r.status, "ok")
         self.assertIn("repair", r.log.get("time_budget_skipped", []))
 
     def test_no_deadline_never_skips(self):
-        p, _ = pipe({"wrong_number": 1.0}, repair_call=True)
+        p, _ = pipe({"unit_swap": 1.0}, repair_call=True)
         r = p.run_case(parse_case(CASE, 0))
         self.assertNotIn("time_budget_skipped", r.log)
 
