@@ -3,7 +3,7 @@
 A0  direct structured prompt (baseline)                                  1 call
 A1  + fact ledger, evidence constraints, statement-level attribution     1 call
 A2  + deterministic verification, safe repair, targeted repair call      1-2 calls   (strategy S1, default)
-S2  model problem extraction (quotes verified) -> A2                     2-3 calls
+S2  reasoning call: problems, quotes (verified), differentials -> A2    2-3 calls
 A3  A2 with a semantic review call producing guarded, targeted patches   2 calls     (strategy S3)
 
 A case can never raise out of run_case: on any failure a conservative, extract-only
@@ -429,7 +429,8 @@ class Pipeline:
     def _extract(self, case, system, common, lang, stats, deadline, log) -> str:
         """S2: model-extracted problem list; every quote must be found verbatim in its cited source."""
         try:
-            obj = parse_json_object(self.client.chat(system, fill(load_prompt("extract", lang, self.cfg.prompt_version), **common), stats, deadline))
+            obj = parse_json_object(self.client.chat(system, fill(load_prompt("extract", lang, self.cfg.prompt_version), **common), stats, deadline,
+                                                     self.cfg.reason_thinking))
         except (LLMError, ParseError) as e:
             log["extract_error"] = f"{type(e).__name__}: {e}"
             return ""
@@ -447,12 +448,25 @@ class Pipeline:
                 else:
                     rejected += 1
             if ev:
-                lines.append(f'{i}. [{p.get("urgency", "routine")}] {p["problem"]}')
+                certainty = f' ({p["certainty"]})' if isinstance(p.get("certainty"), str) and p["certainty"].strip() else ""
+                lines.append(f'{i}. [{p.get("urgency", "routine")}] {p["problem"]}{certainty}')
                 lines += ev
+                for d in (p.get("differentials") or [])[:3]:
+                    if isinstance(d, dict) and str(d.get("name") or "").strip():
+                        lines.append("   * " + " | ".join(f"{k}: {str(d[k]).strip()[:120]}" for k in ("name", "for", "against", "test")
+                                                         if str(d.get(k) or "").strip()))
+                miss = [str(m).strip()[:80] for m in (p.get("missing") or [])[:3] if str(m).strip()]
+                if miss:
+                    lines.append("   ? " + "; ".join(miss))
         log["extract_quotes"] = {"kept": kept, "rejected": rejected}
         if not lines:
             return ""
-        head = "模型提取的问题清单（引文已逐字核对）" if lang == "zh" else "Model-extracted problem list (quotes verified verbatim against the records)"
+        # quotes are checked against the records; differentials (*) and missing items (?) are the model's reasoning,
+        # so the writing step must still ground every statement in the records
+        head = ("模型的问题清单与鉴别思路：引文已逐字核对；“*”鉴别方向与“?”缺失信息为推理，写入记录时仍须以资料为据"
+                if lang == "zh" else
+                "Model problem list and differential reasoning: quotes verified verbatim; '*' differentials and '?' missing "
+                "items are reasoning, so every statement written from them must still rest on the records")
         return "\n<problem_list>\n" + head + "\n" + "\n".join(lines) + "\n</problem_list>\n"
 
     def _finalise(self, note, case, L: Ledger, findings, tr, lang):
