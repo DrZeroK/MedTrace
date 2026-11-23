@@ -9,8 +9,8 @@ from unittest.mock import patch
 
 from eval.practice_retrieval import _intake
 from eval.rag_benchmark import ROOT, benchmark
-from medtrace.knowledge import KnowledgeBase, KnowledgeError, build_database
-from medtrace.retrieval import expand_findings, prepare_query
+from medtrace.knowledge import KnowledgeBase, KnowledgeError, adult_documented, alias_hit, build_database, search_tokens
+from medtrace.retrieval import expand_findings, prepare_query, select_cards
 from scripts.textbook_kb import organize_drafts
 from test_knowledge import entry
 
@@ -36,6 +36,22 @@ class ClinicalRetrievalTests(unittest.TestCase):
             with self.subTest(text=text):
                 clauses, _ = prepare_query(text)
                 self.assertEqual(expand_findings(clauses), clauses)
+
+    def test_pregnancy_cards_require_a_patient_who_can_be_pregnant(self):
+        lines = (ROOT / "knowledge/guidelines.v1.jsonl").read_text(encoding="utf-8").splitlines()
+        rows = [(json.loads(line), -1.0) for line in lines if line.strip()]
+
+        def hits(query):
+            clauses, original = prepare_query(query)
+            return [card["population"] for card in select_cards(
+                rows, expand_findings(clauses), original, alias_hit=alias_hit,
+                adult_documented=adult_documented, search_tokens=search_tokens)]
+
+        for sex in ("男，58岁", "58岁男性", "性别：男 年龄：58岁", "患者男 58岁"):
+            with self.subTest(sex=sex):
+                self.assertNotIn("pregnancy", hits({"chief": sex + "，皮肤巩膜黄染2周", "labs": "总胆汁酸 85 μmol/L"}))
+        self.assertIn("pregnancy", hits({"chief": "女，30岁，孕32周，手足心痒1周，男性伴侣体健",
+                                         "labs": "总胆汁酸 85 μmol/L"}))
 
     def test_practice_intake_keeps_only_disclosed_evidence(self):
         chart = "姓名：模拟姓名\n年龄：55岁\n主  诉：胸痛\n辅助检查\n心电图已查\n初步诊断：\n后续结论"

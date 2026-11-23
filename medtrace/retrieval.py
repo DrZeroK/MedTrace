@@ -15,6 +15,8 @@ GENERIC_ALIASES = {"诊断", "鉴别诊断", "治疗", "检查", "评估", "慢�
 GENERIC_PATTERN = re.compile(r"鉴别诊断|辅助检查|实验室检查|治疗原则|诊断标准|临床表现|评估")
 PEDIATRIC = re.compile(r"儿童|患儿|新生儿|婴幼儿|婴儿|(?<![\d.])(?:[1-9]|1[0-7])\s*岁")
 NONPREGNANT = re.compile(r"成年男性|成人男性|非妊娠|未妊娠|未怀孕|未孕")
+# The patient's own sex; a partner ("男方", "男性伴侣") does not count.
+MALE = re.compile(r"性别\s*[：:]\s*男|男(?:性|患|士|[，,、\s\d])(?!伴侣|配偶)")
 
 
 def prepare_query(query):
@@ -123,7 +125,7 @@ def _scope_matches(item, original, positive, adult_documented):
     if population == "adult":
         return not PEDIATRIC.search(positive)
     if population == "pregnancy":
-        return not NONPREGNANT.search(original)
+        return not (NONPREGNANT.search(original) or MALE.search(positive))
     if population == "pediatric":
         return not (adult_documented(positive) or re.search(r"成人|成年(?:男|女|人|患者)", positive))
     return True
