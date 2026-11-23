@@ -344,8 +344,41 @@ class Verifier(unittest.TestCase):
         none = parse_case({"case_id": "B", "sources": [{"source_id": "S1", "content": "否认药物、食物过敏史。母亲对阿莫西林过敏。"}]}, 0)
         self.assertEqual(V.recorded_allergies(none), {})
 
+    def test_aortic_syndrome_antithrombotics_removed(self):
+        # P05 with qwen3:8b: intramural haematoma, plan "继续阿司匹林300mg/日，氯吡格雷300mg/日"
+        c = parse_case({"case_id": "P", "sources": [{"source_id": "S1", "content":
+            "胸背痛6小时。外院予阿司匹林300mg、氯吡格雷300mg口服。大血管CTA：主动脉壁内血肿。"}]}, 0)
+        L = build_ledger(c)
+        plan = "抗血小板聚集：继续阿司匹林300mg/日，氯吡格雷300mg/日；持续监测生命体征。"
+        self.assertIn(("aortic_antithrombotic", V.HIGH),
+                      {(f.code, f.severity) for f in V.check_statement("treatment_plan", 0, Statement(plan, ["S1"]), c, L)})
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("控制血压，目标<120/80mmHg。", ["S1"]), Statement(plan, ["S1"]),
+                                        Statement("暂停阿司匹林及氯吡格雷，评估出血。", ["S1"])]
+        removed = V.remove_aortic_antithrombotics(n, c)
+        self.assertEqual((len(removed), {t for _, t in removed}), (2, {"壁内血肿"}))
+        self.assertEqual([s.text for s in n.sections["treatment_plan"]],
+                         ["控制血压，目标<120/80mmHg。", "持续监测生命体征。", "暂停阿司匹林及氯吡格雷，评估出血。"])
+        none = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "胸痛。CTA未见主动脉夹层。"}]}, 0)
+        self.assertEqual(V.recorded_aortic(none), [])
+
+    def test_unsupported_allergy_removed(self):
+        # SYN001 with qwen3:8b: "拟予头孢类抗生素（青霉素过敏，需替代方案）" though the record documents no allergy
+        c = parse_case({"case_id": "S", "sources": [{"source_id": "S1", "content": "发热咳嗽3天。否认药物过敏史。"}]}, 0)
+        L = build_ledger(c)
+        text = "拟予头孢类抗生素（青霉素过敏，需替代方案）；监测体温。"
+        self.assertIn("allergy_not_in_source", {f.code for f in V.check_statement("treatment_plan", 0, Statement(text, ["S1"]), c, L)})
+        n = Note()
+        n.sections["case_features"] = [Statement("发热咳嗽3天，青霉素过敏。", ["S1"])]
+        n.sections["treatment_plan"] = [Statement(text, ["S1"]), Statement("如青霉素过敏，改用左氧氟沙星。", ["S1"])]
+        self.assertEqual(V.strip_unsupported_allergies(n, c), ["青霉素", "青霉素"])
+        self.assertEqual(n.sections["case_features"][0].text, "发热咳嗽3天。")
+        self.assertEqual([s.text for s in n.sections["treatment_plan"]], ["拟予头孢类抗生素；监测体温。", "如青霉素过敏，改用左氧氟沙星。"])
+        real = parse_case({"case_id": "R", "sources": [{"source_id": "S1", "content": "青霉素过敏史。"}]}, 0)
+        self.assertEqual(V.strip_unsupported_allergies(n, real), [])     # recorded allergy: left alone
+
     def test_bleeding_risk_screen(self):
-        c = parse_case({"case_id": "H", "sources": [{"source_id": "S1", "content": "胸痛，CTA示主动脉壁内血肿。否认黑便。"}]}, 0)
+        c = parse_case({"case_id": "H", "sources": [{"source_id": "S1", "content": "腹痛，近3天黑便4次。否认呕血。"}]}, 0)
         L = build_ledger(c)
         plan = lambda cc, t: {(f.code, f.severity) for f in V.check_statement("treatment_plan", 0, Statement(t, ["S1"]), cc, build_ledger(cc))}
         self.assertIn(("bleeding_risk", V.MEDIUM), plan(c, "予低分子肝素抗凝。"))
