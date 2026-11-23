@@ -54,6 +54,9 @@ _I18N = {
         "overconfident": "The note states the working diagnosis more definitively than the records support; review the working diagnosis.",
         "c_negation_flip": "'{term}' is stated with the opposite polarity to the source records; check the original record.",
         "c_number_not_in_source": "The value {term} in the case features does not appear in the source records; check it.",
+        "allergy_removed": "A plan item giving {drug} was removed because the records document an allergy to {allergen}; choose an alternative.",
+        "c_allergy_conflict": "The plan gives {term} although the records document an allergy to this drug class; check it.",
+        "c_bleeding_risk": "The records document {term}, and the plan includes anticoagulant, antiplatelet or thrombolytic therapy; assess the bleeding risk before acting.",
         "retensed": "The plan described an intervention the records do not document as already done; it is now worded as planned. Confirm whether it was performed.",
         "number_removed": "{n} value(s) in the draft case features could not be matched to the source records and were removed; check the original records for them.",
         "c_unit_mismatch": "The unit of {term} differs from the source records; check it.",
@@ -82,6 +85,9 @@ _I18N = {
         "conflict_numeric": "“{term}”在{sources}中的数值不一致（{values}），且未注明不同测量时间，请核实。",
         "c_negation_flip": "“{term}”的有无表述与原始资料相反，请核对原始资料。",
         "c_number_not_in_source": "病例特点中的数值{term}未见于原始资料，请核对。",
+        "allergy_removed": "资料记录有{allergen}过敏，诊疗计划中含{drug}的条目已删除，请另选方案。",
+        "c_allergy_conflict": "诊疗计划中的{term}与资料记录的药物过敏史属同类药物，请核对。",
+        "c_bleeding_risk": "资料记录有{term}，诊疗计划包含抗凝、抗血小板或溶栓治疗，请评估出血风险后再执行。",
         "retensed": "诊疗计划中有资料未记录的处置被写为已完成，已改为拟行，请核实是否已执行。",
         "number_removed": "草稿病例特点中有{n}处数值未能与原始资料对应，已删除，请查阅原始资料补充。",
         "c_unit_mismatch": "{term}的单位与原始资料不一致，请核对。",
@@ -97,9 +103,9 @@ _I18N = {
 # value errors, plus overconfident wording. They use the clean `c_<code>` phrase above instead of quoting the draft;
 # every other finding stays in the run log (findings_final_detail).
 # omitted_critical stays in the run log: on the practice run it fired mostly on "接种史不详" / "未查" lines.
-OFFICIAL_VERIFIER_CODES = {"overconfident"}
+OFFICIAL_VERIFIER_CODES = {"overconfident", "bleeding_risk"}
 CLINICIAN_HIGH_CODES = {"negation_flip", "trend_direction", "number_not_in_source", "unit_mismatch", "value_label_mismatch", "post_cutoff",
-                        "unsupported_completed", "false_missing", "qualifier_not_in_source"}
+                        "unsupported_completed", "false_missing", "qualifier_not_in_source", "allergy_conflict"}
 MAX_REVIEW_ITEMS = 6
 # Lower ranks survive the cap: pipeline notices (fallback, cutoff), then record contradictions and high findings,
 # undocumented core items, the model's own items, and last numeric discrepancies and certainty wording.
@@ -123,6 +129,7 @@ _MSG_ZH = {
     "overconfident": "诊断表述过于肯定", "trend_direction": "变化方向描述与数值不符", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
     "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
     "qualifier_not_in_source": "数值的限定词（如空腹、持续）未见于资料",
+    "allergy_conflict": "计划药物与记录的过敏史冲突", "bleeding_risk": "资料记录出血风险而计划含抗栓治疗",
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
     "false_missing": "资料中已有记录，却被表述为未记录",
     "knowledge_record_value": "知识性陈述含病人记录中的特定数值",
@@ -381,6 +388,10 @@ class Pipeline:
         log["numbers_rejoined"], removed = V.repair_numbers(note, case, L)
         log["number_clauses_removed"] = removed
         log["qualifiers_removed"] = V.strip_unsupported_qualifiers(note, case)
+        log["allergy_conflicts_removed"] = V.remove_allergy_conflicts(note, case)
+        for drug, allergen in log["allergy_conflicts_removed"]:
+            note.review_items.append({"type": "verify", "description": tr["allergy_removed"].format(drug=drug, allergen=allergen),
+                                      "source_ids": [], "origin": "verifier", "official_visible": True})
         log["completed_retensed"] = V.retense_completed(note, L)
         if log["completed_retensed"]:
             note.review_items.append({"type": "verify", "description": tr["retensed"], "source_ids": [],

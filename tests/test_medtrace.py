@@ -324,6 +324,36 @@ class Verifier(unittest.TestCase):
         self.assertIn("unsupported_completed", codes(3))            # English stays flagged, not rewritten
         self.assertTrue(T.has_done_cue("已使用头孢曲松") and T.has_done_cue("已于5月3日行造影") and not T.has_done_cue("拟予抗感染治疗"))
 
+    def test_allergy_screen(self):
+        c = parse_case({"case_id": "A", "sources": [{"source_id": "S1", "content":
+            "既往史：髋关节置换手术史、青霉素过敏史。否认磺胺过敏。过敏原检测提示牛奶。发热3天。"}]}, 0)
+        L = build_ledger(c)
+        self.assertEqual(V.recorded_allergies(c), {"penicillin": "青霉素"})
+        plan = lambda t: {f.code for f in V.check_statement("treatment_plan", 0, Statement(t, ["S1"]), c, L)}
+        self.assertIn("allergy_conflict", plan("予阿莫西林克拉维酸钾抗感染。"))
+        for ok in ("青霉素过敏，改用左氧氟沙星抗感染。", "予复方新诺明口服。", "予头孢曲松抗感染。"):
+            self.assertNotIn("allergy_conflict", plan(ok), ok)    # caution worded / denied allergy / other class
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("完善血培养，予哌拉西林他唑巴坦抗感染。", ["S1"]), Statement("监测体温。", ["S1"])]
+        self.assertEqual(V.remove_allergy_conflicts(n, c), [("哌拉西林", "青霉素")])
+        self.assertEqual([s.text for s in n.sections["treatment_plan"]], ["完善血培养。", "监测体温。"])
+        only = Note()
+        only.sections["treatment_plan"] = [Statement("予阿莫西林口服。", ["S1"])]
+        self.assertEqual(V.remove_allergy_conflicts(only, c), [])                # never empties the plan
+        self.assertEqual(only.sections["treatment_plan"][0].text, "予阿莫西林口服。")
+        none = parse_case({"case_id": "B", "sources": [{"source_id": "S1", "content": "否认药物、食物过敏史。母亲对阿莫西林过敏。"}]}, 0)
+        self.assertEqual(V.recorded_allergies(none), {})
+
+    def test_bleeding_risk_screen(self):
+        c = parse_case({"case_id": "H", "sources": [{"source_id": "S1", "content": "胸痛，CTA示主动脉壁内血肿。否认黑便。"}]}, 0)
+        L = build_ledger(c)
+        plan = lambda cc, t: {(f.code, f.severity) for f in V.check_statement("treatment_plan", 0, Statement(t, ["S1"]), cc, build_ledger(cc))}
+        self.assertIn(("bleeding_risk", V.MEDIUM), plan(c, "予低分子肝素抗凝。"))
+        self.assertFalse({x for x in plan(c, "暂缓抗血小板治疗，控制血压。") if x[0] == "bleeding_risk"})
+        quiet = parse_case({"case_id": "Q", "sources": [{"source_id": "S1", "content": "胸痛。否认呕血、黑便及其他出血。"}]}, 0)
+        self.assertEqual(V.recorded_bleeding(quiet), [])
+        self.assertFalse({x for x in plan(quiet, "予阿司匹林抗血小板。") if x[0] == "bleeding_risk"})
+
     def test_repair_numbers_drops_whole_negated_statement(self):
         c = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "否认胸痛、咯血。呼吸28次/分。"}]}, 0)
         L = build_ledger(c)

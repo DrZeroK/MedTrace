@@ -285,6 +285,14 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             if _unsupported_done(clause, L):
                 add("unsupported_completed", HIGH, "plan describes an intervention as already done, without support in the records")
                 break
+        # ---- harm screen: a drug of a recorded allergy class; antithrombotic therapy despite recorded bleeding
+        for drug, allergen in allergy_conflicts(text, recorded_allergies(case)):
+            add("allergy_conflict", HIGH, f"plan gives {drug!r} although the records document an allergy to {allergen!r}", drug)
+        if _ANTITHROMBOTIC.search(text) and not _SAFETY_CAUTION.search(text):
+            bleeding = recorded_bleeding(case)
+            if bleeding:
+                add("bleeding_risk", MEDIUM, f"antithrombotic therapy planned although the records document {bleeding[0]!r}",
+                    bleeding[0])
 
     # ---- diagnostic certainty: only a definitive claim (not "不能确诊…", "需…确诊") about a diagnosis that the
     # records do not themselves list without qualification
@@ -430,6 +438,92 @@ def strip_unsupported_qualifiers(note: Note, case: Case) -> list[str]:
             for start, end, qual, _ in reversed(unsupported_qualifiers(st.text, case)):
                 st.text = st.text[:start] + st.text[end:]
                 removed.append(qual)
+    return removed
+
+
+# Drug classes for the allergy screen: (record terms that name the allergen, plan terms that would give it).
+# Class level on purpose: an allergy to one penicillin rules out the others. Only drugs; foods and pollens are ignored.
+_ALLERGY_CLASSES = {
+    "penicillin": ("青霉素|阿莫西林|氨苄西林|哌拉西林|苯唑西林|(?i:penicillin|amoxicillin|ampicillin|piperacillin)",) * 2,
+    "cephalosporin": ("头孢|(?i:cephalosporin|ceftriaxone|cefazolin|cefuroxime|ceftazidime|cefepime)",) * 2,
+    "quinolone": ("沙星|喹诺酮|(?i:quinolone|levofloxacin|moxifloxacin|ciprofloxacin)",) * 2,
+    "sulfonamide": ("磺胺|复方新诺明|(?i:sulfa|sulfamethoxazole|co-trimoxazole|TMP-SMX)",) * 2,
+    "aminoglycoside": ("庆大霉素|阿米卡星|链霉素|妥布霉素|(?i:gentamicin|amikacin|streptomycin|tobramycin)",) * 2,
+    "macrolide": ("红霉素|阿奇霉素|克拉霉素|(?i:erythromycin|azithromycin|clarithromycin)",) * 2,
+    "nsaid": ("阿司匹林|布洛芬|双氯芬酸|吲哚美辛|洛索洛芬|塞来昔布|非甾体|(?i:aspirin|ibuprofen|diclofenac|nsaid)",) * 2,
+    "contrast": ("造影剂|对比剂|(?i:contrast)", "造影剂|对比剂|增强CT|增强扫描|增强MRI|CTA|造影|(?i:contrast|angiogra)"),
+}
+_ALLERGY_CLASSES = {k: (re.compile(a), re.compile(b)) for k, (a, b) in _ALLERGY_CLASSES.items()}
+_ALLERGY_CUE = re.compile(r"(?i)过敏|allerg")
+_RELATIVE = re.compile(r"(?i)母亲|父亲|其母|其父|母系|父系|家属|家族|兄|姐|弟|妹|儿子|女儿|子女|配偶|\b(?:mother|father|sister|brother|family)\b")
+# wording that already handles the allergy or the bleeding risk ("避免使用青霉素类", "评估出血风险后")
+_SAFETY_CAUTION = re.compile(r"(?i)过敏|避免|禁用|慎用|替代|改用|皮试|脱敏|预处理|出血风险|评估出血|权衡|禁忌|暂缓|暂不|不予|"
+                             r"停用|停止|暂停|不宜|不建议|无需|allerg|avoid|alternative|bleeding risk|contraindicat|withhold|hold")
+_BLEEDING = ("出血", "呕血", "黑便", "便血", "咯血", "壁内血肿", "主动脉夹层", "血小板减少",
+             "bleeding", "haemorrhage", "hemorrhage", "melena", "hematemesis", "aortic dissection", "intramural hematoma")
+_ANTITHROMBOTIC = re.compile(r"(?i)肝素|华法林|利伐沙班|阿哌沙班|达比加群|艾多沙班|抗凝|溶栓|阿替普酶|尿激酶|替奈普酶|"
+                             r"阿司匹林|氯吡格雷|替格瑞洛|抗血小板|双联|heparin|enoxaparin|warfarin|rivaroxaban|apixaban|"
+                             r"dabigatran|anticoagul|thromboly|alteplase|aspirin|clopidogrel|ticagrelor|antiplatelet")
+
+
+def recorded_allergies(case: Case) -> dict:
+    """{class: allergen as written} for drug allergies the records state as present ("青霉素过敏史"; not "否认青霉素过敏")."""
+    out = {}
+    for s in case.sources:
+        for sent in T.split_sentences(s.content):
+            for clause in re.split(r"[，,；;。]", sent):
+                if not _ALLERGY_CUE.search(clause) or _RELATIVE.search(clause):   # "母亲对阿莫西林过敏" is not the patient's
+                    continue
+                for cls, (rec, _) in _ALLERGY_CLASSES.items():
+                    m = rec.search(clause)
+                    if m and T.term_positive_in(m.group(0), clause) and not re.search(r"否认|未发现|不详|未知|(?<![a-z])no\b", clause):
+                        out.setdefault(cls, m.group(0))
+    return out
+
+
+def allergy_conflicts(text: str, allergies: dict) -> list[tuple[str, str]]:
+    """(plan drug, recorded allergen) for each recorded allergy class the plan text would give, unless it says how
+    the allergy is handled."""
+    if not allergies or _SAFETY_CAUTION.search(text):
+        return []
+    return [(m.group(0), allergies[c]) for c, (_, plan) in _ALLERGY_CLASSES.items() if c in allergies
+            for m in [plan.search(text)] if m]
+
+
+def recorded_bleeding(case: Case) -> list[str]:
+    """Bleeding-risk terms the records state as present (not "否认呕血、黑便")."""
+    found = []
+    for s in case.sources:
+        for sent in T.split_sentences(s.content):
+            low = sent.lower()
+            found += [t for t in _BLEEDING if t in low and T.term_positive_in(t, low) and t not in found]
+    return found
+
+
+def remove_allergy_conflicts(note: Note, case: Case) -> list[tuple[str, str]]:
+    """Remove the plan clause that would give a drug of a recorded allergy class. Never empties the plan (the finding
+    then stays visible). Returns (drug, allergen) pairs removed."""
+    allergies = recorded_allergies(case)
+    if not allergies:
+        return []
+    removed, kept = [], []
+    for st in note.sections["treatment_plan"]:
+        parts = re.split(r"([，,；;。])", st.text)
+        keep = []
+        for j in range(0, len(parts), 2):
+            clause, delim = parts[j], parts[j + 1] if j + 1 < len(parts) else ""
+            hits = allergy_conflicts(clause, allergies) if not _SAFETY_CAUTION.search(st.text) else []
+            if hits:
+                removed += hits
+            else:
+                keep.append(clause + delim)
+        text = "".join(keep).strip().strip("，,；;")
+        if text:
+            st.text = text if text[-1] in "。.!?！？" else text + ("。" if re.search(r"[一-鿿]", text) else ".")
+            kept.append(st)
+    if not kept:       # every statement would go (none was edited): leave the plan, the finding stays visible
+        return []
+    note.sections["treatment_plan"] = kept
     return removed
 
 

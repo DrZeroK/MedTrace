@@ -236,3 +236,21 @@ clinician-scored batches before any later change is judged by it.
   untouched. "已于…" and English wording stay flagged and are not rewritten.
 - Real notes: the 18 qwen3:8b plans contain no done-wording at all; the only match was "拟予…". So F3 is a guard
   against a failure the rubric names, not a fix for one observed on this model.
+
+### 2026-11-23: F5 harm screen
+
+- **Allergy** (`allergy_conflict`, high): drug allergies the records state as present, grouped into 8 drug classes
+  (penicillins, cephalosporins, quinolones, sulfonamides, aminoglycosides, macrolides, aspirin/NSAIDs, contrast
+  media). A plan clause that would give a drug of a recorded class is removed in A2/S2/A3, with a review item
+  naming the drug and the allergy. A clause that already handles the allergy (过敏, 改用, 避免, 皮试…) is left
+  alone, and the plan is never emptied. Denied allergies and relatives' allergies don't count.
+- **Bleeding** (`bleeding_risk`, medium, shown to clinicians): the plan includes anticoagulant, antiplatelet or
+  thrombolytic therapy, and the records state bleeding, an aortic dissection or intramural haematoma, or low
+  platelets as present. Flag only, because some cases need anticoagulation despite bleeding. Wording such as
+  评估出血风险, 暂缓 or 权衡 suppresses it.
+- Allergy extraction survey on 2,100+ public cases (synthetic 100, CMB-Clin, TypicalCase-DC): 11 drug allergies
+  found, all correct on reading, after excluding a relative's allergy (the first version read "母亲对阿莫西林…过敏"
+  as the patient's).
+- Real notes: on the 18 qwen3:8b notes it raises nothing. Two cases record bleeding risk (P05 intramural haematoma,
+  SYN005 haemoptysis), and neither plan proposes antithrombotics. P07's dual antiplatelet therapy is not flagged,
+  because it records no bleeding. As with F3, this is a guard, not a fix for an observed error.
