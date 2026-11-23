@@ -20,5 +20,39 @@ class RubricRules(unittest.TestCase):
         self.assertEqual(score_case(REC, {"scores": {**FULL, "plan": 99}, "major_errors": []})["total"], 86.0)
 
 
+class CacheIdentity(unittest.TestCase):
+    def test_two_outputs_in_one_directory_are_judged_separately(self):
+        import json, os, tempfile
+        from pathlib import Path
+        from unittest import mock
+        import eval.rubric_judge as RJ
+
+        calls = []
+
+        class FakeClient:
+            def __init__(self, cfg):
+                pass
+
+            def chat(self, system, user, stats):
+                calls.append(user)
+                good = "GOOD" in user
+                return json.dumps({"scores": {d: 10 if good else 5 for d in RJ.DIMS}, "major_errors": []})
+
+        d = Path(tempfile.mkdtemp())
+        (d / "input.json").write_text(json.dumps([{"case_id": "A", "sources": [{"source_id": "S1", "content": "x"}]}]))
+        for name, text in (("a.json", "GOOD"), ("b.json", "weak")):
+            rec = {**REC, "medical_record": {**REC["medical_record"], "case_features": text}}
+            (d / name).write_text(json.dumps([rec]))
+        with mock.patch.object(RJ, "LLMClient", FakeClient), \
+             mock.patch.dict(os.environ, {"LLM_API_BASE": "mock://", "JUDGE_MODEL": "m"}):
+            args = ["--input", str(d / "input.json"), "--outputs", str(d / "a.json"), str(d / "b.json"), "--out", str(d / "j")]
+            RJ.main(args)
+            RJ.main(args)                       # second run reuses the cache, one entry per distinct note
+        self.assertEqual(len(calls), 2)
+        summary = (d / "j" / "rubric_summary.md").read_text("utf-8")
+        self.assertIn("| 100.0 |", summary)
+        self.assertIn("| 50.0 |", summary)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 import os
 import sys
@@ -110,23 +111,28 @@ def main(argv=None) -> int:
     cache_path = out / "rubric_judge.json"
     cache = json.loads(cache_path.read_text("utf-8")) if cache_path.exists() else {}
     rows, per_case = [], []
-    for path in a.outputs:
-        run = Path(path).parent.name or Path(path).stem
+    names = [Path(p).parent.name or Path(p).stem for p in a.outputs]
+    for path, name in zip(a.outputs, names):
+        run = name if names.count(name) == 1 else path   # two outputs in one directory stay distinct
         recs = {r["case_id"]: r for r in json.loads(Path(path).read_text("utf-8"))}
         scored = []
         for cid, case in cases.items():
-            rec, key = recs.get(cid), f"{run}|{cid}"
-            if rec and rec.get("status") == "success" and key not in cache:
+            rec, key = recs.get(cid), None
+            if rec and rec.get("status") == "success":
                 ref = refs.get(cid)
                 prompt = PROMPT.format(
                     cutoff=case.get("record_cutoff", "T0"),
                     sources="\n".join(f"[{s['source_id']}] {s['content']}" for s in case["sources"]),
                     note=note_text(rec),
                     refs=("\n<参考评分要点>\n" + "\n".join(f"- {x}" for x in ref) + "\n</参考评分要点>\n") if ref else "")
+                # cache identity = what was judged and how: note, sources, refs, judge model/endpoint/thinking
+                key = hashlib.sha256(json.dumps([SYSTEM, prompt, cfg.model, cfg.endpoint, cfg.enable_thinking],
+                                                ensure_ascii=False).encode("utf-8")).hexdigest()
+            if key and key not in cache:
                 try:
                     cache[key] = parse_json_object(client.chat(SYSTEM, prompt, CallStats()))
                 except (LLMError, ParseError) as e:
-                    print("judge failed:", key, f"{type(e).__name__}: {e}"[:200], file=sys.stderr)
+                    print("judge failed:", f"{run}|{cid}", f"{type(e).__name__}: {e}"[:200], file=sys.stderr)
                 cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=1), "utf-8")
             s = score_case(rec, cache.get(key))
             scored.append(s)

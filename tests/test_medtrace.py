@@ -286,6 +286,15 @@ class Verifier(unittest.TestCase):
                          ["静息SpO₂ 93%，心率112次/分。", "呼吸28次/分。", "腰椎L3、4椎间盘突出。"])
         self.assertFalse([f for f in V.verify_note(n, c, L) if f.code == "number_not_in_source"])
 
+    def test_repair_numbers_drops_whole_negated_statement(self):
+        c = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "否认胸痛、咯血。呼吸28次/分。"}]}, 0)
+        L = build_ledger(c)
+        n = Note()
+        n.sections["case_features"] = [Statement("否认胸痛99天、咯血。", ["S1"]), Statement("呼吸28次/分。", ["S1"])]
+        _, removed = V.repair_numbers(n, c, L)
+        self.assertEqual(removed, ["否认胸痛99天、咯血。"])
+        self.assertEqual([s.text for s in n.sections["case_features"]], ["呼吸28次/分。"])
+
 
 class ChineseAndNewChecks(unittest.TestCase):
     ZH = {"case_id": "Z1", "sources": [

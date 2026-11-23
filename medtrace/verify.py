@@ -397,6 +397,9 @@ def repair_numbers(note: Note, case: Case, L: Ledger) -> tuple[int, list[str]]:
         if not bad:
             kept.append(st)
             continue
+        if any(T.neg_spans(s) for s in T.split_sentences(st.text)):
+            removed.append(st.text)   # a fragment could lose the negation it was under ("否认胸痛X、咯血" -> "咯血")
+            continue
         parts = re.split(r"([，,；;。、])", st.text)
         keep = []
         for j in range(0, len(parts), 2):
