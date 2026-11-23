@@ -176,7 +176,8 @@ def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
 
 # A denied history is only contradicted by a statement that asserts the condition. Seen on 2,578 real case reports:
 # most "contradictions" were the term inside a test name ("肝炎标志物…未见异常", "肿瘤指标…无异常", "丙型肝炎病毒抗体 0.12").
-_TEST_SUFFIX = re.compile(r"^(?:病毒)?(?:标志物|抗体|抗原|指标|相关|检测|筛查|系列|全套|谱|dna|rna|病毒|史|家族史)", re.I)
+_TEST_SUFFIX = re.compile(r"^(?:病毒)?(?:标志物|抗体|抗原|指标|相关|检测|筛查|系列|全套|谱|dna|rna|病毒|史|家族史"
+                          r"|流行|疫区|接触)", re.I)    # "传染病流行地区情况", "疫区居住史", "接触史": exposure, not disease
 _NEG_RESULT = re.compile(r"(?i)未见(?:明显)?异常|无异常|阴性|无阳性|正常|排除|除外|待排|negative|normal|unremarkable|ruled out")
 
 
@@ -257,7 +258,9 @@ def _find_conflicts(L: Ledger) -> None:
                                                       for s in C.term_attributes(f.text, term)):
                 continue
             pre = bool(_PRE_PREG.search(f.text))
+            # a relative's condition ("家族史：母亲有2型糖尿病") does not contradict the patient's denial, in any mode
             pos = [g for g in L.facts if g.sid != f.sid and _asserts(term, g.text, pre)
+                   and _patient_mention(g.text, term)
                    and (L.context_mode == "legacy" or any(s["assertion"] == "affirmed" and s["experiencer"] == "patient"
                                                         for s in C.term_attributes(g.text, term)))]
             if pos:

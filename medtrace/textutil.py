@@ -182,6 +182,17 @@ def parse_cutoff(raw):
     return dt, ok
 
 
+# A date introduced by one of these words is a prediction or a plan, not an event after the cutoff
+# ("预产期2026-07-27", "拟于2026-06-10复查", "预约2026-06-05胃镜").
+_PROSPECTIVE = re.compile(r"(?:预产期|预计|预约|拟于|拟|计划|定于|约定|择期|下次|复诊时间|随访时间|due date|scheduled|planned|expected)"
+                          r"[\s:：为在于]{0,3}$", re.I)
+
+
+def prospective_date(text: str, start: int) -> bool:
+    """True if the date starting at text[start] is introduced as a prediction or plan."""
+    return bool(_PROSPECTIVE.search(text[max(0, start - 8):start]))
+
+
 def is_after(dt: datetime, has_time: bool, cutoff: datetime | None) -> bool:
     if cutoff is None:
         return False

@@ -133,8 +133,8 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         add("missing_ref", LOW, "case-feature statement has no source reference")
 
     # ---- chronology
-    for dt, has_time, _, _ in T.find_dates(text, year):
-        if sec != "plan" and T.is_after(dt, has_time, case.cutoff):
+    for dt, has_time, start, _ in T.find_dates(text, year):
+        if sec != "plan" and T.is_after(dt, has_time, case.cutoff) and not T.prospective_date(text, start):
             add("post_cutoff", HIGH, f"refers to {dt:%Y-%m-%d %H:%M}, later than the record cutoff")
         elif sec == "features" and dt.date() not in L.dates:
             add("date_not_in_source", MEDIUM, f"date {dt:%Y-%m-%d} does not appear in the records")

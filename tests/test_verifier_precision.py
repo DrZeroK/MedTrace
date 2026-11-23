@@ -151,6 +151,17 @@ class LedgerConflicts(unittest.TestCase):
         self.assertIn(("polarity", "糖尿病"), self.kinds(case("否认糖尿病史。", "糖尿病5年，口服二甲双胍。")))
         self.assertIn(("polarity", "手术"), self.kinds(case("否认手术史。", "2019年行阑尾切除手术。")))
 
+    def test_family_history_does_not_contradict_denied_history(self):
+        for mode in ("legacy", "zh_context_v1"):
+            c = case("慢性疾病史：否认高血压、糖尿病、心脏病史。", "家族史：母亲有“2型糖尿病”病史；父亲体健。")
+            self.assertNotIn(("polarity", "糖尿病"), {(x["kind"], x["term"]) for x in build_ledger(c, context_mode=mode).conflicts}, mode)
+            c = case("否认糖尿病史。", "糖尿病5年，口服二甲双胍。")
+            self.assertIn(("polarity", "糖尿病"), {(x["kind"], x["term"]) for x in build_ledger(c, context_mode=mode).conflicts}, mode)
+
+    def test_epidemic_area_question_is_not_a_disease_assertion(self):
+        c = case("曾患疾病和传染病史：否认心脑血管疾病史及传染病史。", "个人史：地方病或传染病流行地区情况：未到过。")
+        self.assertNotIn(("polarity", "传染病"), self.kinds(c))
+
     def test_relative_finding_is_not_an_internal_contradiction(self):
         # PR #10 review (P2): a relative's positive finding does not contradict the patient's negative one
         for mode in ("legacy", "zh_context_v1"):
@@ -343,6 +354,24 @@ class UnicodeHyphenDates(unittest.TestCase):
         self.assertIn("2026\u201106\u201101", c.text)                  # source text is not rewritten
         self.assertNotIn("复查CT", c.text)
         self.assertEqual([sid for sid, _ in c.redacted], ["S02"])
+
+    def test_forward_looking_dates_are_not_post_cutoff_events(self):
+        src = [{"source_id": "S01", "content": "末次月经2025\u201110\u201120，预产期2026\u201107\u201127。"},
+               {"source_id": "S02", "content": "拟于2026-06-10复查胃镜；预约2026-06-05心脏超声。"},
+               {"source_id": "S03", "content": "2026-06-05复查CT示病灶吸收。"}]
+        c = parse_case({"case_id": "X", "record_cutoff": "2026\u201106\u201102 10:35", "sources": src}, 0)
+        self.assertIn("预产期", c.text)
+        self.assertIn("拟于2026-06-10复查胃镜", c.text)
+        self.assertNotIn("病灶吸收", c.text)                              # a dated result after the cutoff is still withheld
+        self.assertEqual([sid for sid, _ in c.redacted], ["S03"])
+
+    def test_quoted_due_date_is_not_flagged_post_cutoff(self):
+        c = parse_case({"case_id": "X", "record_cutoff": "2026-06-02 10:35", "sources": [
+            {"source_id": "S01", "content": "末次月经2025-10-20，预产期2026-07-27。2026-06-05复查CT示病灶吸收。"}]}, 0)
+        L = build_ledger(c)
+        got = lambda text: {f.code for f in V.check_statement("case_features", 0, Statement(text, ["S01"]), c, L)}
+        self.assertNotIn("post_cutoff", got("末次月经2025-10-20，预产期2026-07-27。"))
+        self.assertIn("post_cutoff", got("2026-06-05复查CT示病灶吸收。"))
 
     def test_em_dash_is_not_a_date_separator(self):
         self.assertEqual(T.find_dates("2026\u201406\u201402"), [])

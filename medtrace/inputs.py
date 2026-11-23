@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
-from .textutil import detect_lang, find_dates, is_after, parse_instant, split_sentences
+from .textutil import detect_lang, find_dates, is_after, parse_instant, prospective_date, split_sentences
 
 _TIME_KEYS = ("time", "timestamp", "datetime", "recorded_at", "record_time", "date", "created_at")
 _LIST_KEYS = ("cases", "data", "records", "items", "inputs")
@@ -180,16 +180,23 @@ def _protocol_errors(raw: dict) -> list[str]:
     return errors
 
 
+def _late_event(sent: str, year, cutoff) -> bool:
+    for dt, has_time, start, _ in find_dates(sent, year):
+        if is_after(dt, has_time, cutoff) and not prospective_date(sent, start):
+            return True
+    return False
+
+
 def _apply_sentence_cutoff(c: Case, redact: bool) -> None:
-    """Statements carrying an explicit date later than the cutoff must not reach the model."""
+    """Statements carrying an explicit date later than the cutoff must not reach the model.
+    Forward-looking dates (due date, appointment, planned procedure) are not later events."""
     year = c.cutoff.year
     for s in c.sources:
         kept = []
         for line in s.content.split("\n"):
             parts = []
             for sent in split_sentences(line):
-                late = any(is_after(dt, ht, c.cutoff) for dt, ht, _, _ in find_dates(sent, year))
-                if late:
+                if _late_event(sent, year, c.cutoff):
                     c.redacted.append((s.sid, sent))
                     if redact:
                         continue
