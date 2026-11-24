@@ -1282,6 +1282,24 @@ class OfficialProtocol(EndToEnd):
                           "肺炎（严重程度待评估）：依据发热。", "病情进展时转入重症监护室。",
                           "肺炎（可能性大）：伴意识障碍，需按标准评估是否为重症。"])
 
+    def test_severity_guard_keeps_disease_names_negations_and_split_criteria(self):
+        # PR #15 review: 重症肌无力 is a disease name; negated severity is a finding, not a claim; criteria in a
+        # continuation chunk (split_long_statements) still support the first chunk.
+        kept = ["重症肌无力（已确诊）：既往病历已明确诊断，现有眼睑下垂。", "肺炎（可能性大）：目前无重症表现。",
+                "肺炎（可能性大）：目前不符合重症肺炎，未达重症标准。"]
+        n = Note()
+        n.sections["diagnostic_discussion"] = [Statement(t, ["S1"], "assessment") for t in kept] + [
+            Statement("重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。", ["S1"], "assessment"),
+            Statement("符合重症肺炎次要标准3项。", ["S1"], "assessment", cont=True)]
+        self.assertEqual(V.downgrade_unsupported_severity(n), 0)
+        self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]][:3], kept)
+        self.assertEqual(n.sections["diagnostic_discussion"][3].text, "重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。")
+        n.sections["diagnostic_discussion"] = [Statement("重症肺炎（可能性大）：依据发热。", ["S1"], "assessment"),
+                                               Statement("伴意识障碍，符合重症表现。", ["S1"], "assessment", cont=True)]
+        self.assertEqual(V.downgrade_unsupported_severity(n), 1)
+        self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]],
+                         ["肺炎（可能性大，严重程度待评估）：依据发热。", "伴意识障碍，需按标准评估是否为重症。"])
+
     def test_official_sections_are_grouped_numbered_lines(self):
         # v3 first-progress-note layout: kind order, one numbered item per line, group headings in discussion/plan,
         # record ids after each working diagnosis; a split continuation stays on its line.

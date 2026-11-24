@@ -455,29 +455,50 @@ def retense_completed(note: Note, L: Ledger) -> int:
     return n
 
 
-_SEVERE = re.compile(r"(?:重症|危重)(?!监护|医学|病房)")   # 转入重症监护室 is a plan, not a severity claim
+# Not severity modifiers: ward names (转入重症监护室) and disease names that contain the word (重症肌无力).
+_NOT_MODIFIER = r"(?!肌无力|监护|医学|病房)"
+_SEVERE = re.compile(r"(?:重症|危重)" + _NOT_MODIFIER)
 _SEVERITY_CRITERIA = re.compile(r"(?i)CURB|PSI|q?SOFA|APACHE|主要标准|次要标准|诊断标准|分级标准|\d+\s*项")
-_SEVERE_CLAIM = re.compile(r"(?:符合|提示|考虑|属于|达到|为)?(?:重症|危重)(?!监护|医学|病房)(?:肺炎)?(?:的)?(?:临床特征|临床表现|特征|表现|标准)?")
+_SEVERE_CLAIM = re.compile(r"(?:符合|提示|考虑|属于|达到|为)?(?:重症|危重)" + _NOT_MODIFIER
+                           + r"(?:肺炎)?(?:的)?(?:临床特征|临床表现|特征|表现|标准)?")
+_NEGATED = re.compile(r"(?:无|未|不|非|否认|没有|排除)[^，,。；;：:]{0,4}$")   # cue earlier in the same clause
+
+
+def _asserted(m: re.Match) -> bool:
+    """The severity mention is claimed, not negated ("无重症表现", "不符合重症肺炎", "未达重症标准")."""
+    return not _NEGATED.search(re.split(r"[，,。；;：:]", m.string[:m.start()])[-1])
 
 
 def downgrade_unsupported_severity(note: Note) -> int:
     """A discussion statement that calls the case severe ("重症肺炎") without naming the criteria it was checked
     against is rewritten to "严重程度待评估": the label changes treatment intensity, and on the practice case the model
-    applied it with only 2 of the 3 minor criteria met. Statements already hedged ("待评估") or citing criteria are
-    left alone. Returns #statements rewritten."""
-    n = 0
-    for st in note.sections["diagnostic_discussion"]:
-        if not _SEVERE.search(st.text) or "待评估" in st.text or _SEVERITY_CRITERIA.search(st.text):
+    applied it with only 2 of the 3 minor criteria met. Statements already hedged ("待评估"), citing criteria, or only
+    negating severity are left alone. A statement split by split_long_statements is judged with its continuation
+    chunks, so criteria in a later sentence still count. Returns #statements rewritten."""
+    stmts = note.sections["diagnostic_discussion"]
+    sub = lambda rx, repl, text: rx.sub(lambda m: repl if _asserted(m) else m.group(0), text)
+    n, i = 0, 0
+    while i < len(stmts):
+        j = i + 1
+        while j < len(stmts) and stmts[j].cont:
+            j += 1
+        group, i = stmts[i:j], j
+        whole = "".join(st.text for st in group)
+        if (not any(_asserted(m) for m in _SEVERE.finditer(whole)) or "待评估" in whole
+                or _SEVERITY_CRITERIA.search(whole)):
             continue
-        head, sep, body = re.split(r"([：:])", st.text, 1) if re.search(r"[：:]", st.text) else (st.text, "", "")
-        if sep and _SEVERE.search(head):
-            head = _SEVERE.sub("", head)
-            head = (re.sub(r"（([^）]*)）", r"（\1，严重程度待评估）", head, 1) if "（" in head
-                    else head + "（严重程度待评估）")
+        first = group[0]
+        head, sep, body = re.split(r"([：:])", first.text, 1) if re.search(r"[：:]", first.text) else (first.text, "", "")
         if sep:
-            st.text = head + sep + _SEVERE_CLAIM.sub("需按标准评估是否为重症", body)
-        else:
-            st.text = re.sub(r"[。.]$", "", _SEVERE.sub("", head)) + "（严重程度待评估）。"
+            if any(_asserted(m) for m in _SEVERE.finditer(head)):
+                head = sub(_SEVERE, "", head)
+                head = (re.sub(r"（([^）]*)）", r"（\1，严重程度待评估）", head, 1) if "（" in head
+                        else head + "（严重程度待评估）")
+            first.text = head + sep + sub(_SEVERE_CLAIM, "需按标准评估是否为重症", body)
+        elif any(_asserted(m) for m in _SEVERE.finditer(head)):
+            first.text = re.sub(r"[。.]$", "", sub(_SEVERE, "", head)) + "（严重程度待评估）。"
+        for st in group[1:]:
+            st.text = sub(_SEVERE_CLAIM, "需按标准评估是否为重症", st.text)
         n += 1
     return n
 
