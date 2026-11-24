@@ -539,6 +539,9 @@ def clinical_categories(card):
     return tags
 
 
+MIN_PASSAGE_CHARS = 15
+
+
 def chunk_pages(card, start, end):
     spans = [segment for segment in card.get("source_segments", [])
              if segment["start"] < end and start < segment["end"]]
@@ -554,7 +557,7 @@ def organize_drafts(entries_path, output):
     """Derive a local-only, page-traceable index input from existing textbook cards."""
     if output.exists():
         raise ValueError("use a new output path")
-    rows, parent_ids = [], set()
+    rows, parent_ids, fragments = [], set(), 0
     with entries_path.open(encoding="utf-8") as stream:
         for line in stream:
             if not line.strip():
@@ -577,6 +580,10 @@ def organize_drafts(entries_path, output):
                 text = card["text"][start:end].strip()
                 if not text:
                     continue
+                # Split leftovers such as "阴性。" carry no standalone meaning and mislead out of context.
+                if len(text) < MIN_PASSAGE_CHARS:
+                    fragments += 1
+                    continue
                 digest = hashlib.sha256(text.encode()).hexdigest()[:12]
                 evidence_id = f"{card['id']}-{digest}"
                 if digest in digests:
@@ -598,6 +605,7 @@ def organize_drafts(entries_path, output):
         "by_book": dict(sorted(Counter(row.get("book", "") for row in rows).items())),
         "split_boundaries": dict(sorted(Counter(row["split_boundary"] for row in rows).items())),
         "over_limit": sum(len(row["text"]) > MAX_EVIDENCE_CHARS for row in rows),
+        "dropped_fragments": fragments,
         "status": "draft", "entries_sha256": digest_file(output),
     }
 

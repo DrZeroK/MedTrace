@@ -1,0 +1,24 @@
+{"id":"h01","group":"diagnosis","query":{"history":"女，46岁","symptoms":"双手近端指间关节对称性肿痛4个月，晨僵约1小时，疑类风湿关节炎"},"categories":["diagnosis"],"relevant":["kb:ra-2024:diagnosis"]}
+{"id":"h02","group":"checks","query":{"history":"52岁，类风湿关节炎甲氨蝶呤治疗中","exams":"DAS28 3.8，未达到低疾病活动度"},"categories":["tests"],"relevant":["kb:ra-2024:monitoring"]}
+{"id":"h03","group":"treatment","query":{"history":"38岁，新诊断类风湿关节炎，尚未用药"},"categories":["treatment"],"relevant":["kb:ra-2024:treatment"]}
+{"id":"h04","group":"checks","query":{"history":"类风湿关节炎甲氨蝶呤治疗6个月未达标，拟加用tnfα抑制剂"},"categories":["tests"],"relevant":["kb:ra-2024:biologic-screening"]}
+{"id":"h05","group":"diagnosis","query":{"history":"男，44岁，体检超声提示脂肪肝","exams":"BMI 27.3 kg/m2","labs":"甘油三酯 2.4 mmol/L"},"categories":["diagnosis"],"relevant":["kb:mafld-2024:diagnosis"]}
+{"id":"h06","group":"checks","query":{"history":"56岁，代谢相关脂肪性肝病","labs":"FIB-4 1.9，需评估肝纤维化"},"categories":["tests"],"relevant":["kb:mafld-2024:fibrosis"]}
+{"id":"h07","group":"treatment","query":{"history":"41岁，脂肪肝合并超重，咨询减重目标"},"categories":["treatment"],"relevant":["kb:mafld-2024:treatment"]}
+{"id":"h08","group":"checks","query":{"chief":"主诉：突发左侧肢体无力2小时","history":"男，66岁，疑急性缺血性卒中"},"categories":["tests"],"relevant":["kb:csa-icvd-2023:emergency"]}
+{"id":"h09","group":"treatment","query":{"chief":"主诉：急性脑梗死发病3小时","exams":"头颅CT未见出血","history":"男，70岁，评估静脉溶栓"},"categories":["treatment"],"relevant":["kb:csa-icvd-2023:thrombolysis","kb:csa-icvd-2023:thrombectomy","kb:csa-icvd-2023:antiplatelet"]}
+{"id":"h10","group":"treatment","query":{"chief":"主诉：急性缺血性卒中发病10小时","exams":"CTA示大脑中动脉M1段闭塞，考虑大血管闭塞，评估机械取栓"},"categories":["treatment"],"relevant":["kb:csa-icvd-2023:thrombectomy","kb:csa-icvd-2023:thrombolysis","kb:csa-icvd-2023:antiplatelet"]}
+{"id":"h11","group":"treatment","query":{"chief":"主诉：右手无力伴言语含糊6小时","history":"男，61岁，轻型卒中，NIHSS 2分，拟双联抗血小板"},"categories":["treatment"],"relevant":["kb:csa-icvd-2023:antiplatelet"]}
+{"id":"h12","group":"treatment","query":{"history":"男，64岁，缺血性卒中后3个月门诊复诊，讨论缺血性卒中二级预防","labs":"LDL-C 3.1 mmol/L"},"categories":["treatment"],"relevant":["kb:csa-icvd-2023:secondary-prevention"]}
+{"id":"h13","group":"diagnosis","query":{"history":"男，35岁，乙肝表面抗原阳性10年","labs":"HBeAg阳性，HBV DNA 2.3×10^6 IU/mL，ALT反复升高"},"categories":["diagnosis"],"relevant":["kb:chb-2022:phases"]}
+{"id":"h14","group":"treatment","query":{"history":"男，42岁，慢性乙肝，父亲死于乙肝相关肝癌，HBV DNA阳性，ALT正常"},"categories":["treatment"],"relevant":["kb:chb-2022:treatment"]}
+{"id":"h15","group":"checks","query":{"history":"女，58岁，慢性乙型肝炎恩替卡韦治疗中，咨询复查频率和肝癌筛查"},"categories":["tests"],"relevant":["kb:chb-2022:monitoring"]}
+{"id":"h16","group":"treatment","query":{"chief":"女，28岁，孕20周，乙肝表面抗原阳性","labs":"HBV DNA 5.6×10^6 IU/mL"},"categories":["treatment"],"relevant":["kb:chb-2022:mother-to-child","kb:chb-2022:treatment"]}
+{"id":"h17","group":"long_note","query":{"chief":"主诉：突发右侧肢体无力伴言语不清1.5小时","history":["男，72岁","既往高血压15年、2型糖尿病8年，脂肪肝多年"],"symptoms":["1.5小时前突发右侧肢体无力，言语不清，持续不缓解"],"exams":["头颅CT未见出血，考虑急性缺血性卒中"],"labs":["空腹血糖 7.9 mmol/L，HbA1c 7.2%"]},"categories":["treatment"],"relevant":["kb:csa-icvd-2023:thrombolysis","kb:csa-icvd-2023:thrombectomy","kb:csa-icvd-2023:antiplatelet"]}
+{"id":"h18","group":"long_note","query":{"chief":"主诉：乏力、食欲减退2周","history":["男，47岁","乙肝表面抗原阳性20年，未规律复查，母亲为乙肝病毒携带者"],"labs":["HBV DNA 3.4×10^5 IU/mL，ALT 96 U/L"],"exams":["腹部超声示肝实质回声增粗"]},"categories":["treatment"],"relevant":["kb:chb-2022:treatment"]}
+{"id":"h19","group":"negative","query":{"history":"否认乙肝、结核病史","labs":"乙肝表面抗原阴性，HBV DNA未检出"},"relevant":[]}
+{"id":"h20","group":"negative","query":{"history":"母亲患类风湿关节炎，本人关节无肿痛"},"relevant":[]}
+{"id":"h21","group":"negative","query":{"history":"既往脑梗死5年，无后遗症","chief":"本次因膝关节疼痛就诊"},"categories":["tests"],"relevant":[]}
+{"id":"h22","group":"scope","query":{"chief":"男，45岁，乙肝表面抗原阳性，体检","labs":"HBV DNA未检出，ALT正常"},"categories":["treatment"],"relevant":["kb:chb-2022:treatment"]}
+{"id":"h23","group":"negative","query":{"history":"男，40岁，体检","exams":"肝胆脾超声未见异常，BMI 22.4 kg/m2","labs":"甘油三酯 1.1 mmol/L，空腹血糖 5.0 mmol/L"},"relevant":[]}
+{"id":"h24","group":"negative","query":{"history":"若出现急性脑梗死症状应立即就医"},"relevant":[]}

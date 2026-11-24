@@ -64,8 +64,21 @@ class ClinicalRetrievalTests(unittest.TestCase):
         self.assertEqual(ranked["negative_abstention"], 1)
         self.assertEqual(ranked["irrelevant_ratio"], 0)
 
+    def test_full_text_checked_cards_and_scope_queries(self):
+        cards = ROOT / "knowledge" / "guidelines.v4.jsonl"
+        entries = read_guides([cards])
+        self.assertTrue(all(row["clinical_review"]["status"] == "not_signed" for row in entries.values()))
+        result = benchmark(cards, ROOT / "eval" / "retrieval_guidelines.v4.jsonl")
+        ranked = result["modes"]["reranked"]
+        self.assertEqual(ranked["at_k"][5]["recall"], 1)
+        self.assertEqual(ranked["at_k"][5]["negative_abstention"], 1)
+        rows = {row["id"]: row["retrieved"] for row in ranked["rows"]}
+        # An old infarct must not pull acute-phase cards; a man must not get the pregnancy card.
+        self.assertEqual(rows["h21"], [])
+        self.assertNotIn("kb:chb-2022:mother-to-child", rows["h22"])
+
     def test_routine_results_and_pregnancy_scope_across_guideline_sets(self):
-        rows = [(json.loads(line), -1.0) for name in ("v1", "v2")
+        rows = [(json.loads(line), -1.0) for name in ("v1", "v2", "v3", "v4")
                 for line in (ROOT / f"knowledge/guidelines.{name}.jsonl").read_text(encoding="utf-8").splitlines()
                 if line.strip()]
 
@@ -132,11 +145,13 @@ class ClinicalRetrievalTests(unittest.TestCase):
         with TemporaryDirectory() as directory:
             root = Path(directory)
             source = root / "source.jsonl"
-            source.write_text(json.dumps(original) + "\n", encoding="utf-8")
+            fragment = {**original, "id": original["id"] + "-fragment", "text": "阴性。"}
+            source.write_text(json.dumps(original) + "\n" + json.dumps(fragment) + "\n", encoding="utf-8")
             output = root / "cards.jsonl"
             stats = organize_drafts(source, output)
             cards = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
             self.assertGreater(stats["chunks"], 1)
+            self.assertEqual(stats["dropped_fragments"], 1)
             self.assertTrue(any("0.65 μmol/L" in card["text"] for card in cards))
             for card in cards:
                 self.assertEqual(card["parent_id"], original["id"])

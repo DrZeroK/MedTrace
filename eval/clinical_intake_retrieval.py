@@ -62,7 +62,12 @@ def read_guides(paths):
                         or not row.get("categories") or strict.search(row["text"])
                         or len(row["text"]) > 800 or not re.match(r"https://", row.get("source_url", ""))):
                     raise ValueError(f"invalid clinical evidence card: {row['id']}")
-                if path.name == "guidelines.v2.jsonl":
+                if path.name == "guidelines.v4.jsonl" and (
+                        row.get("source_check", {}).get("status") != "ai_checked_against_full_text"
+                        or not row["source_check"].get("verified_points")
+                        or row["clinical_review"]["status"] == "signed"):
+                    raise ValueError(f"v4 cards need a full-text check and no implied sign-off: {row['id']}")
+                if path.name in {"guidelines.v2.jsonl", "guidelines.v3.jsonl", "guidelines.v4.jsonl"}:
                     if (row.get("source_kind") not in {"guideline", "consensus"} or "population" not in row
                             or any(not str(row.get(k, "")).strip() for k in
                                    ("publisher", "specialty", "disease", "version_checked_at"))):
