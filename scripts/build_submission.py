@@ -65,6 +65,7 @@ def build_zip(root: Path, dest: Path, knowledge_path: Path | None = None) -> tup
         raise FileExistsError(f"refusing to overwrite existing archive: {dest}")
     names = collect_files(root)
     resources = []
+    registrations = []
     if knowledge_path is not None:
         import sys
         sys.path.insert(0, str(root))
@@ -72,6 +73,21 @@ def build_zip(root: Path, dest: Path, knowledge_path: Path | None = None) -> tup
         kb = KnowledgeBase(str(knowledge_path))
         resources = [(kb.path, "resources/knowledge.sqlite"),
                      (kb.path.with_suffix(".manifest.json"), "resources/knowledge.manifest.json")]
+        registrations = [
+            {"name": name, "bytes": source.stat().st_size,
+             "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+             "version": kb.manifest["version"], "purpose": "offline clinical evidence retrieval",
+             "dependencies": kb.manifest["dependencies"]}
+            for source, name in resources
+        ]
+        sources = {}
+        for entry in kb.entries.values():
+            key = entry.get("source_id", entry["source"]), entry["version"]
+            if key not in sources:
+                sources[key] = {"source_id": key[0], "source": entry["source"], "version": key[1],
+                                "url": entry.get("source_url"), "entries": 0}
+            sources[key]["entries"] += 1
+        registrations[0]["sources"] = [sources[key] for key in sorted(sources)]
     dest.parent.mkdir(parents=True, exist_ok=True)
     total = 0
     with zipfile.ZipFile(dest, "x", zipfile.ZIP_DEFLATED) as zf:
@@ -86,6 +102,10 @@ def build_zip(root: Path, dest: Path, knowledge_path: Path | None = None) -> tup
             zf.write(src, name)
             names.append(name)
             total += src.stat().st_size
+        registration = json.dumps({"resources": registrations}, ensure_ascii=False, indent=2) + "\n"
+        zf.writestr("resource_manifest.json", registration)
+        names.append("resource_manifest.json")
+        total += len(registration.encode("utf-8"))
         manifest = {"git_commit": _git_rev(), "files": {n: hashlib.sha256(zf.read(n)).hexdigest() for n in names}}
         prompt_hash = hashlib.sha256()
         for name in sorted(n for n in names if n.startswith("medtrace/prompts/v2/") and n.endswith(".txt")):

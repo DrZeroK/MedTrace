@@ -3,6 +3,7 @@
 Cards follow the same entry schema as knowledge/entries.jsonl; nothing is approved or releasable.
 """
 import argparse
+import hashlib
 import json
 import re
 import sqlite3
@@ -13,7 +14,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from medtrace.knowledge import search_tokens, validate_entry
+from medtrace import textutil as T
+from medtrace.knowledge import index_card, search_tokens, validate_entry
 from scripts.textbook_search import digest_file, load_corpus
 
 PART = re.compile(r'^(第[一二三四五六七八九十百]+篇)[\s　]*(.*)$')
@@ -38,6 +40,9 @@ CROSS_REF = re.compile(r'(参见|参照|详见|见)(本篇|本章|本节|第[一
 SOURCE_MAP = {
     '内科学第10版': {'id': 'PMPH-IM10', 'scope': 'adult'},
     '诊断学第10版': {'id': 'PMPH-DX10', 'scope': 'general'},
+    '儿科学第10版': {'id': 'PMPH-PED10', 'scope': 'general', 'population': 'pediatric'},
+    '妇产科学第10版': {'id': 'PMPH-OBG10', 'scope': 'general'},
+    '外科学第10版': {'id': 'PMPH-SUR10', 'scope': 'general'},
 }
 REQUESTED_USES = ['offline_index', 'rag_context', 'derived_cards', 'competition_distribution']
 MAX_CARD_CHARS = 1800
@@ -368,8 +373,8 @@ def outline_for(book, source_id, cards):
     return root
 
 
-def structure_corpus(corpus_dir, out_dir):
-    books, manifest_path = load_corpus(corpus_dir)
+def structure_corpus(corpus_dir, out_dir, *, selected_books=None):
+    books, manifest_path = load_corpus(corpus_dir, selected_books=selected_books)
     sources = {item['id']: item for item in json.loads((ROOT / 'knowledge' / 'sources.json').read_text('utf-8'))}
     dest = Path(out_dir)
     if not dest.is_absolute() or dest.exists():
@@ -386,6 +391,11 @@ def structure_corpus(corpus_dir, out_dir):
             raise ValueError(f'missing source metadata: {mapping["id"]}')
         cards = parse_structure(book, pages, source_info['source'], source_info.get('version_candidate', ''),
                                 mapping['scope'], mapping['id'])
+        for card in cards:
+            card['source_url'] = source_info['source']
+            card['isbn'] = source_info.get('isbn')
+            if 'population' in mapping:
+                card['population'] = mapping['population']
         all_cards.extend(cards)
         outline_books.append(outline_for(book, mapping['id'], cards))
         source_entries.append({'source_id': mapping['id'], 'book': book, 'text_file': item['text_file'],
@@ -425,14 +435,83 @@ def structure_corpus(corpus_dir, out_dir):
                       'by_book': manifest['counts']['by_book']}, ensure_ascii=False))
 
 
-def build_index(entries_path, db_path):
+def clinical_categories(card):
+    structure = card.get("structure") or {}
+    label = " ".join(structure.get(key, "") for key in ("label", "subtopic"))
+    tags = []
+    if "鉴别" in label:
+        tags.append("differential")
+    if "诊断" in label and ("鉴别" not in label or re.search(r"诊断[与和及]鉴别", label)):
+        tags.append("diagnosis")
+    if re.search(r"检查|参考区间|临床意义|标本|心电图特征", label):
+        tags.append("tests")
+    if re.search(r"治疗|管理|防治|用药|随访", label):
+        tags.append("treatment")
+    return tags
+
+
+def pack_sentences(text, max_chars=760):
+    """Do not cut decimals, units or OCR lines without a usable sentence boundary."""
+    group = []
+    size = 0
+    for sentence in T.split_sentences(text):
+        if group and size + 1 + len(sentence) > max_chars:
+            yield "\n".join(group)
+            group, size = [], 0
+        size += len(sentence) + bool(group)
+        group.append(sentence)
+    if group:
+        yield "\n".join(group)
+
+
+def organize_drafts(entries_path, output):
+    """Derive a local-only, page-traceable index input from existing textbook cards."""
+    if output.exists():
+        raise ValueError("use a new output path")
+    rows, ids = [], set()
+    with entries_path.open(encoding="utf-8") as stream:
+        for line in stream:
+            if not line.strip():
+                continue
+            card = json.loads(line)
+            validate_entry(card)
+            if card["status"] != "draft":
+                raise ValueError("expected textbook drafts")
+            if card["type"] != "card":
+                continue
+            categories = clinical_categories(card)
+            for text in pack_sentences(card["text"]):
+                digest = hashlib.sha256(text.encode()).hexdigest()[:12]
+                evidence_id = f"{card['id']}-{digest}"
+                if evidence_id in ids:
+                    continue
+                ids.add(evidence_id)
+                rows.append({**card, "id": evidence_id, "parent_id": card["id"], "categories": categories,
+                             "text": text})
+    if not rows:
+        raise ValueError("no textbook cards")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("x", encoding="utf-8") as stream:
+        for row in rows:
+            stream.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return {
+        "chunks": len(rows), "parent_cards": len({row["parent_id"] for row in rows}),
+        "categories": dict(sorted(Counter(category for row in rows for category in row["categories"]).items())),
+        "unclassified": sum(not row["categories"] for row in rows),
+        "status": "draft", "entries_sha256": digest_file(output),
+    }
+
+
+def build_index(entries_path, db_path, supplements=()):
     entries_path = Path(entries_path)
     if not entries_path.is_absolute():
         raise ValueError('entries path must be absolute')
     dest = Path(db_path)
     if not dest.is_absolute() or dest.exists():
         raise ValueError('use a new absolute database path')
-    entries = [json.loads(line) for line in entries_path.read_text('utf-8').splitlines() if line.strip()]
+    sources = [entries_path, *map(Path, supplements)]
+    entries = [json.loads(line) for source in sources
+               for line in source.read_text('utf-8').splitlines() if line.strip()]
     seen = set()
     for entry in entries:
         validate_entry(entry)
@@ -452,13 +531,13 @@ def build_index(entries_path, db_path):
             db.execute('INSERT INTO entries VALUES(?,?,?,?)',
                        (entry['id'], entry.get('book', ''), entry.get('source_id', ''),
                         json.dumps(entry, ensure_ascii=False)))
-            db.execute('INSERT INTO search VALUES(?,?,?)',
-                       (entry['id'], ' '.join(search_tokens(entry['title'] + ' ' + ' '.join(entry.get('aliases', [])))),
-                        ' '.join(search_tokens(entry['text']))))
+            index_card(db, entry)
         manifest = {
             'schema': 1, 'kind': 'textbook-knowledge-index', 'state': 'draft', 'release': False,
             'created_at': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
             'entries_sha256': digest_file(entries_path), 'entries_bytes': entries_path.stat().st_size,
+            'supplements': [{'name': source.name, 'sha256': digest_file(source), 'bytes': source.stat().st_size}
+                            for source in sources[1:]],
             'counts': dict(Counter(entry.get('book', 'unknown') for entry in entries)),
             'by_type': dict(Counter(entry['type'] for entry in entries)),
             'dependencies': ['Python >=3.10', 'SQLite FTS5'],
@@ -508,10 +587,15 @@ def search_cards(db_path, query, limit=5, book=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
+    organize = sub.add_parser('organize', help='rechunk and tag existing local textbook drafts')
+    organize.add_argument('--entries', type=Path, required=True)
+    organize.add_argument('--output', type=Path, required=True)
     s = sub.add_parser('structure', help='convert filtered plain text into draft knowledge cards')
     s.add_argument('--corpus', required=True)
+    s.add_argument('--book', action='append', help='only structure named books from this corpus')
     s.add_argument('--out', required=True)
     b = sub.add_parser('build', help='build a local draft knowledge index')
+    b.add_argument('--supplement', type=Path, action='append', default=[])
     b.add_argument('--entries', required=True)
     b.add_argument('--db', required=True)
     q = sub.add_parser('search')
@@ -520,10 +604,13 @@ def main():
     q.add_argument('--limit', type=int, default=5)
     q.add_argument('--book')
     args = parser.parse_args()
+    if args.command == 'organize':
+        print(json.dumps(organize_drafts(args.entries, args.output), ensure_ascii=False))
+        return
     if args.command == 'structure':
-        structure_corpus(args.corpus, args.out)
+        structure_corpus(args.corpus, args.out, selected_books=args.book)
     elif args.command == 'build':
-        build_index(args.entries, args.db)
+        build_index(args.entries, args.db, args.supplement)
     else:
         print(json.dumps(search_cards(args.db, args.query, args.limit, args.book), ensure_ascii=False, indent=2))
 

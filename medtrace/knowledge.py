@@ -10,6 +10,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from . import textutil as T
+from .retrieval import CATEGORIES, POPULATIONS, candidates, expand_findings, lexical_tokens, prepare_query, select_cards
 
 
 class KnowledgeError(ValueError):
@@ -25,7 +26,11 @@ def search_tokens(text: str) -> list[str]:
 
 
 def digest_file(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def validate_entry(e):
@@ -54,6 +59,13 @@ def validate_entry(e):
                 raise KnowledgeError(f"{key} requires a separate evidenced sign-off")
     if not isinstance(e.get("aliases", []), list) or any(not isinstance(a, str) or not a.strip() for a in e.get("aliases", [])):
         raise KnowledgeError("aliases must be nonempty strings")
+    if "source_id" in e and (not isinstance(e["source_id"], str) or not e["source_id"].strip()):
+        raise KnowledgeError("source_id must be a nonempty string")
+    if "categories" in e and (not isinstance(e["categories"], list) or
+                              any(not isinstance(c, str) or c not in CATEGORIES for c in e["categories"])):
+        raise KnowledgeError("unknown evidence categories")
+    if "population" in e and e["population"] not in POPULATIONS:
+        raise KnowledgeError("unknown evidence population")
     if e["type"] == "lab" and (not e.get("units") or not isinstance(e["units"], list) or
                                     any(not isinstance(u, str) or not u for u in e["units"])):
         raise KnowledgeError("lab requires units")
@@ -68,6 +80,12 @@ def validate_entry(e):
         # No implicit population/method assumptions in rules.
         if not isinstance(e.get("requires"), dict) or not e["requires"]:
             raise KnowledgeError("rule requires explicit applicability metadata")
+
+
+def index_card(db, entry):
+    title = entry["title"] + " " + " ".join(entry.get("aliases", []))
+    db.execute("INSERT INTO search VALUES (?,?,?)",
+               (entry["id"], " ".join(search_tokens(title)), " ".join(search_tokens(entry["text"]))))
 
 
 def build_database(entries, destination, version):
@@ -96,7 +114,7 @@ def build_database(entries, destination, version):
         for e in approved:
             db.execute("INSERT INTO entries VALUES (?,?)", (e["id"], json.dumps(e, ensure_ascii=False)))
             if e["type"] == "card":
-                db.execute("INSERT INTO search VALUES (?,?,?)", (e["id"], " ".join(search_tokens(e["title"] + " " + " ".join(e.get("aliases", [])))), " ".join(search_tokens(e["text"]))))
+                index_card(db, e)
         db.commit()
     finally:
         db.close()
@@ -143,30 +161,19 @@ class KnowledgeBase:
                 found.append({"id": e["id"], "canonical": e["title"]})
         return found
 
-    def retrieve(self, text):
-        normalized = self.normalize(text)
-        query = text + " " + " ".join(x["canonical"] for x in normalized)
-        tokens = sorted(set(search_tokens(query)))[:512]
-        if not tokens:
-            return []
-        expression = " OR ".join('"' + t + '"' for t in tokens)
+    def retrieve(self, query, *, categories=None, limit=5):
+        if not 1 <= limit <= 50:
+            raise ValueError("limit must be in 1–50")
+        clauses, original = prepare_query(query)
+        positive = " ".join(clause for clause, _ in clauses)
+        normalized = self.normalize(positive)
+        clauses += [(entry["canonical"], 1.0) for entry in normalized]
+        clauses = expand_findings(clauses)
+        tokens = lexical_tokens(clauses, search_tokens)
         with self.connect() as db:
-            rows = db.execute("SELECT id,bm25(search,0,5,1) FROM search WHERE search MATCH ? ORDER BY 2,id", (expression,)).fetchall()
-        out, size = [], 0
-        for kid, score in rows:
-            e = self.entries[kid]
-            if e["scope"] == "adult" and not adult_documented(text):
-                continue
-            # Require a meaningful exact alias/topic anchor, not a generic bigram hit.
-            if not any(alias_hit(a, query) for a in [e["title"], *e.get("aliases", [])]):
-                continue
-            if size + len(e["text"]) > 2500:
-                continue
-            out.append({**e, "score": score})
-            size += len(e["text"])
-            if len(out) == 5:
-                break
-        return out
+            rows = candidates(db, tokens)
+        return select_cards(rows, clauses, original, alias_hit=alias_hit, adult_documented=adult_documented,
+                            search_tokens=search_tokens, categories=categories, limit=limit)
 
     def check_rules(self, ledger):
         results = []
@@ -204,7 +211,7 @@ class KnowledgeBase:
 def alias_hit(alias, text):
     alias, text = T.fw(alias).lower(), T.fw(text).lower()
     if re.fullmatch(r"[a-z0-9-]+", alias):
-        return bool(re.search(r"(?<![a-z])" + re.escape(alias) + r"(?![a-z])", text))
+        return bool(re.search(r"(?<![a-z0-9])" + re.escape(alias) + r"(?![a-z0-9])", text))
     return alias in text
 
 
@@ -237,7 +244,8 @@ def write_audit(path, results, kb, input_digest="", run_id=None):
     payload = {"run_id": run_id or str(uuid.uuid4()), "input_sha256": input_digest,
                "output_sha256": digest_file(path) if Path(path).is_file() else "",
                "knowledge_version": kb.manifest["version"], "knowledge_sha256": kb.manifest["sha256"],
-               "sources": {k: {f: e[f] for f in ("title", "source", "version", "locator", "license", "scope")}
+               "sources": {k: {**{f: e[f] for f in ("title", "source", "version", "locator", "license", "scope")},
+                               "source_id": e.get("source_id", e["source"])}
                            for k, e in kb.entries.items()},
                "cases": [r.log.get("knowledge", {"status": "not_used", "index": r.log.get("index"), "case_id": r.log.get("case_id")}) for r in results]}
     atomic_write_json(str(path) + ".knowledge_audit.json", payload)

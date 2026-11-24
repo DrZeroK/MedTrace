@@ -197,6 +197,7 @@ _UNITS = ["mmHg", "mmol/L", "µmol/L", "μmol/L", "umol/L", "mg/dL", "g/dL", "g/
 _UNIT_ALT = "|".join(re.escape(u) for u in sorted(_UNITS, key=len, reverse=True))
 _UNIT_ALT += r"|[×xX*]10(?:\^\d+|\d+|[⁰¹²³⁴⁵⁶⁷⁸⁹]+)/[Ll]"   # scientific-notation counts (×10^6/L, ×106/L, ×10⁶/L …)
 _NUM_STRICT = re.compile(r"(?<![A-Za-z0-9_.\-])(\d+(?:\.\d+)?)(?:\s*(" + _UNIT_ALT + r")(?![A-Za-z]))?", re.I)
+_UNIT_ONLY = re.compile(_UNIT_ALT, re.I)
 _NUM_ANY = re.compile(r"\d+(?:\.\d+)?")
 # Only unambiguous analyte subscripts: the digits after the recognised prefix are the complete value.
 # A generic letter+digit suffix is unsafe ("Creatinine120" must not manufacture 20 and 0).
@@ -217,6 +218,11 @@ def norm_unit(u: str | None) -> str | None:
     if u.startswith("10^"):
         u = "×" + u
     return {"℃": "°c", "次/分": "/min", "bpm": "/min"}.get(u, u)
+
+
+def is_measurement_only(text: str) -> bool:
+    value = fw(text).strip()
+    return bool(_UNIT_ONLY.fullmatch(value) or _NUM_STRICT.fullmatch(value))
 
 
 def extract_numbers(text: str) -> list[tuple[float, str | None, str]]:

@@ -10,11 +10,12 @@ from medtrace.knowledge import build_database
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--source", required=True)
+    p.add_argument("--source", required=True, action="append", type=Path)
     p.add_argument("--output", required=True)
     p.add_argument("--version", required=True)
     a = p.parse_args()
-    entries = [json.loads(line) for line in Path(a.source).read_text("utf-8").splitlines() if line.strip()]
+    entries = [json.loads(line) for source in a.source
+               for line in source.read_text("utf-8").splitlines() if line.strip()]
     print(json.dumps(build_database(entries, a.output, a.version), ensure_ascii=False, indent=2))
 
 

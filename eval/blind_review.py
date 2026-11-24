@@ -34,6 +34,8 @@ def export(run: Path, reviewers: list[str], seed: int) -> None:
     for f in sorted(run.glob("outputs_*.json")):
         variant = f.stem.split("_", 1)[1]
         for rec in json.loads(f.read_text("utf-8")):
+            if "medical_record" in rec and rec.get("status") != "success":
+                continue
             items.append((variant, rec))
     rng = random.Random(seed)
     rng.shuffle(items)
@@ -46,10 +48,14 @@ def export(run: Path, reviewers: list[str], seed: int) -> None:
         case = cases[rec["case_id"]]["case"]
         md += [f"## {bid}  (case {rec['case_id']}, cutoff {case.get('record_cutoff')})", "", "### Records"]
         md += [f"**[{s['source_id']}]** {s['content']}\n" for s in case["sources"]]
-        md += ["### Case Features", rec["case_features"], "", "### Diagnostic Discussion", rec["diagnostic_discussion"], "",
-               "### Diagnostic and Treatment Plan", rec["treatment_plan"], "", "### Evidence references"]
-        md += [f"- {e['statement'][:140]} -> {e['source_ids']}" for e in rec["evidence"]]
-        md += ["", "### Review items"] + [f"- ({r['type']}) {r['description']}" for r in rec["review_items"]] + ["", "---", ""]
+        note = rec.get("medical_record", rec)
+        plan = note["plan"] if "plan" in note else note["treatment_plan"]
+        md += ["### Case Features", note["case_features"], "", "### Diagnostic Discussion", note["diagnostic_discussion"], "",
+               "### Diagnostic and Treatment Plan", plan, "", "### Evidence references"]
+        md += [f"- {e['statement']} -> {e['source_ids']}" for e in note["evidence"]]
+        items = [r if isinstance(r, str) else f"({r['type']}) {r['description']}"
+                 for r in note["review_items"]]
+        md += ["", "### Review items", *[f"- {item}" for item in items], "", "---", ""]
     (out / "packet.md").write_text("\n".join(md), "utf-8")
     (out / "key.json").write_text(json.dumps(key, indent=1), "utf-8")
     for r in reviewers:
@@ -67,6 +73,42 @@ def _kappa(a: list[int], b: list[int]) -> float:
     po = sum(x == y for x, y in zip(a, b)) / n
     pe = (sum(a) / n) * (sum(b) / n) + (1 - sum(a) / n) * (1 - sum(b) / n)
     return 1.0 if pe == 1 else (po - pe) / (1 - pe)
+
+
+def paired_deltas(key, sheets):
+    """Compute RAG-on minus RAG-off only within the same reviewer and case."""
+    metrics = {
+        "critical_error": ("critical_error", None),
+        "factual_error_rate": ("facts_wrong", "facts_assessed"),
+        "source_support_rate": ("refs_supported", "refs_assessed"),
+        "reasoning_score": ("reasoning_score", None),
+        "plan_score": ("plan_score", None),
+    }
+
+    def value(row, numerator, denominator):
+        if not row.get(numerator) or (denominator and not row.get(denominator)):
+            return None
+        num = float(row[numerator])
+        if denominator is None:
+            return num
+        total = float(row[denominator])
+        return num / total if total else None
+
+    result = {metric: [] for metric in metrics}
+    for sheet in sheets.values():
+        pairs = {}
+        for blind_id, row in sheet.items():
+            item = key[blind_id]
+            pairs.setdefault(item["case_id"], {})[item["variant"]] = row
+        for pair in pairs.values():
+            if not {"rag_off", "rag_on"} <= pair.keys():
+                continue
+            for metric, columns in metrics.items():
+                off = value(pair["rag_off"], *columns)
+                on = value(pair["rag_on"], *columns)
+                if off is not None and on is not None:
+                    result[metric].append(on - off)
+    return result
 
 
 def score(run: Path) -> None:
@@ -102,6 +144,12 @@ def score(run: Path) -> None:
                 cats.setdefault(key[bid]["variant"], {}).setdefault(c, 0)
                 cats[key[bid]["variant"]][c] += 1
     lines += ["", "## Error categories (count of reviewer marks)", ""] + [f"- {v}: {dict(sorted(c.items()))}" for v, c in sorted(cats.items())]
+    if {"rag_off", "rag_on"} <= set(variants):
+        lines += ["", "## Matched case-and-reviewer deltas (RAG on minus off)", "",
+                  "| metric | matched ratings | mean delta |", "|---|---:|---:|"]
+        for metric, deltas in paired_deltas(key, sheets).items():
+            mean = f"{st.mean(deltas):+.3f}" if deltas else "n/a"
+            lines.append(f"| {metric} | {len(deltas)} | {mean} |")
     names = list(sheets)
     if len(names) >= 2:
         a, b = sheets[names[0]], sheets[names[1]]
