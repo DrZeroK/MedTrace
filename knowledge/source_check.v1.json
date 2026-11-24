@@ -1,0 +1,466 @@
+{
+ "checked_at": "2026-11-24",
+ "checked_by": "Claude（AI），非临床签审",
+ "method": "DOI 经 Crossref 或 doi.org 取登记题名并与卡片来源题名比对；仅 v3 四份来源读取全文逐条核对",
+ "sources": [
+  {
+   "source_id": "aas-cta-2026",
+   "title": "急性主动脉综合征计算机断层扫描血管成像诊断报告书写规范中国专家共识",
+   "url": "https://xue.sciconf.cn/guide-list-detail?id=5A74312B-F88B-E581-B120-9DBD5FD5AD87",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "adult-cap-2016",
+   "title": "中国成人社区获得性肺炎诊断和治疗指南",
+   "url": "https://seleguide.yiigle.com/uploads/guide_html/中国成人社区获得性肺炎诊断和治疗指南(2016年版).html",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "af-management-2025",
+   "title": "中国心房颤动管理指南（2025）",
+   "url": "https://doi.org/10.3760/cma.j.cn113859-20250716-00102",
+   "doi": "10.3760/cma.j.cn113859-20250716-00102",
+   "registered_title": "中国心房颤动管理指南（2025）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "af-procedure-2026",
+   "title": "心房颤动导管消融联合左心耳封堵术临床应用专家共识（2026年）",
+   "url": "https://rs.yiigle.com/cmaid/1695655",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "ascites-2025",
+   "title": "肝硬化腹水中西医结合诊疗专家共识",
+   "url": "https://csg.cma.org.cn/csg/a/bh4gz5",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "asthma-2024",
+   "title": "支气管哮喘防治指南",
+   "url": "https://rs.yiigle.com/cmaid/1532201",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "chb-2022",
+   "title": "慢性乙型肝炎防治指南（2022年版）",
+   "url": "https://doi.org/10.14218/JCTH.2023.00320",
+   "doi": "10.14218/JCTH.2023.00320",
+   "registered_title": "Guidelines for the Prevention and Treatment of Chronic Hepatitis B (version 2022)",
+   "status": "full_text_read",
+   "summary_checked_against_full_text": true
+  },
+  {
+   "source_id": "cirrhosis-2025",
+   "title": "肝硬化临床诊治管理指南（2025年版）",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12861852/",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "ckd-screening-2026",
+   "title": "中国慢性肾脏病筛查、诊断及治疗临床实践指南（2026版）",
+   "url": "https://doi.org/10.3760/cma.j.cn441217-20251005-01003",
+   "doi": "10.3760/cma.j.cn441217-20251005-01003",
+   "registered_title": null,
+   "status": "doi_registry_error",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "copd-2026",
+   "title": "慢性阻塞性肺疾病诊治指南（2026年修订版）",
+   "url": "https://doi.org/10.3760/cma.j.cn112147-20260817-00487",
+   "doi": "10.3760/cma.j.cn112147-20260817-00487",
+   "registered_title": "慢性阻塞性肺疾病诊治指南（2026年修订版）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "cough-2021",
+   "title": "咳嗽的诊断与治疗指南",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/35000304/",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "crc-screen-nhc-2024",
+   "title": "结直肠癌筛查与早诊早治方案（2024年版）",
+   "url": "https://www.nhc.gov.cn/ylyjs/gzdt/202408/42f43b5f0c4c4ebe90c78ee127959b92.shtml",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "csa-icvd-2023",
+   "title": "中国卒中学会缺血性脑血管病临床管理指南：执行摘要及2023年更新",
+   "url": "https://doi.org/10.1136/svn-2023-002998",
+   "doi": "10.1136/svn-2023-002998",
+   "registered_title": "Chinese Stroke Association guidelines for clinical management of ischaemic cerebrovascular diseases: executive summary and 2023 update",
+   "status": "full_text_read",
+   "summary_checked_against_full_text": true
+  },
+  {
+   "source_id": "diabetes-cds-2024",
+   "title": "中国糖尿病防治指南（2024版）",
+   "url": "https://diab.cma.org.cn/cn/zhinangongshi.aspx",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "diki-2026",
+   "title": "药物性肾损伤诊疗与管理指南（2026）",
+   "url": "https://doi.org/10.3760/cma.j.cn112138-20260602-00336",
+   "doi": "10.3760/cma.j.cn112138-20260602-00336",
+   "registered_title": "药物性肾损伤诊疗与管理指南（2026）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "dm-primary-2025",
+   "title": "国家基层糖尿病防治管理指南（2025）",
+   "url": "https://doi.org/10.3760/cma.j.cn112138-20250924-00572",
+   "doi": "10.3760/cma.j.cn112138-20250924-00572",
+   "registered_title": "国家基层糖尿病防治管理指南（2025）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "febrile-seizure-2017",
+   "title": "热性惊厥诊断治疗与管理专家共识（2017实用版）",
+   "url": "https://cs.medjournals.cn/article/doi/full/10.3760/cma.j.issn.2095-428X.2017.18.005",
+   "doi": "10.3760/cma.j.issn.2095-428X.2017.18.005",
+   "registered_title": null,
+   "status": "doi_registry_error",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "fuo-2026",
+   "title": "发热待查诊治专家共识（2026版）",
+   "url": "https://doi.org/10.3760/cma.j.cn311365-20260120-00026",
+   "doi": "10.3760/cma.j.cn311365-20260120-00026",
+   "registered_title": null,
+   "status": "doi_registry_error",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "gastric-precancer-2020",
+   "title": "中国胃黏膜癌前状态和癌前病变的处理策略专家共识",
+   "url": "https://seleguide.yiigle.com/uploads/guide_html/中国胃黏膜癌前状态和癌前病变的处理策略专家共识(2020年).html",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "gastric-screen-2024",
+   "title": "胃癌筛查与早诊早治方案",
+   "url": "https://www.nhc.gov.cn/ylyjs/gzdt/202406/2bb28e7a39ce4734bee4e31ff5442e0f.shtml",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "gout-2024-rev",
+   "title": "中国高尿酸血症与痛风诊疗指南（2024）第一部分",
+   "url": "https://doi.org/10.3760/cma.j.cn311282-20250806-00392",
+   "doi": "10.3760/cma.j.cn311282-20250806-00392",
+   "registered_title": "中国高尿酸血症与痛风诊疗指南(2024)第一部分：对一般痛风患者的建议",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "hbv-reactivation-2026",
+   "title": "中国高危人群乙型肝炎病毒再激活防治指南（2026年版）",
+   "url": "https://doi.org/10.12449/JCH260709",
+   "doi": "10.12449/JCH260709",
+   "registered_title": "中国高危人群乙型肝炎病毒再激活防治指南（2026年版）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "hf-2024",
+   "title": "中国心力衰竭诊断和治疗指南2024（下）",
+   "url": "https://csc.cma.org.cn/art/2024/4/18/art_619_56221.html",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "hip-2022-i",
+   "title": "妊娠期高血糖诊治指南［第一部分］",
+   "url": "https://doi.org/10.3760/cma.j.cn112141-20210917-00528",
+   "doi": "10.3760/cma.j.cn112141-20210917-00528",
+   "registered_title": null,
+   "status": "doi_registry_error",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "hypertension-primary-2025",
+   "title": "国家基层高血压防治管理指南2025版",
+   "url": "https://doi.org/10.3760/cma.j.cn112148-20250401-00234",
+   "doi": "10.3760/cma.j.cn112148-20250401-00234",
+   "registered_title": "国家基层高血压防治管理指南2025版",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "icp-2024",
+   "title": "妊娠期肝内胆汁淤积症临床诊治和管理指南",
+   "url": "https://cspm.cma.org.cn/index/news?id=3540",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "imh-2017",
+   "title": "主动脉壁内血肿的诊断和治疗",
+   "url": "https://www.nccd.org.cn/Sites/Uploaded/File/2017/8/%E4%B8%AD%E5%9B%BD%E5%BE%AA%E7%8E%AF%E6%9D%82%E5%BF%972017%E5%B9%B43%E6%9C%88%EF%BC%88225%E6%9C%9F%EF%BC%89%E6%9C%9F%28%E5%8D%B0%E5%88%B7%E7%89%88%29.pdf",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "influenza-2025",
+   "title": "流行性感冒诊疗方案（2025年版）",
+   "url": "https://www.nhc.gov.cn/ylyjs/zcwj/202501/f8fcecca59a048bebc4a71847ce57594.shtml",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "insomnia-2025",
+   "title": "失眠症诊断和治疗指南（2025版）",
+   "url": "https://doi.org/10.3760/cma.j.cn112137-20250421-00981",
+   "doi": "10.3760/cma.j.cn112137-20250421-00981",
+   "registered_title": "失眠症诊断和治疗指南（2025版）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "lipid-test-2026",
+   "title": "中国临床血脂检测指南（2026版）",
+   "url": "https://doi.org/10.3760/cma.j.cn114452-20260213-00110",
+   "doi": "10.3760/cma.j.cn114452-20260213-00110",
+   "registered_title": "中国临床血脂检测指南（2026版）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "ln-2025",
+   "title": "中国狼疮肾炎诊治和管理指南（2025版）",
+   "url": "https://doi.org/10.3760/cma.j.cn112137-20250327-00748",
+   "doi": "10.3760/cma.j.cn112137-20250327-00748",
+   "registered_title": null,
+   "status": "doi_registry_error",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "lung-screen-nhc-2024",
+   "title": "肺癌筛查与早诊早治方案（2024年版）",
+   "url": "https://www.nhc.gov.cn/ylyjs/gzdt/202408/42f43b5f0c4c4ebe90c78ee127959b92.shtml",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "mafld-2024",
+   "title": "代谢相关（非酒精性）脂肪性肝病防治指南（2024年版）",
+   "url": "https://doi.org/10.14218/JCTH.2024.00311",
+   "doi": "10.14218/JCTH.2024.00311",
+   "registered_title": "Guideline for the Prevention and Treatment of Metabolic Dysfunction-associated Fatty Liver Disease (Version 2024)",
+   "status": "full_text_read",
+   "summary_checked_against_full_text": true
+  },
+  {
+   "source_id": "mg-2025",
+   "title": "中国重症肌无力诊断和治疗指南（2025版）",
+   "url": "https://doi.org/10.3760/cma.j.cn113694-20250120-00041",
+   "doi": "10.3760/cma.j.cn113694-20250120-00041",
+   "registered_title": "中国重症肌无力诊断和治疗指南（2025版）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "mpp-2025",
+   "title": "儿童肺炎支原体肺炎诊疗指南（2025年版）",
+   "url": "https://www.nhc.gov.cn/yzygj/c100068/202509/19e7145436b049a68d4ba8c2060dfa56.shtml",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "nsteacs-2024",
+   "title": "非ST段抬高型急性冠脉综合征诊断和治疗指南",
+   "url": "https://csc.cma.org.cn/attach/0/46bfbba77f4249aebc2ae9b70eef5377.pdf",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "oa-2024",
+   "title": "中国骨关节炎诊疗指南（2024版）",
+   "url": "https://doi.org/10.3760/cma.j.cn101658-20240618-00074",
+   "doi": "10.3760/cma.j.cn101658-20240618-00074",
+   "registered_title": "中国骨关节炎诊疗指南（2024版）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "obesity-nhc-2024",
+   "title": "肥胖症诊疗指南（2024年版）",
+   "url": "https://app.www.gov.cn/govdata/gov/202410/21/520851/article.html",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "osa-sequence-2025",
+   "title": "成人阻塞性睡眠呼吸暂停综合序列诊断和治疗专家共识（2025）",
+   "url": "https://doi.org/10.3760/cma.j.cn115330-20250821-00445",
+   "doi": "10.3760/cma.j.cn115330-20250821-00445",
+   "registered_title": "成人阻塞性睡眠呼吸暂停综合序列诊断和治疗专家共识（2025）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "osteoporosis-cma-2022",
+   "title": "原发性骨质疏松症诊疗指南（2022）",
+   "url": "https://rs.yiigle.com/cmaid/1460072",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "pancreatitis-ed-2024",
+   "title": "急性胰腺炎急诊诊治专家共识",
+   "url": "https://doi.org/10.3760/cma.j.issn.1671-0282.2024.04.004",
+   "doi": "10.3760/cma.j.issn.1671-0282.2024.04.004",
+   "registered_title": "急性胰腺炎急诊诊治专家共识",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "peds-diarrhea-2020",
+   "title": "儿童急性感染性腹泻病诊疗规范",
+   "url": "https://www.nhc.gov.cn/cms-search/downFiles/67400070881e472c91e8abb995795b5d.pdf",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "pmn-2026",
+   "title": "中国成人原发性膜性肾病临床实践指南",
+   "url": "https://doi.org/10.3760/cma.j.cn112138-20260707-00416",
+   "doi": "10.3760/cma.j.cn112138-20260707-00416",
+   "registered_title": null,
+   "status": "doi_registry_error",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "preeclampsia-prevention-2025",
+   "title": "子痫前期预测与预防指南（2025）",
+   "url": "https://doi.org/10.3760/cma.j.cn112141-20241130-00636",
+   "doi": "10.3760/cma.j.cn112141-20241130-00636",
+   "registered_title": "子痫前期预测与预防指南（2025）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "ra-2024",
+   "title": "Chinese guidelines for the diagnosis and treatment of rheumatoid arthritis: 2024 update",
+   "url": "https://doi.org/10.1515/rir-2024-0028",
+   "doi": "10.1515/rir-2024-0028",
+   "registered_title": "Chinese guidelines for the diagnosis and treatment of rheumatoid arthritis: 2024 update",
+   "status": "full_text_read",
+   "summary_checked_against_full_text": true
+  },
+  {
+   "source_id": "renal-anemia-2018",
+   "title": "肾性贫血诊断与治疗中国专家共识",
+   "url": "https://seleguide.yiigle.com/uploads/guide_html/肾性贫血诊断与治疗中国专家共识（2018修订版）.html",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "small-airway-2026",
+   "title": "小气道病变与慢性气道疾病临床诊疗专家共识（2026年）",
+   "url": "https://doi.org/10.3760/cma.j.cn114798-20260302-00162",
+   "doi": "10.3760/cma.j.cn114798-20260302-00162",
+   "registered_title": "小气道病变与慢性气道疾病临床诊疗专家共识（2026年）",
+   "status": "doi_title_matches",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "still-2026",
+   "title": "Still病诊断及治疗临床实践指南（2026）",
+   "url": "https://rs.yiigle.com/cmaid/1705102",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "stroke-2024",
+   "title": "脑血管病防治指南",
+   "url": "https://www.nhc.gov.cn/cms-search/downFiles/5683726a96d341dba9aa8090ed2f0734.pdf",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "thyroid-nodule-v2",
+   "title": "甲状腺结节和分化型甲状腺癌诊治指南（第二版）",
+   "url": "https://chinanm.cma.org.cn/art/2024/12/31/art_1367_59554.html",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  },
+  {
+   "source_id": "tia-2021",
+   "title": "中国短暂性脑缺血发作早期诊治指导规范",
+   "url": "https://www.nhc.gov.cn/wjw/c100175/202108/df1789a9ba174678b1979bc14117b58f/files/1645425839055_46009.pdf",
+   "doi": null,
+   "registered_title": null,
+   "status": "no_doi_not_machine_checked",
+   "summary_checked_against_full_text": false
+  }
+ ]
+}

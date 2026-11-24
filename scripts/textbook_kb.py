@@ -14,7 +14,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from medtrace import textutil as T
 from medtrace.knowledge import index_card, search_tokens, validate_entry
 from scripts.textbook_search import digest_file, load_corpus
 
@@ -44,8 +43,44 @@ SOURCE_MAP = {
     '妇产科学第10版': {'id': 'PMPH-OBG10', 'scope': 'general'},
     '外科学第10版': {'id': 'PMPH-SUR10', 'scope': 'general'},
 }
+# Stable source identifiers for the other books already listed in the filtered corpus.
+SOURCE_MAP.update({
+    name: {'id': f'PMPH-{code}', 'scope': 'general'}
+    for name, code in {
+        '人体寄生虫学第10版': 'PAR10',
+        '医学心理学第8版': 'PSY8',
+        '医学生物学第10版': 'BIO10',
+        '医学遗传学第8版': 'GEN8',
+        '医患沟通第3版': 'COM3',
+        '医用高等数学第8版': 'MAT8',
+        '基础化学第10版': 'BCH10',
+        '有机化学第10版': 'OCH10',
+        '生物化学与分子生物学第10版': 'BCM10',
+        '生理学第10版': 'PHY10',
+        '病理学第10版': 'PAT10',
+        '病理生理学第10版': 'PYP10',
+        '皮肤性病学第10版': 'DER10',
+        '组织学与胚胎学第10版': 'HIS10',
+        '药理学第10版': 'PHA10',
+        '麻醉学第5版': 'ANE5',
+    }.items()
+})
+CLINICAL_BOOKS = {
+    '内科学第10版', '诊断学第10版', '儿科学第10版', '妇产科学第10版', '外科学第10版',
+    '皮肤性病学第10版', '麻醉学第5版', '药理学第10版', '病理学第10版', '病理生理学第10版',
+}
 REQUESTED_USES = ['offline_index', 'rag_context', 'derived_cards', 'competition_distribution']
 MAX_CARD_CHARS = 1800
+MAX_EVIDENCE_CHARS = 760
+SENTENCE_BREAK = re.compile(r'[。！？!?]+[”’）】」』]*|(?<!\d)\.(?![\w.])')
+CLAUSE_BREAK = re.compile(r'[；;，,、]')
+PROTECTED_TOKEN = re.compile(
+    r'(?<![A-Za-z0-9])(?:[+-]?\d[\d.]*'
+    r'(?:\s*(?:[~～–−-]\s*[+-]?\d[\d.]*|[×x]\s*10(?:\s*\^?\s*[+−-]?\d+)?))?'
+    r'(?:[ \t]*(?:[a-zA-Zμµ°%％℃/·²³]+(?:[ \t]*/[ \t]*[a-zA-Zμµ°²³]+)*))?'
+    r'|[a-zA-Zμµ][a-zA-Z0-9μµ/.-]*)'
+)
+
 
 
 def norm(text):
@@ -91,6 +126,52 @@ def expand_labels(text):
     return re.sub(r'(?<=[。；！？])\s*(【[^】]{1,30}】)\s*', r'\n\1\n', text)
 
 
+def chunk_spans(text, maximum):
+    """Yield contiguous offsets, preferring paragraphs and sentences over clause breaks."""
+    breaks = (
+        ("paragraph", [m.end() for m in re.finditer(r'\n+', text)]),
+        ("sentence", [m.end() for m in SENTENCE_BREAK.finditer(text)]),
+        ("clause", [m.end() for m in CLAUSE_BREAK.finditer(text)]),
+        ("space", [m.end() for m in re.finditer(r'[ \t]+', text)]),
+    )
+    tokens = [(m.start(), m.end()) for m in PROTECTED_TOKEN.finditer(text)]
+
+    def safe(cut):
+        return not any(left < cut < right for left, right in tokens)
+
+    start = 0
+    while len(text) - start > maximum:
+        end = start + maximum
+        minimum = start + maximum // 2
+        for basis, candidates in breaks:
+            cut = next((p for p in reversed(candidates) if minimum <= p <= end and safe(p)), None)
+            if cut is not None:
+                break
+        else:
+            basis, cut = "character", end
+            for left, right in tokens:
+                if left < cut < right:
+                    cut = left if left > start else right
+                    break
+        yield start, cut, basis
+        start = cut
+    if start < len(text):
+        yield start, len(text), "end"
+
+
+def source_segments(chunk):
+    segments = []
+    offset = 0
+    for text, page, printed, basis in chunk:
+        end = offset + len(text)
+        if segments and segments[-1]["page"] == page:
+            segments[-1]["end"] = end
+        else:
+            segments.append(dict(start=offset, end=end, page=page, printed=printed, basis=basis))
+        offset = end + 1
+    return segments
+
+
 def split_entries(entries):
     chunks, current, size = [], [], 0
     for entry in entries:
@@ -99,8 +180,8 @@ def split_entries(entries):
             if current:
                 chunks.append(current)
                 current, size = [], 0
-            for start in range(0, len(line), MAX_CARD_CHARS):
-                chunks.append([(line[start:start + MAX_CARD_CHARS], entry[1], entry[2], entry[3])])
+            for start, end, _ in chunk_spans(line, MAX_CARD_CHARS):
+                chunks.append([(line[start:end], entry[1], entry[2], entry[3])])
             continue
         if size and size + len(line) + 1 > MAX_CARD_CHARS:
             chunks.append(current)
@@ -248,8 +329,8 @@ def parse_structure(book, pages, source, version, scope, source_id):
         chunks = split_entries(lines)
         base = title()
         for index, chunk in enumerate(chunks, 1):
-            text = '\n'.join(entry[0] for entry in chunk).strip()
-            if not text:
+            text = '\n'.join(entry[0] for entry in chunk)
+            if not text.strip():
                 continue
             card_title = base if len(chunks) == 1 else f'{base}（{index}/{len(chunks)}）'
             cards.append({
@@ -261,7 +342,8 @@ def parse_structure(book, pages, source, version, scope, source_id):
                 'page_end': chunk[-1][1],
                 'printed_page_start': chunk[0][2],
                 'printed_page_end': chunk[-1][2],
-                'page_basis': sorted({entry[3] for entry in chunk}),
+                'page_basis': sorted({entry[3] for entry in chunk if entry[3]}),
+                'source_segments': source_segments(chunk),
             })
 
     for page, printed, basis, text in expanded:
@@ -336,7 +418,7 @@ def parse_structure(book, pages, source, version, scope, source_id):
             },
             'candidate_source_ids': [source_id],
             'source_id': source_id,
-            'source_note': '官方目录元数据；正文来自用户提供的第10版电子版，未取得再分发许可。',
+            'source_note': '正文来自用户提供的电子教材纯文字语料。',
             'clinical_scope_notes': '教材内容范围待临床审核；scope 为初步设定。',
         })
     return cards
@@ -375,6 +457,8 @@ def outline_for(book, source_id, cards):
 
 def structure_corpus(corpus_dir, out_dir, *, selected_books=None):
     books, manifest_path = load_corpus(corpus_dir, selected_books=selected_books)
+    if not books:
+        raise ValueError('no textbooks selected')
     sources = {item['id']: item for item in json.loads((ROOT / 'knowledge' / 'sources.json').read_text('utf-8'))}
     dest = Path(out_dir)
     if not dest.is_absolute() or dest.exists():
@@ -386,14 +470,16 @@ def structure_corpus(corpus_dir, out_dir, *, selected_books=None):
         mapping = SOURCE_MAP.get(book)
         if not mapping:
             raise ValueError(f'no source mapping for {book}')
-        source_info = sources.get(mapping['id'])
-        if not source_info:
-            raise ValueError(f'missing source metadata: {mapping["id"]}')
-        cards = parse_structure(book, pages, source_info['source'], source_info.get('version_candidate', ''),
-                                mapping['scope'], mapping['id'])
+        source_info = sources.get(mapping['id'], {})
+        version = source_info.get('version_candidate') or re.search(r'第\d+版$', book).group()
+        source = source_info.get('source') or f'人民卫生出版社《{book[:-len(version)]}》'
+        cards = parse_structure(book, pages, source, version, mapping['scope'], mapping['id'])
         for card in cards:
-            card['source_url'] = source_info['source']
-            card['isbn'] = source_info.get('isbn')
+            card['publisher'] = '人民卫生出版社'
+            card['corpus_text_sha256'] = item['sha256']
+            if source_info:
+                card['source_url'] = source
+                card['isbn'] = source_info.get('isbn')
             if 'population' in mapping:
                 card['population'] = mapping['population']
         all_cards.extend(cards)
@@ -427,6 +513,7 @@ def structure_corpus(corpus_dir, out_dir, *, selected_books=None):
         'structure': {
             'levels': ['part', 'chapter', 'section', 'topic', 'subtopic', 'label'],
             'max_card_chars': MAX_CARD_CHARS,
+            'page_mapping': 'source_segments offsets into each draft card',
             'split_suffix': '（1/N）…（N/N）',
         },
     }
@@ -437,7 +524,9 @@ def structure_corpus(corpus_dir, out_dir, *, selected_books=None):
 
 def clinical_categories(card):
     structure = card.get("structure") or {}
-    label = " ".join(structure.get(key, "") for key in ("label", "subtopic"))
+    label = " ".join(structure.get(key, "") for key in ("label", "subtopic")).strip()
+    if not label:
+        label = structure.get("topic") or structure.get("section", "")
     tags = []
     if "鉴别" in label:
         tags.append("differential")
@@ -450,25 +539,25 @@ def clinical_categories(card):
     return tags
 
 
-def pack_sentences(text, max_chars=760):
-    """Do not cut decimals, units or OCR lines without a usable sentence boundary."""
-    group = []
-    size = 0
-    for sentence in T.split_sentences(text):
-        if group and size + 1 + len(sentence) > max_chars:
-            yield "\n".join(group)
-            group, size = [], 0
-        size += len(sentence) + bool(group)
-        group.append(sentence)
-    if group:
-        yield "\n".join(group)
+MIN_PASSAGE_CHARS = 15
+
+
+def chunk_pages(card, start, end):
+    spans = [segment for segment in card.get("source_segments", [])
+             if segment["start"] < end and start < segment["end"]]
+    if not spans:
+        return {}
+    pages = dict(page_start=spans[0]["page"], page_end=spans[-1]["page"],
+                 printed_page_start=spans[0]["printed"], printed_page_end=spans[-1]["printed"],
+                 page_basis=sorted({span["basis"] for span in spans if span["basis"]}))
+    return {**pages, "locator": locator(pages)}
 
 
 def organize_drafts(entries_path, output):
     """Derive a local-only, page-traceable index input from existing textbook cards."""
     if output.exists():
         raise ValueError("use a new output path")
-    rows, ids = [], set()
+    rows, parent_ids, fragments = [], set(), 0
     with entries_path.open(encoding="utf-8") as stream:
         for line in stream:
             if not line.strip():
@@ -480,14 +569,29 @@ def organize_drafts(entries_path, output):
             if card["type"] != "card":
                 continue
             categories = clinical_categories(card)
-            for text in pack_sentences(card["text"]):
+            if card.get("parent_id"):
+                raise ValueError("organize expects original textbook cards")
+            if card["id"] in parent_ids:
+                raise ValueError(f"duplicate textbook parent card: {card['id']}")
+            parent_ids.add(card["id"])
+            digests = set()
+            evidence = {key: value for key, value in card.items() if key != "source_segments"}
+            for start, end, boundary in chunk_spans(card["text"], MAX_EVIDENCE_CHARS):
+                text = card["text"][start:end].strip()
+                if not text:
+                    continue
+                # Split leftovers such as "阴性。" carry no standalone meaning and mislead out of context.
+                if len(text) < MIN_PASSAGE_CHARS:
+                    fragments += 1
+                    continue
                 digest = hashlib.sha256(text.encode()).hexdigest()[:12]
                 evidence_id = f"{card['id']}-{digest}"
-                if evidence_id in ids:
-                    continue
-                ids.add(evidence_id)
-                rows.append({**card, "id": evidence_id, "parent_id": card["id"], "categories": categories,
-                             "text": text})
+                if digest in digests:
+                    evidence_id = f"{evidence_id}-{start}"
+                digests.add(digest)
+                rows.append({**evidence, **chunk_pages(card, start, end), "id": evidence_id,
+                             "parent_id": card["id"], "parent_char_start": start, "parent_char_end": end,
+                             "split_boundary": boundary, "categories": categories, "text": text})
     if not rows:
         raise ValueError("no textbook cards")
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -498,11 +602,15 @@ def organize_drafts(entries_path, output):
         "chunks": len(rows), "parent_cards": len({row["parent_id"] for row in rows}),
         "categories": dict(sorted(Counter(category for row in rows for category in row["categories"]).items())),
         "unclassified": sum(not row["categories"] for row in rows),
+        "by_book": dict(sorted(Counter(row.get("book", "") for row in rows).items())),
+        "split_boundaries": dict(sorted(Counter(row["split_boundary"] for row in rows).items())),
+        "over_limit": sum(len(row["text"]) > MAX_EVIDENCE_CHARS for row in rows),
+        "dropped_fragments": fragments,
         "status": "draft", "entries_sha256": digest_file(output),
     }
 
 
-def build_index(entries_path, db_path, supplements=()):
+def build_index(entries_path, db_path, supplements=(), *, clinical_only=False, excluded_books=()):
     entries_path = Path(entries_path)
     if not entries_path.is_absolute():
         raise ValueError('entries path must be absolute')
@@ -512,6 +620,12 @@ def build_index(entries_path, db_path, supplements=()):
     sources = [entries_path, *map(Path, supplements)]
     entries = [json.loads(line) for source in sources
                for line in source.read_text('utf-8').splitlines() if line.strip()]
+    if missing := set(excluded_books) - {row.get('book') for row in entries}:
+        raise ValueError(f'unknown excluded textbooks: {sorted(missing)}')
+    entries = [row for row in entries if row.get('book') not in excluded_books
+               and (not clinical_only or not row.get('book') or row['book'] in CLINICAL_BOOKS)]
+    if not entries:
+        raise ValueError('index requires at least one entry')
     seen = set()
     for entry in entries:
         validate_entry(entry)
@@ -539,6 +653,7 @@ def build_index(entries_path, db_path, supplements=()):
             'supplements': [{'name': source.name, 'sha256': digest_file(source), 'bytes': source.stat().st_size}
                             for source in sources[1:]],
             'counts': dict(Counter(entry.get('book', 'unknown') for entry in entries)),
+            'clinical_only': clinical_only, 'excluded_books': sorted(excluded_books),
             'by_type': dict(Counter(entry['type'] for entry in entries)),
             'dependencies': ['Python >=3.10', 'SQLite FTS5'],
             'redistribution': 'not established; local research index; drafts only',
@@ -597,6 +712,8 @@ def main():
     b = sub.add_parser('build', help='build a local draft knowledge index')
     b.add_argument('--supplement', type=Path, action='append', default=[])
     b.add_argument('--entries', required=True)
+    b.add_argument('--clinical-only', action='store_true')
+    b.add_argument('--exclude-book', action='append', default=[])
     b.add_argument('--db', required=True)
     q = sub.add_parser('search')
     q.add_argument('--db', required=True)
@@ -610,7 +727,8 @@ def main():
     if args.command == 'structure':
         structure_corpus(args.corpus, args.out, selected_books=args.book)
     elif args.command == 'build':
-        build_index(args.entries, args.db, args.supplement)
+        build_index(args.entries, args.db, args.supplement,
+                    clinical_only=args.clinical_only, excluded_books=args.exclude_book)
     else:
         print(json.dumps(search_cards(args.db, args.query, args.limit, args.book), ensure_ascii=False, indent=2))
 
