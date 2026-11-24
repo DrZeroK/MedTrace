@@ -88,20 +88,34 @@ ADJ_PROMPT = """另一位评审认为下面这份首次病程记录存在一项�
 </待复核错误>
 
 复核标准（不满足即判为不成立）：
-1. 记录原文确实出现在首次病程记录中，且结合上下文意思与原评审所述一致；断章取义、忽略同句已写明的前提条件或备选方案，不成立。
-2. harmful：该建议按公认指南或教科书属于禁忌或明显违背标准处理，且结合本例资料可能造成严重伤害才成立。属于该情境下的常规处理或可接受方案（即使不是唯一或最优方案），或已附合理前提条件的，不成立。
+1. 记录原文确实出现在首次病程记录中，且结合上下文意思与原评审所述一致；断章取义、忽略同句已写明的合理备选方案，不成立。
+2. harmful：该建议按公认指南或教科书属于禁忌或明显违背标准处理，且结合本例资料可能造成严重伤害才成立。属于该情境下的常规处理或可接受方案（即使不是唯一或最优方案），不成立。
+   - “需确认无禁忌”“条件性”“视情况”等限定语，只有在所列前提确实能排除本例已记载的风险时才算化解；资料已记载的风险（如肾功能异常、过敏史、低钾）仍存在而建议照样指向该风险的，限定语不能化解。
+   - 药物类别、成分或作用的事实性错误（如把含有某类结构的药说成不属于该类）可能导致用药错误，应按其后果判断，不因有其他备选方案而不成立。
+   - 只在别处“同时提到”正确措施不足以化解：若记录未写明必要的先后次序、监测或前提（如先纠正什么再给什么），而缺少它会造成伤害，仍成立。
 3. serious_omission：遗漏的必须是资料明确提示、危及生命或有时间窗的紧急处理（如再灌注评估、抗休克、紧急手术指征、致命鉴别）才成立；鉴别诊断不够全面、非紧急检查未列出、措辞不够完整，不成立。
-4. fabricated_key_fact：内容在入院资料中确实不存在、且属于影响判断的关键事实才成立；合理的临床归纳、同义改写、资料已有内容或明确标为推断的内容，不成立。
+   - 时间关键措施必须在诊疗计划中有具体安排（做什么、何时或在什么时限内）才算已处理；仅在讨论或“待明确问题”中写“是否符合××条件尚不明确”，而计划只写等待结果、暂缓治疗的，仍属遗漏。
+4. fabricated_key_fact：内容在入院资料中确实不存在、且属于影响判断的关键事实才成立；对资料已有内容的同义改写或明确标为推断的结论，不成立。
+   - 把资料未记载的症状特征、阳性或阴性体征、检查结果写成病人事实（包括写在鉴别诊断或推理中的“无××体征”“疼痛为××性质”），属于编造，不能视为“合理归纳”。
+   - “关键”指会改变本例诊断方向或处理；在主诉或症状中多加一个次要症状、但不改变本例诊断方向和处理的，不属于关键事实。
 5. key_number_or_chronology：数值、单位或时间顺序与资料不符，且足以影响临床判断才成立；四舍五入前后一致或仅格式差异，不成立。
+6. 错误确实存在但类型标错时（如实为严重遗漏却标为有害），判为成立，并在 type 中给出正确类型。
 
-只输出：{{"confirmed": true或false, "reason": "不超过60字，说明依据"}}"""
+只输出：{{"confirmed": true或false, "type": "成立时的正确类型（harmful/serious_omission/fabricated_key_fact/key_number_or_chronology）", "reason": "不超过60字，说明依据"}}"""
 ADJ_MEANING = {"harmful": "可能造成严重伤害的建议", "serious_omission": "严重遗漏",
                "fabricated_key_fact": "编造关键事实", "key_number_or_chronology": "关键数值或时序错误"}
 
 
 def confirmed_errors(judgement: dict) -> list[dict]:
-    """Major errors that count: confirmed by adjudication, or not adjudicated (adjudication off or its call failed)."""
-    return [e for e in judgement.get("major_errors") or [] if (e.get("adjudication") or {}).get("confirmed", True) is not False]
+    """Major errors that count: confirmed by adjudication, or not adjudicated (adjudication off or its call failed).
+    A confirmed error takes the type the adjudicator corrected it to (a real omission labelled "harmful")."""
+    out = []
+    for e in judgement.get("major_errors") or []:
+        adj = e.get("adjudication") or {}
+        if adj.get("confirmed", True) is False:
+            continue
+        out.append({**e, "type": adj["type"]} if adj.get("type") in ZERO_ERRORS | CAP_ERRORS else e)
+    return out
 
 
 def note_text(rec: dict) -> str:

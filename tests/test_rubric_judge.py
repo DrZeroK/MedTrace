@@ -26,6 +26,8 @@ class RubricRules(unittest.TestCase):
         self.assertEqual(score_case(REC, {"scores": FULL, "major_errors": [over]})["total"], 80.0)
         self.assertEqual(score_case(REC, {"scores": FULL, "major_errors": [over, kept]})["total"], 0.0)
         self.assertEqual(score_case(REC, {"scores": FULL, "major_errors": [{"type": "harmful"}]})["total"], 0.0)   # review failed or off
+        retyped = {"type": "harmful", "adjudication": {"confirmed": True, "type": "fabricated_key_fact", "reason": "编造体征"}}
+        self.assertEqual(score_case(REC, {"scores": FULL, "major_errors": [retyped]})["total"], 50.0)   # corrected type rules
 
 
 class CacheIdentity(unittest.TestCase):
