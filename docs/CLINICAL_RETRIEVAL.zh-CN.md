@@ -2,6 +2,33 @@
 
 本分支把本地检索接入现有 MedTrace 生成流水线。检索器使用 Python 标准库和 SQLite FTS5。输入支持自由文本，或 `history`、`symptoms`、`labs`、`exams` 字段。比赛流水线使用已按截止点处理的事实账本，检索无额外模型调用。返回的知识卡 `id` 标识证据片段，`source_id`、`version` 和 `locator` 用于审计和回查。正式输出的 `medical_record.evidence[].source_ids` 仍按赛题协议引用本病例的资料 ID。
 
+## 2026-11-24 扩库与教材分块
+
+新增 [24 条纯文字知识卡](../knowledge/guidelines.v3.jsonl)，来自 13 份文件，其中 10 份是指南、3 份是专家共识。补充皮炎湿疹、皮肤鳞癌、脓疱型银屑病、药疹、儿童春季角膜结膜炎、原发性闭角型青光眼、近视、乳腺癌、原发性肝癌、成人幽门螺杆菌感染、帕金森病、急性肺栓塞和成人惊厥性癫痫持续状态。来源版本和适用范围按各机构原文件登记。三批合计 111 条纯文字卡。
+
+教材分块保留目录层级、标点和原始定位。块长目标 760 字符，优先使用保留的换行、句末或分句断点；分割避开检验值及单位。每块保留父条目、字符区间、`source_id`、版次及页码依据。由纯文本页重新整理时，页码只覆盖该块涉及的页面；已存在的旧父卡没有页内偏移时，子块沿用父卡页范围。用途根据原有标签或小节标题填写。
+
+```bash
+root="$(mktemp -d)"
+python scripts/textbook_kb.py structure \
+  --corpus data/reference_indexes/textbooks-text-21-v2 --out "$root/structure"
+python scripts/textbook_kb.py organize \
+  --entries "$root/structure/entries.jsonl" --output "$root/chunks.jsonl" > "$root/chunk-audit.json"
+python scripts/textbook_kb.py build --entries "$root/chunks.jsonl" \
+  --exclude-book 人体寄生虫学第10版 --db "$root/textbook-search.sqlite"
+python scripts/textbook_kb.py build --entries "$root/chunks.jsonl" --clinical-only \
+  --supplement knowledge/guidelines.v1.jsonl \
+  --supplement knowledge/guidelines.v2.jsonl \
+  --supplement knowledge/guidelines.v3.jsonl \
+  --db "$root/clinical-drafts.sqlite"
+python -m eval.rag_benchmark --cards knowledge/guidelines.v3.jsonl \
+  --queries eval/retrieval_guidelines.v3.jsonl
+```
+
+全量命令需要私有仓库已提供的纯文字教材及其语料清单。实际整理 21 册，共 20,144 个父条目、26,110 个证据片段，片段均在 760 字符内。通用检索库含 20 册、25,226 片，逐册探针 20/20 命中。人体寄生虫学的 884 片保留供本地审阅，因为 OCR 和页码质量仍待复核。临床库选择 10 册与诊疗直接相关的教材，叠加三批指南和共识，共 17,571 条，逐册探针 10/10 命中。新增书目的版次和文件哈希来自既有教材语料，未经核对的 ISBN 不填。
+
+新增指南的 16 条合成查询含 13 条正例和 3 条反例。新版卡单独索引时，Recall@5 和证据相关准确率@5 均为 100%，三条反例均为空。测试样例由团队编写，用于检查继续扩库后的基础检索和范围过滤。临床混合库在官方 8 份练习病历的 10 个主题中命中 9 个，原有短暂性局灶神经症状漏召仍需处理。
+
 ## 指南与共识扩库
 
 截至 2026-11-23 核对并新增 30 份来源，含 25 份指南或诊疗方案、5 份专家共识。[纯文字条目](../knowledge/guidelines.v2.jsonl) 有 54 条可检索知识卡，分别为诊断 15 条、鉴别 5 条、检查 12 条、治疗 22 条。来源包括国家卫健委、中华医学会及相关专业组织。重点补充慢阻肺、儿童肺炎支原体肺炎、高血压、房颤、慢性肾脏病、肝硬化、风湿免疫病、睡眠障碍、重症肌无力及部分肿瘤筛查。诊疗指南、专项治疗共识、筛查方案按原文适用范围分别取材。罕见病、眼科、皮肤科、精神科及肿瘤分型治疗仍有明显覆盖缺口。

@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from medtrace.knowledge import validate_entry
-from scripts.textbook_kb import build_index, search_cards, structure_corpus
+from scripts.textbook_kb import build_index, chunk_spans, organize_drafts, search_cards, structure_corpus
 from scripts.textbook_search import render_book
 
 BOOK = '内科学第10版'
@@ -62,6 +62,40 @@ class TextbookKnowledgeCards(unittest.TestCase):
         interval = [entry for entry in self.entries if entry['structure'].get('label') == '【参考区间】']
         self.assertEqual(interval[0]['text'], '3.5～5.3mmol/L。')
         self.assertFalse(any('思维导图' in entry['text'] or '张三' in entry['text'] for entry in self.entries))
+
+    def test_chunk_spans_preserve_text_and_measurements(self):
+        prefix = "甲" * 15
+        measurement = "3.5～5.3 mmol/L"
+        text = f"{prefix}{measurement}。\n后续段落。"
+        spans = list(chunk_spans(text, 20))
+        self.assertEqual("".join(text[start:end] for start, end, _ in spans), text)
+        self.assertTrue(all(end - start <= 20 for start, end, _ in spans))
+        self.assertEqual(sum(measurement in text[start:end] for start, end, _ in spans), 1)
+
+    def test_organized_evidence_tracks_actual_page_and_parent_offsets(self):
+        corpus = self.root / 'extra-corpus'
+        corpus.mkdir()
+        make_corpus(corpus, [
+            (10, 6, 'header', '第一章 主题\n【实验室检查】\n' + '一' * 500 + '。'),
+            (11, 7, 'offset_inferred', '二' * 500 + '。'),
+        ])
+        structured = self.root / 'two-pages'
+        structure_corpus(corpus / 'corpus', structured)
+        source = structured / 'entries.jsonl'
+        parent = json.loads(source.read_text('utf-8'))
+        output = self.root / 'evidence.jsonl'
+        stats = organize_drafts(source, output)
+        self.assertEqual(stats["over_limit"], 0)
+        rows = [json.loads(line) for line in output.read_text('utf-8').splitlines()]
+        self.assertEqual([r["page_start"] for r in rows], [10, 11])
+        self.assertEqual([r["page_end"] for r in rows], [10, 11])
+        self.assertIn("第6页", rows[0]["locator"])
+        self.assertIn("第7页", rows[1]["locator"])
+        for row in rows:
+            self.assertEqual(row["parent_id"], parent["id"])
+            self.assertEqual(row["text"],
+                             parent["text"][row["parent_char_start"]:row["parent_char_end"]].strip())
+            self.assertIn("tests", row["categories"])
 
     def test_select_one_verified_book_from_larger_manifest(self):
         manifest_path = self.corpus / 'corpus.manifest.json'

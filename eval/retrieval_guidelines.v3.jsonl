@@ -1,0 +1,16 @@
+{"id":"g301","group":"skin","query":{"symptoms":"反复湿疹样皮炎，接触手套后加重，需做湿疹鉴别诊断"},"categories":["differential"],"relevant":["kb:eczema-2026:differential"]}
+{"id":"g302","group":"skin","query":{"symptoms":"手背角化性溃疡长期不愈，疑似皮肤鳞癌，需要组织病理评估"},"categories":["diagnosis"],"relevant":["kb:cscc-2026:biopsy"]}
+{"id":"g303","group":"skin","query":{"history":"有银屑病史","symptoms":"大范围发红并有无菌性脓疱，待鉴别脓疱型银屑病"},"categories":["differential"],"relevant":["kb:pustular-psoriasis-2026:differential"]}
+{"id":"g304","group":"skin","query":{"history":"新用一种药数日后出现药物性皮疹","symptoms":"伴发热、口腔黏膜糜烂"},"categories":["differential"],"relevant":["kb:drug-eruption-2026:differential"]}
+{"id":"g305","group":"eye","query":{"history":"8岁儿童","symptoms":"春季反复双眼痒和畏光","exams":"睑结膜见巨乳头"},"categories":["diagnosis"],"relevant":["kb:vkc-peds-2026:assessment"]}
+{"id":"g306","group":"eye","query":{"history":"64岁","symptoms":"急起眼痛、视力下降","exams":"周边前房浅，疑房角关闭"},"categories":["diagnosis"],"relevant":["kb:pacg-2025:workup"]}
+{"id":"g307","group":"eye","query":{"history":"12岁学生，近视防控随访","exams":"计划睫状肌麻痹验光"},"categories":["tests"],"relevant":["kb:myopia-nhc-2026:assessment"]}
+{"id":"g308","group":"oncology","query":{"exams":"乳腺影像提示可疑肿块，拟行乳腺穿刺活检确认分型"},"categories":["diagnosis"],"relevant":["kb:breast-caca-2026:diagnosis"]}
+{"id":"g309","group":"oncology","query":{"history":"肝硬化，属于肝癌高危人群","exams":"新发肝占位，需评估肝癌动态增强影像表现"},"categories":["diagnosis"],"relevant":["kb:hcc-nhc-2026:diagnosis"]}
+{"id":"g310","group":"digestive","query":{"history":"45岁，拟评估幽门螺杆菌现症感染","labs":"计划尿素呼气试验"},"categories":["diagnosis"],"relevant":["kb:hp-adult-2026:diagnosis"]}
+{"id":"g311","group":"neuro","query":{"history":"帕金森病用药多年","symptoms":"有明显帕金森运动波动和异动症，伴帕金森病睡眠障碍"},"categories":["treatment"],"relevant":["kb:parkinson-2026:motor","kb:parkinson-2026:nonmotor"]}
+{"id":"g312","group":"vascular","query":{"symptoms":"术后突发气短，疑急性肺栓塞","exams":"拟行CT肺动脉造影"},"categories":["tests"],"relevant":["kb:pte-2025:workup"]}
+{"id":"g313","group":"neuro","query":{"history":"34岁","symptoms":"持续全身强直阵挛超过五分钟，考虑惊厥性癫痫持续状态"},"categories":["diagnosis"],"relevant":["kb:convulsive-se-2025:recognition"]}
+{"id":"g314","group":"negative","query":"否认皮肤鳞状细胞癌，否认急性肺栓塞。","relevant":[]}
+{"id":"g315","group":"negative","query":{"history":"40岁成人，计划检索儿童春季角膜结膜炎诊断"},"categories":["diagnosis"],"relevant":[]}
+{"id":"g316","group":"negative","query":{"labs":"浓度4.8 mmol/L，眼压18 mmHg，病史未提供"},"relevant":[]}
