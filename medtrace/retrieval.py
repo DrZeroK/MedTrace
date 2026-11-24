@@ -31,9 +31,13 @@ def prepare_query(query):
             value = T.fw(value).lower()
             originals.append(value)
             masked = list(value)
-            for span in context.analyze(value):
-                if span.value in {"negated", "missing", "family", "hypothetical"}:
-                    masked[span.start:span.end] = " " * (span.end - span.start)
+            scopes = context.analyze(value)
+            # Resolve overlapping scopes by the context module's precedence: "不能排除哮喘" stays uncertain.
+            for i in {i for span in scopes for i in range(span.start, span.end)}:
+                state = context.attributes(value, i, i + 1, scopes)
+                if (state["assertion"] in {"negated", "missing"} or state["experiencer"] == "family"
+                        or state["temporality"] == "hypothetical"):
+                    masked[i] = " "
             for clause in CLAUSE.split("".join(masked)):
                 if clause.strip():
                     clauses.append((clause, FIELDS[field]))

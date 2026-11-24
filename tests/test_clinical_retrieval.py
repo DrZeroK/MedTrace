@@ -78,6 +78,14 @@ class ClinicalRetrievalTests(unittest.TestCase):
         self.assertEqual(set(weights), {"高血压", "糖尿病"})
         self.assertLess(weights["高血压"], weights["糖尿病"])
 
+    def test_unresolved_differential_is_not_masked_as_negated(self):
+        for text in ("不能排除哮喘", "待排除哮喘", "考虑哮喘"):
+            with self.subTest(text=text):
+                self.assertIn("哮喘", " ".join(clause for clause, _ in prepare_query(text)[0]))
+        for text in ("已排除哮喘", "排除哮喘", "否认哮喘", "母亲哮喘", "若出现哮喘"):
+            with self.subTest(text=text):
+                self.assertNotIn("哮喘", " ".join(clause for clause, _ in prepare_query(text)[0]))
+
     def test_practice_intake_keeps_only_disclosed_evidence(self):
         chart = "姓名：模拟姓名\n年龄：55岁\n主  诉：胸痛\n辅助检查\n心电图已查\n初步诊断：\n后续结论"
         self.assertEqual(_intake(chart), ["年龄：55岁", "主  诉：胸痛", "辅助检查", "心电图已查"])
