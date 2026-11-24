@@ -2,7 +2,7 @@
 
 **English** | [简体中文](COMPETITION_QA.zh-CN.md)
 
-- Compiled on: 2026-11-17. Updated on: 2026-11-18: the Chinese Q&A now reproduces the organizer's original text verbatim, plus four supplementary organizer answers (Q10-Q13). Updated on 2026-11-20 with three additional answers (Q14-Q16 are project-side working numbers; the organizer did not number them).
+- Compiled on: 2026-11-17. Updated on: 2026-11-18: the Chinese Q&A now reproduces the organizer's original text verbatim, plus four supplementary organizer answers (Q10-Q13). Updated on 2026-11-20 with three additional answers (Q14-Q16 are project-side working numbers; the organizer did not number them). Updated on 2026-11-24 from the "赛题组常见问题咨询" document: the designated model name and the vendor answers (Section 7, Q17-Q21, summarised rather than reproduced).
 - Source: the organizer's full Q&A supplied by the project owner in conversation, plus the supplementary answers supplied on 2026-11-18 and 2026-11-20. No original announcement URL, publication date, or version number was provided.
 - Editorial approach: the Chinese Q&A text is reproduced verbatim from the organizer (only heading levels and Q numbering are normalized); the English version is a paragraph-by-paragraph translation with consistent headings and code formatting.
 - Applicability: this document records the supplied answers. Subsequent unified technical specifications, actual API examples, and official evaluation configurations take precedence. This document does not certify that the repository implements or satisfies every requirement.
@@ -24,7 +24,9 @@
 | Enterprise-track hardware | Model inference served by a unified Huawei Ascend stack deployment; participant algorithms run in an isolated CPU environment without direct GPU/NPU allocation | Python, rule computation, local retrieval, and lightweight computing allowed within resource limits; no additional self-deployed LLMs or GPU/NPU inference services; special CPU dependencies require advance declaration and compatibility assessment; OS, CPU, memory, storage, and runtime limits pending |
 | Token, call, and runtime budgets | No explicit total token limit during the current development and testing stage | Official timeout, runtime, token, call, and retry limits pending; retries actively initiated by participant algorithms count toward the call budget |
 | `temperature` and `response_format` | vLLM natively supports `text`, `json_object`, `json_schema`, and other output formats; `json_schema` permitted in principle | Exact parameter range and JSON Schema features subject to compatibility validation of the deployed version; a unified parameter list and examples will be provided |
-| Thinking | Strategy-dependent selection permitted in principle | Controlled through `chat_template_kwargs`; omission uses the actual server-side default configuration |
+| Designated model | `qwen3.8-27b` (officially specified) | Interface broadly compatible with OpenAI Chat Completions (messages, temperature, max_tokens, stream, tools and other common fields) |
+| Thinking | Strategy-dependent selection permitted in principle; participants may turn deep thinking off | `qwen3.8-27b` has Thinking on by default; turned off through `chat_template_kwargs`; omission uses the actual server-side default; streaming is allowed with deep thinking on |
+| Official evaluation cases | 1, the same record for every team | One each for the enterprise round and the final (the final is harder); the enterprise-round case is issued with the round notice |
 | External third-party APIs | Prohibited | Includes commercial large models, online Embedding, and online retrieval; competition cases must not be uploaded to third-party platforms |
 | Result filename | Not yet unified | Prechecks will accommodate `output.json` and `results.json` where possible; official submissions must follow the updated unified technical specification |
 
@@ -207,6 +209,30 @@ A low-frequency internal-network test API will be provided through a unified HTT
 
 The specific endpoint, authentication method, call examples, quota, and final model version will be published uniformly after service validation and kept consistent during official evaluation.
 
+## 7. Vendor Answers: Model Interface and Evaluation Arrangements (added 2026-11-24, summary)
+
+Source: the first part (vendor-side answers) of the "赛题组常见问题咨询" document supplied by the project owner, and the model name the project owner confirmed. These are summarised points, not the original text; the document itself is authoritative. Q17-Q21 are project-side working numbers.
+
+### Q17. Designated model and interface compatibility
+
+The officially specified model name is `qwen3.8-27b`. The interface is broadly compatible with OpenAI Chat Completions; common fields such as messages, temperature, max_tokens, stream and tools match OpenAI. Whether and when a test interface matching the official evaluation is provided is for the organiser to arrange.
+
+### Q18. Thinking and streaming
+
+`qwen3.8-27b` has Thinking on by default; it runs without a thinking parameter, and turning Thinking off or adjusting reasoning depth uses extension parameters (in vLLM, `chat_template_kwargs`; see Q7). Participants may turn deep thinking off, and streaming is allowed with deep thinking on. `temperature`, `max_tokens` and `response_format` are adjustable; whether teams may set them is configured by the organiser (see also Q6, Q14).
+
+### Q19. Number of official evaluation cases
+
+The official evaluation uses 1 case, the same record for every team. The enterprise round and the final each provide one, the final being harder; the enterprise-round case is issued with the round notice at the start. Scoring dimensions and technical documents are in the competition-rule attachments.
+
+### Q20. Token and call limits
+
+Token limits, call counts, concurrency, timeouts, retries and runtime limits are competition rules set by the organiser in the back end (official limits: see Q5).
+
+### Q21. Algorithms, external knowledge and supporting materials
+
+Multi-stage workflows, multi-agent collaboration, and bundled fixed-version medical knowledge bases, rule bases and local retrieval modules are allowed (registration: Q1, Q2). Practice cases, the model list and interface documentation follow the organising committee's notices. The vendor answer also restates that only the designated model announced by the organiser may be called (consistent with Q8).
+
 ## Items Awaiting Organizer Clarification
 
 The following items were not finalized in this Q&A and must not be replaced with assumed official limits:
@@ -214,11 +240,11 @@ The following items were not finalized in this Q&A and must not be replaced with
 - Algorithm package size limit, Python dependency compatibility requirements, and resource registration template.
 - Per-request timeout, total runtime per case, token consumption, model-call limits, and retry limits.
 - How platform faults are confirmed and handled under the unified exception-handling rules.
-- Actual model configuration, default Thinking mode, Thinking/`response_format` support parameters, and unified API examples; the specific JSON Schema features supported by `json_schema`.
+- The deployed `qwen3.8-27b` configuration, Thinking/`response_format` support parameters, and unified API examples; the specific JSON Schema features supported by `json_schema`. (The model name and "Thinking on by default" are settled by Section 7.)
 - Final result filename and data structure.
 - Final evaluation environment configuration, including whether vLLM automatic prefix caching is disabled for official evaluation.
 - Specification of the unified internal-network Embedding API, including endpoint, authentication, call examples, batching/quota, and the final BGE-M3 version and precision configuration.
 - Size limits for local knowledge bases and pre-built indexes submitted with the algorithm.
 - Operating system, CPU, memory, storage, and runtime limits of the isolated CPU evaluation environment.
 
-This Q&A does not specify the exact Qwen model name, ENDPOINT configuration method, complete input/output schemas, or exit-code rules. These items must be checked separately against the official technical specification.
+The designated model name is `qwen3.8-27b` (Section 7). This Q&A does not specify the ENDPOINT configuration method, complete input/output schemas, or exit-code rules; these items must be checked separately against the official technical specification.

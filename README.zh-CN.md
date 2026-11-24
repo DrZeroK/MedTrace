@@ -11,7 +11,7 @@
 主办方放入input.json和.env；.env只允许两项非空配置：
 
 ```dotenv
-MODEL_NAME=replace_with_model_name
+MODEL_NAME=qwen3.8-27b
 ENDPOINT=http://127.0.0.1:8000/v1/chat/completions
 ```
 
@@ -37,7 +37,7 @@ output.json在整批处理结束后原子发布。每条包含case_id、status�
 
 离线测试：将ZIP解压至新目录，设置进程环境LLM_API_BASE=mock://、OUTPUT_PROTOCOL=official，再执行 `python main.py --development --input /绝对路径/input.example.json --output /绝对路径/test_output.json`。这是显式模拟运行。
 
-开发实验须加--development；可在独立工作目录使用.env.development.example，启用模型别名、路径与参数配置，默认使用旧扁平输出。评测模块显式使用开发配置。官方病例不得发往第三方服务。
+开发实验须加--development；可在独立工作目录使用.env.development.example，启用模型别名、路径与参数配置，默认输出与官方模式相同（`OUTPUT_PROTOCOL=legacy` 可改用旧扁平输出）。评测模块显式使用开发配置。
 
 运行 `python -m unittest discover -s tests -v`检查回归；测试包含本地HTTP模拟服务下、仅两项.env配置的无参数比赛入口，测试产物保留。
 

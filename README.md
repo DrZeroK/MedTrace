@@ -11,7 +11,7 @@ Python 3.11 is the competition runtime. Install with `python -m pip install -r r
 `.env` contains exactly two non-empty keys:
 
 ```dotenv
-MODEL_NAME=replace_with_model_name
+MODEL_NAME=qwen3.8-27b
 ENDPOINT=http://127.0.0.1:8000/v1/chat/completions
 ```
 
@@ -43,7 +43,7 @@ After running an extracted algorithm package, use `python scripts/build_submissi
 
 For an offline smoke test, extract into a new directory and run `python main.py --development --input /absolute/extracted/input.example.json --output /absolute/extracted/test_output.json` with `LLM_API_BASE=mock://` and `OUTPUT_PROTOCOL=official` in the process environment. This explicitly uses a mock, not the competition service.
 
-For configurable experiments, use `.env.development.example` in a separate working directory and `python /absolute/path/main.py --development`. Development mode supports legacy endpoint/key aliases and path overrides and defaults to the legacy flat output contract. Evaluation modules explicitly use development configuration. Never send organiser cases to a third-party endpoint.
+For configurable experiments, use `.env.development.example` in a separate working directory and `python /absolute/path/main.py --development`. Development mode supports legacy endpoint/key aliases and path overrides and produces the same official output protocol by default (`OUTPUT_PROTOCOL=legacy` opts into the old flat contract). Evaluation modules explicitly use development configuration.
 
 Run `python -m unittest discover -s tests -v` for regressions, including isolated ZIP tests of the official two-key configuration and no-argument entry point. Tests retain their artifacts.
 

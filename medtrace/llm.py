@@ -148,13 +148,15 @@ class LLMClient:
             base = cfg.api_base.rstrip("/")
             self.url = base if base.endswith("/chat/completions") else base + "/chat/completions"
 
-    def chat(self, system: str, user: str, stats: CallStats, deadline: float | None = None) -> str:
+    def chat(self, system: str, user: str, stats: CallStats, deadline: float | None = None,
+             thinking: bool | None = None) -> str:
+        """`thinking` overrides cfg.enable_thinking for this call only (None: use the configured value)."""
         if stats.calls >= self.cfg.max_calls_per_case:
             raise BudgetExceeded("model-call budget for this case is exhausted")
         stats.calls += 1
         t0 = time.monotonic()
         try:
-            return self._chat(system, user, stats, deadline)
+            return self._chat(system, user, stats, deadline, thinking)
         finally:
             stats.latency += time.monotonic() - t0
 
@@ -163,7 +165,7 @@ class LLMClient:
         if limit > 0 and stats.http_attempts >= limit:
             raise BudgetExceeded(f"request budget for this case is exhausted ({stats.http_attempts}/{limit} HTTP attempts)")
 
-    def _payload(self, messages: list) -> dict:
+    def _payload(self, messages: list, thinking: bool | None = None) -> dict:
         payload = {"model": self.cfg.model, "messages": messages, "temperature": self.cfg.temperature, "stream": False}
         if self.cfg.max_tokens > 0:
             payload["max_tokens"] = self.cfg.max_tokens
@@ -171,8 +173,9 @@ class LLMClient:
             payload["response_format"] = {"type": "json_object"}
         if self.cfg.seed is not None and "seed" not in self.compat_disabled:
             payload["seed"] = self.cfg.seed
-        if self.cfg.enable_thinking is not None and "chat_template_kwargs" not in self.compat_disabled:
-            payload["chat_template_kwargs"] = {"enable_thinking": self.cfg.enable_thinking}
+        thinking = self.cfg.enable_thinking if thinking is None else thinking
+        if thinking is not None and "chat_template_kwargs" not in self.compat_disabled:
+            payload["chat_template_kwargs"] = {"enable_thinking": thinking}
         payload.update(self.cfg.extra_body or {})
         for key in self.compat_disabled:
             payload.pop(key, None)
@@ -184,7 +187,7 @@ class LLMClient:
             return set()
         return {key for key, rx in _COMPAT_FIELDS if key not in self.compat_disabled and rx.search(text)}
 
-    def _chat(self, system, user, stats, deadline):
+    def _chat(self, system, user, stats, deadline, thinking=None):
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         if self.mock is not None:
             self._check_request_budget(stats)
@@ -196,11 +199,11 @@ class LLMClient:
             finally:
                 attempt["finished_at"] = datetime.now(timezone.utc).isoformat()
         headers = {"Content-Type": "application/json"}
-        if self.cfg.api_key and not self.cfg.official:
+        if self.cfg.api_key and self.cfg.development:     # the official entry point is keyless; output shape is independent
             headers["Authorization"] = f"Bearer {self.cfg.api_key}"
         last = "no attempt made"
         for attempt in range(self.cfg.max_retries + 1):
-            payload = self._payload(messages)
+            payload = self._payload(messages, thinking)
             timeout = self.cfg.timeout
             if deadline is not None:
                 remaining = deadline - time.monotonic()

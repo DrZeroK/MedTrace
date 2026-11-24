@@ -112,6 +112,7 @@ class Config:
     max_tokens: int = 0             # 0 => omit, use server default
     json_mode: bool = False         # send response_format=json_object if the endpoint supports it
     seed: int | None = 42           # fixed request seed; a 400 that rejects it is handled by the payload compatibility fallback
+    reason_thinking: bool | None = None   # development only: thinking for the S2 reasoning call (None => as enable_thinking)
     enable_thinking: bool | None = None   # None => omit (server default, not necessarily off); official load_config sets False. Sent as chat_template_kwargs (Q7)
     extra_body: dict = field(default_factory=dict)   # merged into every request last (provider-specific switches, may override the above)
     pipeline: str = "A2"
@@ -216,7 +217,7 @@ def load_config(*, development: bool = False, **overrides) -> Config:
         endpoint=_get("ENDPOINT", default=""),
         api_key=_get("LLM_API_KEY", "OPENAI_API_KEY", "API_KEY", default=""),
         model=_get("MODEL_NAME", "LLM_MODEL", "MODEL", default=""),
-        output_protocol=str(_get("OUTPUT_PROTOCOL", default="legacy")).lower(),
+        output_protocol=str(_get("OUTPUT_PROTOCOL", default="official")).lower(),
         timeout=_num(float, "LLM_TIMEOUT", default=600.0),
         max_retries=_num(int, "LLM_MAX_RETRIES", default=2),
         retry_backoff=_num(float, "LLM_RETRY_BACKOFF", default=2.0),
@@ -225,6 +226,7 @@ def load_config(*, development: bool = False, **overrides) -> Config:
         json_mode=_flag("LLM_JSON_MODE"),
         seed=_opt_int("LLM_SEED", warnings, default=42),
         enable_thinking=_tristate("LLM_ENABLE_THINKING", warnings),
+        reason_thinking=_tristate("REASON_THINKING", warnings),
         pipeline=str(_get("PIPELINE", default="A2")).upper(),
         max_calls_per_case=_num(int, "MAX_CALLS_PER_CASE", default=2),
         max_requests_per_case=max(0, _num(int, "MAX_REQUESTS_PER_CASE", default=0)),
