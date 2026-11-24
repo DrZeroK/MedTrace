@@ -25,6 +25,7 @@ from . import verify as V
 from . import textutil as T
 from .knowledge import KnowledgeBase, knowledge_block
 from .retrieval import case_query
+from .safety_points import safety_block, safety_points
 from .config import ConfigError, prompt_version
 from .inputs import Case
 from .ledger import build_ledger, digest, Ledger
@@ -373,6 +374,10 @@ class Pipeline:
             user = fill(load_prompt("a0", lang, self.cfg.prompt_version), **common)
         else:
             user = fill(load_prompt("a1", lang, self.cfg.prompt_version), ledger=digest(L), problems=problems, changes=changes, **common)
+            if lang == "zh":
+                points = safety_points(case)
+                log["safety_points"] = [rule for rule, _ in points]
+                user += safety_block(points)
         if self.candidate and variant != "A0":
             user = ("<development_organization_guidance>\n" + self.candidate["instruction"]
                     + "\n</development_organization_guidance>\n"
