@@ -63,6 +63,14 @@ class SafetyPoints(unittest.TestCase):
         self.assertEqual(V.drop_planned_result_items(n, case), ["缺脑脊液检查结果，影响诊断。"])
         self.assertEqual(len(n.review_items), 2)                       # pending result named in the records stays
         self.assertTrue(V.hedged_disposition(n))
+        # the records may name a missing test more briefly than the review item: that item is about record content, keep it
+        brief = parse_case({"case_id": "B", "record_cutoff": "T0", "sources": [
+            {"source_id": "S1", "content": "反复喘息5年；未提供血气及胸部影像；甲状腺及肝功能结果未齐。"}]}, 0)
+        m = Note()
+        m.sections["treatment_plan"] = [Statement("拟行动脉血气分析；完善甲状腺功能检查。", ["S1"], "investigation")]
+        m.review_items = [{"type": "missing", "description": "缺血气分析结果，影响分级。", "origin": "model"},
+                          {"type": "missing", "description": "缺甲状腺功能结果，无法排除甲亢。", "origin": "model"}]
+        self.assertEqual(V.drop_planned_result_items(m, brief), [])
         n.sections["treatment_plan"][1] = Statement("收入普通病房，若出现低血压或氧合恶化转ICU。", ["S1"], "treatment")
         self.assertFalse(V.hedged_disposition(n))
 
