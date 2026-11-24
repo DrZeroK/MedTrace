@@ -57,7 +57,11 @@
 - text中不要写序号（程序会自动编号和分组），不要写来源编号。
 - 不适用于本例的核对项不要提及（例如男性患者不写妊娠状态）。
 - 仅当资料间的差异会影响诊断或处理时才作为矛盾提出；同一检查的措辞差异不算矛盾。
-- review_items 3-6条，只列会改变诊断或处理的具体事项（缺失、冲突、需医生确认），写明缺什么、为何重要；不写“是否存在其他诱因”之类的泛泛条目。
+- review_items（待核事项）2-5条，每条不超过50字，格式为“缺什么/哪里不一致 + 影响哪项诊断或处理”，按对本例决策的影响排序。只允许三类：
+  · missing：资料未提供、且会改变本例当前诊断、严重程度评估或拟行治疗的具体信息（如对拟用药物至关重要的过敏史细节、判断病程所需的既往基线值、未记录的生命体征或出入量）。
+  · conflict：两处资料对同一事项的记载互相矛盾，sources须列出两个及以上编号；单一来源内的数值偏高偏低、边界值或推测风险不是冲突。
+  · verify：拟行措施的安全前提需医生当面确认（如交叉过敏风险、有创操作前的凝血或颅压评估）。
+  不得列入：资料已明确记载或已否认的事项（如已否认糖尿病就不要再问降糖药）；与本例当前问题无关的常规病史（疫苗接种史、家族史、婚育史等，除非与本例鉴别直接相关）；诊疗计划中已安排、尚未进行的检查结果（如“脑脊液结果未提供”）；推测性并发症（如“警惕DIC”，应写在拟诊讨论或观察中）；“是否存在其他诱因”之类的泛泛条目。确实没有符合条件的事项时输出[]。
 
 输出
 只输出一个JSON对象。“sources”列出支持该陈述的资料编号（讨论和计划条目：列出其所依据所见的资料编号，初步诊断条目须列全其依据所在的编号）。只能使用<records>中出现的编号。讨论和计划条目须加“basis”：“record”（源于记录的病人事实）、“knowledge”（通用医学知识，不得含记录中的病人特定数值）、“inference”（基于记录的推理）。
@@ -65,5 +69,5 @@
   "case_features": [{"kind": "summary|symptoms|history|exam|tests|missing", "text": "……", "sources": ["编号"]}],
   "diagnostic_discussion": [{"kind": "assessment|differential|uncertainty", "basis": "record|knowledge|inference", "text": "……", "sources": ["编号"]}],
   "treatment_plan": [{"kind": "investigation|treatment|monitoring", "basis": "record|knowledge|inference", "text": "……", "sources": ["编号"]}],
-  "review_items": [{"type": "missing|conflict|verify", "text": "需医生核实的内容及其重要性", "sources": ["编号"]}]
+  "review_items": [{"type": "missing|conflict|verify", "text": "缺什么/哪里不一致 + 影响哪项诊断或处理", "sources": ["编号"]}]
 }

@@ -1229,9 +1229,14 @@ class OfficialProtocol(EndToEnd):
             {"type": "verify", "description": "知识检索失败", "source_ids": [], "origin": "internal"},
             {"type": "missing", "description": "药物过敏史未记录", "source_ids": [], "origin": "ledger"},
             {"type": "verify", "description": "血压需复核", "source_ids": [], "origin": "model"},
+            {"type": "conflict", "description": "血小板处于正常低限", "source_ids": ["S1"], "origin": "model"},
+            {"type": "conflict", "description": "两份用药清单不一致", "source_ids": ["S1", "S2"], "origin": "model"},
+            {"type": "conflict", "description": "S1前后记载不一致", "source_ids": ["S1"], "origin": "ledger"},
         ]
         rec = to_official_record(n, parse_case(CASE, 0), status="success")
-        self.assertEqual(rec["medical_record"]["review_items"], ["【缺失】药物过敏史未记录", "【待确认】血压需复核"])
+        self.assertEqual(rec["medical_record"]["review_items"],
+                         ["【缺失】药物过敏史未记录", "【待确认】血压需复核", "【待确认】血小板处于正常低限",
+                          "【冲突】两份用药清单不一致", "【冲突】S1前后记载不一致"])
 
     def test_finalise_marks_verifier_items_for_exclusion(self):
         from medtrace import pipeline as P

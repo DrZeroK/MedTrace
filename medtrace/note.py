@@ -250,7 +250,12 @@ def _review_text(r: dict) -> str:
     if text.startswith(("【", "[")):
         return text
     lang = "zh" if detect_lang(text) == "zh" else "en"
-    return _REVIEW_PREFIX[lang].get(r.get("type", "verify"), _REVIEW_PREFIX[lang]["verify"]) + text
+    typ = r.get("type", "verify")
+    # a model "conflict" needs two disagreeing records; one source is a borderline value or a guess, not a conflict
+    # (ledger-detected conflicts keep their tag: an internal contradiction legitimately has one source)
+    if typ == "conflict" and r.get("origin", "model") == "model" and len(set(r.get("source_ids", []))) < 2:
+        typ = "verify"
+    return _REVIEW_PREFIX[lang].get(typ, _REVIEW_PREFIX[lang]["verify"]) + text
 
 
 def to_record(note: Note, case, cfg, meta: dict | None = None) -> dict:
