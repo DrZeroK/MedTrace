@@ -64,17 +64,49 @@ def parse_json_object(text: str) -> dict:
         candidates.append(t[i:j + 1])
         candidates.append(re.sub(r",\s*([}\]])", r"\1", t[i:j + 1]))
     last_error = None
-    for c in candidates:
+    # Unescaped ASCII quotes copied from the records ("健胃消食片") end a string early; repaired copies are tried
+    # only after every literal candidate fails, so valid JSON is never rewritten.
+    repaired = [_escape_inner_quotes(c) for c in candidates[1:]]
+    for n, c in enumerate(candidates + repaired):
         try:
             obj = json.loads(c)
             if isinstance(obj, dict):
                 return obj
         except ValueError as error:
-            if isinstance(error, json.JSONDecodeError):
-                last_error = error
+            if isinstance(error, json.JSONDecodeError) and n < len(candidates):
+                last_error = error      # report the model's own error, not one from a repair attempt
             continue
     location = (f" ({last_error.msg}; line {last_error.lineno}, column {last_error.colno})" if last_error else "")
     raise ParseError("model response is not a JSON object" + location)
+
+
+_CLOSES_STRING = re.compile(r"\s*[,}\]:]|\s*$")
+
+
+def _escape_inner_quotes(text: str) -> str:
+    """Escape ASCII double quotes inside JSON strings. A quote that really closes a string is followed (after
+    whitespace) by , } ] or : -- anything else ("健胃消食片"等, "腰腿痛"服药) is part of the text.
+    shortcut: a text quote followed directly by an ASCII comma or colon still ends the string; the caller's
+    regeneration request and extract-only fallback remain for that case."""
+    out, in_string, i = [], False, 0
+    while i < len(text):
+        ch = text[i]
+        if in_string and ch == "\\":
+            out.append(text[i:i + 2])
+            i += 2
+            continue
+        if ch == '"':
+            if not in_string:
+                in_string = True
+            elif _CLOSES_STRING.match(text, i + 1):
+                in_string = False
+            else:
+                out.append('\\"')
+                i += 1
+                continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
 
 
 def _ids(v) -> list[str]:

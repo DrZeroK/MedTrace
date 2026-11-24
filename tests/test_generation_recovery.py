@@ -12,7 +12,9 @@ from eval.response_metrics import observe_response
 
 CASE = {"case_id": "format-regression", "record_cutoff": "T0", "sources": [
     {"source_id": "S", "content": "记录使用药物甲10mg后缓解。"}]}
-BAD = '{"case_features":[{"text":"使用“药物甲10mg"后缓解。","sources":["S"]}]}'
+# Unrecoverable by the parser (missing comma between fields), so the regeneration path is exercised.
+# A mixed-quote reply ('使用“药物甲10mg"后缓解') is now repaired in the parser; see test_medtrace Parsing.
+BAD = '{"case_features":[{"text":"使用药物甲10mg后缓解。" "sources":["S"]}]}'
 GOOD = {"case_features": [{"text": "记录使用药物甲10mg后缓解。", "sources": ["S"]}],
         "diagnostic_discussion": [{"text": "建议核实原始用药记录。", "sources": ["S"]}],
         "treatment_plan": [{"text": "建议复核用药情况。", "sources": ["S"]}]}
