@@ -14,17 +14,14 @@ from pathlib import Path
 from medtrace.knowledge import KnowledgeError, adult_documented, alias_hit, digest_file, search_tokens
 from medtrace.retrieval import candidates, case_query, expand_findings, lexical_tokens, prepare_query, select_cards
 from medtrace.pipeline import Pipeline
-from medtrace.ranking_profile import load_anchor_weights
 
 # Procedural/normal-finding pages crowd out disease knowledge in BM25 rankings.
 _SKIP_TITLE = ("体格检查", "病历书写", "问诊", "检查方法", "基本项目", "绪论")
 
 
 class TextbookIndex:
-    def __init__(self, path, profile=None):
+    def __init__(self, path):
         self.path = Path(path).resolve()
-        self.anchor_weights = load_anchor_weights(profile) if profile else None
-        self.profile_sha256 = digest_file(profile) if profile else None
         if not self.path.is_file():
             raise KnowledgeError(f"textbook index not found: {self.path}")
         self.sha256 = digest_file(self.path)
@@ -41,7 +38,7 @@ class TextbookIndex:
         return sqlite3.connect(self.path.as_uri() + "?mode=ro", uri=True)
 
     def describe(self):
-        return {"path": str(self.path), "sha256": self.sha256, "profile_sha256": self.profile_sha256,
+        return {"path": str(self.path), "sha256": self.sha256,
                 "state": self.manifest.get("state", "unknown"), "release": self.manifest.get("release", False),
                 "counts": self.manifest.get("counts", {}),
                 "redistribution": self.manifest.get("redistribution", "unknown")}
@@ -66,7 +63,7 @@ class TextbookIndex:
                     and not any(s in e["title"] for s in _SKIP_TITLE)]
         return select_cards(eligible, clauses, original, alias_hit=alias_hit, adult_documented=adult_documented,
                             search_tokens=search_tokens, categories=categories, limit=limit,
-                            max_chars=max_chars, textbook=True, anchor_weights=self.anchor_weights)
+                            max_chars=max_chars, textbook=True)
 
 
 class TextbookRagPipeline(Pipeline):

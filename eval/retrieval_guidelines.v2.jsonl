@@ -16,3 +16,5 @@
 {"id":"g16","group":"negative","query":{"history":"8岁患儿，计划复核成人高血压诊室血压界值"},"categories":["diagnosis"],"relevant":[]}
 {"id":"g17","group":"negative","query":{"history":"父亲患慢性肾脏病","labs":"本人的检查结果未提供"},"relevant":[]}
 {"id":"g18","group":"negative","query":{"labs":"结果分别为6.0 mmol/L、90 mmHg"},"relevant":[]}
+{"id":"g19","group":"negative","query":{"history":"男，45岁，体检","exams":"BMI 22.1 kg/m2，心脏超声：心脏结构及功能正常","labs":"空腹血糖 5.1 mmol/L，HbA1c 5.4%，eGFR 98，血淀粉酶 60 U/L，TSH 2.1 mIU/L"},"relevant":[]}
+{"id":"g20","group":"negative","query":{"chief":"女，29岁，孕26周，OGTT异常","labs":"空腹血糖 5.3 mmol/L，高血糖"},"relevant":[]}

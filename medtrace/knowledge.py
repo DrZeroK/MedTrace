@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from . import textutil as T
-from .retrieval import CATEGORIES, candidates, expand_findings, lexical_tokens, prepare_query, select_cards
+from .retrieval import CATEGORIES, POPULATIONS, candidates, expand_findings, lexical_tokens, prepare_query, select_cards
 
 
 class KnowledgeError(ValueError):
@@ -64,6 +64,8 @@ def validate_entry(e):
     if "categories" in e and (not isinstance(e["categories"], list) or
                               any(not isinstance(c, str) or c not in CATEGORIES for c in e["categories"])):
         raise KnowledgeError("unknown evidence categories")
+    if "population" in e and e["population"] not in POPULATIONS:
+        raise KnowledgeError("unknown evidence population")
     if e["type"] == "lab" and (not e.get("units") or not isinstance(e["units"], list) or
                                     any(not isinstance(u, str) or not u for u in e["units"])):
         raise KnowledgeError("lab requires units")

@@ -70,9 +70,7 @@ def prepare_cases(records):
     return cases
 
 
-def run(cases, index_path, *, official=False, anchor_profile=None):
-    if official and anchor_profile:
-        raise ValueError("development anchor profiles are only used in mock runs")
+def run(cases, index_path, *, official=False):
     if official:
         cfg = replace(load_config(), kb_path="", pipeline="A2")
         knowledge = RetrievalOnlyKnowledge(Path(index_path).resolve())
@@ -80,9 +78,8 @@ def run(cases, index_path, *, official=False, anchor_profile=None):
         draft_index = None
     else:
         cfg = Config(api_base="mock://", model="MockLLM", pipeline="A2", repair_call=False)
-        draft_index = TextbookIndex(index_path, profile=anchor_profile)
-        index_meta = {"sha256": draft_index.sha256, "state": draft_index.describe()["state"],
-                      "anchor_profile_sha256": draft_index.profile_sha256}
+        draft_index = TextbookIndex(index_path)
+        index_meta = {"sha256": draft_index.sha256, "state": draft_index.describe()["state"]}
 
     outputs = {arm: [] for arm in ARMS}
     reviews = []
@@ -143,7 +140,6 @@ def main(argv=None):
     source.add_argument("--input", type=Path, help="authorized official-format JSON cases")
     parser.add_argument("--official", action="store_true", help="use the organizer's configured keyless service")
     parser.add_argument("--index", type=Path, required=True, help="draft index for mock; approved release for official")
-    parser.add_argument("--anchor-profile", type=Path, help="optional local ranking profile for mock")
     parser.add_argument("--output", type=Path, required=True, help="new local run directory")
     args = parser.parse_args(argv)
     if args.output.exists():
@@ -152,7 +148,7 @@ def main(argv=None):
         data = (load_practice_cases(args.practice_archive) if args.practice_archive
                 else json.loads(args.input.read_text("utf-8")))
         cases = prepare_cases(data)
-        report, outputs, review_cases = run(cases, args.index, official=args.official, anchor_profile=args.anchor_profile)
+        report, outputs, review_cases = run(cases, args.index, official=args.official)
     except (ValueError, OSError, ConfigError) as error:
         parser.error(str(error))
     args.output.mkdir(mode=0o700, parents=True)

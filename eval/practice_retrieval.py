@@ -61,8 +61,8 @@ def load_practice_cases(archive_path):
     return cases
 
 
-def evaluate(index_path, archive_path, labels, profile=None):
-    index = TextbookIndex(index_path, profile=profile) if profile else TextbookIndex(index_path)
+def evaluate(index_path, archive_path, labels):
+    index = TextbookIndex(index_path)
     if index.describe()["state"] != "draft":
         raise ValueError("practice evaluation expects the local draft index")
     samples = []
@@ -83,7 +83,6 @@ def evaluate(index_path, archive_path, labels, profile=None):
     ranks = [rank for sample in samples for rank in sample["topic_first_rank"].values()]
     return {
         "index_sha256": index.sha256,
-        "profile_sha256": getattr(index, "profile_sha256", None),
         "sample_count": len(samples),
         "topic_count": len(ranks),
         "topics_hit_at_1": sum(rank == 1 for rank in ranks),
@@ -99,11 +98,10 @@ def main():
     parser.add_argument("--archive", type=Path, required=True)
     parser.add_argument("--index", type=Path, required=True)
     parser.add_argument("--labels", type=Path, required=True)
-    parser.add_argument("--anchor-profile", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     labels = json.loads(args.labels.read_text(encoding="utf-8"))
-    report = json.dumps(evaluate(args.index, args.archive, labels, profile=args.anchor_profile), ensure_ascii=False, indent=2) + "\n"
+    report = json.dumps(evaluate(args.index, args.archive, labels), ensure_ascii=False, indent=2) + "\n"
     if args.output:
         args.output.write_text(report, encoding="utf-8")
     else:

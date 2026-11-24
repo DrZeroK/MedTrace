@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from . import context, textutil as T
 
 CATEGORIES = {"diagnosis", "differential", "tests", "treatment"}
+POPULATIONS = {"general", "adult", "pediatric", "pregnancy", "nonpregnant", "nonpregnant_adult"}
 FIELDS = {"chief": 1.65, "pathology": 1.65, "history": 1.0, "symptoms": 1.25, "labs": 1.2, "exams": 1.15, "other": 1.0}
 CLAUSE = re.compile(r"[，,。；;！？!?\n]")
 GENERIC_ALIASES = {"诊断", "鉴别诊断", "治疗", "检查", "评估", "慢性", "急性", "轻度", "中度", "重度", "病史", "一般情况", "知识要点"}
@@ -127,10 +128,10 @@ def _scope_matches(item, original, positive, adult_documented):
     if item["scope"] == "adult" and not adult_documented(positive):
         return False
     population = item.get("population")
-    if population in {"adult", "nonpregnant_adult"}:
-        if PEDIATRIC.search(positive):
-            return False
-        return population == "adult" or bool(NONPREGNANT.search(positive)) or not PREGNANCY.search(positive)
+    if population in {"adult", "nonpregnant_adult"} and PEDIATRIC.search(positive):
+        return False
+    if population in {"nonpregnant", "nonpregnant_adult"}:
+        return bool(NONPREGNANT.search(positive)) or not PREGNANCY.search(positive)
     if population == "pregnancy":
         return not (NONPREGNANT.search(original) or MALE.search(positive))
     if population == "pediatric":
@@ -139,9 +140,8 @@ def _scope_matches(item, original, positive, adult_documented):
 
 
 def select_cards(rows, clauses, original, *, alias_hit, adult_documented, search_tokens,
-                 categories=None, limit=5, max_chars=2500, baseline=False, textbook=False, anchor_weights=None):
+                 categories=None, limit=5, max_chars=2500, baseline=False, textbook=False):
     """Return complete passages; the original case and entry objects remain intact."""
-    anchor_weights = anchor_weights or {}
     wanted = None if categories is None else set(categories)
     if wanted is not None and not wanted <= CATEGORIES:
         raise ValueError("unknown evidence category")
@@ -164,7 +164,7 @@ def select_cards(rows, clauses, original, *, alias_hit, adult_documented, search
                 weight = max((weight for clause, weight in clauses if alias_hit(alias, clause)), default=0)
                 if weight:
                     matched.append(alias)
-                    score += weight * anchor_weights.get(T.fw(alias).lower(), 1.0) * (1 + min(len(alias), 8) / 8)
+                    score += weight * (1 + min(len(alias), 8) / 8)
             title = text_trigrams(item["title"])
             body = text_trigrams(item["text"])
             matches = [(weight, grams & title, grams & body) for grams, weight in fingerprints]

@@ -7,12 +7,10 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from eval.fit_clinical_retrieval import read_guides
+from eval.clinical_intake_retrieval import read_guides
 from eval.practice_retrieval import _intake
 from eval.rag_benchmark import ROOT, benchmark
-from medtrace.inputs import parse_case
 from medtrace.knowledge import KnowledgeBase, KnowledgeError, adult_documented, alias_hit, build_database, search_tokens
-from medtrace.ranking_profile import fit_anchor_weights
 from medtrace.retrieval import expand_findings, prepare_query, select_cards
 from scripts.textbook_kb import organize_drafts
 from test_knowledge import entry
@@ -66,17 +64,30 @@ class ClinicalRetrievalTests(unittest.TestCase):
         self.assertEqual(ranked["negative_abstention"], 1)
         self.assertEqual(ranked["irrelevant_ratio"], 0)
 
-    def test_offline_profile_uses_affirmed_case_text(self):
-        notes = [
-            "既往明确高血压。否认哮喘。其父亲患房颤。",
-            "高血压随访，合并糖尿病。",
-        ]
-        cases = [parse_case({"case_id": i, "record_cutoff": "T0",
-                             "sources": [{"source_id": "s1", "content": note}]}, i)
-                 for i, note in enumerate(notes)]
-        weights = fit_anchor_weights(cases, {"高血压", "哮喘", "房颤", "糖尿病"})
-        self.assertEqual(set(weights), {"高血压", "糖尿病"})
-        self.assertLess(weights["高血压"], weights["糖尿病"])
+    def test_routine_results_and_pregnancy_scope_across_guideline_sets(self):
+        rows = [(json.loads(line), -1.0) for name in ("v1", "v2")
+                for line in (ROOT / f"knowledge/guidelines.{name}.jsonl").read_text(encoding="utf-8").splitlines()
+                if line.strip()]
+
+        def hits(query):
+            clauses, original = prepare_query(query)
+            return [card["id"] for card in select_cards(
+                rows, expand_findings(clauses), original, alias_hit=alias_hit,
+                adult_documented=adult_documented, search_tokens=search_tokens)]
+
+        # Test names present in every record must not pull in disease cards when results are normal.
+        self.assertEqual(hits({"history": "男，45岁，体检",
+                               "exams": "BMI 22.1 kg/m2，腰围 82 cm，心脏超声：心脏结构及功能正常，骨密度T值 -0.5，甲状腺超声未见结节",
+                               "labs": "空腹血糖 5.1 mmol/L，HbA1c 5.4%，TSH 2.1 mIU/L，eGFR 98，UACR 8 mg/g，"
+                                       "血淀粉酶 60 U/L，脂肪酶 30 U/L，LDL-C 2.6 mmol/L，乙肝核心抗体阴性"}), [])
+        pregnant = hits({"chief": "女，29岁，孕26周，OGTT异常", "labs": "空腹血糖 5.3 mmol/L，高血糖"})
+        self.assertIn("kb:hip-2022-i:ogtt", pregnant)
+        self.assertFalse(any(card.startswith("kb:diabetes-cds-2024:") for card in pregnant))
+        self.assertIn("kb:diabetes-cds-2024:diagnosis", hits({"chief": "女，52岁，口渴多饮3月，确诊糖尿病待分型"}))
+
+    def test_population_labels_are_validated(self):
+        with self.assertRaisesRegex(KnowledgeError, "population"):
+            build_database([entry(population="pregnacy")], Path("/nonexistent/unused.sqlite"), "fixture")
 
     def test_unresolved_differential_is_not_masked_as_negated(self):
         for text in ("不能排除哮喘", "待排除哮喘", "考虑哮喘"):
