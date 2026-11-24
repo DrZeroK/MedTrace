@@ -344,42 +344,23 @@ class Verifier(unittest.TestCase):
         none = parse_case({"case_id": "B", "sources": [{"source_id": "S1", "content": "否认药物、食物过敏史。母亲对阿莫西林过敏。"}]}, 0)
         self.assertEqual(V.recorded_allergies(none), {})
 
-    def test_aortic_syndrome_antithrombotics_removed(self):
-        # P05 with qwen3:8b: intramural haematoma, plan "继续阿司匹林300mg/日，氯吡格雷300mg/日"
+    def test_aortic_interface_kept(self):
+        # The graded AAS screen is tested in tests/test_aortic_rule.py (spec A01-A36, P05). This keeps the earlier
+        # verify-level interface: recorded_aortic, remove_aortic_antithrombotics and the high finding.
         c = parse_case({"case_id": "P", "sources": [{"source_id": "S1", "content":
-            "胸背痛6小时。外院予阿司匹林300mg、氯吡格雷300mg口服。大血管CTA：主动脉壁内血肿。"}]}, 0)
+            "胸背痛6小时。外院予阿司匹林300mg、氯吡格雷300mg口服。急诊大血管CTA：主动脉壁内血肿。"}]}, 0)
         L = build_ledger(c)
         plan = "抗血小板聚集：继续阿司匹林300mg/日，氯吡格雷300mg/日；持续监测生命体征。"
         self.assertIn(("aortic_antithrombotic", V.HIGH),
                       {(f.code, f.severity) for f in V.check_statement("treatment_plan", 0, Statement(plan, ["S1"]), c, L)})
+        self.assertEqual(V.recorded_aortic(c), ["主动脉壁内血肿"])
         n = Note()
-        n.sections["treatment_plan"] = [Statement("控制血压，目标<120/80mmHg。", ["S1"]), Statement(plan, ["S1"]),
-                                        Statement("暂停阿司匹林及氯吡格雷，评估出血。", ["S1"])]
-        removed = V.remove_aortic_antithrombotics(n, c)
-        self.assertEqual((len(removed), {t for _, t in removed}), (2, {"壁内血肿"}))
-        self.assertEqual([s.text for s in n.sections["treatment_plan"]],
-                         ["控制血压，目标<120/80mmHg。", "持续监测生命体征。", "暂停阿司匹林及氯吡格雷，评估出血。"])
+        n.sections["treatment_plan"] = [Statement("控制血压，目标<120/80mmHg。", ["S1"]), Statement(plan, ["S1"])]
+        self.assertEqual(V.remove_aortic_antithrombotics(n, c), [("antiplatelet", "主动脉壁内血肿")])
+        self.assertEqual(n.sections["treatment_plan"][0].text, "控制血压，目标<120/80mmHg。")
+        self.assertTrue(n.sections["treatment_plan"][1].text.endswith("；持续监测生命体征。"))
         none = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "胸痛。CTA未见主动脉夹层。"}]}, 0)
         self.assertEqual(V.recorded_aortic(none), [])
-
-    def test_aortic_withhold_sentence_kept_whole(self):
-        # cloud P05: the withholding sentence lost its subject and history clauses and kept "或谨慎使用"
-        c = parse_case({"case_id": "P", "sources": [{"source_id": "S1", "content":
-            "胸背痛6小时。外院予阿司匹林300mg、氯吡格雷300mg口服。大血管CTA：主动脉壁间血肿。"}]}, 0)
-        L = build_ledger(c)
-        plan = ("抗血小板治疗调整：鉴于已确诊主动脉壁内血肿可能，且已服用阿司匹林和氯吡格雷，需权衡出血与血栓风险，"
-                "建议暂停或谨慎使用抗血小板药物，具体方案需多学科会诊决定。")
-        self.assertIn("aortic_antithrombotic", {f.code for f in V.check_statement("treatment_plan", 0, Statement(plan, ["S1"]), c, L)})
-        n = Note()
-        n.sections["treatment_plan"] = [Statement("控制血压。", ["S1"]), Statement(plan, ["S1"]),
-                                        Statement("暂禁用抗凝药物，继续阿司匹林100mg/日。", ["S1"])]
-        removed = V.remove_aortic_antithrombotics(n, c)
-        self.assertEqual([d for d, _ in removed], ["抗血小板", "阿司匹林"])
-        self.assertEqual([s.text for s in n.sections["treatment_plan"]],
-                         ["控制血压。", "抗血小板治疗调整：鉴于已确诊主动脉壁内血肿可能，且已服用阿司匹林和氯吡格雷，"
-                          "需权衡出血与血栓风险，建议暂停抗血小板药物，具体方案需多学科会诊决定。", "暂禁用抗凝药物。"])
-        for st in n.sections["treatment_plan"]:      # the edited plan raises no aortic finding
-            self.assertNotIn("aortic_antithrombotic", {f.code for f in V.check_statement("treatment_plan", 0, st, c, L)})
 
     def test_unsupported_allergy_removed(self):
         # SYN001 with qwen3:8b: "拟予头孢类抗生素（青霉素过敏，需替代方案）" though the record documents no allergy

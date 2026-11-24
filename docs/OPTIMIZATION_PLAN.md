@@ -288,3 +288,14 @@ differentials (for, against, discriminating test) and missing items. Same 18 cas
   D1: "拟予头孢类抗生素（青霉素过敏，需替代方案）" with no allergy in the record.
 - On all saved real notes (four 18-case runs), the rules flag exactly those errors: P05 once, SYN001 three times.
   They flag nothing else. Verbatim guard: 33,537 record sentences raise 0 allergy findings.
+
+### Aortic antithrombotic rule rebuilt from the clinical spec (2026-11-24)
+
+- The keyword rule above is replaced by the graded screen in `medtrace/aortic.py`, implementing
+  `docs/AORTIC_ANTITHROMBOTIC_RULE.md`: disease state (confirmed / suspected / perioperative / stable / unknown /
+  ruled out), medication intent and source, independent indications, PASS / BLOCK / REVIEW / REVIEW_URGENT, whole-unit
+  rewrites with fixed assessment wording, high-priority visible review items, an audit trail and a final-plan
+  post-check. A separate loading-dose-as-maintenance finding covers P05's 300 mg/day.
+- Tests: `tests/test_aortic_rule.py` covers A01-A36 and P05, including an end-to-end official record.
+- Saved notes (8 runs, 18 cases): only P05 is in an AAS state; no other case is touched.
+- **Clinical review: pending.** Not clinically validated; open questions are listed in the rule doc.

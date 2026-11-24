@@ -10,6 +10,7 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, asdict
 
+from . import aortic as A
 from . import textutil as T
 from .knowledge import approved_quote
 from .inputs import Case
@@ -314,17 +315,25 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         # ---- harm screen: a drug of a recorded allergy class; antithrombotic therapy despite recorded bleeding
         for drug, allergen in allergy_conflicts(text, recorded_allergies(case)):
             add("allergy_conflict", HIGH, f"plan gives {drug!r} although the records document an allergy to {allergen!r}", drug)
-        aortic = recorded_aortic(case) if _ANTITHROMBOTIC.search(text) else []
-        if aortic and any(antithrombotic_order(c, text) for c in re.split(r"[，,；;。]", text)) or \
-                aortic and any(_WITHHOLD.search(s) and _ALT_USE.search(s) for s in re.split(r"[；;。]", text)
-                               if _ANTITHROMBOTIC.search(s)):
-            add("aortic_antithrombotic", HIGH, f"antithrombotic therapy planned although the records document {aortic[0]!r}",
-                aortic[0])
-        elif _ANTITHROMBOTIC.search(text) and not _SAFETY_CAUTION.search(text):
-            bleeding = recorded_bleeding(case)
-            if bleeding:
-                add("bleeding_risk", MEDIUM, f"antithrombotic therapy planned although the records document {bleeding[0]!r}",
-                    bleeding[0])
+        # acute aortic syndrome screen (medtrace/aortic.py): a finding whenever the screen would rewrite generated text;
+        # a real order copied from the records is kept and gets its review item from the pipeline instead
+        if A.has_antithrombotic(text):
+            ctx = _aortic_context(case)
+            lang = "zh" if re.search(r"[一-鿿]", text) else "en"
+            changed = [e for e in A.screen_text(text, case, lang, ctx)[1] if e.replacement != e.original_candidate]
+            if changed:
+                name = A.ENTITY_NAME["en"].get(changed[0].entity, "an acute aortic syndrome")
+                add("aortic_antithrombotic", HIGH, f"antithrombotic suggestion conflicts with {name} ({ctx.state})",
+                    A.ENTITY_NAME["zh"].get(changed[0].entity, "急性主动脉综合征"))
+            elif not _SAFETY_CAUTION.search(text):
+                # F5, deduplicated: an AAS the aortic screen already governs is not reported again as bleeding
+                aas_live = ctx.state not in A.QUIET_STATES
+                bleeding = [b for b in recorded_bleeding(case) if not (aas_live and b in _AAS_BLEEDING_TERMS)]
+                if bleeding:
+                    add("bleeding_risk", MEDIUM, f"antithrombotic therapy planned although the records document {bleeding[0]!r}",
+                        bleeding[0])
+        for drug, mg in A.loading_as_maintenance(text):
+            add("loading_dose_as_maintenance", HIGH, f"{drug} {mg:g} mg per day is a loading-size dose given as maintenance", drug)
 
     # ---- diagnostic certainty: only a definitive claim (not "不能确诊…", "需…确诊") about a diagnosis that the
     # records do not themselves list without qualification
@@ -493,9 +502,6 @@ _SAFETY_CAUTION = re.compile(r"(?i)过敏|避免|禁用|慎用|替代|改用|皮
                              r"停用|停止|暂停|不宜|不建议|无需|allerg|avoid|alternative|bleeding risk|contraindicat|withhold|hold")
 _BLEEDING = ("出血", "呕血", "黑便", "便血", "咯血", "壁内血肿", "主动脉夹层", "血小板减少",
              "bleeding", "haemorrhage", "hemorrhage", "melena", "hematemesis", "aortic dissection", "intramural hematoma")
-_ANTITHROMBOTIC = re.compile(r"(?i)肝素|华法林|利伐沙班|阿哌沙班|达比加群|艾多沙班|抗凝|溶栓|阿替普酶|尿激酶|替奈普酶|"
-                             r"阿司匹林|氯吡格雷|替格瑞洛|抗血小板|双联|heparin|enoxaparin|warfarin|rivaroxaban|apixaban|"
-                             r"dabigatran|anticoagul|thromboly|alteplase|aspirin|clopidogrel|ticagrelor|antiplatelet")
 
 
 def recorded_allergies(case: Case) -> dict:
@@ -570,63 +576,33 @@ def remove_allergy_conflicts(note: Note, case: Case) -> list[tuple[str, str]]:
                           lambda clause, full: [] if _SAFETY_CAUTION.search(full) else allergy_conflicts(clause, allergies))
 
 
-# Acute aortic syndromes: antithrombotic therapy is dangerous whatever the stated bleeding-risk assessment, so only
-# explicit stop/withhold wording keeps such a clause. Clinical rule pending clinician sign-off (docs/OPTIMIZATION_PLAN.md).
-_AORTIC = ("主动脉夹层", "壁内血肿", "壁间血肿", "aortic dissection", "intramural hematoma", "intramural haematoma")
-_WITHHOLD = re.compile(r"(?i)停用|停止|暂停|暂缓|暂不|不予|禁用|避免|禁忌|不宜|不建议|无需|withhold|hold|avoid|contraindicat|stop")
+# Acute aortic syndromes: the graded antithrombotic screen lives in medtrace/aortic.py (spec and evidence in
+# docs/AORTIC_ANTITHROMBOTIC_RULE.md; clinical review pending). The two functions below keep the earlier interface.
+_AAS_BLEEDING_TERMS = {"壁内血肿", "主动脉夹层", "aortic dissection", "intramural hematoma"}
+_AORTIC_CTX: dict = {}
+
+
+def _aortic_context(case: Case) -> "A.Context":
+    """Per-case cache: check_statement runs once per statement, the record-level state only once per case."""
+    key = id(case)
+    hit = _AORTIC_CTX.get(key)
+    if hit is None or hit[0] is not case:
+        if len(_AORTIC_CTX) > 256:
+            _AORTIC_CTX.clear()
+        hit = _AORTIC_CTX[key] = (case, A.context(case))
+    return hit[1]
 
 
 def recorded_aortic(case: Case) -> list[str]:
-    found = []
-    for s in case.sources:
-        for sent in T.split_sentences(s.content):
-            low = sent.lower()
-            found += [t for t in _AORTIC if t in low and T.term_positive_in(t, low) and t not in found]
-    return found
+    """Entity names of a current, suspected, perioperative or unknown-status AAS (empty when the rule is quiet)."""
+    state, finding = A.aortic_state(case)
+    return [] if state in A.QUIET_STATES or finding is None else [A.ENTITY_NAME["zh"][finding.entity]]
 
 
-# Judged per sentence, not per comma clause (cloud P05: "抗血小板治疗调整：鉴于…，且已服用阿司匹林…，建议暂停或谨慎使用抗血小板
-#药物" lost its subject and history clauses and kept the "or use with caution" option).
-_GIVE = re.compile(r"(?i)继续|予|给予|加用|使用|服用|口服|应用|联合|负荷|启动|开始|维持|静滴|静推|皮下|注射|"
-                   r"\bstart|\bcontinu|\bgive|administer|\bload")
-_HISTORY = re.compile(r"(?i)已(?:经)?(?:服用|口服|予|给予|使用|应用)|曾(?:予|服|用)|院外|外院|入院前|既往|"
-                      r"previously|already|prior to admission")
-_ALT_USE = re.compile(r"(?i)或(?:谨慎|酌情|小剂量|减量)(?:使用|应用|服用|继续)?|\s*or (?:use with caution|continue)")
-
-
-def remove_aortic_antithrombotics(note: Note, case: Case) -> list[tuple[str, str]]:
-    """When the records document an acute aortic syndrome, remove plan clauses that order antithrombotic therapy, and
-    in a sentence that stops it drop a "or use with caution" alternative. A clause that only names the drug follows
-    its sentence (kept if the sentence withholds it); a clause reporting earlier doses is history and is kept.
-    Returns (drug, condition) pairs removed; never empties the plan."""
-    aortic = recorded_aortic(case)
-    if not aortic:
-        return []
-    removed = []
-    for st in note.sections["treatment_plan"]:
-        chunks = re.split(r"([；;。])", st.text)
-        for i in range(0, len(chunks), 2):
-            if _ANTITHROMBOTIC.search(chunks[i]) and _WITHHOLD.search(chunks[i]) and _ALT_USE.search(chunks[i]):
-                chunks[i] = _ALT_USE.sub("", chunks[i])
-                removed.append((_ANTITHROMBOTIC.search(chunks[i]).group(0), aortic[0]))
-        st.text = "".join(chunks)
-
-    def hits(clause, full):
-        drug = antithrombotic_order(clause, full)
-        return [(drug, aortic[0])] if drug else []
-    return removed + _apply_removal(note, "treatment_plan", hits)
-
-
-def antithrombotic_order(clause: str, full: str) -> str | None:
-    """The antithrombotic a plan clause orders, or None. Withholding or history clauses order nothing; a clause that
-    only names the drug follows its sentence in `full` (nothing ordered if that sentence withholds it)."""
-    m = _ANTITHROMBOTIC.search(clause)
-    if not m or _WITHHOLD.search(clause) or _HISTORY.search(clause):
-        return None
-    sentence = next((s for s in re.split(r"[；;。]", full) if clause in s), full)
-    if not _GIVE.search(_PAREN.sub("", clause)) and _WITHHOLD.search(sentence) and not _ALT_USE.search(sentence):
-        return None
-    return m.group(0)
+def remove_aortic_antithrombotics(note: Note, case: Case, lang: str = "zh") -> list[tuple[str, str]]:
+    """Earlier interface: screen the plan in place; (drug class, entity) for each rewritten unit."""
+    return [(",".join(e.drug_classes), A.ENTITY_NAME["zh"].get(e.entity, e.entity))
+            for e in A.screen_plan(note, case, lang) if e.replacement != e.original_candidate]
 
 
 # An allergy stated in the note must be one the records give; an invented one (seen with qwen3:8b: "青霉素过敏" in a
@@ -676,7 +652,12 @@ _ZH_DONE_PREFIX = re.compile(r"已(?:经)?(?=" + T.ZH_DONE_VERBS + ")")
 
 
 def _unsupported_done(clause: str, L: Ledger) -> bool:
-    return T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5
+    if not (T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5):
+        return False
+    # an antithrombotic the records show was given is real history: "鉴于已使用抗血小板药物" must not become "拟使用"
+    # (cloud P05: the rewrite turned a loading-dose history into what reads as a new antiplatelet plan)
+    named = A.drug_classes(clause)
+    return not (named and named <= A.drug_classes(L.all_text))
 
 
 def retense_completed(note: Note, L: Ledger) -> int:
