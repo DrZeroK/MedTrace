@@ -35,7 +35,7 @@ def safety_points(case: Case) -> list[tuple[str, str]]:
     """(rule id, instruction) for each situation the records show."""
     text = "\n".join(s.content for s in case.sources)
     hr = max(_num(r"心率\s*(\d{2,3})\s*次", text), default=0)
-    sbp = min(_num(r"血压\s*(\d{2,3})\s*/\s*\d{2,3}", text), default=999)
+    sbp = min(_num(r"(?:血压|BP)\s*[:：]?\s*(\d{2,3})\s*/\s*\d{2,3}", text), default=999)
     lactate = max(_num(r"乳酸\s*(\d+(?:\.\d+)?)\s*mmol", text), default=0)
     potassium = min(_num(r"(?<![a-zA-Z])(?:血钾|钾)\s*(\d(?:\.\d+)?)\s*mmol", text), default=9)
     glucose = min(_num(r"血糖\s*(\d+(?:\.\d+)?)\s*mmol", text), default=99)
@@ -84,7 +84,71 @@ def safety_points(case: Case) -> list[tuple[str, str]]:
         out.append(("sepsis_shock", "疑似脓毒症伴低血压或乳酸升高：诊疗计划首先写1小时内留取血培养后启动经验性抗菌治疗、"
                                     "3小时内晶体液约30 ml/kg复苏（心肾功能不全者评估容量反应性后调整）、目标平均动脉压≥65 mmHg"
                                     "（复苏中或复苏后仍低时首选去甲肾上腺素）、初始乳酸>2 mmol/L时复查乳酸。"))
+    severity = pneumonia_severity(case)
+    if severity:
+        out.append(("pneumonia_severity", severity))
     return out
+
+
+# Pneumonia severity is computed here, not by the model: on the practice case the model left "严重程度待评估" although
+# the records allowed grading. Criteria: CURB-65 (Lim et al., Thorax 2003) and the IDSA/ATS 2019 severe-CAP criteria as
+# given in 内科学第10版 p48 (1 major or >=3 minor). Unrecorded items are reported as unknown, never assumed normal.
+_PNEUMONIA = re.compile(r"肺炎|肺部感染|下呼吸道感染|(?:斑片|浸润|实变)影")
+_CONFUSION = "意识障碍|意识模糊|意识错乱|神志恍惚|定向障碍|谵妄|嗜睡|反应迟钝|反应迟缓"
+
+
+def pneumonia_severity(case: Case) -> str | None:
+    text = "\n".join(s.content for s in case.sources)
+    if not _PNEUMONIA.search(text):
+        return None
+    first = lambda rx: (_num(rx, text) or [None])[0]
+    age = first(r"(\d{1,3})\s*岁")
+    rr = first(r"(?:呼吸(?:频率)?|(?<![A-Za-z])R)\s*[:：]?\s*(\d{1,2})\s*次")
+    bp = re.search(r"(?:血压|BP)\s*[:：]?\s*(\d{2,3})\s*/\s*(\d{2,3})", text)
+    sbp, dbp = (int(bp.group(1)), int(bp.group(2))) if bp else (None, None)
+    urea = first(r"(?:血尿素氮|尿素氮|BUN|血尿素|尿素)\s*[:：]?\s*(\d+(?:\.\d+)?)\s*mmol")
+    pao2 = re.search(r"PaO[2₂]\s*[:：]?\s*(\d{2,3})\s*mmHg", text)
+    room_air = bool(pao2) and bool(re.search(r"未吸氧|室内空气|不吸氧", text[max(0, pao2.start() - 60):pao2.end() + 10]))
+    wbc = first(r"(?:白细胞(?:总数|计数)?|WBC)\s*[:：]?\s*(\d+(?:\.\d+)?)\s*[×x]")
+    plt = first(r"(?:血小板(?:计数)?|PLT)\s*[:：]?\s*(\d+(?:\.\d+)?)\s*[×x]")
+    temp = first(r"(?:体温|(?<![A-Za-z])T)\s*[:：]?\s*(\d{2}(?:\.\d)?)\s*[℃°]")
+    # documented clear consciousness counts as "no"; silence on mental status is unknown, not normal
+    confusion = True if _positive(_CONFUSION, case) else False if re.search(r"神志清|意识清|神清", text) else None
+
+    def item(name, value, met):
+        return (name, None if value is None else bool(met))
+
+    curb = [item("意识障碍", confusion, confusion),
+            item("尿素>7 mmol/L", urea, urea is not None and urea > 7),
+            item("呼吸频率≥30次/分", rr, rr is not None and rr >= 30),
+            item("收缩压<90或舒张压≤60 mmHg", sbp, sbp is not None and (sbp < 90 or dbp <= 60)),
+            item("年龄≥65岁", age, age is not None and age >= 65)]
+    minor = [item("呼吸频率≥30次/分", rr, rr is not None and rr >= 30),
+             item("PaO2/FiO2≤250", pao2 if room_air else None, room_air and int(pao2.group(1)) / 0.21 <= 250),
+             item("多肺叶浸润", True if re.search(r"多(?:个)?肺叶|多叶|双肺[^。；\n]{0,8}(?:浸润|实变|斑片)", text) else None, True),
+             item("意识障碍和/或定向障碍", confusion, confusion),
+             item("血尿素氮≥7.14 mmol/L", urea, urea is not None and urea >= 7.14),
+             item("白细胞<4×10⁹/L", wbc, wbc is not None and wbc < 4),
+             item("血小板<100×10⁹/L", plt, plt is not None and plt < 100),
+             item("体温<36℃", temp, temp is not None and temp < 36),
+             item("低血压需积极液体复苏", sbp, sbp is not None and sbp < 90)]
+    major = _positive("机械通气|气管插管|血管活性药|去甲肾上腺素|升压药", case)
+    fmt = lambda items: "；".join(f"{n}{'（是）' if v else '（否）' if v is False else '（资料未提供）'}" for n, v in items)
+    score = sum(v is True for _, v in curb)
+    unknown_curb = sum(v is None for _, v in curb)
+    met = sum(v is True for _, v in minor)
+    unknown = sum(v is None for _, v in minor)
+    if major or met >= 3:
+        verdict = "符合重症肺炎标准"
+    elif met + unknown < 3:
+        verdict = f"不符合重症肺炎标准（已满足{met}项次要标准，即使未提供项均满足也不足3项）"
+    else:
+        verdict = f"目前满足{met}项次要标准、{unknown}项资料未提供，尚不能完成重症判定，须写明缺哪些项目"
+    return (f"肺炎严重程度（程序按资料计算，供拟诊讨论直接引用，不得改动数值）：CURB-65 = {score}分"
+            f"{f'（另有{unknown_curb}项资料未提供）' if unknown_curb else ''}，各项：{fmt(curb)}。"
+            f"重症肺炎主要标准{'有' if major else '无'}；次要标准：{fmt(minor)}。结论：{verdict}。"
+            "拟诊讨论须写出上述分级及依据，不得笼统写“严重程度待评估”；诊疗计划据此写明单一收治场所"
+            "（CURB-65 0-1分可考虑门诊、2分住院、3-5分或符合重症标准考虑ICU）及升级条件，不得写“A或B”。")
 
 
 def safety_block(points: list[tuple[str, str]]) -> str:

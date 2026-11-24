@@ -424,6 +424,8 @@ class Pipeline:
             note.review_items.append({"type": "verify", "description": tr["allergy_removed"].format(drug=drug, allergen=allergen),
                                       "source_ids": [], "origin": "verifier", "official_visible": True})
         log["completed_retensed"] = V.retense_completed(note, L)
+        log["planned_result_items_dropped"] = V.drop_planned_result_items(note, case)
+        log["disposition_hedged"] = V.hedged_disposition(note)
         log["severity_downgraded"] = V.downgrade_unsupported_severity(note)
         if log["severity_downgraded"]:
             note.review_items.append({"type": "verify", "description": tr["severity"], "source_ids": [],

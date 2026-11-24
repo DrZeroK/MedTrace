@@ -724,6 +724,38 @@ def _asserted(m: re.Match) -> bool:
     return not _NEGATED.search(re.split(r"[，,。；;：:]", m.string[:m.start()])[-1])
 
 
+_PENDING_RESULT = re.compile(r"(?:缺少?|未提供|尚无|暂无|尚未提供|待)([一-鿿A-Za-z0-9-]{2,10}?)"
+                             r"(?:检查|检测|化验|培养|穿刺)?(?:结果|报告)")
+
+
+def drop_planned_result_items(note: Note, case: Case) -> list[str]:
+    """Drop a model review item asking for the result of a test the plan itself has just ordered ("缺脑脊液检查结果"
+    while the plan says "拟行腰椎穿刺送脑脊液…"): the plan already handles it, and the rubric wants review items for
+    missing or conflicting record content. A test the records mention (sent, pending) stays a valid item."""
+    plan = note.text("treatment_plan")
+    records = "\n".join(s.content for s in case.sources)
+    kept, dropped = [], []
+    for r in note.review_items:
+        m = _PENDING_RESULT.search(r.get("description", ""))
+        if r.get("origin", "model") == "model" and m and m.group(1) in plan and m.group(1) not in records:
+            dropped.append(r["description"])
+        else:
+            kept.append(r)
+    note.review_items = kept
+    return dropped
+
+
+# one clause, no condition between: "收入ICU或普通病房" is a hedge, "收入普通病房，若…或…转ICU" is an escalation rule
+_GAP = r"[^。；，,\n若如转]"
+_DISPOSITION_HEDGE = re.compile(rf"(?:ICU|重症监护){_GAP}{{0,8}}或{_GAP}{{0,8}}(?:普通病房|病房)|"
+                                rf"(?:普通病房|病房){_GAP}{{0,8}}或{_GAP}{{0,8}}(?:ICU|重症监护)")
+
+
+def hedged_disposition(note: Note) -> bool:
+    """The plan leaves the admission setting open ("ICU监护或普通病房"); logged for evaluation, not rewritten."""
+    return bool(_DISPOSITION_HEDGE.search(note.text("treatment_plan")))
+
+
 def downgrade_unsupported_severity(note: Note) -> int:
     """A discussion statement that calls the case severe ("重症肺炎") without naming the criteria it was checked
     against is rewritten to "严重程度待评估": the label changes treatment intensity, and on the practice case the model
