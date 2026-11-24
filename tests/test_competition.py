@@ -96,7 +96,7 @@ class Competition(unittest.TestCase):
         self.assertEqual(official_schema_errors(rec, {"S1"}), [])
         self.assertEqual(len(requests), 1)
         self.assertEqual(requests[0]["payload"]["model"], "official-test")
-        self.assertEqual(requests[0]["payload"]["seed"], 42)
+        self.assertEqual(requests[0]["payload"]["seed"], 37)
         self.assertNotIn("Authorization", requests[0]["headers"])
         events = json.loads((root / "run_log.json").read_text())
         self.assertEqual(len({e["run_id"] for e in events}), 1)
@@ -323,7 +323,7 @@ class Competition(unittest.TestCase):
         self.assertEqual((root / ".env.example").read_text().splitlines(),
                          ["MODEL_NAME=qwen3.8-27b", "ENDPOINT=http://127.0.0.1:8000/v1/chat/completions"])
         text = (root / "README.md").read_text()
-        for term in ("MODEL_NAME", "ENDPOINT", "medical_record", "review_items", "run_log.json", "--development", "seed 42"):
+        for term in ("MODEL_NAME", "ENDPOINT", "medical_record", "review_items", "run_log.json", "--development", "seed 37"):
             self.assertIn(term, text)
         for path in ("README.md", "README.zh-CN.md"):
             import re

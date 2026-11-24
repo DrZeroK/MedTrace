@@ -1,0 +1,25 @@
+[task:repair/v1]
+An automatic checker compared a draft initial progress note with the admission records and raised the findings below. Correct ONLY the statements named in the findings. A finding can be a false alarm: if the statement is fully supported by the records, leave it unchanged.
+
+Record cutoff: <<cutoff>>
+
+<records>
+<<sources>>
+</records>
+
+<draft>
+<<draft>>
+</draft>
+
+<findings>
+<<findings>>
+</findings>
+
+For each finding that is real, return a patch:
+- "replace": rewrite the statement so that it states only what the records support (exact values and units, correct negation, correct certainty, proposals worded as proposals).
+- "delete": remove the statement, only if nothing in it is supported by the records.
+Do not add new clinical content. Write in <<lang>>.
+
+Return exactly one JSON object:
+{"patches": [{"section": "case_features|diagnostic_discussion|treatment_plan", "index": 0, "action": "replace|delete", "text": "new text for replace", "sources": ["id"], "reason": "short"}]}
+If no change is needed return {"patches": []}.

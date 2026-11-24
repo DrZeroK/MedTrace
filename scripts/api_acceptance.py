@@ -274,7 +274,7 @@ def main(argv=None) -> int:
         os.chdir(old_cwd)
     if args.development:
         if cfg.seed is None:
-            cfg.seed = 42
+            cfg.seed = Config.seed
         if cfg.enable_thinking is None:
             cfg.enable_thinking = False
     if cfg.max_retries < 2:

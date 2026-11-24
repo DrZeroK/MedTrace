@@ -65,6 +65,7 @@ _I18N = {
         "c_allergy_conflict": "The plan gives {term} although the records document an allergy to this drug class; check it.",
         "c_bleeding_risk": "The records document {term}, and the plan includes anticoagulant, antiplatelet or thrombolytic therapy; assess the bleeding risk before acting.",
         "retensed": "The plan described an intervention the records do not document as already done; it is now worded as planned. Confirm whether it was performed.",
+        "severity": "Disease severity was stated without the criteria it was checked against; it is now 'severity to be assessed'. Assess against a standard severity score.",
         "number_removed": "{n} value(s) in the draft case features could not be matched to the source records and were removed; check the original records for them.",
         "c_unit_mismatch": "The unit of {term} differs from the source records; check it.",
         "c_value_label_mismatch": "A value in the case features is attached to a different test than in the source records; check it.",
@@ -101,6 +102,7 @@ _I18N = {
         "c_allergy_conflict": "诊疗计划中的{term}与资料记录的药物过敏史属同类药物，请核对。",
         "c_bleeding_risk": "资料记录有{term}，诊疗计划包含抗凝、抗血小板或溶栓治疗，请评估出血风险后再执行。",
         "retensed": "诊疗计划中有资料未记录的处置被写为已完成，已改为拟行，请核实是否已执行。",
+        "severity": "疾病严重程度（重症）未按标准逐项评估，已改为“严重程度待评估”，请按该病适用的严重程度标准复核。",
         "number_removed": "草稿病例特点中有{n}处数值未能与原始资料对应，已删除，请查阅原始资料补充。",
         "c_unit_mismatch": "{term}的单位与原始资料不一致，请核对。",
         "c_value_label_mismatch": "病例特点中有数值与原始资料中的检查项目不对应，请核对。",
@@ -417,6 +419,10 @@ class Pipeline:
             note.review_items.append({"type": "verify", "description": tr["allergy_removed"].format(drug=drug, allergen=allergen),
                                       "source_ids": [], "origin": "verifier", "official_visible": True})
         log["completed_retensed"] = V.retense_completed(note, L)
+        log["severity_downgraded"] = V.downgrade_unsupported_severity(note)
+        if log["severity_downgraded"]:
+            note.review_items.append({"type": "verify", "description": tr["severity"], "source_ids": [],
+                                      "origin": "verifier", "official_visible": True})
         if log["completed_retensed"]:
             note.review_items.append({"type": "verify", "description": tr["retensed"], "source_ids": [],
                                       "origin": "verifier", "official_visible": True})

@@ -16,7 +16,7 @@ from . import textutil as T
 from .knowledge import approved_quote
 from .inputs import Case
 from .ledger import Ledger, numerics
-from .note import Note, Statement, SECTIONS
+from .note import Note, Statement, SECTIONS, statement_groups
 
 import re
 
@@ -708,6 +708,50 @@ def retense_completed(note: Note, L: Ledger) -> int:
     return n
 
 
+# Not severity modifiers: ward names (转入重症监护室) and disease names that contain the word (重症肌无力).
+_NOT_MODIFIER = r"(?!肌无力|监护|医学|病房)"
+_SEVERE = re.compile(r"(?:重症|危重)" + _NOT_MODIFIER)
+_SEVERITY_CRITERIA = re.compile(r"(?i)CURB|PSI|q?SOFA|APACHE|主要标准|次要标准|诊断标准|分级标准|\d+\s*项")
+_SEVERE_CLAIM = re.compile(r"(?:符合|提示|考虑|属于|达到|为)?(?:重症|危重)" + _NOT_MODIFIER
+                           + r"(?:肺炎)?(?:的)?(?:临床特征|临床表现|特征|表现|标准)?")
+_NEGATED = re.compile(r"(?:无|未|不|非|否认|没有|排除)[^，,。；;：:]{0,4}$")   # cue earlier in the same clause
+
+
+def _asserted(m: re.Match) -> bool:
+    """The severity mention is claimed, not negated ("无重症表现", "不符合重症肺炎", "未达重症标准")."""
+    return not _NEGATED.search(re.split(r"[，,。；;：:]", m.string[:m.start()])[-1])
+
+
+def downgrade_unsupported_severity(note: Note) -> int:
+    """A discussion statement that calls the case severe ("重症肺炎") without naming the criteria it was checked
+    against is rewritten to "严重程度待评估": the label changes treatment intensity, and on the practice case the model
+    applied it with only 2 of the 3 minor criteria met. Statements already hedged ("待评估"), citing criteria, or only
+    negating severity are left alone. A statement split by split_long_statements is judged with its continuation
+    chunks, so criteria in a later sentence still count. Returns #statements rewritten."""
+    stmts = note.sections["diagnostic_discussion"]
+    sub = lambda rx, repl, text: rx.sub(lambda m: repl if _asserted(m) else m.group(0), text)
+    n = 0
+    for group in statement_groups(stmts):
+        whole = "".join(st.text for st in group)
+        if (not any(_asserted(m) for m in _SEVERE.finditer(whole)) or "待评估" in whole
+                or _SEVERITY_CRITERIA.search(whole)):
+            continue
+        first = group[0]
+        head, sep, body = re.split(r"([：:])", first.text, 1) if re.search(r"[：:]", first.text) else (first.text, "", "")
+        if sep:
+            if any(_asserted(m) for m in _SEVERE.finditer(head)):
+                head = sub(_SEVERE, "", head)
+                head = (re.sub(r"（([^）]*)）", r"（\1，严重程度待评估）", head, 1) if "（" in head
+                        else head + "（严重程度待评估）")
+            first.text = head + sep + sub(_SEVERE_CLAIM, "需按标准评估是否为重症", body)
+        elif any(_asserted(m) for m in _SEVERE.finditer(head)):
+            first.text = re.sub(r"[。.]$", "", sub(_SEVERE, "", head)) + "（严重程度待评估）。"
+        for st in group[1:]:
+            st.text = sub(_SEVERE_CLAIM, "需按标准评估是否为重症", st.text)
+        n += 1
+    return n
+
+
 _SPLIT_NUM = re.compile(r"(?<![\d.])(\d+)\s*([、，,])\s*(\d+)(?![\d.])")
 
 
@@ -789,7 +833,7 @@ def split_long_statements(note: Note, limit: int = 100) -> int:
     added = 0
     for sec in SECTIONS:
         out = []
-        for st in note.sections[sec]:
+        for index, st in enumerate(note.sections[sec]):
             parts = [x for x in _SENT_END.split(st.text) if x.strip()] if len(st.text) > limit else [st.text]
             chunks: list[str] = []
             for x in parts:
@@ -797,7 +841,8 @@ def split_long_statements(note: Note, limit: int = 100) -> int:
                     chunks[-1] += x
                 else:
                     chunks.append(x)
-            out += [Statement(c.strip(), list(st.sources), st.kind, st.basis, list(st.knowledge_ids)) for c in chunks]
+            group = index if len(chunks) > 1 else st.split_group
+            out += [Statement(c.strip(), list(st.sources), st.kind, st.basis, list(st.knowledge_ids), group) for c in chunks]
             added += len(chunks) - 1
         note.sections[sec] = out
     return added

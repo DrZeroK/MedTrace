@@ -82,7 +82,7 @@ class GenerationRecovery(unittest.TestCase):
         self.assertIn("双引号", second[len(first):])
         self.assertIn("T0", second)
         self.assertIn("药物甲10mg", first)
-        self.assertEqual([r["seed"] for r in requests], [42, 42])
+        self.assertEqual([r["seed"] for r in requests], [37, 37])
         attempt = result.log["attempts"][0]
         self.assertEqual(attempt["finish_reason"], "stop")
         self.assertEqual(attempt["content_characters"], len(BAD))

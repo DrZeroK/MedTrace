@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from itertools import groupby
 
 from .textutil import detect_lang, split_sentences, strip_enum
 
@@ -34,6 +35,7 @@ class Statement:
     kind: str = ""
     basis: str = ""             # record | knowledge | inference (optional; discussion/plan)
     knowledge_ids: list = field(default_factory=list)
+    split_group: int | None = None  # original position within the section, shared by split chunks
 
 
 @dataclass
@@ -43,7 +45,7 @@ class Note:
     extra_evidence: list = field(default_factory=list)   # model-supplied evidence list (baseline format)
 
     def copy(self) -> "Note":
-        return Note({k: [Statement(s.text, list(s.sources), s.kind, s.basis, list(s.knowledge_ids)) for s in v] for k, v in self.sections.items()},
+        return Note({k: [Statement(s.text, list(s.sources), s.kind, s.basis, list(s.knowledge_ids), s.split_group) for s in v] for k, v in self.sections.items()},
                     [dict(r) for r in self.review_items], [dict(e) for e in self.extra_evidence])
 
     def text(self, section=None) -> str:
@@ -186,6 +188,96 @@ def render_prose(stmts: list[Statement], inline: bool = False) -> str:
     return out
 
 
+# Official rendering: statements are grouped by their `kind` in first-progress-note order and numbered one per line.
+# Unknown kinds (e.g. v2 output) inherit the previous statement's group, so older prompts render in their own order.
+_GROUPS = {
+    "case_features": (("summary", None, None), ("symptoms", None, None), ("history", None, None),
+                      ("exam", None, None), ("tests", None, None), ("missing", None, None)),
+    "diagnostic_discussion": (("assessment", "初步诊断及依据", "Working diagnoses"), ("differential", "鉴别诊断", "Differential diagnosis"),
+                              ("uncertainty", "待明确问题", "Open questions")),
+    "treatment_plan": (("investigation", "检查", "Investigations"), ("treatment", "处理", "Management"),
+                       ("monitoring", "观察", "Monitoring")),
+}
+_CITE_KINDS = {"assessment"}     # rubric: each working diagnosis points at its record, e.g. "贫血待查（Hb 82 g/L，见S03）"
+
+
+def statement_groups(stmts):
+    # A verifier can remove the first chunk. Keep surviving chunks with their original statement.
+    for _, chunks in groupby(stmts, key=lambda s: s.split_group if s.split_group is not None else object()):
+        yield list(chunks)
+
+
+def _whole_statements(stmts):
+    for group in statement_groups(stmts):
+        first = group[0]
+        if len(group) == 1:
+            yield first
+            continue
+        parts = [s.text.strip() for s in group if s.text.strip()]
+        separator = "" if detect_lang("".join(parts)) == "zh" else " "
+        sources = list(dict.fromkeys(i for s in group for i in s.sources))
+        yield replace(first, text=separator.join(parts), sources=sources)
+
+
+def render_official(stmts: list[Statement], section: str, rid=lambda i: i) -> str:
+    groups = _GROUPS[section]
+    order = [g[0] for g in groups]
+    items: list = []                            # [group kind, line text, sources]
+    current = None
+    for s in stmts:
+        text = s.text.strip()
+        if not text:
+            continue
+        k = (s.kind or "").strip().lower()
+        k = k if k in order else (current or None)
+        items.append([k, text, s.sources])
+        current = k
+    if not items:
+        return ""
+    for it in items:
+        if it[0] in _CITE_KINDS and it[2]:
+            body = re.sub(r"[。.]$", "", it[1])
+            zh = detect_lang(body) == "zh"
+            ids = ("、" if zh else ", ").join(dict.fromkeys(str(rid(i)) for i in it[2]))
+            it[1] = body + (f"（见{ids}）。" if zh else f" (see {ids}).")
+    items = [(k, text) for k, text, _ in items]
+    zh = detect_lang(" ".join(t for _, t in items)) == "zh"
+    rank = {k: n for n, k in enumerate(order)}
+    items.sort(key=lambda it: rank.get(it[0], -1))   # stable; ungrouped leading items stay first
+    lines, last = [], object()
+    n = 0
+    for k, text in items:
+        if k != last:
+            head = next((g[1] if zh else g[2] for g in groups if g[0] == k), None)
+            if head:
+                lines.append(head + ("：" if zh else ":"))
+                n = 0
+            last = k
+        n += 1
+        lines.append(f"{n}. {text}")
+    return "\n".join(lines)
+
+
+_REVIEW_PREFIX = {"zh": {"missing": "【缺失】", "conflict": "【冲突】", "verify": "【待确认】"},
+                  "en": {"missing": "[Missing] ", "conflict": "[Conflict] ", "verify": "[Confirm] "}}
+
+
+def _review_text(r: dict) -> str:
+    text = (r.get("clinician") or r["description"]).strip()
+    for prefixes in _REVIEW_PREFIX.values():
+        for prefix in prefixes.values():
+            if text.startswith(prefix.rstrip()):
+                text = text[len(prefix.rstrip()):].lstrip()
+                break
+    lang = "zh" if detect_lang(text) == "zh" else "en"
+    typ = r.get("type", "verify")
+    # a model "conflict" needs two disagreeing records; one source is a borderline value or a guess, not a conflict
+    # (ledger-detected conflicts keep their tag: an internal contradiction legitimately has one source)
+    if typ == "conflict" and r.get("origin", "model") == "model" and len(set(r.get("source_ids", []))) < 2:
+        typ = "verify"
+    return _REVIEW_PREFIX[lang].get(typ, _REVIEW_PREFIX[lang]["verify"]) + text
+
+
 def to_record(note: Note, case, cfg, meta: dict | None = None) -> dict:
     """Serialise to the output contract. Field names/selection are configurable (official schema TBC)."""
     rid = case.raw_id
@@ -233,7 +325,8 @@ def to_official_record(note: Note, case, meta: dict | None = None, status: str =
             "error": {"code": str((error or {}).get("code", "GENERATION_ERROR")),
                       "message": str((error or {}).get("message", "generation failed"))},
         }
-    sections = {sec: render_prose(note.sections[sec]) for sec in SECTIONS}
+    whole = {sec: list(_whole_statements(note.sections[sec])) for sec in SECTIONS}
+    sections = {sec: render_official(whole[sec], sec, rid) for sec in SECTIONS}
 
     def _kind(sec: str, basis: str) -> str:
         """Official 'fact' = content stated in the records; 'inference' = reasoning over them.
@@ -245,16 +338,16 @@ def to_official_record(note: Note, case, meta: dict | None = None, status: str =
     # evidence: derive from statements carrying source ids, map section + basis -> kind, cap to 3-5.
     candidates = []
     for sec in SECTIONS:
-        for s in note.sections[sec]:
+        for s in whole[sec]:
             if not s.sources:
                 continue
             candidates.append({"statement": s.text, "source_ids": [rid(i) for i in s.sources],
-                               "kind": _kind(sec, s.basis)})
+                               "kind": _kind(sec, s.basis), "_k": (s.kind or "").lower()})
     candidates += [{"statement": e["statement"], "source_ids": [rid(i) for i in e["source_ids"]],
-                    "kind": _kind(e.get("section", ""), e.get("basis", ""))}
+                    "kind": _kind(e.get("section", ""), e.get("basis", "")), "_k": ""}
                    for e in note.extra_evidence if e["source_ids"]]
-    evidence = _select_evidence(candidates)
-    review = [r.get("clinician") or r["description"] for r in note.review_items
+    evidence = [{k: v for k, v in e.items() if k != "_k"} for e in _select_evidence(candidates)]
+    review = [_review_text(r) for r in note.review_items
               if r.get("description")
               and (r.get("origin", "model") not in OFFICIAL_REVIEW_EXCLUDE or r.get("official_visible"))][:6]
     return {
@@ -288,15 +381,20 @@ def _select_evidence(candidates: list[dict], low: int = 3, high: int = 5) -> lis
                 out.append(e)
         return out
 
+    # facts: key findings first (values before prose, few sources before many), summary and "not documented" lines last
+    facts = sorted(facts, key=lambda e: (e.get("_k") in ("summary", "missing"), len(e["source_ids"]) > 3,
+                                         not re.search(r"\d", e["statement"])))
     facts_d, infers_d = distinct(facts), distinct(infers)
-    picked: list[dict] = []
-    if infers_d:
-        picked.append(infers_d[0])                       # guarantee one inference boundary
+    by_kind = lambda k: [e for e in infers if e.get("_k") == k]
+    main = (by_kind("assessment") or infers_d)[:1]                       # the working diagnosis and its basis
+    boundary = [e for e in (by_kind("uncertainty") + by_kind("differential"))[:1] if e not in main]   # inference boundary
+    picked: list[dict] = list(main)
     for e in facts_d:                                    # then facts across distinct sources
-        if len(picked) >= high:
+        if len(picked) >= high - len(boundary):
             break
         if e not in picked:
             picked.append(e)
+    picked += boundary
     for e in facts + infers:                             # fill from all remaining to reach `low`
         if len(picked) >= min(low, len(candidates)):
             break

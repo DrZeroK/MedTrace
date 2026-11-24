@@ -423,12 +423,15 @@ class Verifier(unittest.TestCase):
         class Client:
             def chat(self, system, user, stats, deadline=None, thinking=None):
                 seen["thinking"] = thinking
+                seen["prompt"] = user
                 return json.dumps(reply)
 
         p = Pipeline(cfg(pipeline="S2", reason_thinking=True), Client())
         log = {}
         block = p._extract(parse_case(CASE, 0), "", {"lang": "English", "cutoff": "T0", "sources": ""}, "en", CallStats(), None, log)
         self.assertTrue(seen["thinking"])
+        for field in ("certainty", "differentials", "missing"):
+            self.assertIn(f'"{field}"', seen["prompt"])
         self.assertEqual(log["extract_quotes"], {"kept": 1, "rejected": 2})
         self.assertIn('1. [urgent] Fever with cough (probable)', block)
         self.assertIn("* name: Pneumonia | for: fever, cough | against: no imaging yet | test: chest X-ray", block)
@@ -770,7 +773,7 @@ class ConfigParsing(unittest.TestCase):
 
     def test_invalid_seed_and_thinking_are_ignored_with_warning(self):
         c = self._load(LLM_SEED="abc", LLM_ENABLE_THINKING="maybe")
-        self.assertEqual(c.seed, 42)
+        self.assertEqual(c.seed, 37)
         self.assertIsNone(c.enable_thinking)
         self.assertEqual(len(c.warnings), 2)
 
@@ -824,7 +827,7 @@ class Http(unittest.TestCase):
         self.assertEqual(r.status, "ok")
         self.assertTrue(srv.requests)
         for req in srv.requests:
-            self.assertEqual(req["seed"], 42)
+            self.assertEqual(req["seed"], 37)
             self.assertNotIn("chat_template_kwargs", req)
 
     def test_seed_and_thinking_sent_when_configured(self):
@@ -1162,7 +1165,7 @@ class Packaging(unittest.TestCase):
     def test_zip_whitelist(self):
         d = Path(tempfile.mkdtemp())
         names, total = self.B.build_zip(ROOT, d / "sub.zip")
-        for expected in ("main.py", "medtrace/prompts/v2/zh/a1.txt", "docs/RESOURCE_REGISTRATION.md", "input.example.json"):
+        for expected in ("main.py", "medtrace/prompts/v3/zh/a1.txt", "docs/RESOURCE_REGISTRATION.md", "input.example.json"):
             self.assertIn(expected, names)
         self.assertNotIn(".env", names)
         for n in names:
@@ -1298,7 +1301,7 @@ class OfficialProtocol(EndToEnd):
         stats = CallStats()
         self.assertEqual(client.chat("s", "u", stats), "ok")
         headers, payload = seen[0]
-        self.assertEqual(payload["seed"], 42)
+        self.assertEqual(payload["seed"], 37)
         self.assertEqual(payload["chat_template_kwargs"], {"enable_thinking": False})
         self.assertNotIn("Authorization", headers)
         self.assertEqual((stats.calls, stats.http_attempts), (1, 1))
@@ -1348,9 +1351,14 @@ class OfficialProtocol(EndToEnd):
             {"type": "verify", "description": "知识检索失败", "source_ids": [], "origin": "internal"},
             {"type": "missing", "description": "药物过敏史未记录", "source_ids": [], "origin": "ledger"},
             {"type": "verify", "description": "血压需复核", "source_ids": [], "origin": "model"},
+            {"type": "conflict", "description": "【冲突】血小板处于正常低限", "source_ids": ["S1"], "origin": "model"},
+            {"type": "conflict", "description": "两份用药清单不一致", "source_ids": ["S1", "S2"], "origin": "model"},
+            {"type": "conflict", "description": "S1前后记载不一致", "source_ids": ["S1"], "origin": "ledger"},
         ]
         rec = to_official_record(n, parse_case(CASE, 0), status="success")
-        self.assertEqual(rec["medical_record"]["review_items"], ["药物过敏史未记录", "血压需复核"])
+        self.assertEqual(rec["medical_record"]["review_items"],
+                         ["【缺失】药物过敏史未记录", "【待确认】血压需复核", "【待确认】血小板处于正常低限",
+                          "【冲突】两份用药清单不一致", "【冲突】S1前后记载不一致"])
 
     def test_finalise_marks_verifier_items_for_exclusion(self):
         from medtrace import pipeline as P
@@ -1383,20 +1391,78 @@ class OfficialProtocol(EndToEnd):
         p._finalise(n, c, L, V.verify_note(n, c, L), P._I18N["zh"], "zh")
         self.assertTrue(any(r.get("official_visible") for r in n.review_items))
         rec = to_official_record(n, c, status="success")
-        self.assertIn("记录中初步诊断的确定程度可能高于资料支持，请复核初步诊断表述。", rec["medical_record"]["review_items"])
+        self.assertIn("【待确认】记录中初步诊断的确定程度可能高于资料支持，请复核初步诊断表述。", rec["medical_record"]["review_items"])
         self.assertFalse(any(x.startswith("请核实：") for x in rec["medical_record"]["review_items"]))
 
-    def test_official_sections_are_prose(self):
+    def test_unsupported_severity_is_downgraded(self):
         n = Note()
-        n.sections["case_features"] = [Statement("发热。", ["S1"]), Statement("咳嗽。", ["S1"])]
-        n.sections["diagnostic_discussion"] = [Statement("考虑感染。", ["S1"])]
-        n.sections["treatment_plan"] = [Statement("复查血常规。", ["S1"])]
-        rec = to_official_record(n, parse_case(CASE, 0), status="success")
-        self.assertEqual(rec["medical_record"]["case_features"], "发热。咳嗽。")
-        self.assertNotIn("1. ", rec["medical_record"]["case_features"])
+        n.sections["diagnostic_discussion"] = [
+            Statement("重症肺炎（可能性大）：依据发热。存在意识障碍，符合重症表现。", ["S1"], "assessment"),
+            Statement("重症肺炎（可能性大）：意识障碍、BUN升高，满足次要标准3项。", ["S1"], "assessment"),
+            Statement("肺炎（严重程度待评估）：依据发热。", ["S1"], "assessment"),
+            Statement("病情进展时转入重症监护室。", ["S1"], "uncertainty"),
+            Statement("肺炎（可能性大）：伴意识障碍，符合重症肺炎临床特征。", ["S1"], "assessment")]
+        self.assertEqual(V.downgrade_unsupported_severity(n), 2)
+        self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]],
+                         ["肺炎（可能性大，严重程度待评估）：依据发热。存在意识障碍，需按标准评估是否为重症。",
+                          "重症肺炎（可能性大）：意识障碍、BUN升高，满足次要标准3项。",
+                          "肺炎（严重程度待评估）：依据发热。", "病情进展时转入重症监护室。",
+                          "肺炎（可能性大）：伴意识障碍，需按标准评估是否为重症。"])
+
+    def test_severity_guard_keeps_disease_names_negations_and_split_criteria(self):
+        # PR #15 review: 重症肌无力 is a disease name; negated severity is a finding, not a claim; criteria in a
+        # continuation chunk (split_long_statements) still support the first chunk.
+        kept = ["重症肌无力（已确诊）：既往病历已明确诊断，现有眼睑下垂。", "肺炎（可能性大）：目前无重症表现。",
+                "肺炎（可能性大）：目前不符合重症肺炎，未达重症标准。"]
+        n = Note()
+        n.sections["diagnostic_discussion"] = [Statement(t, ["S1"], "assessment") for t in kept] + [
+            Statement("重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。", ["S1"], "assessment", split_group=1),
+            Statement("符合重症肺炎次要标准3项。", ["S1"], "assessment", split_group=1)]
+        self.assertEqual(V.downgrade_unsupported_severity(n), 0)
+        self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]][:3], kept)
+        self.assertEqual(n.sections["diagnostic_discussion"][3].text, "重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。")
+        n.sections["diagnostic_discussion"] = [Statement("重症肺炎（可能性大）：依据发热。", ["S1"], "assessment", split_group=1),
+                                               Statement("伴意识障碍，符合重症表现。", ["S1"], "assessment", split_group=1)]
+        self.assertEqual(V.downgrade_unsupported_severity(n), 1)
+        self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]],
+                         ["肺炎（可能性大，严重程度待评估）：依据发热。", "伴意识障碍，需按标准评估是否为重症。"])
+
+    def test_official_sections_are_grouped_numbered_lines(self):
+        # v3 first-progress-note layout: kind order, one numbered item per line, group headings in discussion/plan,
+        # record ids after each working diagnosis; a split continuation stays on its line.
+        n = Note()
+        n.sections["case_features"] = [Statement("颈软，病理征阴性。", ["S1"], "exam"), Statement("中年男性，急性病程。", ["S1"], "summary"),
+                                       Statement("发热。", ["S1"], "symptoms", split_group=1), Statement("续。", ["S1"], "symptoms", split_group=1)]
+        n.sections["diagnostic_discussion"] = [Statement("肺炎（可能性大）：依据发热。", ["S1"], "assessment"),
+                                               Statement("流感：因发热需考虑。", ["S1"], "differential")]
+        n.sections["treatment_plan"] = [Statement("复查血常规。", ["S1"], "monitoring"), Statement("拟查痰培养。", ["S1"], "investigation")]
+        mr = to_official_record(n, parse_case(CASE, 0), status="success")["medical_record"]
+        self.assertEqual(mr["case_features"], "1. 中年男性，急性病程。\n2. 发热。续。\n3. 颈软，病理征阴性。")
+        self.assertEqual(mr["diagnostic_discussion"], "初步诊断及依据：\n1. 肺炎（可能性大）：依据发热（见S1）。\n鉴别诊断：\n1. 流感：因发热需考虑。")
+        self.assertEqual(mr["plan"], "检查：\n1. 拟查痰培养。\n观察：\n1. 复查血常规。")
         n.sections["case_features"] = [Statement("Fever.", ["S1"]), Statement("Cough.", ["S1"])]
         rec = to_official_record(n, parse_case(CASE, 0), status="success")
-        self.assertEqual(rec["medical_record"]["case_features"], "Fever. Cough.")
+        self.assertEqual(rec["medical_record"]["case_features"], "1. Fever.\n2. Cough.")
+
+    def test_english_assessment_continuation_and_evidence_with_shared_sources(self):
+        n = Note()
+        n.sections["diagnostic_discussion"] = [
+            Statement("Cause unclear.", ["S1", "S2"], "uncertainty"),
+            Statement("Suspected infection;", ["S1", "S2"], "assessment", split_group=1),
+            Statement("cultures pending.", ["S1", "S2"], "assessment", split_group=1)]
+        mr = to_official_record(n, parse_case(CASE, 0))["medical_record"]
+        self.assertIn("Suspected infection; cultures pending (see S1, S2).", mr["diagnostic_discussion"])
+        self.assertEqual([e["statement"] for e in mr["evidence"]], ["Suspected infection; cultures pending.", "Cause unclear."])
+
+    def test_orphaned_chunk_keeps_its_own_source(self):
+        n = Note()
+        n.sections["diagnostic_discussion"] = [Statement("First diagnosis.", ["S1"], "assessment"),
+                                               Statement("Second diagnosis; still under review.", ["S2"], "assessment")]
+        self.assertEqual(V.split_long_statements(n, limit=20), 1)
+        n.sections["diagnostic_discussion"].pop(1)
+        mr = to_official_record(n, parse_case(CASE, 0))["medical_record"]
+        self.assertIn("1. First diagnosis (see S1).\n2. still under review (see S2).", mr["diagnostic_discussion"])
+        self.assertEqual(mr["evidence"][1]["source_ids"], ["S2"])
 
     def test_endpoint_overrides_mock_base(self):
         # PR#4 P1: an explicit ENDPOINT must reach the real service even when LLM_API_BASE=mock:// (copied .env.example).

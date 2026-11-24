@@ -1,0 +1,22 @@
+[task:extract/v2]
+Reason clinically first; another step will write the initial progress note from your analysis. From the admission records below, list the patient's active clinical problems, most urgent first (usually 2-5).
+
+Record cutoff: <<cutoff>>
+
+<records>
+<<sources>>
+</records>
+
+For each problem:
+- evidence: verbatim quotes (short spans) supporting it, including documented negatives that bear on it (polarity "negative") and pending or not-done items ("pending").
+- certainty: "established" only if the records state it, "probable" with strong support, "to exclude" when support is limited. Never present a hypothesis as established.
+- differentials: 2-3 case-specific alternatives; for each, the documented findings that suggest it ("for"), what argues against it or is still missing ("against"), and the next test that would separate it ("test"). Do not list diseases the records explicitly deny. No generic textbook lists.
+- missing: up to 3 undocumented items that would change the assessment or management of this problem.
+
+Rules: quotes must be copied character-for-character; name a problem by what is documented (e.g. "fever with right lower lobe consolidation") and use a definitive diagnosis only if the records give it; do not write a treatment plan.
+
+Return exactly one JSON object:
+{"problems": [{"problem": "...", "urgency": "immediate|urgent|routine", "certainty": "established|probable|to exclude",
+  "evidence": [{"source": "id", "quote": "verbatim", "polarity": "positive|negative|pending"}],
+  "differentials": [{"name": "...", "for": "...", "against": "...", "test": "..."}],
+  "missing": ["..."]}]}

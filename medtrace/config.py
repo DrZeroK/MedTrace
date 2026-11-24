@@ -12,7 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PIPELINES = ("A0", "A1", "A2", "S2", "A3")  # A2 == strategy S1 (default), A3 == strategy S3
-DEFAULT_PROMPT_VERSION = "v2"
+DEFAULT_PROMPT_VERSION = "v3"
 # Safety ceilings for the no-argument official entry point. These are not the organiser's
 # published limits (Q5 still pending); they exist so one stalled request cannot consume the
 # whole evaluation window before output.json is written. Development mode keeps 0 = unlimited.
@@ -111,7 +111,7 @@ class Config:
     temperature: float = 0.0
     max_tokens: int = 0             # 0 => omit, use server default
     json_mode: bool = False         # send response_format=json_object if the endpoint supports it
-    seed: int | None = 42           # fixed request seed; a 400 that rejects it is handled by the payload compatibility fallback
+    seed: int | None = 37           # fixed request seed; a 400 that rejects it is handled by the payload compatibility fallback
     reason_thinking: bool | None = None   # development only: thinking for the S2 reasoning call (None => as enable_thinking)
     enable_thinking: bool | None = None   # None => omit (server default, not necessarily off); official load_config sets False. Sent as chat_template_kwargs (Q7)
     extra_body: dict = field(default_factory=dict)   # merged into every request last (provider-specific switches, may override the above)
@@ -224,7 +224,7 @@ def load_config(*, development: bool = False, **overrides) -> Config:
         temperature=_num(float, "LLM_TEMPERATURE", default=0.0),
         max_tokens=_num(int, "LLM_MAX_TOKENS", default=0),
         json_mode=_flag("LLM_JSON_MODE"),
-        seed=_opt_int("LLM_SEED", warnings, default=42),
+        seed=_opt_int("LLM_SEED", warnings, default=Config.seed),
         enable_thinking=_tristate("LLM_ENABLE_THINKING", warnings),
         reason_thinking=_tristate("REASON_THINKING", warnings),
         pipeline=str(_get("PIPELINE", default="A2")).upper(),

@@ -8,7 +8,7 @@ MedTrace generates an initial hospital course note draft from admission material
 
 1. Parse the materials cutoff, and filter content explicitly later than the cutoff by source and sentence; T0 is retained as the organiser marker with no calendar mapping.
 2. Build a fact ledger that aggregates numbers, units, negation, pending-result information and possible conflicts.
-3. Generate source-tagged statements using the fixed v2 prompt and the A2 flow. Defaults are temperature 0 and seed 42, with at most two logical calls; the second is used only to regenerate results that cannot be parsed or lack sections.
+3. Generate source-tagged statements using the fixed v3 prompt and the A2 flow. Defaults are temperature 0 and seed 37, with at most two logical calls; the second is used only to regenerate results that cannot be parsed or lack sections.
 4. Verify numbers, units, negation, sources and completed/planned wording. Invalid references are removed, and unresolved issues become review items. Extra model repair calls are off by default.
 5. Check the official input, complete medical sections, success/failure structure and case-local references. A failed case keeps its position; output.json is published atomically after the whole batch finishes, together with a checkable run_log.json.
 
@@ -24,6 +24,6 @@ Algorithm packages and test result packages are built from allowlists. The build
 
 Automated checks cover the official no-argument entry point, isolation of invalid input, retry/failure on missing model sections, authentication and proxy isolation, complete result publication, log correlation and packaging exclusions. Offline mock results demonstrate the engineering flow and do not represent the medical quality of the designated model. Historical public-data experiments and their limitations are retained in the repository's docs/REPORT.md and are not current official results.
 
-Rule checks cannot reliably judge whether clinical inferences are correct, nor detect every omission. Relative times, complex negation and abbreviations may still cause misjudgements. The seed cannot guarantee word-for-word identical results across different hardware and model versions. The designated model, final time limits/budget, clinical review and official resource permissions still require confirmation before the competition.
+Rule checks cannot reliably judge whether clinical inferences are correct, nor detect every omission. Relative times, complex negation and abbreviations may still cause misjudgements. Repeated requests to the same model can produce different text even with a fixed seed. Acceptance against the designated service, final time limits/budget, clinical review and official resource permissions still require confirmation before the competition.
 
 This file is the source of the short project description; before formal submission it must be laid out in the organiser template with the limit of no more than 10 pages verified, and this test version must not be presented as completed registration or formal acceptance.
