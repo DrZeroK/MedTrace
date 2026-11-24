@@ -65,7 +65,9 @@ def read_guides(paths):
                 if path.name == "guidelines.v4.jsonl" and (
                         row.get("source_check", {}).get("status") != "ai_checked_against_full_text"
                         or not row["source_check"].get("verified_points")
-                        or row["clinical_review"]["status"] == "signed"):
+                        # An AI check is never a sign-off or permission: require the untouched draft statuses.
+                        or row["clinical_review"]["status"] != "not_signed"
+                        or row["permission_review"]["status"] != "not_granted"):
                     raise ValueError(f"v4 cards need a full-text check and no implied sign-off: {row['id']}")
                 if path.name in {"guidelines.v2.jsonl", "guidelines.v3.jsonl", "guidelines.v4.jsonl"}:
                     if (row.get("source_kind") not in {"guideline", "consensus"} or "population" not in row

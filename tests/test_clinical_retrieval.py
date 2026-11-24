@@ -77,6 +77,16 @@ class ClinicalRetrievalTests(unittest.TestCase):
         self.assertEqual(rows["h21"], [])
         self.assertNotIn("kb:chb-2022:mother-to-child", rows["h22"])
 
+    def test_ai_checked_cards_cannot_carry_a_sign_off_or_permission(self):
+        card = json.loads((ROOT / "knowledge/guidelines.v4.jsonl").read_text(encoding="utf-8").splitlines()[0])
+        for key, status in (("clinical_review", "signed_off"), ("permission_review", "cleared")):
+            with self.subTest(key=key), TemporaryDirectory() as directory:
+                path = Path(directory) / "guidelines.v4.jsonl"
+                path.write_text(json.dumps({**card, key: {**card[key], "status": status}}, ensure_ascii=False) + "\n",
+                                encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "no implied sign-off"):
+                    read_guides([path])
+
     def test_routine_results_and_pregnancy_scope_across_guideline_sets(self):
         rows = [(json.loads(line), -1.0) for name in ("v1", "v2", "v3", "v4")
                 for line in (ROOT / f"knowledge/guidelines.{name}.jsonl").read_text(encoding="utf-8").splitlines()
