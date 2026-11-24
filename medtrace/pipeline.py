@@ -270,21 +270,62 @@ class Pipeline:
                 if self.cfg.context_mode != "legacy":
                     log["contexts"] = [{"fact_id": f.fid, "source_id": f.sid, "text": f.text, "scopes": f.contexts}
                                        for f in L.facts if f.contexts]
+                kb_context = ""
                 if self.kb and variant != "A0":
-                    audit = {"case_id": case.case_id, "index": case.index, "status": "ok", "retrieved": [], "rules": []}
+                    audit = {
+                        "case_id": case.case_id,
+                        "index": case.index,
+                        "status": "ok",
+                        "retrieved": [],
+                        "rules": [],
+                    }
                     log["knowledge"] = audit
+                    error_stage = "retrieval"
+
                     try:
                         cards = self.kb.retrieve(case_query(L))
-                        normalized = [{"fact_id": f.fid, "source_id": f.sid, "polarity": f.polarity,
-                                      "matches": self.kb.normalize(f.text)} for f in L.facts]
+                        error_stage = "preparation"
+
+                        normalized = [
+                            {
+                                "fact_id": f.fid,
+                                "source_id": f.sid,
+                                "polarity": f.polarity,
+                                "matches": self.kb.normalize(f.text),
+                            }
+                            for f in L.facts
+                        ]
                         rules = self.kb.check_rules(L)
-                        L.knowledge_cards = {e["id"]: e for e in cards}
-                        audit.update(status="ok" if cards else "no_hits", retrieved=cards, normalized=normalized, rules=rules)
+                        knowledge_cards = {e["id"]: e for e in cards}
+
+                        error_stage = "context_rendering"
+                        if knowledge_cards:
+                            kb_context = knowledge_block(
+                                list(knowledge_cards.values())
+                            )
+                            if not isinstance(kb_context, str) or not kb_context.strip():
+                                raise ValueError(
+                                    "knowledge cards did not produce usable model context"
+                                )
+
+                        L.knowledge_cards = knowledge_cards
+                        audit.update(
+                            status="ok" if cards else "no_hits",
+                            retrieved=cards,
+                            normalized=normalized,
+                            rules=rules,
+                        )
+
                     except Exception as e:
+                        kb_context = ""
                         L.knowledge_cards = {}
-                        audit.update(status="degraded", error=str(e))
+                        audit.update(
+                            status="degraded",
+                            error=str(e),
+                            error_stage=error_stage,
+                        )
                 try:
-                    note, initial, final = self._generate_and_verify(case, L, variant, lang, stats, deadline, changes, log)
+                    note, initial, final = self._generate_and_verify(case, L, variant, lang, stats, deadline, changes, log, kb_context=kb_context,)
                     if self.cfg.official and any(not note.sections[sec] for sec in SECTIONS):
                         raise ParseError("generation left an empty required section")
                 except (LLMError, ParseError) as e:
@@ -356,13 +397,12 @@ class Pipeline:
         return CaseResult(record, note, status, initial, final, log)
 
     # ---------------------------------------------------------------- internals
-    def _generate_and_verify(self, case, L, variant, lang, stats, deadline, changes, log):
+    def _generate_and_verify(self, case, L, variant, lang, stats, deadline, changes, log, *, kb_context=""):
         tr = _I18N[lang]
         low_time = lambda: deadline is not None and deadline - time.monotonic() < self.cfg.time_reserve
         skip = lambda step: log.setdefault("time_budget_skipped", []).append(step)
         common = dict(lang=tr["lang"], cutoff=case.cutoff_raw if case.cutoff_raw not in (None, "") else tr["no_cutoff"],
                       sources=sources_block(case))
-        kb_context = knowledge_block(list(L.knowledge_cards.values()))
         system = load_prompt("system", lang, self.cfg.prompt_version)
         if variant == "S2" and low_time():
             skip("extract")
