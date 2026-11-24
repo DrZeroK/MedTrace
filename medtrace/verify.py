@@ -315,7 +315,9 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         for drug, allergen in allergy_conflicts(text, recorded_allergies(case)):
             add("allergy_conflict", HIGH, f"plan gives {drug!r} although the records document an allergy to {allergen!r}", drug)
         aortic = recorded_aortic(case) if _ANTITHROMBOTIC.search(text) else []
-        if aortic and any(_ANTITHROMBOTIC.search(c) and not _WITHHOLD.search(c) for c in re.split(r"[，,；;。]", text)):
+        if aortic and any(antithrombotic_order(c, text) for c in re.split(r"[，,；;。]", text)) or \
+                aortic and any(_WITHHOLD.search(s) and _ALT_USE.search(s) for s in re.split(r"[；;。]", text)
+                               if _ANTITHROMBOTIC.search(s)):
             add("aortic_antithrombotic", HIGH, f"antithrombotic therapy planned although the records document {aortic[0]!r}",
                 aortic[0])
         elif _ANTITHROMBOTIC.search(text) and not _SAFETY_CAUTION.search(text):
@@ -583,16 +585,48 @@ def recorded_aortic(case: Case) -> list[str]:
     return found
 
 
+# Judged per sentence, not per comma clause (cloud P05: "抗血小板治疗调整：鉴于…，且已服用阿司匹林…，建议暂停或谨慎使用抗血小板
+#药物" lost its subject and history clauses and kept the "or use with caution" option).
+_GIVE = re.compile(r"(?i)继续|予|给予|加用|使用|服用|口服|应用|联合|负荷|启动|开始|维持|静滴|静推|皮下|注射|"
+                   r"\bstart|\bcontinu|\bgive|administer|\bload")
+_HISTORY = re.compile(r"(?i)已(?:经)?(?:服用|口服|予|给予|使用|应用)|曾(?:予|服|用)|院外|外院|入院前|既往|"
+                      r"previously|already|prior to admission")
+_ALT_USE = re.compile(r"(?i)或(?:谨慎|酌情|小剂量|减量)(?:使用|应用|服用|继续)?|\s*or (?:use with caution|continue)")
+
+
 def remove_aortic_antithrombotics(note: Note, case: Case) -> list[tuple[str, str]]:
-    """Remove plan clauses giving antithrombotic therapy when the records document an acute aortic syndrome.
+    """When the records document an acute aortic syndrome, remove plan clauses that order antithrombotic therapy, and
+    in a sentence that stops it drop a "or use with caution" alternative. A clause that only names the drug follows
+    its sentence (kept if the sentence withholds it); a clause reporting earlier doses is history and is kept.
     Returns (drug, condition) pairs removed; never empties the plan."""
     aortic = recorded_aortic(case)
     if not aortic:
         return []
+    removed = []
+    for st in note.sections["treatment_plan"]:
+        chunks = re.split(r"([；;。])", st.text)
+        for i in range(0, len(chunks), 2):
+            if _ANTITHROMBOTIC.search(chunks[i]) and _WITHHOLD.search(chunks[i]) and _ALT_USE.search(chunks[i]):
+                chunks[i] = _ALT_USE.sub("", chunks[i])
+                removed.append((_ANTITHROMBOTIC.search(chunks[i]).group(0), aortic[0]))
+        st.text = "".join(chunks)
+
     def hits(clause, full):
-        m = _ANTITHROMBOTIC.search(clause)
-        return [(m.group(0), aortic[0])] if m and not _WITHHOLD.search(clause) else []
-    return _apply_removal(note, "treatment_plan", hits)
+        drug = antithrombotic_order(clause, full)
+        return [(drug, aortic[0])] if drug else []
+    return removed + _apply_removal(note, "treatment_plan", hits)
+
+
+def antithrombotic_order(clause: str, full: str) -> str | None:
+    """The antithrombotic a plan clause orders, or None. Withholding or history clauses order nothing; a clause that
+    only names the drug follows its sentence in `full` (nothing ordered if that sentence withholds it)."""
+    m = _ANTITHROMBOTIC.search(clause)
+    if not m or _WITHHOLD.search(clause) or _HISTORY.search(clause):
+        return None
+    sentence = next((s for s in re.split(r"[；;。]", full) if clause in s), full)
+    if not _GIVE.search(_PAREN.sub("", clause)) and _WITHHOLD.search(sentence) and not _ALT_USE.search(sentence):
+        return None
+    return m.group(0)
 
 
 # An allergy stated in the note must be one the records give; an invented one (seen with qwen3:8b: "青霉素过敏" in a

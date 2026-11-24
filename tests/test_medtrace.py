@@ -362,6 +362,25 @@ class Verifier(unittest.TestCase):
         none = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "胸痛。CTA未见主动脉夹层。"}]}, 0)
         self.assertEqual(V.recorded_aortic(none), [])
 
+    def test_aortic_withhold_sentence_kept_whole(self):
+        # cloud P05: the withholding sentence lost its subject and history clauses and kept "或谨慎使用"
+        c = parse_case({"case_id": "P", "sources": [{"source_id": "S1", "content":
+            "胸背痛6小时。外院予阿司匹林300mg、氯吡格雷300mg口服。大血管CTA：主动脉壁间血肿。"}]}, 0)
+        L = build_ledger(c)
+        plan = ("抗血小板治疗调整：鉴于已确诊主动脉壁内血肿可能，且已服用阿司匹林和氯吡格雷，需权衡出血与血栓风险，"
+                "建议暂停或谨慎使用抗血小板药物，具体方案需多学科会诊决定。")
+        self.assertIn("aortic_antithrombotic", {f.code for f in V.check_statement("treatment_plan", 0, Statement(plan, ["S1"]), c, L)})
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("控制血压。", ["S1"]), Statement(plan, ["S1"]),
+                                        Statement("暂禁用抗凝药物，继续阿司匹林100mg/日。", ["S1"])]
+        removed = V.remove_aortic_antithrombotics(n, c)
+        self.assertEqual([d for d, _ in removed], ["抗血小板", "阿司匹林"])
+        self.assertEqual([s.text for s in n.sections["treatment_plan"]],
+                         ["控制血压。", "抗血小板治疗调整：鉴于已确诊主动脉壁内血肿可能，且已服用阿司匹林和氯吡格雷，"
+                          "需权衡出血与血栓风险，建议暂停抗血小板药物，具体方案需多学科会诊决定。", "暂禁用抗凝药物。"])
+        for st in n.sections["treatment_plan"]:      # the edited plan raises no aortic finding
+            self.assertNotIn("aortic_antithrombotic", {f.code for f in V.check_statement("treatment_plan", 0, st, c, L)})
+
     def test_unsupported_allergy_removed(self):
         # SYN001 with qwen3:8b: "拟予头孢类抗生素（青霉素过敏，需替代方案）" though the record documents no allergy
         c = parse_case({"case_id": "S", "sources": [{"source_id": "S1", "content": "发热咳嗽3天。否认药物过敏史。"}]}, 0)
