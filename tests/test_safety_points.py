@@ -71,6 +71,12 @@ class SafetyPoints(unittest.TestCase):
         m.review_items = [{"type": "missing", "description": "缺血气分析结果，影响分级。", "origin": "model"},
                           {"type": "missing", "description": "缺甲状腺功能结果，无法排除甲亢。", "origin": "model"}]
         self.assertEqual(V.drop_planned_result_items(m, brief), [])
+        # package smoke run, SYN001: records "未提供血气分析", item "缺动脉血气分析结果" (core "动脉血气" differs)
+        syn001 = parse_case({"case_id": "C", "record_cutoff": "T0", "sources": [
+            {"source_id": "S1", "content": "入院初步考虑下呼吸道感染；未提供血气分析。"}]}, 0)
+        m.sections["treatment_plan"] = [Statement("拟行动脉血气分析评估氧合。", ["S1"], "investigation")]
+        m.review_items = [{"type": "missing", "description": "缺动脉血气分析结果，影响低氧程度分级。", "origin": "model"}]
+        self.assertEqual(V.drop_planned_result_items(m, syn001), [])
         n.sections["treatment_plan"][1] = Statement("收入普通病房，若出现低血压或氧合恶化转ICU。", ["S1"], "treatment")
         self.assertFalse(V.hedged_disposition(n))
 

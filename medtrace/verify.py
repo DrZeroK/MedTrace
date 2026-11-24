@@ -737,9 +737,12 @@ def drop_planned_result_items(note: Note, case: Case) -> list[str]:
     kept, dropped = [], []
     for r in note.review_items:
         m = _PENDING_RESULT.search(r.get("description", ""))
-        # records name tests more briefly ("未提供血气", "甲状腺及肝功能结果未齐"): compare on the core name
+        # records name tests more briefly or differently ("未提供血气分析" vs "动脉血气分析", "甲状腺及肝功能"): the test
+        # counts as named in the records if any two-character piece of its core name is there. Conservative on purpose:
+        # a wrongly kept item is harmless, a wrongly dropped one loses a real missing-information item.
         core = re.sub(r"(?:分析|功能|常规|检查|测定|水平|全套)$", "", m.group(1)) if m else ""
-        if r.get("origin", "model") == "model" and m and len(core) >= 2 and core in plan and core not in records:
+        in_records = any(core[i:i + 2] in records for i in range(len(core) - 1))
+        if r.get("origin", "model") == "model" and m and len(core) >= 2 and core in plan and not in_records:
             dropped.append(r["description"])
         else:
             kept.append(r)
