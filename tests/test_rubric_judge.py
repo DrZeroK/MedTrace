@@ -19,6 +19,14 @@ class RubricRules(unittest.TestCase):
         self.assertIsNone(score_case(REC, None)["total"])
         self.assertEqual(score_case(REC, {"scores": {**FULL, "plan": 99}, "major_errors": []})["total"], 86.0)
 
+    def test_only_confirmed_errors_zero_or_cap(self):
+        # rubric: a case is zeroed only after a third reviewer confirms; an overturned error leaves the dimension score
+        over = {"type": "harmful", "adjudication": {"confirmed": False, "reason": "胆囊炎禁食及胃肠减压为常规处理"}}
+        kept = {"type": "harmful", "adjudication": {"confirmed": True, "reason": "记录过敏仍用同类药"}}
+        self.assertEqual(score_case(REC, {"scores": FULL, "major_errors": [over]})["total"], 80.0)
+        self.assertEqual(score_case(REC, {"scores": FULL, "major_errors": [over, kept]})["total"], 0.0)
+        self.assertEqual(score_case(REC, {"scores": FULL, "major_errors": [{"type": "harmful"}]})["total"], 0.0)   # review failed or off
+
 
 class CacheIdentity(unittest.TestCase):
     def test_two_outputs_in_one_directory_are_judged_separately(self):
