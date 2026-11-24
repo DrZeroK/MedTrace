@@ -708,11 +708,13 @@ def retense_completed(note: Note, L: Ledger) -> int:
     return n
 
 
-# Not severity modifiers: ward names (转入重症监护室) and disease names that contain the word (重症肌无力).
-_NOT_MODIFIER = r"(?!肌无力|监护|医学|病房)"
-_SEVERE = re.compile(r"(?:重症|危重)" + _NOT_MODIFIER)
+# Not severity modifiers: ward names (转入重症监护室), disease names that contain the word (重症肌无力), and words that
+# merely contain the two characters (严重症状, 加重症状).
+_NOT_MODIFIER = r"(?!肌无力|监护|医学|病房|状)"
+_SEVERE_WORD = r"(?<![严加])(?:重症|危重)" + _NOT_MODIFIER
+_SEVERE = re.compile(_SEVERE_WORD)
 _SEVERITY_CRITERIA = re.compile(r"(?i)CURB|PSI|q?SOFA|APACHE|主要标准|次要标准|诊断标准|分级标准|\d+\s*项")
-_SEVERE_CLAIM = re.compile(r"(?:符合|提示|考虑|属于|达到|为)?(?:重症|危重)" + _NOT_MODIFIER
+_SEVERE_CLAIM = re.compile(r"(?:符合|提示|考虑|属于|达到|为)?" + _SEVERE_WORD
                            + r"(?:肺炎)?(?:的)?(?:临床特征|临床表现|特征|表现|标准)?")
 _NEGATED = re.compile(r"(?:无|未|不|非|否认|没有|排除)[^，,。；;：:]{0,4}$")   # cue earlier in the same clause
 
