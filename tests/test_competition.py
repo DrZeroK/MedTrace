@@ -321,7 +321,7 @@ class Competition(unittest.TestCase):
     def test_packaged_docs_and_configuration_describe_official_protocol(self):
         root = self.package()
         self.assertEqual((root / ".env.example").read_text().splitlines(),
-                         ["MODEL_NAME=replace_with_model_name", "ENDPOINT=http://127.0.0.1:8000/v1/chat/completions"])
+                         ["MODEL_NAME=qwen3.8-27b", "ENDPOINT=http://127.0.0.1:8000/v1/chat/completions"])
         text = (root / "README.md").read_text()
         for term in ("MODEL_NAME", "ENDPOINT", "medical_record", "review_items", "run_log.json", "--development", "seed 42"):
             self.assertIn(term, text)

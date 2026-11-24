@@ -91,7 +91,7 @@ document URL or version). Later official specifications override it.
 - Per-request timeout, total runtime per case, token budget, model-call limit, retry limit (Q5).
 - Final result filename (`output.json` vs `results.json`) and result data structure (Q9).
 - Algorithm package size limit, dependency compatibility rules, resource registration template (Q2, Q3).
-- Qwen model name, endpoint configuration method, default Thinking mode, supported parameters, API examples.
+- Endpoint configuration method, supported parameters, API examples. (Model name `qwen3.8-27b` and "Thinking on by default" are now settled: COMPETITION_QA Q17-Q18.)
 - `response_format`/`json_schema` parameter list, supported Schema feature subset, and examples.
 - Embedding endpoint, authentication, call examples, quota, and final BGE-M3 version/precision.
 - Complete input and output schemas, exit-code rules, platform-fault handling.

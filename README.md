@@ -11,7 +11,7 @@ Python 3.11 is the competition runtime. Install with `python -m pip install -r r
 `.env` contains exactly two non-empty keys:
 
 ```dotenv
-MODEL_NAME=replace_with_model_name
+MODEL_NAME=qwen3.8-27b
 ENDPOINT=http://127.0.0.1:8000/v1/chat/completions
 ```
 

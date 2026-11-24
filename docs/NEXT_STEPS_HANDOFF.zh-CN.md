@@ -88,7 +88,7 @@
 - 每请求超时、每例总运行时长、token 预算、模型调用上限、重试上限（Q5）。
 - 最终结果文件名（`output.json` 还是 `results.json`）以及结果数据结构（Q9）。
 - 算法包大小限制、依赖兼容性规则、资源登记模板（Q2、Q3）。
-- Qwen 模型名称、端点配置方式、默认 Thinking 模式、支持的参数、API 示例。
+- 端点配置方式、支持的参数、API 示例。（模型名称 `qwen3.8-27b` 及"默认开启 Thinking"已明确：COMPETITION_QA Q17-Q18。）
 - `response_format`/`json_schema` 参数清单、支持的 Schema 特性及示例。
 - Embedding endpoint、认证方式、调用示例、配额，以及最终 BGE-M3 版本/精度。
 - 完整的输入和输出 schema、退出码规则、平台故障处理。

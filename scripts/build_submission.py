@@ -30,7 +30,7 @@ _EXCLUDE_NAMES = {"__pycache__", ".DS_Store"}
 # Tech spec 附件3 §1/§3: the submission .env.example carries only these two keys. The organiser
 # injects the real values at run time; the program must not require a key and must not read paths from .env.
 SUBMISSION_ENV_EXAMPLE = (
-    "MODEL_NAME=replace_with_model_name\n"
+    "MODEL_NAME=qwen3.8-27b\n"
     "ENDPOINT=http://127.0.0.1:8000/v1/chat/completions\n"
 )
 

@@ -11,7 +11,7 @@
 主办方放入input.json和.env；.env只允许两项非空配置：
 
 ```dotenv
-MODEL_NAME=replace_with_model_name
+MODEL_NAME=qwen3.8-27b
 ENDPOINT=http://127.0.0.1:8000/v1/chat/completions
 ```
 
