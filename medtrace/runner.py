@@ -26,9 +26,9 @@ from pathlib import Path
 from .config import ROOT, ConfigError, load_config
 from .inputs import InputError, load_cases
 from .llm import LLMClient, LLMError
-from .pipeline import Pipeline, prompt_fingerprint
+from .pipeline import CaseResult, Pipeline, prompt_fingerprint
 from .knowledge import KnowledgeError, digest_file, write_audit
-from .note import official_schema_errors
+from .note import Note, official_schema_errors, to_official_record
 
 log = logging.getLogger("medtrace")
 
@@ -68,6 +68,29 @@ def _git_rev() -> str:
         return subprocess.run([git, "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, timeout=5).stdout.strip() if git else ""
     except Exception:
         return ""
+
+
+def _official_skipped_case(case, variant: str) -> CaseResult:
+    """Record an undispatched case without running the clinical pipeline."""
+    if not case.usable or case.protocol_errors:
+        status = "input_error"
+        reason = "; ".join(case.errors + case.protocol_errors) or "no sources"
+    else:
+        status = "fallback"
+        reason = "skipped: total time budget exhausted"
+    note = Note()
+    record = to_official_record(note, case, status="failed", error={"code": status.upper(), "message": reason})
+    timestamp = datetime.now(timezone.utc).isoformat()
+    return CaseResult(record, note, status, log={
+        "case_id": case.case_id, "index": case.index, "variant": variant, "status": status,
+        "warnings": list(case.warnings), "excluded_sources": case.excluded_sources,
+        "redacted_statements": len(case.redacted), "error": reason, "budget_exhausted": True,
+        "skip_reason": "total_time_budget", "started_at": timestamp, "finished_at": timestamp,
+        "latency": 0.0, "llm_latency": 0.0, "attempts": [],
+        "llm_errors": [], "llm_compat": [], "findings_final_detail": [],
+        "findings_initial": {"high": 0, "medium": 0, "low": 0},
+        "findings_final": {"high": 0, "medium": 0, "low": 0},
+    })
 
 
 def main(argv=None) -> int:
@@ -136,13 +159,17 @@ def main(argv=None) -> int:
     totals = {k: 0 for k in ("prompt_tokens", "completion_tokens", "total_tokens", "reasoning_tokens",
                              "cached_tokens", "usage_missing", "calls", "http_attempts", "retries")}
     latencies: list = []
-    deadline_all = started + cfg.total_timeout if cfg.total_timeout > 0 else None
+    generation_deadline = started + cfg.total_timeout if cfg.total_timeout > 0 else None
+    if cfg.official and generation_deadline is not None:
+        # Reserve time for final record validation and atomic publication.
+        generation_deadline -= min(cfg.total_timeout, max(0.0, cfg.time_reserve))
 
     def write():
         obj = [r.record for r in results] if cfg.official else wrap([r.record for r in results], envelope, cfg)
         if cfg.official:
             for case, record in zip(cases, obj):
-                errors = official_schema_errors(record, {s.raw_id for s in case.sources})
+                valid_ids = {s.raw_id for s in case.sources} if record.get("status") == "success" else None
+                errors = official_schema_errors(record, valid_ids)
                 if record.get("case_id") != case.case_id or errors:
                     raise ValueError("invalid final output: " + "; ".join(errors))
         atomic_write_json(cfg.output_path, obj)
@@ -170,15 +197,20 @@ def main(argv=None) -> int:
 
         def work(c):
             now = time.monotonic()
-            if deadline_all is not None and now >= deadline_all - 1:
+            if generation_deadline is not None and now >= generation_deadline - 1:
                 return None
-            dls = [d for d in (deadline_all, now + cfg.case_timeout if cfg.case_timeout > 0 else None) if d]
+            dls = [d for d in (generation_deadline, now + cfg.case_timeout if cfg.case_timeout > 0 else None)
+                   if d is not None]
             return pipe.run_case(c, deadline=min(dls) if dls else None)
 
         def done(c, r):
             if r is None:
-                r = results[c.index] or Pipeline(cfg, _Unavailable()).run_case(c)
-                r.log["error"] = "skipped: total time budget exhausted"
+                if cfg.official:
+                    r = _official_skipped_case(c, cfg.pipeline)
+                    r.log.update(dict.fromkeys(totals, 0))
+                else:
+                    r = results[c.index] or Pipeline(cfg, _Unavailable()).run_case(c)
+                    r.log["error"] = "skipped: total time budget exhausted"
             results[c.index] = r
             for k in totals:
                 totals[k] += r.log.get(k, 0)
@@ -210,10 +242,13 @@ def main(argv=None) -> int:
         raise
 
     n_fb = sum(r.status != "ok" for r in results)
+    batch_metrics = {}
+    if cfg.official:
+        batch_metrics["batch_budget_skipped"] = sum(r.log.get("skip_reason") == "total_time_budget" for r in results)
     emit({"event": "run_end", "cases": len(cases), "not_ok": n_fb, "seconds": round(time.monotonic() - started, 2),
           "input_sha256": digest_file(cfg.input_path), "output_sha256": digest_file(cfg.output_path),
           "latency_p50": round(statistics.median(latencies), 3) if latencies else 0.0,
-          "latency_max": round(max(latencies), 3) if latencies else 0.0, **totals})
+          "latency_max": round(max(latencies), 3) if latencies else 0.0, **totals, **batch_metrics})
     log.info("wrote %s: %d case(s), %d not ok, %.1fs", cfg.output_path, len(cases), n_fb, time.monotonic() - started)
     if run_log:
         run_log.close()

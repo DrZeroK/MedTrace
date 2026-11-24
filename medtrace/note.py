@@ -113,7 +113,18 @@ def _stmt(item) -> Statement | None:
     return Statement(text, src, kind, basis, _ids(item.get("knowledge_ids")) if isinstance(item, dict) else []) if text else None
 
 
-def note_from_model(obj: dict, require_complete: bool = False) -> Note:
+def _optional_items(obj: dict, key: str, dropped: dict[str, int]) -> list | tuple:
+    items = obj.get(key)
+    if items is None:
+        return []
+    if isinstance(items, (list, tuple)):
+        return items
+    dropped[key] = 1
+    return []
+
+
+def note_from_model(obj: dict, require_complete: bool = False, *,
+                    optional_fields_dropped: dict[str, int] | None = None) -> Note:
     note = Note()
     found = False
     for sec, names in _ALIASES.items():
@@ -144,21 +155,27 @@ def note_from_model(obj: dict, require_complete: bool = False) -> Note:
             raise ParseError(f"empty required section: {sec}")
     if not found:
         raise ParseError("model JSON has none of the required sections")
-    for r in obj.get("review_items") or []:
+    dropped: dict[str, int] = {}
+    for r in _optional_items(obj, "review_items", dropped):
         if isinstance(r, str):
             r = {"type": "verify", "text": r}
-        if not isinstance(r, dict):
+        desc = (r.get("text") or r.get("description") or r.get("item")) if isinstance(r, dict) else None
+        if not isinstance(desc, str) or not desc.strip():
+            dropped["review_items"] = dropped.get("review_items", 0) + 1
             continue
-        desc = r.get("text") or r.get("description") or r.get("item") or ""
         typ = str(r.get("type") or "verify").lower()
-        if desc:
-            note.review_items.append({"type": typ if typ in REVIEW_TYPES else "verify", "description": str(desc),
-                                      "source_ids": _ids(r.get("sources", r.get("source_ids"))), "origin": "model"})
-    for e in obj.get("evidence") or []:
-        if isinstance(e, dict) and (e.get("statement") or e.get("claim") or e.get("text")):
-            note.extra_evidence.append({"section": str(e.get("section") or ""),
-                                        "statement": str(e.get("statement") or e.get("claim") or e.get("text")),
-                                        "source_ids": _ids(e.get("source_ids", e.get("sources")))})
+        note.review_items.append({"type": typ if typ in REVIEW_TYPES else "verify", "description": desc,
+                                  "source_ids": _ids(r.get("sources", r.get("source_ids"))), "origin": "model"})
+    for e in _optional_items(obj, "evidence", dropped):
+        statement = (e.get("statement") or e.get("claim") or e.get("text")) if isinstance(e, dict) else None
+        if not isinstance(statement, str) or not statement.strip():
+            dropped["evidence"] = dropped.get("evidence", 0) + 1
+            continue
+        note.extra_evidence.append({"section": str(e.get("section") or ""),
+                                    "statement": statement,
+                                    "source_ids": _ids(e.get("source_ids", e.get("sources")))})
+    if optional_fields_dropped is not None:
+        optional_fields_dropped.update(dropped)
     return note
 
 

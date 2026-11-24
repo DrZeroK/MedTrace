@@ -7,12 +7,16 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
+import sys
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
 
 _THINK = re.compile(r"<think>.*?</think>", re.S | re.I)
 _RETRY_STATUS = {408, 409, 425, 429, 500, 502, 503, 504, 529}
+_HTTP_DEADLINE = "time budget exhausted during model request"
 # A 400 that explicitly names an unsupported request field is recoverable: strip that field
 # once, cache the decision, and retry. Other 400s remain non-retryable.
 _UNSUPPORTED_FIELD = re.compile(
@@ -56,33 +60,35 @@ class CallStats:
             self.usage_missing += 1
             return
 
-        def num(key):
-            v = usage.get(key)
-            return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+        def token_count(value):
+            if type(value) is int and value >= 0:
+                return value
+            if type(value) is float and value >= 0 and value.is_integer():
+                return int(value)
+            return None
 
         def detail(container, key):
             d = usage.get(container)
             if not isinstance(d, dict):
                 return None
-            v = d.get(key)
-            return v if isinstance(v, (int, float)) and not isinstance(v, bool) else None
+            return token_count(d.get(key))
 
         rt = detail("completion_tokens_details", "reasoning_tokens")
         if rt is None:
-            rt = num("reasoning_tokens")
+            rt = token_count(usage.get("reasoning_tokens"))
         if rt is not None:
-            self.reasoning_tokens += int(rt)
+            self.reasoning_tokens += rt
         ct = detail("prompt_tokens_details", "cached_tokens")
         if ct is not None:
-            self.cached_tokens += int(ct)
+            self.cached_tokens += ct
 
-        p, c, t = num("prompt_tokens"), num("completion_tokens"), num("total_tokens")
+        p, c, t = (token_count(usage.get(key)) for key in ("prompt_tokens", "completion_tokens", "total_tokens"))
         if p is None and c is None and t is None:
             self.usage_missing += 1
             return
-        self.prompt_tokens += int(p or 0)
-        self.completion_tokens += int(c or 0)
-        self.total_tokens += int(t if t is not None else (p or 0) + (c or 0))
+        self.prompt_tokens += p or 0
+        self.completion_tokens += c or 0
+        self.total_tokens += t if t is not None else (p or 0) + (c or 0)
 
 
 def _post(url, headers, payload, timeout):
@@ -113,6 +119,46 @@ def _post(url, headers, payload, timeout):
             return e.code, e.read().decode("utf-8", "replace")
     except Exception as e:
         raise ConnectionError(f"{type(e).__name__}: {e}") from e
+
+
+def _post_before_deadline(url, headers, payload, timeout, deadline):
+    """Run the blocking transport in a process whose sockets close on cancellation."""
+    request = json.dumps([url, headers, payload, timeout]).encode("ascii")
+    if time.monotonic() >= deadline:
+        raise BudgetExceeded(_HTTP_DEADLINE)
+    command = [sys.executable, "-I", str(Path(__file__).resolve()), "--http-worker"]
+    try:
+        with subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                              stderr=subprocess.DEVNULL) as worker:
+            try:
+                remaining = max(0.0, deadline - time.monotonic())
+                output, _ = worker.communicate(request, timeout=remaining)
+            except BaseException:
+                worker.kill()
+                worker.communicate()
+                raise
+        if worker.returncode:
+            raise ConnectionError("HTTP transport worker exited before returning a response")
+    except subprocess.TimeoutExpired:
+        raise BudgetExceeded(_HTTP_DEADLINE) from None
+    except OSError as e:
+        raise ConnectionError(f"HTTP transport worker: {e}") from e
+    try:
+        result = json.loads(output)
+        if "error" in result:
+            raise ConnectionError(result["error"])
+        return result["status"], result["body"]
+    except (ValueError, KeyError, TypeError) as e:
+        raise ConnectionError("HTTP transport worker returned unreadable data") from e
+
+
+def _http_worker():
+    try:
+        status, body = _post(*json.load(sys.stdin.buffer))
+        result = {"status": status, "body": body}
+    except ConnectionError as e:
+        result = {"error": str(e)}
+    sys.stdout.buffer.write(json.dumps(result).encode("ascii"))
 
 
 def _usage(body: str):
@@ -216,7 +262,12 @@ class LLMClient:
             stats.attempts.append(detail)
             retryable = True
             try:
-                status, body = self.transport(self.url, headers, payload, timeout)
+                if deadline is not None and self.transport is _post:
+                    status, body = _post_before_deadline(self.url, headers, payload, timeout, deadline)
+                else:
+                    status, body = self.transport(self.url, headers, payload, timeout)
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise BudgetExceeded(_HTTP_DEADLINE)
                 detail["status_code"] = status
                 if status == 200:
                     stats.add_usage(_usage(body))
@@ -237,14 +288,18 @@ class LLMClient:
                             stats.retries += 1
                             continue
                 retryable = retryable and status in _RETRY_STATUS
-            except ConnectionError as e:
-                last = str(e)
-            except LLMError as e:      # 200 with unusable body
+            except BudgetExceeded as e:
+                detail["error"] = str(e)
+                stats.errors.append(str(e))
+                raise
+            except (ConnectionError, LLMError) as e:
                 last = str(e)
             finally:
                 detail["finished_at"] = datetime.now(timezone.utc).isoformat()
             detail["error"] = last
             stats.errors.append(last)
+            if deadline is not None and time.monotonic() >= deadline:
+                raise BudgetExceeded(_HTTP_DEADLINE)
             if not retryable or attempt == self.cfg.max_retries:
                 break
             stats.retries += 1
@@ -271,7 +326,14 @@ class LLMClient:
             if isinstance(content, str):
                 detail["content_characters"] = len(content)
         if isinstance(content, list):
-            content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
+            parts = [p.get("text", "") for p in content if isinstance(p, dict)]
+            if any(not isinstance(part, str) for part in parts):
+                raise LLMError("model returned a non-string content part")
+            content = "".join(parts)
         if not isinstance(content, str) or not content.strip():
             raise LLMError("model returned empty content")
         return _THINK.sub("", content).strip()
+
+
+if __name__ == "__main__" and sys.argv[1:] == ["--http-worker"]:
+    _http_worker()
