@@ -118,6 +118,21 @@ class Finding:
         return asdict(self)
 
 
+def _negated_list_covers(term_norm: str, L: Ledger) -> bool:
+    """"肾等重要脏器疾病" shortens the records' negated list "否认…肺、肾、内分泌系统等重要脏器疾病史": the head and the
+    "等…" tail both sit, in order, inside one negated span of a record sentence. (Cloud practice run, P01.)"""
+    head, sep, tail = term_norm.partition("等")
+    if not (sep and head and tail):
+        return False
+    for f in L.facts:
+        for s, e in T.neg_spans(f.text):
+            span = T.squash(f.text[s:e])
+            i = span.find(head)
+            if i >= 0 and span.find("等" + tail, i + len(head)) >= 0:
+                return True
+    return False
+
+
 def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledger) -> list[Finding]:
     out: list[Finding] = []
     sec = _SHORT[section]
@@ -268,7 +283,9 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 add("negation_flip", HIGH, f"{term!r} is negated here but the records document it as present", term)
             elif any(v in L.pos_text_norm for v in variants):
                 continue        # the records mention it after a negation cue: ambiguous, not flagged
-            elif not any(v in L.all_text_norm for v in variants):
+            elif not any(v in L.all_text_norm or T.covered_by(v, L.neg_terms_norm) or _negated_list_covers(v, L)
+                         for v in variants):
+                # covered_by: a reworded record negation; checked after the flip test so it cannot hide one
                 add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records", term)
     if enhanced and sec == "features":
         for code, term in C.context_conflicts(checked, L.facts):
