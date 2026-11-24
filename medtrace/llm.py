@@ -199,7 +199,7 @@ class LLMClient:
             finally:
                 attempt["finished_at"] = datetime.now(timezone.utc).isoformat()
         headers = {"Content-Type": "application/json"}
-        if self.cfg.api_key and not self.cfg.official:
+        if self.cfg.api_key and self.cfg.development:     # the official entry point is keyless; output shape is independent
             headers["Authorization"] = f"Bearer {self.cfg.api_key}"
         last = "no attempt made"
         for attempt in range(self.cfg.max_retries + 1):

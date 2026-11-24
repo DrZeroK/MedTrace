@@ -72,8 +72,7 @@ judges do not use.
 - **E1 Rubric judge.** Score each note on the five Appendix 2 dimensions, apply the 50% cap and zero rules, and
   report "capped cases" and "zero cases" as headline numbers. A clinician writes 3–6 reference points per case
   for the 8 practice cases and ~20 synthetic cases, the way the judges will. Judge model: the strongest model we
-  may legally use on that data (public/synthetic only for any external model; practice and organiser cases stay
-  on local or designated endpoints). Calibrate once against two-person human scoring of 10 notes; keep the judge
+  available (the cloud endpoint is allowed for all case sets). Calibrate once against two-person human scoring of 10 notes; keep the judge
   only if it agrees with humans on which cases are capped.
 - **E2 Fixed splits.** Practice set (8, closest to official format) as the primary dev set; synthetic 100 split
   60 dev / 40 holdout; CMB-Clin test30 stays untouched until the final confirmation.

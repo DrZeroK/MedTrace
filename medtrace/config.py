@@ -217,7 +217,7 @@ def load_config(*, development: bool = False, **overrides) -> Config:
         endpoint=_get("ENDPOINT", default=""),
         api_key=_get("LLM_API_KEY", "OPENAI_API_KEY", "API_KEY", default=""),
         model=_get("MODEL_NAME", "LLM_MODEL", "MODEL", default=""),
-        output_protocol=str(_get("OUTPUT_PROTOCOL", default="legacy")).lower(),
+        output_protocol=str(_get("OUTPUT_PROTOCOL", default="official")).lower(),
         timeout=_num(float, "LLM_TIMEOUT", default=600.0),
         max_retries=_num(int, "LLM_MAX_RETRIES", default=2),
         retry_backoff=_num(float, "LLM_RETRY_BACKOFF", default=2.0),

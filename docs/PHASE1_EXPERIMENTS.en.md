@@ -10,7 +10,7 @@ DSPy is pinned to `dspy[optuna,numpy]==3.5.0`. It uses MIPROv2, seed42, 3 instru
 
 ## Data and selection
 
-- Only public CMB-Clin at a fixed path may enter the experiment service; arbitrary case paths are not accepted. Organiser cases and local real medical records must not be used in external-interface experiments.
+- Only public CMB-Clin at a fixed path may enter the experiment service; arbitrary case paths are not accepted.
 - dev26 is deterministically split by seed42 into proposal18 and selection8; candidates are scored on selection8 only. test30 is used for a single confirmation after the candidate is frozen, and the cache supports resume. validation17, previously used for development, is not treated as an untouched independent validation set.
 - CMB-Clin has no temporal trajectory; empty cutoffs are marked in memory as the symbol T0, no real date is inferred, and date-specific cutoff filtering cannot be verified. Raw data files are not rewritten, and their hashes are written into the experiment identity.
 - A is legacy; B is the Chinese context rules; C is the rules plus the optimized organisational suggestion. C is selected only if its search score on selection8 is strictly higher than B's; otherwise B is selected. This freezes only the confirmation candidate and does not decide official rollout.

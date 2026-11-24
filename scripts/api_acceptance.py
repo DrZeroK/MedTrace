@@ -168,7 +168,7 @@ def run_acceptance(cfg: Config, *, repeats: int = 1, timeout: float | None = Non
     cache_reported = any((r["response"]["usage"] or {}).get("cached_tokens") is not None for r in runs)
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": "official" if cfg.official else "development",
+        "mode": "development" if cfg.development else "official",
         "endpoint": client.url,
         "model": cfg.model,
         "synthetic_prompt": True,

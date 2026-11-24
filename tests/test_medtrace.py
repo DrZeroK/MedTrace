@@ -982,7 +982,7 @@ class EndToEnd(unittest.TestCase):
         p = subprocess.run([sys.executable, str(ROOT / "main.py"), "--development"], cwd=d, env=env, capture_output=True, text=True, timeout=120)
         self.assertEqual(p.returncode, 0, p.stderr)
         rec = json.loads((Path(d) / "output.json").read_text("utf-8"))[0]
-        self.assertEqual(schema_errors(rec), [])  # development template retains the legacy contract
+        self.assertEqual(official_schema_errors(rec), [])  # development template matches the official output protocol
 
     def test_prompt_version_resolved_after_dotenv(self):
         # regression (review P2): PROMPT_VERSION was read at import time, before .env was loaded
@@ -1246,7 +1246,7 @@ class OfficialProtocol(EndToEnd):
             self.assertGreater(c.case_timeout, 0)
             self.assertGreater(c.total_timeout, 0)
             dev = C.load_config(development=True)
-            self.assertFalse(dev.official)
+            self.assertTrue(dev.official)          # development output matches the official protocol by default
             self.assertIsNone(dev.enable_thinking)
             self.assertEqual((dev.case_timeout, dev.total_timeout), (0.0, 0.0))
 
