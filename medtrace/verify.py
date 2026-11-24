@@ -11,6 +11,7 @@ import copy
 from dataclasses import dataclass, asdict
 
 from . import aortic as A
+from . import dosing as D
 from . import textutil as T
 from .knowledge import approved_quote
 from .inputs import Case
@@ -332,8 +333,9 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 if bleeding:
                     add("bleeding_risk", MEDIUM, f"antithrombotic therapy planned although the records document {bleeding[0]!r}",
                         bleeding[0])
-        for drug, mg in A.loading_as_maintenance(text):
-            add("loading_dose_as_maintenance", HIGH, f"{drug} {mg:g} mg per day is a loading-size dose given as maintenance", drug)
+        for d in D.dose_findings(text, "\n".join(s.content for s in case.sources)):
+            add(d.code, HIGH, f"{d.drug} {d.per_dose_mg:g} mg x{d.times_per_day}/day ({d.daily_mg:g} mg/day; limit "
+                f"{d.limit_mg:g}): {d.reason}", d.drug)
 
     # ---- diagnostic certainty: only a definitive claim (not "不能确诊…", "需…确诊") about a diagnosis that the
     # records do not themselves list without qualification
@@ -654,10 +656,41 @@ _ZH_DONE_PREFIX = re.compile(r"已(?:经)?(?=" + T.ZH_DONE_VERBS + ")")
 def _unsupported_done(clause: str, L: Ledger) -> bool:
     if not (T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5):
         return False
-    # an antithrombotic the records show was given is real history: "鉴于已使用抗血小板药物" must not become "拟使用"
-    # (cloud P05: the rewrite turned a loading-dose history into what reads as a new antiplatelet plan)
+    # Documented history must not be retensed (cloud P05: "鉴于已使用抗血小板药物" became "拟使用…", which reads as a new
+    # antiplatelet plan): (1) an antithrombotic class the records show was given; (2) any done-object ("已行冠脉造影")
+    # that a record sentence reports with a done cue.
     named = A.drug_classes(clause)
-    return not (named and named <= A.drug_classes(L.all_text))
+    if named and named <= _given_classes(L):
+        return False
+    m = _DONE_OBJECT.search(T.fw(clause))
+    return not (m and _done_in_records(T.squash(m.group(1)), L))
+
+
+_DONE_OBJECT = re.compile(r"已(?:经)?(?:" + T.ZH_DONE_VERBS + r")([^，,；;。、\s]{2,8})")
+
+
+def _given_classes(L: Ledger) -> set:
+    got = getattr(L, "_aortic_given", None)
+    if got is None:
+        got = set()
+        for f in L.facts:
+            if T.has_done_cue(f.text) or re.search(r"予|给予|服用|口服|使用", f.text):
+                got |= A.drug_classes(f.text)
+        L._aortic_given = got
+    return got
+
+
+def _done_in_records(obj: str, L: Ledger) -> bool:
+    """A record sentence names `obj` and reports it as done ("已行", "予", "行…后", "术后")."""
+    if len(obj) < 2:
+        return False
+    for f in L.facts:
+        t = T.squash(f.text)
+        i = t.find(obj)
+        if i >= 0 and (T.has_done_cue(f.text) or re.search(r"(?:予|行|给予|完成|接受|曾)$", t[max(0, i - 4):i])
+                       or t[i + len(obj):i + len(obj) + 2].startswith(("后", "术后"))):
+            return True
+    return False
 
 
 def retense_completed(note: Note, L: Ledger) -> int:

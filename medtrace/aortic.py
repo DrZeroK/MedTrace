@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import asdict, dataclass, field
+from datetime import datetime
 
 from . import textutil as T
 
@@ -48,8 +49,10 @@ _NOT_AAS = re.compile(r"主动脉(?:附壁|壁)血栓|(?:肠|子宫肌|肌|胃)�
 _FAMILY = re.compile(r"家族|父亲|母亲|其父|其母|兄|姐|弟|妹|子女|family|mother|father|sibling")
 _EXCLUDED_RESULT = re.compile(r"(?:已|明确|基本|可以|可|予以)\s*(?:排除|除外)|排除了|除外了|ruled out|excluded|no evidence of")
 # "需排除" / "rule out" / "cannot exclude" are open questions: suspicion, never negation.
-_SUSPECT = re.compile(r"疑似|可疑|可能|待排|需(?:要)?排除|以排除|为排除|待除外|不除外|不能(?:排除|除外)|考虑|怀疑|待查|"
-                      r"\bsuspect|possible|probable|rule out|r/o|cannot (?:be )?exclude")
+_SUSPECT = re.compile(r"疑似|可疑|可能|待排|需(?:要)?排除|以排除|为排除|待除外|不除外|不能(?:排除|除外)|考虑|怀疑|待查|拟诊|"
+                      r"为明确诊断|待确诊|疑诊|[?？]|\bsuspect|possible|probable|rule out|r/o|cannot (?:be )?exclude")
+# a negation of progression ("未见血肿进展") negates the change, not the lesion
+_PROGRESSION = re.compile(r"^[^，,；;。]{0,4}(?:进展|扩大|扩展|延展|破裂|加重|变化|增大)")
 _PAST = re.compile(r"既往|病史|曾(?:患|行|于)|[0-9一二三四五六七八九十]+\s*(?:年|个月|月)前|history of|\bprior\b|previous")
 _REPAIR = re.compile(r"修复|置换|术后|腔内隔绝|tevar|evar|bentall|repair|post-?op")
 _PERIOP = re.compile(r"术后\s*(?:第?\s*[0-9一二三四五六七八九十]+\s*(?:天|日|周)|早期|当天|止血)|围术期|术前|拟.{0,6}手术|"
@@ -59,7 +62,84 @@ _LESION_STABLE = re.compile(r"病情稳定|病变稳定|夹层稳定|血肿稳�
 _CHRONIC = re.compile(r"慢性|陈旧|chronic")
 _CURRENT = re.compile(r"本次|此次|新发|新出现|进展|急性|突发|急诊|入院|收入|current|acute|\bnew\b")
 _ACUTE_PHASE = re.compile(r"急性|突发|[0-9一二三四五六七八九十]+\s*(?:小时|h\b)|acute|hyperacute")
+_CURRENT_ACUTE = re.compile(r"急性|突发|新发|新出现|进展|acute|\bnew\b")
 _CLAUSE_SPLIT = re.compile(r"[，,；;。！？!?\n]")
+
+# ---- elapsed time (spec §3.2: hyperacute <24 h, acute 1-14 d, subacute 15-90 d, chronic >90 d; auxiliary only)
+_CN_DIGIT = {"一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+# "3天后" / "48小时内" are intervals relative to another event, not time before now
+_DURATION = re.compile(r"(\d+(?:\.\d+)?|[一二两三四五六七八九十半]{1,3})\s*(?:个)?\s*(小时|h(?![a-z])|天|日(?!期|间)|周|星期|月|年)"
+                       r"(?![\d-])(?!\s*(?:余|多)?\s*(?:后|内|以内))")
+_COMPOUND = re.compile(r"(\d+)\s*年\s*(?:零)?\s*(\d+)\s*(?:个)?\s*月")        # "1 年 4 个月前" = 485 days
+_UNIT_DAYS = {"小时": 1 / 24, "h": 1 / 24, "天": 1, "日": 1, "周": 7, "星期": 7, "月": 30, "年": 365}
+_YEAR_ONLY = re.compile(r"(?<!\d)(20\d{2}|19\d{2})\s*年(?!\s*\d{1,2}\s*月)")
+_YEAR_MONTH = re.compile(r"(?<!\d)(20\d{2}|19\d{2})\s*年\s*(\d{1,2})\s*月(?!\s*\d{1,2}\s*日)")
+# masked before reading durations (TypicalCase-DC: "2020 年 9 月", "7 月 12 日", "4 岁 2 月龄", "周期 28d")
+_NOT_DURATION = re.compile(r"(?<!\d)(?:19|20)\d{2}\s*年(?:\s*\d{1,2}\s*月)?(?:\s*\d{1,2}\s*日)?|\d{1,2}\s*月\s*\d{1,2}\s*日|"
+                           r"\d{4}\s*[-/.]\s*\d{1,2}(?:\s*[-/.]\s*\d{1,2})?|\d+\s*岁(?:\s*\d+\s*(?:个)?月(?:龄)?)?|\d+\s*(?:个)?月龄|"
+                           r"周期\s*\d+|经期\s*\d+|\d+\s*(?:天|日)\s*/\s*次")
+_ONSET = re.compile(r"突发|突然|胸痛|胸背痛|背痛|腹痛|撕裂|胸闷|起病|发病|加重|再发|复发")
+
+
+def _number(tok: str) -> float | None:
+    if re.fullmatch(r"\d+(?:\.\d+)?", tok):
+        return float(tok)
+    if tok == "半":
+        return 0.5
+    if "十" in tok:                                     # 十, 十二, 二十, 二十五
+        a, _, b = tok.partition("十")
+        return (_CN_DIGIT.get(a, 1) if a else 1) * 10 + (_CN_DIGIT.get(b, 0) if b else 0)
+    return float(_CN_DIGIT[tok]) if tok in _CN_DIGIT else None
+
+
+def reference_time(case):
+    """The record cutoff, else the latest explicit date in the records, else None."""
+    if getattr(case, "cutoff", None):
+        return case.cutoff
+    dates = [d for s in case.sources for d, *_ in T.find_dates(s.content)]
+    return max(dates) if dates else None
+
+
+def elapsed_days(text: str, ref=None) -> float | None:
+    """Days between the event `text` describes and `ref`: a duration ("5小时", "术后第3天", "1周前") or an explicit date
+    ("2025-06", "2025年") against the reference time. None when the text gives no time."""
+    t = T.fw(text).lower()
+    masked = _NOT_DURATION.sub(lambda x: " " * len(x.group(0)), t)
+    spans = [int(a) * 365 + int(b) * 30 for a, b in _COMPOUND.findall(masked)]
+    masked = _COMPOUND.sub(lambda x: " " * len(x.group(0)), masked)
+    spans += [n * _UNIT_DAYS[m.group(2)] for m in _DURATION.finditer(masked)
+              for n in [_number(m.group(1))] if n is not None]
+    if spans:
+        return min(spans)          # "间断胸痛5年，加重1周": the most recent change dates the current episode
+    if ref is not None:
+        dates = [d for d, *_ in T.find_dates(t, ref.year)]
+        dates += [datetime(int(y), int(mo), 15) for y, mo in _YEAR_MONTH.findall(t) if 1 <= int(mo) <= 12]
+        if dates:
+            return max(0.0, (ref - max(dates)).total_seconds() / 86400)
+        y = _YEAR_ONLY.search(t)
+        if y:
+            return max(0.0, (ref.year - int(y.group(1))) * 365.0)
+    return None
+
+
+def phase_of(days: float | None) -> str:
+    if days is None:
+        return "UNKNOWN"
+    return "HYPERACUTE" if days < 1 else "ACUTE" if days <= 14 else "SUBACUTE" if days <= 90 else "CHRONIC"
+
+
+def case_onset_days(case) -> float | None:
+    """Days since symptom onset, from the first symptom sentence that states a duration ("突发胸痛5小时")."""
+    ref = reference_time(case)
+    for s in case.sources:
+        for sent in T.split_sentences(s.content):
+            # only clauses that state a present symptom or a worsening date the episode ("腹痛4个月，发现胆红素高1天":
+            # 4 months; "胸痛5年，加重1周": 1 week)
+            days = [d for c in _CLAUSE_SPLIT.split(sent) for m in [_ONSET.search(c)]
+                    if m and T.term_positive_in(m.group(0), c) for d in [elapsed_days(c, ref)] if d is not None]
+            if days:
+                return min(days)
+    return None
 
 
 @dataclass
@@ -72,36 +152,53 @@ class AorticFinding:
     phase: str            # ACUTE | CHRONIC | UNKNOWN (time-based phase is auxiliary only)
     subject: str          # PATIENT | FAMILY
     evidence: list        # ["<source_id>: <exact clause>"]
+    days: float | None = None   # elapsed days since the event the clause describes (or since symptom onset)
 
 
-def _finding(entity: str, term: str, clause: str, sentence: str, sid: str) -> AorticFinding:
+def _finding(entity: str, term: str, clause: str, sentence: str, sid: str, ref=None, onset=None) -> AorticFinding:
     i = clause.find(term)
     subject = "FAMILY" if _FAMILY.search(clause) else "PATIENT"
     if _EXCLUDED_RESULT.search(clause[max(0, i - 12):i]) or _EXCLUDED_RESULT.search(clause[i + len(term):i + len(term) + 8]):
         assertion = "RULED_OUT"
-    elif not T.term_positive_in(term, clause):
+    elif not T.term_positive_in(term, clause) and not _PROGRESSION.search(clause[i + len(term):]):
         assertion = "NEGATED"
     elif _SUSPECT.search(clause):
         assertion = "SUSPECTED"
     else:
         assertion = "CONFIRMED"
     past = bool(_PAST.search(clause) or (_REPAIR.search(clause) and not _PERIOP.search(clause)))
-    temporality = "HISTORY" if past and not _CURRENT.search(clause) else "CURRENT"
+    current = bool(_CURRENT.search(clause))
+    # both cues in one clause ("既往夹层，本次…" written without a break): which episode is meant is unclear
+    temporality = "UNKNOWN" if past and current and _PAST.search(clause) else "HISTORY" if past and not current else "CURRENT"
     repair = "PERIOPERATIVE" if _PERIOP.search(sentence) else "POST_REPAIR" if _REPAIR.search(clause) else "UNREPAIRED"
     chronic = bool(_CHRONIC.search(clause))
     stable = (temporality == "HISTORY" or chronic) and _LESION_STABLE.search(sentence)
     activity = "STABLE" if stable else "ACTIVE" if temporality == "CURRENT" and not chronic else "UNKNOWN"
-    phase = "CHRONIC" if chronic else "ACUTE" if _ACUTE_PHASE.search(sentence) else "UNKNOWN"
-    return AorticFinding(entity, assertion, temporality, activity, repair, phase, subject, [f"{sid}: {clause.strip()}"])
+    days = elapsed_days(clause, ref)
+    if days is None and temporality == "CURRENT":
+        days = onset                       # a current lesion dates from symptom onset ("突发胸痛5小时")
+    phase = phase_of(days)
+    if phase == "UNKNOWN":                 # wording only when no time is given
+        phase = "CHRONIC" if chronic else "ACUTE" if _ACUTE_PHASE.search(sentence) else "UNKNOWN"
+    return AorticFinding(entity, assertion, temporality, activity, repair, phase, subject,
+                         [f"{sid}: {clause.strip()}"], days)
+
+
+def _clauses(sent: str) -> list[str]:
+    """Clauses of a sentence; a clause keeps a trailing question mark ("主动脉夹层并血栓形成？" is a question)."""
+    parts = re.split(r"([，,；;。！？!?\n])", sent)
+    return [parts[i] + (parts[i + 1] if i + 1 < len(parts) and parts[i + 1] in "?？" else "")
+            for i in range(0, len(parts), 2)]
 
 
 def aortic_findings(case) -> list[AorticFinding]:
     """Every AAS mention in the input records, one per clause, with the exact source clause as evidence."""
     out = []
+    ref, onset = reference_time(case), case_onset_days(case)
     for s in case.sources:
         src = T.fw(s.content).lower()
         for sent in T.split_sentences(src):
-            for clause in _CLAUSE_SPLIT.split(sent):
+            for clause in _clauses(sent):
                 masked = _NOT_AAS.sub(" ", clause)
                 seen = set()
                 for entity, rx, ctx in _ENTITY:
@@ -112,7 +209,7 @@ def aortic_findings(case) -> list[AorticFinding]:
                             or ctx == "sentence" and not _AORTIC_CONTEXT.search(sent)):
                         continue
                     seen.add(entity)
-                    out.append(_finding(entity, m.group(0), clause, sent, getattr(s, "raw_id", s.sid)))
+                    out.append(_finding(entity, m.group(0), clause, sent, getattr(s, "raw_id", s.sid), ref, onset))
     return out
 
 
@@ -123,12 +220,19 @@ def derive_state(findings: list[AorticFinding]) -> tuple[str, AorticFinding | No
     pts = [f for f in findings if f.subject == "PATIENT"]
     cur = [f for f in pts if f.temporality == "CURRENT"]
     confirmed = [f for f in cur if f.assertion == "CONFIRMED" and f.activity == "ACTIVE" and f.repair_status != "PERIOPERATIVE"]
+    # time is auxiliary (spec §3.2): >90 days without acute or new wording is neither assumed acute nor stable
+    late = [f for f in confirmed if f.phase == "CHRONIC" and not _CURRENT_ACUTE.search(f.evidence[0])]
+    confirmed = [f for f in confirmed if f not in late]
     excluded = [f for f in cur if f.assertion in ("RULED_OUT", "NEGATED")]
     suspected = [f for f in cur if f.assertion == "SUSPECTED"]
-    if confirmed and any(e.entity == c.entity and e.assertion == "RULED_OUT" for e in excluded for c in confirmed):
+    unclear = [f for f in pts if f.temporality == "UNKNOWN" and f.assertion in ("CONFIRMED", "SUSPECTED")] + late
+    # conflicting current evidence about the same lesion ("CTA示主动脉夹层" / "CTA未见主动脉夹层"): UNKNOWN
+    if confirmed and any(e.entity == c.entity for e in excluded for c in confirmed):
         return UNKNOWN, confirmed[0]
     if confirmed:
         return CONFIRMED_ACTIVE, confirmed[0]
+    if unclear:                                          # an unclear-episode mention and no clear current one
+        return UNKNOWN, unclear[0]
     if suspected and not any(e.assertion == "RULED_OUT" for e in excluded):
         return SUSPECTED_ACTIVE, suspected[0]
     periop = [f for f in pts if f.repair_status == "PERIOPERATIVE" and f.assertion == "CONFIRMED"]
@@ -157,7 +261,9 @@ def aortic_state(case) -> tuple[str, AorticFinding | None]:
 # (name, regex, drug class it supports, urgent competing risk). "房颤" alone is not a confirmed anticoagulation
 # indication, so it never makes a REVIEW_URGENT; an ACS label or a troponin rise is not an indication at all.
 _INDICATIONS = [
-    ("机械瓣膜", re.compile(r"机械瓣|人工(?:心脏)?瓣膜|瓣膜置换|mechanical (?:heart )?valve"), "anticoagulant", True),
+    ("机械瓣膜", re.compile(r"机械瓣|mechanical (?:heart )?valve"), "anticoagulant", True),
+    # a replaced valve of unstated type may be bioprosthetic (no lifelong anticoagulation): a plain REVIEW
+    ("人工瓣膜（类型未明）", re.compile(r"人工(?:心脏)?瓣膜|瓣膜置换|换瓣|prosthetic valve|valve replacement"), "anticoagulant", False),
     ("急性肺栓塞", re.compile(r"肺栓塞|肺动脉栓塞|pulmonary embol"), "anticoagulant", True),
     ("急性深静脉血栓", re.compile(r"深静脉血栓|(?<![a-z])dvt(?![a-z])|deep vein thromb"), "anticoagulant", True),
     ("心腔内血栓", re.compile(r"心腔内血栓|左心耳血栓|左室血栓|心室内血栓|intracardiac thromb|lv thromb"), "anticoagulant", True),
@@ -165,6 +271,16 @@ _INDICATIONS = [
     ("心房颤动", re.compile(r"房颤|心房颤动|atrial fibrillation"), "anticoagulant", False),
 ]
 _PROPHYLAXIS_WORD = re.compile(r"预防|prophyla")      # "预防DVT" in a record is prophylaxis, not a thrombosis
+_CORONARY = re.compile(r"冠|pci|前降支|回旋支|右冠|左主干|钝缘支|对角支|coronary")
+_NON_CORONARY_STENT = re.compile(r"(?:主动脉|腹主|胸主|颈(?:总|内)?动脉|锁骨下|椎动脉|肾动脉|髂|股|胆道|胆管|食管|肠|输尿管|颅内|"
+                                 r"覆膜|aortic|carotid|biliary|renal|iliac)[^，,；;。]{0,10}支架")
+# Time windows for a COMPETING (urgent) indication; beyond them the indication stays a plain REVIEW. Engineering
+# choices pending clinical sign-off: stent 12 months (usual DAPT course after stenting); acute PE/DVT 90 days
+# (initial anticoagulation phase). Unknown timing is treated as within the window (conservative).
+RECENT_STENT_DAYS = 365
+ACUTE_VTE_DAYS = 90
+_WINDOW_DAYS = {"近期冠脉支架": RECENT_STENT_DAYS, "急性肺栓塞": ACUTE_VTE_DAYS, "急性深静脉血栓": ACUTE_VTE_DAYS}
+_LATE_NAME = {"近期冠脉支架": "冠脉支架（植入超过12个月）", "急性肺栓塞": "肺栓塞（超过90天）", "急性深静脉血栓": "深静脉血栓（超过90天）"}
 
 
 @dataclass
@@ -173,11 +289,12 @@ class Indication:
     drug_class: str
     urgent: bool
     evidence: str
+    days: float | None = None
 
 
 def recorded_indications(case) -> list[Indication]:
     """Affirmed patient indications from the input records (not "否认房颤", "肺栓塞待排", family, prophylaxis)."""
-    out = []
+    out, ref = [], reference_time(case)
     for s in case.sources:
         for sent in T.split_sentences(T.fw(s.content).lower()):
             for clause in _CLAUSE_SPLIT.split(sent):
@@ -185,8 +302,18 @@ def recorded_indications(case) -> list[Indication]:
                     continue
                 for name, rx, cls, urgent in _INDICATIONS:
                     m = rx.search(clause)
-                    if m and T.term_positive_in(m.group(0), clause) and name not in {i.name for i in out}:
-                        out.append(Indication(name, cls, urgent, f"{getattr(s, 'raw_id', s.sid)}: {clause.strip()}"))
+                    if not (m and T.term_positive_in(m.group(0), clause)) or name in {i.name.split("（")[0] for i in out}:
+                        continue
+                    if name == "近期冠脉支架" and (_NON_CORONARY_STENT.search(clause) or not _CORONARY.search(sent)):
+                        continue           # aortic stent graft, carotid, biliary... stents are not coronary
+                    if name == "人工瓣膜（类型未明）" and any(i.name == "机械瓣膜" for i in out):
+                        continue
+                    days = elapsed_days(clause, ref)
+                    window = _WINDOW_DAYS.get(name)
+                    if window is not None and days is not None and days > window:
+                        out.append(Indication(_LATE_NAME[name], cls, False, f"{getattr(s, 'raw_id', s.sid)}: {clause.strip()}", days))
+                    else:
+                        out.append(Indication(name, cls, urgent, f"{getattr(s, 'raw_id', s.sid)}: {clause.strip()}", days))
     return out
 
 
@@ -234,7 +361,8 @@ _GROUP_CLASS = {"vka": "anticoagulant", "heparin": "anticoagulant", "dti": "anti
 _AGENT_GROUPS = {"cox", "p2y12", "gp2b3a", "other_ap"}
 # Semantic exceptions, masked before matching: tests and sample tubes, catheter locks, local lysis, risk assessments,
 # reversal agents, "双联降压/抗感染", aortic mural thrombus.
-_NOT_DRUG = re.compile(r"抗凝血酶(?:iii|ⅲ|3)?(?:测定|活性)?|凝血(?:功能|指标|象|四项)(?:检查|监测)?|"
+_NOT_DRUG = re.compile(r"狼疮抗凝(?:物质?|血因子|因子)?|(?:edta|乙二胺四乙酸|枸橼酸钠?|肝素锂?)?\s*抗凝(?:的)?(?:外周|静脉)?血(?!栓)|"
+                       r"乙二胺四乙酸抗凝|溶栓(?:治疗)?监测|纤溶酶原?|抗凝血酶(?:iii|ⅲ|3)?(?:测定|活性)?|凝血(?:功能|指标|象|四项)(?:检查|监测)?|"
                        r"枸橼酸(?:钠)?抗凝(?:血)?(?:标本|采血管|管)?|抗凝(?:采血)?管|肝素(?:钠)?(?:盐水)?封管|肝素帽|肝素锁|"
                        r"导管(?:内|局部)?(?:接触)?溶栓|局部溶栓|(?:抗凝|抗栓|出血|血栓)(?:作用)?(?:风险)?(?:评估|分层|评分)|"
                        r"抗凝(?:作用)?逆转|逆转抗凝|鱼精蛋白|维生素\s*k\d?|依达赛珠单抗|andexanet|idarucizumab|protamine|"
@@ -273,7 +401,10 @@ _A_START = re.compile(r"给予|(?<![评参])予(?!以评估)|加用|启动|开�
                       r"预防|(?<!调整)治疗(?!调整|方案|策略|原则)|\bstart|\bgive|administer|\bload|initiat|\buse\b|therapy|prophyla")
 _A_HOLD = re.compile(r"暂停|暂缓|暂不|\bhold")
 _A_STOP = re.compile(r"停用|停止|停药|discontinu|\bstop")
-_A_AVOID = re.compile(r"禁用|避免|禁忌|不宜|不建议|不予|无需|avoid|contraindicat|not recommended")
+_A_AVOID = re.compile(r"禁用|避免|禁忌|不宜|不建议|不予|无需|严禁|禁止|不可|不能使用|勿用|切忌|avoid|contraindicat|not recommended|do not")
+# caution or deferral without an explicit order ("抗凝治疗需谨慎，建议先咨询血管外科", TypicalCase-DC cloud run): an assessment
+_CAUTION = re.compile(r"需谨慎|(?<!或)谨慎(?!使用|应用)|慎用|权衡|咨询|会诊|caution|consult")
+_EXPLICIT_ORDER = re.compile(r"继续|维持|给予|(?<![评参])予(?!以评估)|启动|开始|加用|泵入|静滴|静推|皮下注射|负荷|continu|\bgive|administer|\bstart")
 _A_MONITOR = re.compile(r"监测|复查|观察|monitor")
 _A_ASSESS = re.compile(r"评估|必要性|时机|适应证|由.{0,20}(?:评估|决定|确定)|需经.{0,8}评估|会诊|assess|evaluat|to be decided")
 _ALT_OPTION = re.compile(r"或(?:谨慎|酌情|小剂量|减量)(?:使用|应用|服用|继续)?|or (?:use with caution|continue)")
@@ -399,6 +530,8 @@ def classify(text: str, source_text: str = "") -> Unit:
     elif _CONDITIONAL.search(bare) and any(rx.search(bare) for rx in (_A_RESUME, _A_START, _A_CONTINUE, _DOSE)):
         # a conditional ORDER ("若稳定，可考虑恢复双抗"); "待病情稳定后由多学科讨论决定后续抗栓策略" orders nothing
         u.action, u.modality = ("RESUME" if _A_RESUME.search(bare) else "START"), "CONDITIONAL"
+    elif _CAUTION.search(bare) and not (_EXPLICIT_ORDER.search(bare.split("后决定")[0]) or _DOSE.search(bare)):
+        u.action, u.modality = "ASSESS_ONLY", "ASSESS_ONLY"
     elif _A_MONITOR.search(bare) and not (_A_CONTINUE.search(bare) or _DOSE.search(bare)):
         u.action, u.modality = "MONITOR", "ASSESS_ONLY"
     elif _A_ASSESS.search(bare) and not (_A_CONTINUE.search(bare) or _DOSE.search(bare)):
@@ -508,7 +641,11 @@ def decide(state: str, u: Unit, indications: list[Indication], receiving: set = 
     if u.modality == "OPTION":
         return Decision(REVIEW, "WITHHOLD_OR_CAUTION_OPTION", "review_option")
     if u.action in ("HOLD", "STOP", "AVOID"):
-        return Decision(REVIEW, "AUTOMATIC_STOP_NOT_AUTHORISED", "review_hold" if kind in receiving else "review_option")
+        # stopping a therapy the patient receives is the clinician's decision (spec §6 row 2); "暂禁用/避免抗凝" for a
+        # class the records never show was given stops nothing and is a safety caution, so it is kept as written
+        if kind in receiving or (kind == "antithrombotic" and receiving):
+            return Decision(REVIEW, "AUTOMATIC_STOP_NOT_AUTHORISED", "review_hold")
+        return Decision(PASS, "AVOID_UNGIVEN_CLASS_KEPT")
     if u.modality == "CONDITIONAL":
         return Decision(REVIEW, "CONDITIONAL_RESUMPTION", "review_conditional")
     if fib:
@@ -684,7 +821,9 @@ _MSG = {
     },
 }
 _IND_EN = {"机械瓣膜": "mechanical valve", "急性肺栓塞": "acute pulmonary embolism", "急性深静脉血栓": "deep vein thrombosis",
-           "心腔内血栓": "intracardiac thrombus", "近期冠脉支架": "recent coronary stent", "心房颤动": "atrial fibrillation"}
+           "心腔内血栓": "intracardiac thrombus", "近期冠脉支架": "recent coronary stent", "心房颤动": "atrial fibrillation",
+           "冠脉支架（植入超过12个月）": "coronary stent (over 12 months)", "肺栓塞（超过90天）": "pulmonary embolism (over 90 days)",
+           "深静脉血栓（超过90天）": "deep vein thrombosis (over 90 days)"}
 
 
 def review_messages(events: list[Event], lang: str) -> list[str]:
@@ -717,24 +856,7 @@ def review_messages(events: list[Event], lang: str) -> list[str]:
 
 
 # ------------------------------------------------------------------------------- dose check (independent of AAS)
-# A loading-size dose given per day (spec §8). Maintenance examples: aspirin 75-100 mg/d, clopidogrel 75 mg/d. Flagged
-# only, never rewritten; no global cross-disease dose limits beyond these loading-size thresholds.
-_LOADING = {"aspirin": 300, "clopidogrel": 300, "prasugrel": 60}
-_PER_DAY = re.compile(r"^\s*(?:/\s*(?:日|天|d\b|day)|每日|每天|qd|daily|once daily|1次/日|一日一次)")
-_LOADING_CUE = re.compile(r"负荷|首剂|顿服|一次性|loading|single dose|\bstat\b")
-
-
 def loading_as_maintenance(text: str) -> list[tuple[str, float]]:
-    """(drug, mg) where a plan clause gives a loading-size dose per day ("阿司匹林300mg/日") without saying loading."""
-    out = []
-    for clause in re.split(r"[，,；;。]", T.fw(text).lower()):
-        if _LOADING_CUE.search(clause):
-            continue
-        for canon, _, _, rx in _DRUGS:
-            if canon not in _LOADING:
-                continue
-            for m in rx.finditer(clause):
-                d = re.match(r"[^\d，,]{0,8}?(\d+(?:\.\d+)?)\s*mg", clause[m.end():])
-                if d and float(d.group(1)) >= _LOADING[canon] and _PER_DAY.search(clause[m.end() + d.end():]):
-                    out.append((canon, float(d.group(1))))
-    return out
+    """Moved to medtrace/dosing.py (table-driven dose engine); kept here for the earlier interface."""
+    from .dosing import loading_as_maintenance as check
+    return check(text)

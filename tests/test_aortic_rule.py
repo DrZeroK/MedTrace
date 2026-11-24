@@ -69,8 +69,9 @@ CASES = [
     ("A20", (IMH, "外院已给予肝素治疗。"), "评估是否需要抗凝逆转。", A.CONFIRMED_ACTIVE, set(), ["评估是否需要抗凝逆转"], []),
     ("A21", IMH, "建议暂停或谨慎使用抗血小板药物。", A.CONFIRMED_ACTIVE, {A.REVIEW}, ["抗血小板治疗的必要性及安全性需由专科医师评估确定"],
      ["暂停", "谨慎使用"]),
-    ("A22", IMH, "暂禁用抗凝药物，继续阿司匹林100mg/日。", A.CONFIRMED_ACTIVE, {A.BLOCK, A.REVIEW},
-     ["不建议常规抗血小板治疗"], ["暂禁用", "100mg"]),
+    # A22 (amended 2026-11-24 at the user's request): "暂禁用抗凝" for a class never given stops nothing and is kept
+    ("A22", IMH, "暂禁用抗凝药物，继续阿司匹林100mg/日。", A.CONFIRMED_ACTIVE, {A.BLOCK},
+     ["暂禁用抗凝药物", "不建议常规抗血小板治疗"], ["100mg"]),
     ("A23", "2年前CTA未见主动脉夹层。本次新发胸痛，高度怀疑主动脉夹层，待CTA。", "予阿替普酶全身溶栓。", A.SUSPECTED_ACTIVE,
      {A.BLOCK}, ["属全身溶栓禁忌"], ["阿替普酶"]),
     ("A24", ("本次胸痛，考虑主动脉夹层可能。急诊CTA明确排除主动脉夹层。", "阵发性房颤，CHA2DS2-VASc 3分。"), "继续利伐沙班20mg qd。",
@@ -260,6 +261,120 @@ class P05Regression(unittest.TestCase):
         self.assertTrue(any("未作为可执行给药方案输出" in r for r in mr["review_items"]), mr["review_items"])
         self.assertEqual(res.log["aortic_postcheck_changes"], 0)
         self.assertTrue(all(e["rule_id"] == A.RULE_ID for e in res.log["aortic_rule_events"]))
+
+
+class Fixes20261124(unittest.TestCase):
+    """Follow-up fixes: avoid wording, wider UNKNOWN, elapsed-time phase, stent/VTE windows, F3 history, dose engine."""
+
+    def test_avoid_kept_only_for_classes_never_given(self):
+        self.assertEqual(screen(IMH, "拟避免使用抗凝药物。")[1], [])
+        text, events, _ = screen((IMH, "外院予低分子肝素4000IU皮下注射。"), "暂停抗凝药物。")
+        self.assertEqual([e.reason_code for e in events], ["AUTOMATIC_STOP_NOT_AUTHORISED"])
+        self.assertIn("评估暂停抗凝治疗的必要性及时机", text)
+
+    def test_unknown_conflicts(self):
+        state = lambda *r: A.aortic_state(case(*r))[0]
+        self.assertEqual(state("外院CT示主动脉夹层。", "我院CTA未见主动脉夹层。"), A.UNKNOWN)            # plain negation now too
+        self.assertEqual(state("既往主动脉夹层本次突发胸痛加重"), A.UNKNOWN)                            # one clause, two episodes
+        self.assertEqual(state("胸痛4个月。CTA示主动脉夹层。"), A.UNKNOWN)                               # >90 days, no acute wording
+        self.assertEqual(state("CTA示主动脉壁内血肿，未见血肿进展。"), A.CONFIRMED_ACTIVE)               # negated progression
+        self.assertEqual(state("临床拟诊主动脉夹层，为明确诊断要求行CTA检查。"), A.SUSPECTED_ACTIVE)     # TypicalCase-DC wording
+        self.assertEqual(state("主动脉夹层并血栓形成？"), A.SUSPECTED_ACTIVE)
+
+    def test_elapsed_time_and_phase(self):
+        self.assertAlmostEqual(A.elapsed_days("突发胸痛5小时"), 5 / 24)
+        for text, days in [("术后第3天", 3), ("1周前", 7), ("2个月前", 60), ("两年前", 730), ("十二天", 12)]:
+            with self.subTest(text):
+                self.assertEqual(A.elapsed_days(text), days)
+        ref = A.reference_time(parse_case({"case_id": "R", "record_cutoff": "2026-03-01T08:00:00",
+                                           "sources": [{"source_id": "S1", "content": "x"}]}, 0))
+        self.assertEqual(round(A.elapsed_days("2026-02-01行支架植入", ref)), 28)
+        self.assertEqual([A.phase_of(d) for d in (0.2, 3, 30, 200, None)],
+                         ["HYPERACUTE", "ACUTE", "SUBACUTE", "CHRONIC", "UNKNOWN"])
+        f = A.aortic_findings(case("突发胸背痛5小时。急诊CTA示主动脉夹层。"))[0]
+        self.assertEqual((f.phase, round(f.days, 2)), ("HYPERACUTE", 0.21))
+
+    def test_stent_and_vte_windows(self):
+        ind = lambda *r: [(i.name, i.urgent) for i in A.recorded_indications(case(*r))]
+        self.assertEqual(ind("冠脉支架植入术后3个月。"), [("近期冠脉支架", True)])
+        self.assertEqual(ind("2年前冠脉支架植入。"), [("冠脉支架（植入超过12个月）", False)])
+        self.assertEqual(ind("冠脉支架植入术后。"), [("近期冠脉支架", True)])                           # timing unknown: conservative
+        self.assertEqual(ind("急性肺栓塞10天。"), [("急性肺栓塞", True)])
+        self.assertEqual(ind("肺栓塞6个月。"), [("肺栓塞（超过90天）", False)])
+        text, events, _ = screen((AD, "2年前冠脉支架植入。"), "继续氯吡格雷75mg qd。")
+        self.assertEqual({e.action for e in events}, {A.REVIEW})                                   # not urgent beyond 12 months
+
+    def test_f3_keeps_documented_done_items(self):
+        c = case("2025-06行冠脉造影示前降支轻度狭窄。")
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("已行冠脉造影，继续冠心病二级预防。", ["S1"])]
+        self.assertEqual(V.retense_completed(n, build_ledger(c)), 0)
+        n.sections["treatment_plan"] = [Statement("已行冠脉CTA，继续观察。", ["S1"])]
+        self.assertEqual(V.retense_completed(n, build_ledger(case("胸痛2天。"))), 1)                 # not in the records
+
+    def test_dose_engine(self):
+        from medtrace import dosing as D
+        codes = lambda t, src="": [(f.code, f.drug) for f in D.dose_findings(t, src)]
+        self.assertEqual(codes("替格瑞洛180mg qd。", "外院予替格瑞洛180mg口服。"), [("loading_dose_as_maintenance", "ticagrelor")])
+        self.assertEqual(codes("利伐沙班20mg bid。"), [("dose_above_daily_max", "rivaroxaban")])
+        self.assertEqual(codes("氯吡格雷 300 mg/日。"), [("loading_dose_as_maintenance", "clopidogrel")])
+        self.assertEqual(codes("普拉格雷10mg qd，阿司匹林100mg qd。"), [])
+        for fine in ("替格瑞洛90mg bid", "阿哌沙班10mg bid", "氯吡格雷75mg/日", "阿司匹林300mg负荷后100mg qd维持",
+                     "予阿司匹林300mg、氯吡格雷300mg口服", "华法林5mg qn"):
+            with self.subTest(fine):
+                self.assertEqual(codes(fine), [])
+
+
+class CorpusFoundCases(unittest.TestCase):
+    """Wordings from the real-corpus run (TypicalCase-DC / CMB-Clin / CHIP-CDEE) that the first version got wrong."""
+
+    def test_time_parsing(self):
+        for text in ("2020 年 9 月无明显诱因突发意识不清", "7 月 12 日就诊我院", "4 岁 2 月龄起病", "周期 28d，经期 7 天"):
+            with self.subTest(text):
+                self.assertIsNone(A.elapsed_days(text))                         # dates, ages, cycles are not durations
+        self.assertEqual(A.elapsed_days("间断胸痛 5 年，加重 1 周"), 7)          # the latest change
+        self.assertEqual(A.elapsed_days("1 年 4 个月前晨起出现晕厥"), 485)
+        self.assertIsNone(A.elapsed_days("3 天后行血肿清除术，48 小时内复查"))      # intervals, not time before now
+        self.assertEqual(A.case_onset_days(case("主诉：恶心伴有腹痛、腹胀 4 个月，发现胆红素高 1 天余。")), 120)
+        self.assertEqual(A.case_onset_days(case("既往月经规则，周期 28d，经期 7 天，无痛经，无腹痛腹胀。")), None)
+
+    def test_indications(self):
+        ind = lambda *r: [i.name for i in A.recorded_indications(case(*r))]
+        for text in ("腹主动脉瘤支架置入术后 6 月", "同期行左侧颈总动脉覆膜支架植入术", "行ERCP+胆道支架植入术"):
+            with self.subTest(text):
+                self.assertEqual(ind(text), [])
+        self.assertEqual(ind("行冠状动脉造影，于前降支植入支架 1 枚"), ["近期冠脉支架"])
+        self.assertEqual(ind("接受了主动脉瓣换瓣术"), ["人工瓣膜（类型未明）"])
+        self.assertEqual(ind("机械瓣置换术后长期华法林"), ["机械瓣膜"])
+        self.assertEqual(ind("疑诊急性肺栓塞"), [])
+
+    def test_dictionary_lab_and_sample_terms(self):
+        for text in ("狼疮抗凝物质+凝血功能常规", "狼疮抗凝血因子实验", "取抗凝外周血，送检全外显子检测", "采集EDTA抗凝静脉血2ml",
+                     "溶栓治疗监测、血电解质测定", "血浆纤溶酶原活性"):
+            with self.subTest(text):
+                self.assertEqual(A.drug_mentions(text), [])
+        self.assertTrue(A.drug_mentions("术后规律服用华法林进行抗凝治疗"))
+
+    def test_dose_frequency_slash_d(self):
+        from medtrace import dosing as D
+        self.assertEqual([f.code for f in D.dose_findings("利伐沙班 20mg/次 2 次/d")], ["dose_above_daily_max"])
+        self.assertEqual(D.dose_findings("利伐沙班 15mg/次 2 次/d"), [])
+
+
+class RealCloudRun(unittest.TestCase):
+    """Plan sentences the cloud model wrote for real TypicalCase-DC AAS cases; both were wrongly rewritten at first."""
+    dissection = "突发胸痛30分钟。胸部、腹部CTA：Stanford A型主动脉夹层。"
+
+    def test_strict_prohibition_kept(self):
+        plan = "抗凝/抗血小板治疗禁忌：在主动脉夹层未修复前，严禁使用肝素、阿司匹林等抗栓药物，以免诱发夹层破裂大出血。"
+        self.assertEqual(screen(self.dissection, plan)[:2], (plan, []))
+
+    def test_cautious_assessment_kept(self):
+        plan = ("预防深静脉血栓，鉴于D-二聚体极高且存在主动脉病变，抗凝治疗需谨慎，建议先咨询血管外科及血液科，"
+                "评估出血风险后决定是否启动低分子肝素。")
+        self.assertEqual(screen("增强CT：主动脉弓、降主动脉壁间血肿形成。", plan)[:2], (plan, []))
+        text, events, _ = screen(self.dissection, "谨慎使用阿司匹林100mg qd。")   # cautious USE is still an order
+        self.assertEqual({e.action for e in events}, {A.BLOCK})
 
 
 if __name__ == "__main__":

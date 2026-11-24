@@ -59,6 +59,7 @@ _I18N = {
         "c_allergy_not_in_source": "The note states an allergy to {term} that the records do not document; check it.",
         "c_aortic_antithrombotic": "The records document {term}, and the plan includes antithrombotic therapy; check it.",
         "c_loading_dose_as_maintenance": "The plan gives {term} at a loading-size dose every day; check the loading and maintenance doses.",
+        "c_dose_above_daily_max": "The daily dose of {term} in the plan is above the labelled adult maximum; check the dose.",
         "allergy_removed": "A plan item giving {drug} was removed because the records document an allergy to {allergen}; choose an alternative.",
         "c_allergy_conflict": "The plan gives {term} although the records document an allergy to this drug class; check it.",
         "c_bleeding_risk": "The records document {term}, and the plan includes anticoagulant, antiplatelet or thrombolytic therapy; assess the bleeding risk before acting.",
@@ -94,6 +95,7 @@ _I18N = {
         "c_allergy_not_in_source": "记录中写有资料未记载的{term}过敏，请核对。",
         "c_aortic_antithrombotic": "资料记录有{term}，诊疗计划含抗栓治疗，请核对。",
         "c_loading_dose_as_maintenance": "诊疗计划中{term}的每日剂量与常规负荷量相当，请核对负荷量与维持量。",
+        "c_dose_above_daily_max": "诊疗计划中{term}的每日剂量超过说明书成人每日最大量，请核对剂量。",
         "allergy_removed": "资料记录有{allergen}过敏，诊疗计划中含{drug}的条目已删除，请另选方案。",
         "c_allergy_conflict": "诊疗计划中的{term}与资料记录的药物过敏史属同类药物，请核对。",
         "c_bleeding_risk": "资料记录有{term}，诊疗计划包含抗凝、抗血小板或溶栓治疗，请评估出血风险后再执行。",
@@ -115,7 +117,8 @@ _I18N = {
 OFFICIAL_VERIFIER_CODES = {"overconfident", "bleeding_risk"}
 CLINICIAN_HIGH_CODES = {"negation_flip", "trend_direction", "number_not_in_source", "unit_mismatch", "value_label_mismatch", "post_cutoff",
                         "unsupported_completed", "false_missing", "qualifier_not_in_source", "allergy_conflict",
-                        "allergy_not_in_source", "aortic_antithrombotic", "loading_dose_as_maintenance"}
+                        "allergy_not_in_source", "aortic_antithrombotic", "loading_dose_as_maintenance",
+                        "dose_above_daily_max"}
 MAX_REVIEW_ITEMS = 6
 # Lower ranks survive the cap: pipeline notices (fallback, cutoff), then record contradictions and high findings,
 # undocumented core items, the model's own items, and last numeric discrepancies and certainty wording.
@@ -142,6 +145,7 @@ _MSG_ZH = {
     "allergy_conflict": "计划药物与记录的过敏史冲突", "allergy_not_in_source": "过敏史未见于资料",
     "aortic_antithrombotic": "主动脉夹层/壁内血肿而计划含抗栓治疗", "bleeding_risk": "资料记录出血风险而计划含抗栓治疗",
     "loading_dose_as_maintenance": "计划中抗血小板药物的每日剂量与负荷量相当",
+    "dose_above_daily_max": "计划中抗栓药物的每日剂量超过说明书最大量",
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
     "false_missing": "资料中已有记录，却被表述为未记录",
     "knowledge_record_value": "知识性陈述含病人记录中的特定数值",
