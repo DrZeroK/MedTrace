@@ -396,6 +396,29 @@ class Verifier(unittest.TestCase):
         real = parse_case({"case_id": "R", "sources": [{"source_id": "S1", "content": "青霉素过敏史。"}]}, 0)
         self.assertEqual(V.strip_unsupported_allergies(n, real), [])     # recorded allergy: left alone
 
+    def test_allergy_case_and_monitoring(self):
+        # PR #14 review: a capitalised English allergen is still a recorded allergy
+        en = parse_case({"case_id": "E", "sources": [{"source_id": "S1", "content": "Allergy: Penicillin (rash)."}]}, 0)
+        self.assertEqual(V.recorded_allergies(en), {"penicillin": "Penicillin"})
+        n = Note()
+        n.sections["case_features"] = [Statement("Fever for 3 days.", ["S1"]), Statement("Penicillin allergy documented.", ["S1"])]
+        self.assertEqual(V.strip_unsupported_allergies(n, en), [])
+        self.assertEqual(len(n.sections["case_features"]), 2)
+        # ... and monitoring for a reaction is not an asserted allergy, so the antibiotic order stays
+        zh = parse_case({"case_id": "Z", "sources": [{"source_id": "S1", "content": "发热咳嗽3天。否认药物过敏史。"}]}, 0)
+        for text in ("予头孢曲松抗感染并监测过敏反应。", "Give ceftriaxone and monitor for allergic reaction."):
+            with self.subTest(text=text):
+                n = Note()
+                n.sections["treatment_plan"] = [Statement(text, ["S1"]), Statement("监测体温。", ["S1"])]
+                self.assertEqual(V.strip_unsupported_allergies(n, zh), [])
+                self.assertEqual(n.sections["treatment_plan"][0].text, text)
+                self.assertNotIn("allergy_not_in_source",
+                                 {f.code for f in V.check_statement("treatment_plan", 0, n.sections["treatment_plan"][0], zh, build_ledger(zh))})
+        # asserted forms are still caught
+        for frag in ("对青霉素过敏", "头孢类抗生素过敏", "过敏史：青霉素", "allergy to penicillin", "Penicillin allergy"):
+            with self.subTest(frag=frag):
+                self.assertTrue(V.unsupported_allergy(frag, {}))
+
     def test_bleeding_risk_screen(self):
         c = parse_case({"case_id": "H", "sources": [{"source_id": "S1", "content": "腹痛，近3天黑便4次。否认呕血。"}]}, 0)
         L = build_ledger(c)

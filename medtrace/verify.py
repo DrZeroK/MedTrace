@@ -508,7 +508,7 @@ def recorded_allergies(case: Case) -> dict:
                     continue
                 for cls, (rec, _) in _ALLERGY_CLASSES.items():
                     m = rec.search(clause)
-                    if m and T.term_positive_in(m.group(0), clause) and not re.search(r"否认|未发现|不详|未知|(?<![a-z])no\b", clause):
+                    if m and T.term_positive_in(m.group(0).lower(), clause) and not re.search(r"否认|未发现|不详|未知|(?<![a-z])no\b", clause):
                         out.setdefault(cls, m.group(0))
     return out
 
@@ -635,14 +635,24 @@ _HYPOTHETICAL = re.compile(r"(?i)如|若|假如|是否|询问|核实|确认|不�
 _PAREN = re.compile(r"[（(][^（）()]*[）)]")
 
 
+# Co-occurrence is not an assertion: "予头孢曲松抗感染并监测过敏反应" orders a drug and watches for a reaction.
+_MONITOR = re.compile(r"(?i)监测|观察|注意|警惕|预防|monitor|watch for|observe")
+_ASSERT_AFTER = re.compile(r"(?i)^(?:类)?(?:药物|抗生素|类药物)?(?:过敏|皮试阳性)|^\s*(?:allergy|allergic)")
+_ASSERT_BEFORE = re.compile(r"(?i)(?:对|过敏史\s*[：:]\s*|过敏\s*[：:]\s*)$|allerg(?:y|ic)\s*(?:to\s*)?[:：]?\s*$")
+
+
 def unsupported_allergy(fragment: str, recorded: dict) -> str | None:
-    """The allergen term when `fragment` asserts a drug allergy that the records do not document."""
-    if not _ALLERGY_CUE.search(fragment) or _HYPOTHETICAL.search(fragment) or _RELATIVE.search(fragment):
+    """The allergen term when `fragment` asserts a patient drug allergy ("青霉素过敏", "对青霉素过敏", "allergy to
+    penicillin") that the records do not document."""
+    if (not _ALLERGY_CUE.search(fragment) or _HYPOTHETICAL.search(fragment) or _RELATIVE.search(fragment)
+            or _MONITOR.search(fragment)):
         return None
     for cls, (rec, _) in _ALLERGY_CLASSES.items():
-        m = rec.search(fragment)
-        if m and cls not in recorded:
-            return m.group(0)
+        if cls in recorded:
+            continue
+        for m in rec.finditer(fragment):
+            if _ASSERT_AFTER.search(fragment[m.end():]) or _ASSERT_BEFORE.search(fragment[:m.start()]):
+                return m.group(0)
     return None
 
 
