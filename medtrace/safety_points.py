@@ -97,7 +97,9 @@ _PNEUMONIA = re.compile(r"肺炎|肺部感染|下呼吸道感染|(?:斑片|浸�
 _CONFUSION = "意识障碍|意识模糊|意识错乱|神志恍惚|定向障碍|谵妄|嗜睡|反应迟钝|反应迟缓"
 
 
-def pneumonia_severity(case: Case) -> str | None:
+def pneumonia_grade(case: Case) -> dict | None:
+    """Computed pneumonia severity: CURB-65 and severe-CAP criteria items (True / False / None = not recorded), the
+    severe-CAP status ("severe" | "not_severe" | "incomplete") and whether the CURB-65 risk band is decided."""
     text = "\n".join(s.content for s in case.sources)
     if not _PNEUMONIA.search(text):
         return None
@@ -115,6 +117,10 @@ def pneumonia_severity(case: Case) -> str | None:
     # documented clear consciousness counts as "no"; silence on mental status is unknown, not normal
     confusion = True if _positive(_CONFUSION, case) else False if re.search(r"神志清|意识清|神清", text) else None
 
+    # an explicit single lobe is "no"; a location without lobe count ("右下肺斑片影") stays unknown
+    multilobar = (True if re.search(r"多(?:个)?肺叶|多叶|双肺[^。；\n]{0,8}(?:浸润|实变|斑片)", text)
+                  else False if re.search(r"单(?:个)?肺?叶", text) else None)
+
     def item(name, value, met):
         return (name, None if value is None else bool(met))
 
@@ -125,7 +131,7 @@ def pneumonia_severity(case: Case) -> str | None:
             item("年龄≥65岁", age, age is not None and age >= 65)]
     minor = [item("呼吸频率≥30次/分", rr, rr is not None and rr >= 30),
              item("PaO2/FiO2≤250", pao2 if room_air else None, room_air and int(pao2.group(1)) / 0.21 <= 250),
-             item("多肺叶浸润", True if re.search(r"多(?:个)?肺叶|多叶|双肺[^。；\n]{0,8}(?:浸润|实变|斑片)", text) else None, True),
+             item("多肺叶浸润", multilobar, multilobar),
              item("意识障碍和/或定向障碍", confusion, confusion),
              item("血尿素氮≥7.14 mmol/L", urea, urea is not None and urea >= 7.14),
              item("白细胞<4×10⁹/L", wbc, wbc is not None and wbc < 4),
@@ -133,22 +139,78 @@ def pneumonia_severity(case: Case) -> str | None:
              item("体温<36℃", temp, temp is not None and temp < 36),
              item("低血压需积极液体复苏", sbp, sbp is not None and sbp < 90)]
     major = _positive("机械通气|气管插管|血管活性药|去甲肾上腺素|升压药", case)
+    score, unknown_curb = sum(v is True for _, v in curb), sum(v is None for _, v in curb)
+    met, unknown = sum(v is True for _, v in minor), sum(v is None for _, v in minor)
+    status = "severe" if major or met >= 3 else "not_severe" if met + unknown < 3 else "incomplete"
+    short = lambda name: re.split(r"[≥<>]|和/或|需积极", name)[0]
+    return {"curb": curb, "minor": minor, "major": major, "score": score, "unknown_curb": unknown_curb,
+            "met": met, "unknown": unknown, "status": status,
+            # the outpatient / low-risk band (0-1) is decided only if the unknown items cannot lift the score to 2
+            "low_risk": None if score <= 1 < score + unknown_curb else score <= 1,
+            "missing": list(dict.fromkeys(short(n) for n, v in minor + curb if v is None)),
+            "missing_curb": [short(n) for n, v in curb if v is None]}
+
+
+def pneumonia_severity(case: Case) -> str | None:
+    g = pneumonia_grade(case)
+    if not g:
+        return None
     fmt = lambda items: "；".join(f"{n}{'（是）' if v else '（否）' if v is False else '（资料未提供）'}" for n, v in items)
-    score = sum(v is True for _, v in curb)
-    unknown_curb = sum(v is None for _, v in curb)
-    met = sum(v is True for _, v in minor)
-    unknown = sum(v is None for _, v in minor)
-    if major or met >= 3:
-        verdict = "符合重症肺炎标准"
-    elif met + unknown < 3:
-        verdict = f"不符合重症肺炎标准（已满足{met}项次要标准，即使未提供项均满足也不足3项）"
-    else:
-        verdict = f"目前满足{met}项次要标准、{unknown}项资料未提供，尚不能完成重症判定，须写明缺哪些项目"
-    return (f"肺炎严重程度（程序按资料计算，供拟诊讨论直接引用，不得改动数值）：CURB-65 = {score}分"
-            f"{f'（另有{unknown_curb}项资料未提供）' if unknown_curb else ''}，各项：{fmt(curb)}。"
-            f"重症肺炎主要标准{'有' if major else '无'}；次要标准：{fmt(minor)}。结论：{verdict}。"
+    verdict = {"severe": "符合重症肺炎标准",
+               "not_severe": f"不符合重症肺炎标准（已满足{g['met']}项次要标准，即使未提供项均满足也不足3项）",
+               "incomplete": f"目前满足{g['met']}项次要标准、{g['unknown']}项资料未提供，尚不能完成重症判定，"
+                             f"不得写“非重症/轻症”，须写“严重程度暂无法完整分级（缺{'、'.join(g['missing'])}）”"}[g["status"]]
+    curb_unknown = f"（另有{g['unknown_curb']}项资料未提供）" if g["unknown_curb"] else ""
+    return (f"肺炎严重程度（程序按资料计算，供拟诊讨论直接引用，不得改动数值）：CURB-65 = {g['score']}分"
+            f"{curb_unknown}，各项：{fmt(g['curb'])}。"
+            f"重症肺炎主要标准{'有' if g['major'] else '无'}；次要标准：{fmt(g['minor'])}。结论：{verdict}。"
             "拟诊讨论须写出上述分级及依据，不得笼统写“严重程度待评估”；诊疗计划据此写明单一收治场所"
             "（CURB-65 0-1分可考虑门诊、2分住院、3-5分或符合重症标准考虑ICU）及升级条件，不得写“A或B”。")
+
+
+# Guard: the computed grade decides, not the model. Prompting alone did not stop "非重症" with 4 criteria unknown (SYN001).
+_NOT_SEVERE = re.compile(r"非重症(?:肺炎)?|不符合重症(?:肺炎)?(?:标准)?|轻症(?:肺炎)?|轻度肺炎|病情较轻")
+_LOW_RISK = re.compile(r"低危|可(?:在)?门诊(?:治疗)?|门诊治疗即可")
+# a claim that the case IS severe: with a verb, or as the diagnosis heading; "重症肺炎主要标准无" names criteria, not a claim
+_SEVERE_PN = re.compile(r"(?:符合|诊断为?|考虑为?|属于|即为|达到?)重症(?:社区获得性)?肺炎(?!(?:主要|次要)标准)|^重症(?:社区获得性)?肺炎(?=[（(:：])")
+
+
+def enforce_pneumonia_grade(note, case: Case) -> list[dict]:
+    """Make the note's pneumonia severity agree with pneumonia_grade.
+    incomplete grading -> every asserted "非重症/轻症/不符合重症" becomes "严重程度暂无法完整分级（缺X）";
+    undecided CURB-65 band -> "低危/可门诊" becomes "风险分层暂无法确定（CURB-65缺X）";
+    complete grading that the note contradicts -> left as written and flagged.
+    Returns review items to add (one per kind of event)."""
+    from .verify import _asserted
+    g = pneumonia_grade(case)
+    if not g:
+        return []
+    grade_text = f"严重程度暂无法完整分级（缺{'、'.join(g['missing'])}）"
+    band_text = f"风险分层暂无法确定（CURB-65缺{'、'.join(g['missing_curb'])}）"
+    sub = lambda rx, repl, text: rx.sub(lambda m: repl if _asserted(m) else m.group(0), text)
+    claims = lambda rx, text: any(_asserted(m) for m in rx.finditer(text))
+    rewritten = mismatch = False
+    for sec in ("diagnostic_discussion", "treatment_plan"):
+        for st in note.sections[sec]:
+            before = st.text
+            if g["status"] == "incomplete":
+                st.text = sub(_NOT_SEVERE, grade_text, st.text)
+            if g["low_risk"] is None:
+                st.text = sub(_LOW_RISK, band_text, st.text)
+            rewritten |= st.text != before
+            mismatch |= ((g["status"] == "severe" and claims(_NOT_SEVERE, st.text))
+                         or (g["status"] == "not_severe" and claims(_SEVERE_PN, st.text))
+                         or (g["low_risk"] is False and claims(_LOW_RISK, st.text)))
+    out = []
+    if rewritten:
+        out.append({"type": "missing", "description": f"肺炎{grade_text}，记录中未经完整分级的轻症/低危结论已改写，请补充后分级。",
+                    "source_ids": [], "origin": "verifier", "official_visible": True, "code": "pneumonia_grade_incomplete"})
+    if mismatch:
+        computed = {"severe": "符合重症肺炎标准", "not_severe": "不符合重症肺炎标准", "incomplete": "无法完整分级"}[g["status"]]
+        out.append({"type": "verify", "description": f"记录中的肺炎严重程度表述与按资料计算的结果（{computed}，CURB-65 {g['score']}分）"
+                                                     "不一致，请复核。", "source_ids": [], "origin": "verifier",
+                    "official_visible": True, "code": "pneumonia_grade_mismatch"})
+    return out
 
 
 def safety_block(points: list[tuple[str, str]]) -> str:

@@ -25,7 +25,7 @@ from . import verify as V
 from . import textutil as T
 from .knowledge import KnowledgeBase, knowledge_block
 from .retrieval import case_query
-from .safety_points import safety_block, safety_points
+from .safety_points import enforce_pneumonia_grade, safety_block, safety_points
 from .config import ConfigError, prompt_version
 from .inputs import Case
 from .ledger import build_ledger, digest, Ledger
@@ -427,6 +427,9 @@ class Pipeline:
         log["planned_result_items_dropped"] = V.drop_planned_result_items(note, case)
         log["disposition_hedged"] = V.hedged_disposition(note)
         log["severity_downgraded"] = V.downgrade_unsupported_severity(note)
+        grade_items = enforce_pneumonia_grade(note, case) if lang == "zh" else []
+        log["pneumonia_grade_guard"] = [r["code"] for r in grade_items]
+        note.review_items.extend(grade_items)
         if log["severity_downgraded"]:
             note.review_items.append({"type": "verify", "description": tr["severity"], "source_ids": [],
                                       "origin": "verifier", "official_visible": True})

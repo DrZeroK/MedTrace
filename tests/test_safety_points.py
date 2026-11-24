@@ -84,5 +84,73 @@ class SafetyPoints(unittest.TestCase):
         self.assertEqual(res.log["safety_points"], ["hypokalaemia"])
 
 
+def pneumonia(age=56, rr=20, bp="120/80", bun="5.0", pao2="80", wbc="8.0", plt="200", temp="37.5",
+              mental="神志清楚", lobes="右下肺单叶斑片影"):
+    """A pneumonia record with every severity item recorded unless a field is set to None."""
+    parts = [f"男性，{age}岁，发热咳嗽3天。" if age else "男性，发热咳嗽3天。",
+             mental and f"{mental}。", rr and f"R {rr}次/分。", bp and f"血压{bp} mmHg。", temp and f"体温{temp}℃。",
+             bun and f"BUN {bun} mmol/L。", wbc and f"白细胞{wbc}×10⁹/L。", plt and f"血小板{plt}×10⁹/L。",
+             pao2 and f"血气分析（未吸氧）PaO2 {pao2} mmHg。", f"胸部CT示{lobes}，考虑肺炎。" if lobes else "胸片示右下肺斑片影，考虑肺炎。"]
+    return parse_case({"case_id": "P", "record_cutoff": "T0",
+                       "sources": [{"source_id": "S1", "content": "".join(p for p in parts if p)}]}, 0)
+
+
+class PneumoniaGrade(unittest.TestCase):
+    def grade(self, **kw):
+        from medtrace.safety_points import pneumonia_grade
+        return pneumonia_grade(pneumonia(**kw))
+
+    def guard(self, case, *texts, plan=()):
+        from medtrace.note import Note, Statement
+        from medtrace.safety_points import enforce_pneumonia_grade
+        n = Note()
+        n.sections["diagnostic_discussion"] = [Statement(t, ["S1"], "assessment") for t in texts]
+        n.sections["treatment_plan"] = [Statement(t, ["S1"], "treatment") for t in plan] or [Statement("拟完善血气分析。", ["S1"])]
+        items = enforce_pneumonia_grade(n, case)
+        return [s.text for s in n.sections["diagnostic_discussion"]], [s.text for s in n.sections["treatment_plan"]], [r["code"] for r in items]
+
+    def test_incomplete_grading_is_never_rendered_as_not_severe(self):
+        # SYN001 pattern: mental status, urea, PaO2 and lobes not recorded; the model concluded "非重症" anyway
+        case = pneumonia(age=67, rr=23, bp="132/78", bun=None, pao2=None, plt=None, mental=None, lobes=None)
+        self.assertEqual(self.grade(age=67, rr=23, bp="132/78", bun=None, pao2=None, plt=None, mental=None, lobes=None)["status"],
+                         "incomplete")
+        disc, plan, codes = self.guard(case, "社区获得性肺炎（可能性大）：CURB-65评分1分，非重症，但需完善评估。",
+                                       "目前为轻症肺炎。", plan=["可门诊治疗，密切随访。"])
+        joined = "".join(disc + plan)
+        for word in ("非重症", "轻症", "可门诊"):
+            self.assertNotIn(word, joined)
+        self.assertIn("严重程度暂无法完整分级（缺", disc[0])
+        self.assertIn("风险分层暂无法确定（CURB-65缺", plan[0])          # score 1 + 2 unknown items could reach 2
+        self.assertEqual(codes, ["pneumonia_grade_incomplete"])
+        kept, _, codes = self.guard(case, "资料不足，不能判定为非重症。")    # a negated mention is not a conclusion
+        self.assertEqual((kept, codes), (["资料不足，不能判定为非重症。"], []))
+
+    def test_complete_grading_must_match_the_computed_value(self):
+        mild = pneumonia()                                                   # every item recorded, none met
+        self.assertEqual(self.guard(mild, "社区获得性肺炎，符合重症肺炎标准。")[2], ["pneumonia_grade_mismatch"])
+        self.assertEqual(self.guard(mild, "社区获得性肺炎，不符合重症肺炎标准（重症肺炎主要标准无，次要标准0项）。")[2], [])
+        severe = pneumonia(rr=32, mental="意识模糊", bun="8.2")             # 3 minor criteria met
+        disc, _, codes = self.guard(severe, "社区获得性肺炎，非重症。")
+        self.assertEqual((disc, codes), (["社区获得性肺炎，非重症。"], ["pneumonia_grade_mismatch"]))   # flagged, not rewritten
+
+    def test_boundary_values(self):
+        g = self.grade
+        self.assertEqual(g(rr=30)["minor"][0][1], True)
+        self.assertEqual(g(rr=29)["minor"][0][1], False)
+        self.assertEqual(g(bun="7.0")["curb"][1][1], False)                 # CURB-65: urea > 7
+        self.assertEqual(g(bun="7.1")["curb"][1][1], True)
+        self.assertEqual(g(bun="7.1")["minor"][4][1], False)                # severe CAP: BUN >= 7.14
+        self.assertEqual(g(bun="7.14")["minor"][4][1], True)
+        self.assertEqual(g(pao2="52")["minor"][1][1], True)                 # 52 / 0.21 = 247.6 <= 250
+        self.assertEqual(g(pao2="53")["minor"][1][1], False)                # 252.4
+        self.assertEqual(g(bp="90/70")["curb"][3][1], False)                # SBP < 90
+        self.assertEqual(g(bp="120/60")["curb"][3][1], True)                # DBP <= 60
+        self.assertEqual(g(age=65)["curb"][4][1], True)
+        self.assertEqual(g(age=64)["curb"][4][1], False)
+        self.assertEqual(g(rr=31, mental="意识模糊")["status"], "not_severe")            # 2 met, 0 unknown
+        self.assertEqual(g(rr=31, mental="意识模糊", lobes=None)["status"], "incomplete") # 2 met + 1 unknown could be 3
+        self.assertEqual(g(rr=31, mental="意识模糊", bun="7.2")["status"], "severe")      # 3 met
+
+
 if __name__ == "__main__":
     unittest.main()
