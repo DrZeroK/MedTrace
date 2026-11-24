@@ -1,0 +1,24 @@
+[task:a0/v1]
+请根据以下资料，用<<lang>>书写该患者的首次病程记录。
+
+资料截止时间：<<cutoff>>（晚于该时间的信息一律忽略）。
+
+<records>
+<<sources>>
+</records>
+
+要求
+- 病例特点：简明概括重要临床信息（病史、重要阳性及阴性表现、查体、检查结果）。
+- 拟诊讨论：初步诊断及依据、鉴别诊断、尚不明确之处。
+- 诊疗计划：检查、治疗、监测。
+- 只能使用资料中的信息，不得编造；数值和单位必须准确。
+- 用来源编号列出主要陈述的依据，并列出需医生核实的事项（缺失信息、矛盾信息）。
+
+严格按以下JSON对象输出：
+{
+  "case_features": "文本",
+  "diagnostic_discussion": "文本",
+  "treatment_plan": "文本",
+  "evidence": [{"statement": "主要陈述", "source_ids": ["来源编号"]}],
+  "review_items": [{"type": "missing|conflict|verify", "text": "需核实的内容"}]
+}

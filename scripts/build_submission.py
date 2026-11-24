@@ -108,14 +108,22 @@ def build_zip(root: Path, dest: Path, knowledge_path: Path | None = None) -> tup
         total += len(registration.encode("utf-8"))
         manifest = {"git_commit": _git_rev(), "files": {n: hashlib.sha256(zf.read(n)).hexdigest() for n in names}}
         prompt_hash = hashlib.sha256()
-        for name in sorted(n for n in names if n.startswith("medtrace/prompts/v2/") and n.endswith(".txt")):
+        version = _default_prompt_version(root)
+        for name in sorted(n for n in names if n.startswith(f"medtrace/prompts/{version}/") and n.endswith(".txt")):
             prompt_hash.update(zf.read(name))
-        manifest["prompt"] = "v2:" + prompt_hash.hexdigest()[:12]
+        manifest["prompt"] = f"{version}:" + prompt_hash.hexdigest()[:12]
         body = json.dumps(manifest, ensure_ascii=False, indent=2) + "\n"
         zf.writestr("submission.manifest.json", body)
         names.append("submission.manifest.json")
         total += len(body.encode("utf-8"))
     return names, total
+
+
+def _default_prompt_version(root: Path) -> str:
+    """The packaged default prompt version, read from config.py so the manifest hash follows it."""
+    import re
+    m = re.search(r'^DEFAULT_PROMPT_VERSION = "([^"]+)"', (root / "medtrace" / "config.py").read_text("utf-8"), re.M)
+    return m.group(1) if m else "v2"
 
 
 def _git_rev() -> str:

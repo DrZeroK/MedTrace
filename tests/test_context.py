@@ -164,7 +164,7 @@ class ContextTests(unittest.TestCase):
         p = d / "candidate.json"
         instruction = "先列出病例核心问题，再按问题组织鉴别分析和诊疗计划。"
         candidate = {"schema_version": 1, "instruction": instruction, "instruction_sha256": hashlib.sha256(instruction.encode()).hexdigest(),
-                     "base_prompt": prompt_fingerprint("v2")}
+                     "base_prompt": prompt_fingerprint(Config().prompt_version)}
         p.write_text(json.dumps(candidate))
         cfg = Config(development=True, api_base="mock://", context_mode=C.VERSION, prompt_candidate_path=str(p), repair_call=False)
         pipe = Pipeline(cfg, LLMClient(cfg, mock=MockLLM()))
@@ -173,7 +173,7 @@ class ContextTests(unittest.TestCase):
         with patch.object(pipe.client, "chat", wraps=pipe.client.chat) as chat:
             pipe.run_case(case)
             user = chat.call_args.args[1]
-            self.assertLess(user.index(instruction), user.index("[task:a1/v2]"))
+            self.assertLess(user.index(instruction), user.index("[task:a1/v3]"))
             self.assertIn("资料截止时间：T0", user)
             self.assertIn("缺失不等于正常", user)
             self.assertIn('"case_features":', user)

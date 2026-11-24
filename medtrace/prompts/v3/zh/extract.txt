@@ -1,0 +1,13 @@
+[task:extract/v1]
+请根据以下入院资料，按紧急程度由高到低列出患者当前的临床问题，并为每个问题逐字引用依据。
+
+资料截止时间：<<cutoff>>
+
+<records>
+<<sources>>
+</records>
+
+规则：引文必须与资料原文逐字一致（短片段）；包含与该问题相关的阴性记录；不得超出资料作出诊断，问题名称按记录所见表述（如“发热伴右下肺实变”）。
+
+只输出一个JSON对象：
+{"problems": [{"problem": "……", "urgency": "immediate|urgent|routine", "evidence": [{"source": "编号", "quote": "原文", "polarity": "positive|negative|pending"}]}]}

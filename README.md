@@ -29,7 +29,7 @@ Failure uses `status="failed"`, `medical_record=null`, and `error={"code":"…",
 
 Exit codes: **0** complete protocol-valid output written (individual failures allowed); **1** task/runtime or output/log-writing error; **2** missing/invalid configuration or basic input protocol error. `logs/run_log.jsonl` retains appended events; `run_log.json` beside the output contains only the current completed run, with timestamps, run ID, per-attempt records, counts, token usage and input/output hashes.
 
-Defaults fixed in code: A2, prompt v2, temperature 0, seed 42, at most two logical calls/case, two transient HTTP retries/call, 600-second request timeout, one worker, model repair off. Final organiser limits still require confirmation. An unsupported seed requires an explicit documented change; the client does not silently drop it.
+Defaults fixed in code: A2, prompt v3, temperature 0, seed 37, at most two logical calls/case, two transient HTTP retries/call, 600-second request timeout, one worker, model repair off. Final organiser limits still require confirmation. An unsupported seed requires an explicit documented change; the client does not silently drop it.
 
 ## Test packaging
 

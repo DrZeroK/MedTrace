@@ -48,7 +48,7 @@ class ApiAcceptance(unittest.TestCase):
         self.assertTrue(report["summary"]["seed_accepted"])
         self.assertTrue(report["summary"]["thinking_accepted"])
         self.assertFalse(report["summary"]["authorization_present"])
-        self.assertEqual(calls[0][1]["seed"], 42)
+        self.assertEqual(calls[0][1]["seed"], 37)
         self.assertEqual(calls[0][1]["chat_template_kwargs"], {"enable_thinking": False})
         self.assertNotIn("Authorization", calls[0][0])
         self.assertEqual(report["summary"]["usage_total"]["total_tokens"], 12)
