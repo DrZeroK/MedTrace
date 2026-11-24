@@ -324,6 +324,128 @@ class Verifier(unittest.TestCase):
         self.assertIn("unsupported_completed", codes(3))            # English stays flagged, not rewritten
         self.assertTrue(T.has_done_cue("已使用头孢曲松") and T.has_done_cue("已于5月3日行造影") and not T.has_done_cue("拟予抗感染治疗"))
 
+    def test_allergy_screen(self):
+        c = parse_case({"case_id": "A", "sources": [{"source_id": "S1", "content":
+            "既往史：髋关节置换手术史、青霉素过敏史。否认磺胺过敏。过敏原检测提示牛奶。发热3天。"}]}, 0)
+        L = build_ledger(c)
+        self.assertEqual(V.recorded_allergies(c), {"penicillin": "青霉素"})
+        plan = lambda t: {f.code for f in V.check_statement("treatment_plan", 0, Statement(t, ["S1"]), c, L)}
+        self.assertIn("allergy_conflict", plan("予阿莫西林克拉维酸钾抗感染。"))
+        for ok in ("青霉素过敏，改用左氧氟沙星抗感染。", "予复方新诺明口服。", "予头孢曲松抗感染。"):
+            self.assertNotIn("allergy_conflict", plan(ok), ok)    # caution worded / denied allergy / other class
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("完善血培养，予哌拉西林他唑巴坦抗感染。", ["S1"]), Statement("监测体温。", ["S1"])]
+        self.assertEqual(V.remove_allergy_conflicts(n, c), [("哌拉西林", "青霉素")])
+        self.assertEqual([s.text for s in n.sections["treatment_plan"]], ["完善血培养。", "监测体温。"])
+        only = Note()
+        only.sections["treatment_plan"] = [Statement("予阿莫西林口服。", ["S1"])]
+        self.assertEqual(V.remove_allergy_conflicts(only, c), [])                # never empties the plan
+        self.assertEqual(only.sections["treatment_plan"][0].text, "予阿莫西林口服。")
+        none = parse_case({"case_id": "B", "sources": [{"source_id": "S1", "content": "否认药物、食物过敏史。母亲对阿莫西林过敏。"}]}, 0)
+        self.assertEqual(V.recorded_allergies(none), {})
+
+    def test_aortic_interface_kept(self):
+        # The graded AAS screen is tested in tests/test_aortic_rule.py (spec A01-A36, P05). This keeps the earlier
+        # verify-level interface: recorded_aortic, remove_aortic_antithrombotics and the high finding.
+        c = parse_case({"case_id": "P", "sources": [{"source_id": "S1", "content":
+            "胸背痛6小时。外院予阿司匹林300mg、氯吡格雷300mg口服。急诊大血管CTA：主动脉壁内血肿。"}]}, 0)
+        L = build_ledger(c)
+        plan = "抗血小板聚集：继续阿司匹林300mg/日，氯吡格雷300mg/日；持续监测生命体征。"
+        self.assertIn(("aortic_antithrombotic", V.HIGH),
+                      {(f.code, f.severity) for f in V.check_statement("treatment_plan", 0, Statement(plan, ["S1"]), c, L)})
+        self.assertEqual(V.recorded_aortic(c), ["主动脉壁内血肿"])
+        n = Note()
+        n.sections["treatment_plan"] = [Statement("控制血压，目标<120/80mmHg。", ["S1"]), Statement(plan, ["S1"])]
+        self.assertEqual(V.remove_aortic_antithrombotics(n, c), [("antiplatelet", "主动脉壁内血肿")])
+        self.assertEqual(n.sections["treatment_plan"][0].text, "控制血压，目标<120/80mmHg。")
+        self.assertTrue(n.sections["treatment_plan"][1].text.endswith("；持续监测生命体征。"))
+        none = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "胸痛。CTA未见主动脉夹层。"}]}, 0)
+        self.assertEqual(V.recorded_aortic(none), [])
+
+    def test_unsupported_allergy_removed(self):
+        # SYN001 with qwen3:8b: "拟予头孢类抗生素（青霉素过敏，需替代方案）" though the record documents no allergy
+        c = parse_case({"case_id": "S", "sources": [{"source_id": "S1", "content": "发热咳嗽3天。否认药物过敏史。"}]}, 0)
+        L = build_ledger(c)
+        text = "拟予头孢类抗生素（青霉素过敏，需替代方案）；监测体温。"
+        self.assertIn("allergy_not_in_source", {f.code for f in V.check_statement("treatment_plan", 0, Statement(text, ["S1"]), c, L)})
+        n = Note()
+        n.sections["case_features"] = [Statement("发热咳嗽3天，青霉素过敏。", ["S1"])]
+        n.sections["treatment_plan"] = [Statement(text, ["S1"]), Statement("如青霉素过敏，改用左氧氟沙星。", ["S1"])]
+        self.assertEqual(V.strip_unsupported_allergies(n, c), ["青霉素", "青霉素"])
+        self.assertEqual(n.sections["case_features"][0].text, "发热咳嗽3天。")
+        self.assertEqual([s.text for s in n.sections["treatment_plan"]], ["拟予头孢类抗生素；监测体温。", "如青霉素过敏，改用左氧氟沙星。"])
+        real = parse_case({"case_id": "R", "sources": [{"source_id": "S1", "content": "青霉素过敏史。"}]}, 0)
+        self.assertEqual(V.strip_unsupported_allergies(n, real), [])     # recorded allergy: left alone
+
+    def test_allergy_case_and_monitoring(self):
+        # PR #14 review: a capitalised English allergen is still a recorded allergy
+        en = parse_case({"case_id": "E", "sources": [{"source_id": "S1", "content": "Allergy: Penicillin (rash)."}]}, 0)
+        self.assertEqual(V.recorded_allergies(en), {"penicillin": "Penicillin"})
+        n = Note()
+        n.sections["case_features"] = [Statement("Fever for 3 days.", ["S1"]), Statement("Penicillin allergy documented.", ["S1"])]
+        self.assertEqual(V.strip_unsupported_allergies(n, en), [])
+        self.assertEqual(len(n.sections["case_features"]), 2)
+        # ... and monitoring for a reaction is not an asserted allergy, so the antibiotic order stays
+        zh = parse_case({"case_id": "Z", "sources": [{"source_id": "S1", "content": "发热咳嗽3天。否认药物过敏史。"}]}, 0)
+        for text in ("予头孢曲松抗感染并监测过敏反应。", "Give ceftriaxone and monitor for allergic reaction."):
+            with self.subTest(text=text):
+                n = Note()
+                n.sections["treatment_plan"] = [Statement(text, ["S1"]), Statement("监测体温。", ["S1"])]
+                self.assertEqual(V.strip_unsupported_allergies(n, zh), [])
+                self.assertEqual(n.sections["treatment_plan"][0].text, text)
+                self.assertNotIn("allergy_not_in_source",
+                                 {f.code for f in V.check_statement("treatment_plan", 0, n.sections["treatment_plan"][0], zh, build_ledger(zh))})
+        # asserted forms are still caught
+        for frag in ("对青霉素过敏", "头孢类抗生素过敏", "过敏史：青霉素", "allergy to penicillin", "Penicillin allergy"):
+            with self.subTest(frag=frag):
+                self.assertTrue(V.unsupported_allergy(frag, {}))
+
+    def test_bleeding_risk_screen(self):
+        c = parse_case({"case_id": "H", "sources": [{"source_id": "S1", "content": "腹痛，近3天黑便4次。否认呕血。"}]}, 0)
+        L = build_ledger(c)
+        plan = lambda cc, t: {(f.code, f.severity) for f in V.check_statement("treatment_plan", 0, Statement(t, ["S1"]), cc, build_ledger(cc))}
+        self.assertIn(("bleeding_risk", V.MEDIUM), plan(c, "予低分子肝素抗凝。"))
+        self.assertFalse({x for x in plan(c, "暂缓抗血小板治疗，控制血压。") if x[0] == "bleeding_risk"})
+        quiet = parse_case({"case_id": "Q", "sources": [{"source_id": "S1", "content": "胸痛。否认呕血、黑便及其他出血。"}]}, 0)
+        self.assertEqual(V.recorded_bleeding(quiet), [])
+        self.assertFalse({x for x in plan(quiet, "予阿司匹林抗血小板。") if x[0] == "bleeding_risk"})
+
+    def test_reasoning_call_renders_verified_problems_and_differentials(self):
+        reply = {"problems": [
+            {"problem": "Fever with cough", "urgency": "urgent", "certainty": "probable",
+             "evidence": [{"source": "S2", "quote": "Temp 38.6 °C", "polarity": "positive"},
+                          {"source": "S2", "quote": "invented quote", "polarity": "positive"}],
+             "differentials": [{"name": "Pneumonia", "for": "fever, cough", "against": "no imaging yet", "test": "chest X-ray"}],
+             "missing": ["chest imaging"]},
+            {"problem": "Unquoted problem", "evidence": [{"source": "S2", "quote": "not in record"}]}]}
+        seen = {}
+
+        class Client:
+            def chat(self, system, user, stats, deadline=None, thinking=None):
+                seen["thinking"] = thinking
+                seen["prompt"] = user
+                return json.dumps(reply)
+
+        p = Pipeline(cfg(pipeline="S2", reason_thinking=True), Client())
+        log = {}
+        block = p._extract(parse_case(CASE, 0), "", {"lang": "English", "cutoff": "T0", "sources": ""}, "en", CallStats(), None, log)
+        self.assertTrue(seen["thinking"])
+        for field in ("certainty", "differentials", "missing"):
+            self.assertIn(f'"{field}"', seen["prompt"])
+        self.assertEqual(log["extract_quotes"], {"kept": 1, "rejected": 2})
+        self.assertIn('1. [urgent] Fever with cough (probable)', block)
+        self.assertIn("* name: Pneumonia | for: fever, cough | against: no imaging yet | test: chest X-ray", block)
+        self.assertIn("? chest imaging", block)
+        self.assertNotIn("Unquoted problem", block)
+        self.assertNotIn("invented quote", block)
+
+    def test_thinking_override_is_per_call(self):
+        c = cfg(enable_thinking=False)
+        client = LLMClient(c, mock=MockLLM({}, seed=1))
+        self.assertEqual(client._payload([], None)["chat_template_kwargs"], {"enable_thinking": False})
+        self.assertEqual(client._payload([], True)["chat_template_kwargs"], {"enable_thinking": True})
+        self.assertNotIn("chat_template_kwargs", LLMClient(cfg(), mock=MockLLM({}, seed=1))._payload([], None))
+
     def test_repair_numbers_drops_whole_negated_statement(self):
         c = parse_case({"case_id": "N", "sources": [{"source_id": "S1", "content": "否认胸痛、咯血。呼吸28次/分。"}]}, 0)
         L = build_ledger(c)
@@ -886,7 +1008,7 @@ class EndToEnd(unittest.TestCase):
         p = subprocess.run([sys.executable, str(ROOT / "main.py"), "--development"], cwd=d, env=env, capture_output=True, text=True, timeout=120)
         self.assertEqual(p.returncode, 0, p.stderr)
         rec = json.loads((Path(d) / "output.json").read_text("utf-8"))[0]
-        self.assertEqual(schema_errors(rec), [])  # development template retains the legacy contract
+        self.assertEqual(official_schema_errors(rec), [])  # development template matches the official output protocol
 
     def test_prompt_version_resolved_after_dotenv(self):
         # regression (review P2): PROMPT_VERSION was read at import time, before .env was loaded
@@ -1150,7 +1272,7 @@ class OfficialProtocol(EndToEnd):
             self.assertGreater(c.case_timeout, 0)
             self.assertGreater(c.total_timeout, 0)
             dev = C.load_config(development=True)
-            self.assertFalse(dev.official)
+            self.assertTrue(dev.official)          # development output matches the official protocol by default
             self.assertIsNone(dev.enable_thinking)
             self.assertEqual((dev.case_timeout, dev.total_timeout), (0.0, 0.0))
 
@@ -1229,7 +1351,7 @@ class OfficialProtocol(EndToEnd):
             {"type": "verify", "description": "知识检索失败", "source_ids": [], "origin": "internal"},
             {"type": "missing", "description": "药物过敏史未记录", "source_ids": [], "origin": "ledger"},
             {"type": "verify", "description": "血压需复核", "source_ids": [], "origin": "model"},
-            {"type": "conflict", "description": "血小板处于正常低限", "source_ids": ["S1"], "origin": "model"},
+            {"type": "conflict", "description": "【冲突】血小板处于正常低限", "source_ids": ["S1"], "origin": "model"},
             {"type": "conflict", "description": "两份用药清单不一致", "source_ids": ["S1", "S2"], "origin": "model"},
             {"type": "conflict", "description": "S1前后记载不一致", "source_ids": ["S1"], "origin": "ledger"},
         ]
@@ -1294,13 +1416,13 @@ class OfficialProtocol(EndToEnd):
                 "肺炎（可能性大）：目前不符合重症肺炎，未达重症标准。"]
         n = Note()
         n.sections["diagnostic_discussion"] = [Statement(t, ["S1"], "assessment") for t in kept] + [
-            Statement("重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。", ["S1"], "assessment"),
-            Statement("符合重症肺炎次要标准3项。", ["S1"], "assessment", cont=True)]
+            Statement("重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。", ["S1"], "assessment", split_group=1),
+            Statement("符合重症肺炎次要标准3项。", ["S1"], "assessment", split_group=1)]
         self.assertEqual(V.downgrade_unsupported_severity(n), 0)
         self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]][:3], kept)
         self.assertEqual(n.sections["diagnostic_discussion"][3].text, "重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。")
-        n.sections["diagnostic_discussion"] = [Statement("重症肺炎（可能性大）：依据发热。", ["S1"], "assessment"),
-                                               Statement("伴意识障碍，符合重症表现。", ["S1"], "assessment", cont=True)]
+        n.sections["diagnostic_discussion"] = [Statement("重症肺炎（可能性大）：依据发热。", ["S1"], "assessment", split_group=1),
+                                               Statement("伴意识障碍，符合重症表现。", ["S1"], "assessment", split_group=1)]
         self.assertEqual(V.downgrade_unsupported_severity(n), 1)
         self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]],
                          ["肺炎（可能性大，严重程度待评估）：依据发热。", "伴意识障碍，需按标准评估是否为重症。"])
@@ -1310,7 +1432,7 @@ class OfficialProtocol(EndToEnd):
         # record ids after each working diagnosis; a split continuation stays on its line.
         n = Note()
         n.sections["case_features"] = [Statement("颈软，病理征阴性。", ["S1"], "exam"), Statement("中年男性，急性病程。", ["S1"], "summary"),
-                                       Statement("发热。", ["S1"], "symptoms"), Statement("续。", ["S1"], "symptoms", cont=True)]
+                                       Statement("发热。", ["S1"], "symptoms", split_group=1), Statement("续。", ["S1"], "symptoms", split_group=1)]
         n.sections["diagnostic_discussion"] = [Statement("肺炎（可能性大）：依据发热。", ["S1"], "assessment"),
                                                Statement("流感：因发热需考虑。", ["S1"], "differential")]
         n.sections["treatment_plan"] = [Statement("复查血常规。", ["S1"], "monitoring"), Statement("拟查痰培养。", ["S1"], "investigation")]
@@ -1321,6 +1443,26 @@ class OfficialProtocol(EndToEnd):
         n.sections["case_features"] = [Statement("Fever.", ["S1"]), Statement("Cough.", ["S1"])]
         rec = to_official_record(n, parse_case(CASE, 0), status="success")
         self.assertEqual(rec["medical_record"]["case_features"], "1. Fever.\n2. Cough.")
+
+    def test_english_assessment_continuation_and_evidence_with_shared_sources(self):
+        n = Note()
+        n.sections["diagnostic_discussion"] = [
+            Statement("Cause unclear.", ["S1", "S2"], "uncertainty"),
+            Statement("Suspected infection;", ["S1", "S2"], "assessment", split_group=1),
+            Statement("cultures pending.", ["S1", "S2"], "assessment", split_group=1)]
+        mr = to_official_record(n, parse_case(CASE, 0))["medical_record"]
+        self.assertIn("Suspected infection; cultures pending (see S1, S2).", mr["diagnostic_discussion"])
+        self.assertEqual([e["statement"] for e in mr["evidence"]], ["Suspected infection; cultures pending.", "Cause unclear."])
+
+    def test_orphaned_chunk_keeps_its_own_source(self):
+        n = Note()
+        n.sections["diagnostic_discussion"] = [Statement("First diagnosis.", ["S1"], "assessment"),
+                                               Statement("Second diagnosis; still under review.", ["S2"], "assessment")]
+        self.assertEqual(V.split_long_statements(n, limit=20), 1)
+        n.sections["diagnostic_discussion"].pop(1)
+        mr = to_official_record(n, parse_case(CASE, 0))["medical_record"]
+        self.assertIn("1. First diagnosis (see S1).\n2. still under review (see S2).", mr["diagnostic_discussion"])
+        self.assertEqual(mr["evidence"][1]["source_ids"], ["S2"])
 
     def test_endpoint_overrides_mock_base(self):
         # PR#4 P1: an explicit ENDPOINT must reach the real service even when LLM_API_BASE=mock:// (copied .env.example).

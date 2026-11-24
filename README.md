@@ -11,7 +11,7 @@ Python 3.11 is the competition runtime. Install with `python -m pip install -r r
 `.env` contains exactly two non-empty keys:
 
 ```dotenv
-MODEL_NAME=replace_with_model_name
+MODEL_NAME=qwen3.8-27b
 ENDPOINT=http://127.0.0.1:8000/v1/chat/completions
 ```
 
@@ -29,7 +29,7 @@ Failure uses `status="failed"`, `medical_record=null`, and `error={"code":"…",
 
 Exit codes: **0** complete protocol-valid output written (individual failures allowed); **1** task/runtime or output/log-writing error; **2** missing/invalid configuration or basic input protocol error. `logs/run_log.jsonl` retains appended events; `run_log.json` beside the output contains only the current completed run, with timestamps, run ID, per-attempt records, counts, token usage and input/output hashes.
 
-Defaults fixed in code: A2, prompt v3, temperature 0, seed 37, at most two logical calls/case, two transient HTTP retries/call, 600-second request timeout, one worker, model repair off. Final organiser limits still require confirmation. An unsupported seed requires an explicit documented change; the client does not silently drop it.
+Defaults fixed in code: A2, prompt v3, temperature 0, seed 37, at most two logical calls/case, two transient HTTP retries/call, 600-second request timeout, one worker, model repair off. Final organiser limits still require confirmation. If the service explicitly rejects the seed, the client retries without it and logs the change. Repeated requests can produce different text even with the same seed.
 
 ## Test packaging
 
@@ -43,7 +43,7 @@ After running an extracted algorithm package, use `python scripts/build_submissi
 
 For an offline smoke test, extract into a new directory and run `python main.py --development --input /absolute/extracted/input.example.json --output /absolute/extracted/test_output.json` with `LLM_API_BASE=mock://` and `OUTPUT_PROTOCOL=official` in the process environment. This explicitly uses a mock, not the competition service.
 
-For configurable experiments, use `.env.development.example` in a separate working directory and `python /absolute/path/main.py --development`. Development mode supports legacy endpoint/key aliases and path overrides and defaults to the legacy flat output contract. Evaluation modules explicitly use development configuration. Never send organiser cases to a third-party endpoint.
+For configurable experiments, use `.env.development.example` in a separate working directory and `python /absolute/path/main.py --development`. Development mode supports legacy endpoint/key aliases and path overrides and produces the same official output protocol by default (`OUTPUT_PROTOCOL=legacy` opts into the old flat contract). Evaluation modules explicitly use development configuration.
 
 Run `python -m unittest discover -s tests -v` for regressions, including isolated ZIP tests of the official two-key configuration and no-argument entry point. Tests retain their artifacts.
 

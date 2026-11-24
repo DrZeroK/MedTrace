@@ -10,11 +10,13 @@ from __future__ import annotations
 import copy
 from dataclasses import dataclass, asdict
 
+from . import aortic as A
+from . import dosing as D
 from . import textutil as T
 from .knowledge import approved_quote
 from .inputs import Case
 from .ledger import Ledger, numerics
-from .note import Note, Statement, SECTIONS
+from .note import Note, Statement, SECTIONS, statement_groups
 
 import re
 
@@ -118,6 +120,21 @@ class Finding:
         return asdict(self)
 
 
+def _negated_list_covers(term_norm: str, L: Ledger) -> bool:
+    """"肾等重要脏器疾病" shortens the records' negated list "否认…肺、肾、内分泌系统等重要脏器疾病史": the head and the
+    "等…" tail both sit, in order, inside one negated span of a record sentence. (Cloud practice run, P01.)"""
+    head, sep, tail = term_norm.partition("等")
+    if not (sep and head and tail):
+        return False
+    for f in L.facts:
+        for s, e in T.neg_spans(f.text):
+            span = T.squash(f.text[s:e])
+            i = span.find(head)
+            if i >= 0 and span.find("等" + tail, i + len(head)) >= 0:
+                return True
+    return False
+
+
 def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledger) -> list[Finding]:
     out: list[Finding] = []
     sec = _SHORT[section]
@@ -203,6 +220,15 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                     add("value_label_mismatch", HIGH,
                         f"{num['raw']!r}: the records give {num['label']!r} as {sorted(known)}; this value belongs to another item")
 
+    # ---- an allergy stated in the note that the records do not give
+    recorded = None
+    for frag in re.split(r"[，,；;。（）()]", text):
+        if _ALLERGY_CUE.search(frag):
+            recorded = recorded_allergies(case) if recorded is None else recorded
+            term = unsupported_allergy(frag, recorded)
+            if term:
+                add("allergy_not_in_source", HIGH, f"states an allergy to {term!r} that the records do not document", term)
+
     # ---- qualifier attached to a value that the records give without it ("GLU 10.8" written as "空腹血糖10.8")
     if sec in ("features", "discussion") and st.basis != "knowledge":
         for _, _, qual, raw in unsupported_qualifiers(text, case):
@@ -259,7 +285,9 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
                 add("negation_flip", HIGH, f"{term!r} is negated here but the records document it as present", term)
             elif any(v in L.pos_text_norm for v in variants):
                 continue        # the records mention it after a negation cue: ambiguous, not flagged
-            elif not any(v in L.all_text_norm for v in variants):
+            elif not any(v in L.all_text_norm or T.covered_by(v, L.neg_terms_norm) or _negated_list_covers(v, L)
+                         for v in variants):
+                # covered_by: a reworded record negation; checked after the flip test so it cannot hide one
                 add("undocumented_negative", MEDIUM, f"{term!r} is stated as absent but is not mentioned in the records", term)
     if enhanced and sec == "features":
         for code, term in C.context_conflicts(checked, L.facts):
@@ -285,6 +313,29 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
             if _unsupported_done(clause, L):
                 add("unsupported_completed", HIGH, "plan describes an intervention as already done, without support in the records")
                 break
+        # ---- harm screen: a drug of a recorded allergy class; antithrombotic therapy despite recorded bleeding
+        for drug, allergen in allergy_conflicts(text, recorded_allergies(case)):
+            add("allergy_conflict", HIGH, f"plan gives {drug!r} although the records document an allergy to {allergen!r}", drug)
+        # acute aortic syndrome screen (medtrace/aortic.py): a finding whenever the screen would rewrite generated text;
+        # a real order copied from the records is kept and gets its review item from the pipeline instead
+        if A.has_antithrombotic(text):
+            ctx = _aortic_context(case)
+            lang = "zh" if re.search(r"[一-鿿]", text) else "en"
+            changed = [e for e in A.screen_text(text, case, lang, ctx)[1] if e.replacement != e.original_candidate]
+            if changed:
+                name = A.ENTITY_NAME["en"].get(changed[0].entity, "an acute aortic syndrome")
+                add("aortic_antithrombotic", HIGH, f"antithrombotic suggestion conflicts with {name} ({ctx.state})",
+                    A.ENTITY_NAME["zh"].get(changed[0].entity, "急性主动脉综合征"))
+            elif not _SAFETY_CAUTION.search(text):
+                # F5, deduplicated: an AAS the aortic screen already governs is not reported again as bleeding
+                aas_live = ctx.state not in A.QUIET_STATES
+                bleeding = [b for b in recorded_bleeding(case) if not (aas_live and b in _AAS_BLEEDING_TERMS)]
+                if bleeding:
+                    add("bleeding_risk", MEDIUM, f"antithrombotic therapy planned although the records document {bleeding[0]!r}",
+                        bleeding[0])
+        for d in D.dose_findings(text, "\n".join(s.content for s in case.sources)):
+            add(d.code, HIGH, f"{d.drug} {d.per_dose_mg:g} mg x{d.times_per_day}/day ({d.daily_mg:g} mg/day; limit "
+                f"{d.limit_mg:g}): {d.reason}", d.drug)
 
     # ---- diagnostic certainty: only a definitive claim (not "不能确诊…", "需…确诊") about a diagnosis that the
     # records do not themselves list without qualification
@@ -433,11 +484,213 @@ def strip_unsupported_qualifiers(note: Note, case: Case) -> list[str]:
     return removed
 
 
+# Drug classes for the allergy screen: (record terms that name the allergen, plan terms that would give it).
+# Class level on purpose: an allergy to one penicillin rules out the others. Only drugs; foods and pollens are ignored.
+_ALLERGY_CLASSES = {
+    "penicillin": ("青霉素|阿莫西林|氨苄西林|哌拉西林|苯唑西林|(?i:penicillin|amoxicillin|ampicillin|piperacillin)",) * 2,
+    "cephalosporin": ("头孢|(?i:cephalosporin|ceftriaxone|cefazolin|cefuroxime|ceftazidime|cefepime)",) * 2,
+    "quinolone": ("沙星|喹诺酮|(?i:quinolone|levofloxacin|moxifloxacin|ciprofloxacin)",) * 2,
+    "sulfonamide": ("磺胺|复方新诺明|(?i:sulfa|sulfamethoxazole|co-trimoxazole|TMP-SMX)",) * 2,
+    "aminoglycoside": ("庆大霉素|阿米卡星|链霉素|妥布霉素|(?i:gentamicin|amikacin|streptomycin|tobramycin)",) * 2,
+    "macrolide": ("红霉素|阿奇霉素|克拉霉素|(?i:erythromycin|azithromycin|clarithromycin)",) * 2,
+    "nsaid": ("阿司匹林|布洛芬|双氯芬酸|吲哚美辛|洛索洛芬|塞来昔布|非甾体|(?i:aspirin|ibuprofen|diclofenac|nsaid)",) * 2,
+    "contrast": ("造影剂|对比剂|(?i:contrast)", "造影剂|对比剂|增强CT|增强扫描|增强MRI|CTA|造影|(?i:contrast|angiogra)"),
+}
+_ALLERGY_CLASSES = {k: (re.compile(a), re.compile(b)) for k, (a, b) in _ALLERGY_CLASSES.items()}
+_ALLERGY_CUE = re.compile(r"(?i)过敏|allerg")
+_RELATIVE = re.compile(r"(?i)母亲|父亲|其母|其父|母系|父系|家属|家族|兄|姐|弟|妹|儿子|女儿|子女|配偶|\b(?:mother|father|sister|brother|family)\b")
+# wording that already handles the allergy or the bleeding risk ("避免使用青霉素类", "评估出血风险后")
+_SAFETY_CAUTION = re.compile(r"(?i)过敏|避免|禁用|慎用|替代|改用|皮试|脱敏|预处理|出血风险|评估出血|权衡|禁忌|暂缓|暂不|不予|"
+                             r"停用|停止|暂停|不宜|不建议|无需|allerg|avoid|alternative|bleeding risk|contraindicat|withhold|hold")
+_BLEEDING = ("出血", "呕血", "黑便", "便血", "咯血", "壁内血肿", "主动脉夹层", "血小板减少",
+             "bleeding", "haemorrhage", "hemorrhage", "melena", "hematemesis", "aortic dissection", "intramural hematoma")
+
+
+def recorded_allergies(case: Case) -> dict:
+    """{class: allergen as written} for drug allergies the records state as present ("青霉素过敏史"; not "否认青霉素过敏")."""
+    out = {}
+    for s in case.sources:
+        for sent in T.split_sentences(s.content):
+            for clause in re.split(r"[，,；;。]", sent):
+                if not _ALLERGY_CUE.search(clause) or _RELATIVE.search(clause):   # "母亲对阿莫西林过敏" is not the patient's
+                    continue
+                for cls, (rec, _) in _ALLERGY_CLASSES.items():
+                    m = rec.search(clause)
+                    if m and T.term_positive_in(m.group(0).lower(), clause) and not re.search(r"否认|未发现|不详|未知|(?<![a-z])no\b", clause):
+                        out.setdefault(cls, m.group(0))
+    return out
+
+
+def allergy_conflicts(text: str, allergies: dict) -> list[tuple[str, str]]:
+    """(plan drug, recorded allergen) for each recorded allergy class the plan text would give, unless it says how
+    the allergy is handled."""
+    if not allergies or _SAFETY_CAUTION.search(text):
+        return []
+    return [(m.group(0), allergies[c]) for c, (_, plan) in _ALLERGY_CLASSES.items() if c in allergies
+            for m in [plan.search(text)] if m]
+
+
+def recorded_bleeding(case: Case) -> list[str]:
+    """Bleeding-risk terms the records state as present (not "否认呕血、黑便")."""
+    found = []
+    for s in case.sources:
+        for sent in T.split_sentences(s.content):
+            low = sent.lower()
+            found += [t for t in _BLEEDING if t in low and T.term_positive_in(t, low) and t not in found]
+    return found
+
+
+def _remove_clauses(stmts: list, hits_for) -> tuple[list, list]:
+    """Drop each clause for which hits_for(clause, statement_text) returns hits. Returns (kept statements, hits);
+    when every statement would go, returns ([], []) with nothing edited, so the caller keeps the section."""
+    removed, kept = [], []
+    for st in stmts:
+        parts = re.split(r"([，,；;。])", st.text)
+        keep = []
+        for j in range(0, len(parts), 2):
+            clause, delim = parts[j], parts[j + 1] if j + 1 < len(parts) else ""
+            hits = hits_for(clause, st.text)
+            if hits:
+                removed += hits
+            else:
+                keep.append(clause + delim)
+        text = "".join(keep).strip().strip("，,；;")
+        if text:
+            st.text = text if text[-1] in "。.!?！？" else text + ("。" if re.search(r"[\u4e00-\u9fff]", text) else ".")
+            kept.append(st)
+    return (kept, removed) if kept else ([], [])
+
+
+def _apply_removal(note: Note, sec: str, hits_for) -> list:
+    kept, removed = _remove_clauses(note.sections[sec], hits_for)
+    if kept:
+        note.sections[sec] = kept
+    return removed
+
+
+def remove_allergy_conflicts(note: Note, case: Case) -> list[tuple[str, str]]:
+    """Remove the plan clause that would give a drug of a recorded allergy class. Never empties the plan (the finding
+    then stays visible). Returns (drug, allergen) pairs removed."""
+    allergies = recorded_allergies(case)
+    if not allergies:
+        return []
+    return _apply_removal(note, "treatment_plan",
+                          lambda clause, full: [] if _SAFETY_CAUTION.search(full) else allergy_conflicts(clause, allergies))
+
+
+# Acute aortic syndromes: the graded antithrombotic screen lives in medtrace/aortic.py (spec and evidence in
+# docs/AORTIC_ANTITHROMBOTIC_RULE.md; clinical review pending). The two functions below keep the earlier interface.
+_AAS_BLEEDING_TERMS = {"壁内血肿", "主动脉夹层", "aortic dissection", "intramural hematoma"}
+_AORTIC_CTX: dict = {}
+
+
+def _aortic_context(case: Case) -> "A.Context":
+    """Per-case cache: check_statement runs once per statement, the record-level state only once per case."""
+    key = id(case)
+    hit = _AORTIC_CTX.get(key)
+    if hit is None or hit[0] is not case:
+        if len(_AORTIC_CTX) > 256:
+            _AORTIC_CTX.clear()
+        hit = _AORTIC_CTX[key] = (case, A.context(case))
+    return hit[1]
+
+
+def recorded_aortic(case: Case) -> list[str]:
+    """Entity names of a current, suspected, perioperative or unknown-status AAS (empty when the rule is quiet)."""
+    state, finding = A.aortic_state(case)
+    return [] if state in A.QUIET_STATES or finding is None else [A.ENTITY_NAME["zh"][finding.entity]]
+
+
+def remove_aortic_antithrombotics(note: Note, case: Case, lang: str = "zh") -> list[tuple[str, str]]:
+    """Earlier interface: screen the plan in place; (drug class, entity) for each rewritten unit."""
+    return [(",".join(e.drug_classes), A.ENTITY_NAME["zh"].get(e.entity, e.entity))
+            for e in A.screen_plan(note, case, lang) if e.replacement != e.original_candidate]
+
+
+# An allergy stated in the note must be one the records give; an invented one (seen with qwen3:8b: "青霉素过敏" in a
+# plan, no allergy in the record) is a fabricated key fact.
+_HYPOTHETICAL = re.compile(r"(?i)如|若|假如|是否|询问|核实|确认|不详|未记录|未知|待|否认|无|未发现|\bif\b|whether|unknown|\bno\b|denies")
+_PAREN = re.compile(r"[（(][^（）()]*[）)]")
+
+
+# Co-occurrence is not an assertion: "予头孢曲松抗感染并监测过敏反应" orders a drug and watches for a reaction.
+_MONITOR = re.compile(r"(?i)监测|观察|注意|警惕|预防|monitor|watch for|observe")
+_ASSERT_AFTER = re.compile(r"(?i)^(?:类)?(?:药物|抗生素|类药物)?(?:过敏|皮试阳性)|^\s*(?:allergy|allergic)")
+_ASSERT_BEFORE = re.compile(r"(?i)(?:对|过敏史\s*[：:]\s*|过敏\s*[：:]\s*)$|allerg(?:y|ic)\s*(?:to\s*)?[:：]?\s*$")
+
+
+def unsupported_allergy(fragment: str, recorded: dict) -> str | None:
+    """The allergen term when `fragment` asserts a patient drug allergy ("青霉素过敏", "对青霉素过敏", "allergy to
+    penicillin") that the records do not document."""
+    if (not _ALLERGY_CUE.search(fragment) or _HYPOTHETICAL.search(fragment) or _RELATIVE.search(fragment)
+            or _MONITOR.search(fragment)):
+        return None
+    for cls, (rec, _) in _ALLERGY_CLASSES.items():
+        if cls in recorded:
+            continue
+        for m in rec.finditer(fragment):
+            if _ASSERT_AFTER.search(fragment[m.end():]) or _ASSERT_BEFORE.search(fragment[:m.start()]):
+                return m.group(0)
+    return None
+
+
+def strip_unsupported_allergies(note: Note, case: Case) -> list[str]:
+    """Remove a stated allergy the records lack: first a parenthetical holding it ("拟予头孢类（青霉素过敏，需替代）"
+    -> "拟予头孢类"), then a clause. Never empties a section. Returns the allergen terms removed."""
+    recorded, removed = recorded_allergies(case), []
+    for sec in SECTIONS:
+        for st in note.sections[sec]:
+            def drop(m):
+                term = unsupported_allergy(m.group(0)[1:-1], recorded)
+                if term:
+                    removed.append(term)
+                return "" if term else m.group(0)
+            st.text = _PAREN.sub(drop, st.text)
+        removed += _apply_removal(note, sec, lambda clause, full: [t] if (t := unsupported_allergy(clause, recorded)) else [])
+    return removed
+
+
 _ZH_DONE_PREFIX = re.compile(r"已(?:经)?(?=" + T.ZH_DONE_VERBS + ")")
 
 
 def _unsupported_done(clause: str, L: Ledger) -> bool:
-    return T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5
+    if not (T.has_done_cue(clause) and T.support(clause, L.tokens_all) < 0.5):
+        return False
+    # Documented history must not be retensed (cloud P05: "鉴于已使用抗血小板药物" became "拟使用…", which reads as a new
+    # antiplatelet plan): (1) an antithrombotic class the records show was given; (2) any done-object ("已行冠脉造影")
+    # that a record sentence reports with a done cue.
+    named = A.drug_classes(clause)
+    if named and named <= _given_classes(L):
+        return False
+    m = _DONE_OBJECT.search(T.fw(clause))
+    return not (m and _done_in_records(T.squash(m.group(1)), L))
+
+
+_DONE_OBJECT = re.compile(r"已(?:经)?(?:" + T.ZH_DONE_VERBS + r")([^，,；;。、\s]{2,8})")
+
+
+def _given_classes(L: Ledger) -> set:
+    got = getattr(L, "_aortic_given", None)
+    if got is None:
+        got = set()
+        for f in L.facts:
+            if T.has_done_cue(f.text) or re.search(r"予|给予|服用|口服|使用", f.text):
+                got |= A.drug_classes(f.text)
+        L._aortic_given = got
+    return got
+
+
+def _done_in_records(obj: str, L: Ledger) -> bool:
+    """A record sentence names `obj` and reports it as done ("已行", "予", "行…后", "术后")."""
+    if len(obj) < 2:
+        return False
+    for f in L.facts:
+        t = T.squash(f.text)
+        i = t.find(obj)
+        if i >= 0 and (T.has_done_cue(f.text) or re.search(r"(?:予|行|给予|完成|接受|曾)$", t[max(0, i - 4):i])
+                       or t[i + len(obj):i + len(obj) + 2].startswith(("后", "术后"))):
+            return True
+    return False
 
 
 def retense_completed(note: Note, L: Ledger) -> int:
@@ -477,12 +730,8 @@ def downgrade_unsupported_severity(note: Note) -> int:
     chunks, so criteria in a later sentence still count. Returns #statements rewritten."""
     stmts = note.sections["diagnostic_discussion"]
     sub = lambda rx, repl, text: rx.sub(lambda m: repl if _asserted(m) else m.group(0), text)
-    n, i = 0, 0
-    while i < len(stmts):
-        j = i + 1
-        while j < len(stmts) and stmts[j].cont:
-            j += 1
-        group, i = stmts[i:j], j
+    n = 0
+    for group in statement_groups(stmts):
         whole = "".join(st.text for st in group)
         if (not any(_asserted(m) for m in _SEVERE.finditer(whole)) or "待评估" in whole
                 or _SEVERITY_CRITERIA.search(whole)):
@@ -584,7 +833,7 @@ def split_long_statements(note: Note, limit: int = 100) -> int:
     added = 0
     for sec in SECTIONS:
         out = []
-        for st in note.sections[sec]:
+        for index, st in enumerate(note.sections[sec]):
             parts = [x for x in _SENT_END.split(st.text) if x.strip()] if len(st.text) > limit else [st.text]
             chunks: list[str] = []
             for x in parts:
@@ -592,8 +841,8 @@ def split_long_statements(note: Note, limit: int = 100) -> int:
                     chunks[-1] += x
                 else:
                     chunks.append(x)
-            out += [Statement(c.strip(), list(st.sources), st.kind, st.basis, list(st.knowledge_ids), st.cont or j > 0)
-                    for j, c in enumerate(chunks)]
+            group = index if len(chunks) > 1 else st.split_group
+            out += [Statement(c.strip(), list(st.sources), st.kind, st.basis, list(st.knowledge_ids), group) for c in chunks]
             added += len(chunks) - 1
         note.sections[sec] = out
     return added

@@ -1,5 +1,5 @@
-[task:extract/v1]
-请根据以下入院资料，按紧急程度由高到低列出患者当前的临床问题，并为每个问题逐字引用依据。
+[task:extract/v2]
+请先做临床推理，再由他人据此书写首次病程记录。根据以下入院资料，按紧急程度由高到低列出患者当前的临床问题（一般2-5个）。
 
 资料截止时间：<<cutoff>>
 
@@ -7,7 +7,16 @@
 <<sources>>
 </records>
 
-规则：引文必须与资料原文逐字一致（短片段）；包含与该问题相关的阴性记录；不得超出资料作出诊断，问题名称按记录所见表述（如“发热伴右下肺实变”）。
+对每个问题：
+- evidence：逐字引用支持该问题的资料原文（短片段），并包含与之相关的阴性记录（polarity记为negative）、待回报/未做项目（记为pending）。
+- certainty：资料已明确的写“明确”，有较强依据的写“可能性大”，依据不足的写“待排”。不得把推测写成明确。
+- differentials：2-3个针对本例的鉴别方向；每个写明资料中提示该病的所见（for）、不支持或尚缺的依据（against）、可据以鉴别的下一步检查（test）。资料已明确否认的疾病不要列入。不要罗列通用教科书清单。
+- missing：会改变该问题判断或处理、但资料中未记录的信息（最多3项）。
+
+规则：引文必须与资料原文逐字一致；问题名称按记录所见表述（如“发热伴右下肺实变”），确定诊断只用资料中已有的诊断名称；不写治疗方案。
 
 只输出一个JSON对象：
-{"problems": [{"problem": "……", "urgency": "immediate|urgent|routine", "evidence": [{"source": "编号", "quote": "原文", "polarity": "positive|negative|pending"}]}]}
+{"problems": [{"problem": "……", "urgency": "immediate|urgent|routine", "certainty": "明确|可能性大|待排",
+  "evidence": [{"source": "编号", "quote": "原文", "polarity": "positive|negative|pending"}],
+  "differentials": [{"name": "……", "for": "……", "against": "……", "test": "……"}],
+  "missing": ["……"]}]}

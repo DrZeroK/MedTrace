@@ -72,8 +72,7 @@ judges do not use.
 - **E1 Rubric judge.** Score each note on the five Appendix 2 dimensions, apply the 50% cap and zero rules, and
   report "capped cases" and "zero cases" as headline numbers. A clinician writes 3–6 reference points per case
   for the 8 practice cases and ~20 synthetic cases, the way the judges will. Judge model: the strongest model we
-  may legally use on that data (public/synthetic only for any external model; practice and organiser cases stay
-  on local or designated endpoints). Calibrate once against two-person human scoring of 10 notes; keep the judge
+  available (the cloud endpoint is allowed for all case sets). Calibrate once against two-person human scoring of 10 notes; keep the judge
   only if it agrees with humans on which cases are capped.
 - **E2 Fixed splits.** Practice set (8, closest to official format) as the primary dev set; synthetic 100 split
   60 dev / 40 holdout; CMB-Clin test30 stays untouched until the final confirmation.
@@ -236,3 +235,67 @@ clinician-scored batches before any later change is judged by it.
   untouched. "已于…" and English wording stay flagged and are not rewritten.
 - Real notes: the 18 qwen3:8b plans contain no done-wording at all; the only match was "拟予…". So F3 is a guard
   against a failure the rubric names, not a fix for one observed on this model.
+
+### 2026-11-23: F5 harm screen
+
+- **Allergy** (`allergy_conflict`, high): drug allergies the records state as present, grouped into 8 drug classes
+  (penicillins, cephalosporins, quinolones, sulfonamides, aminoglycosides, macrolides, aspirin/NSAIDs, contrast
+  media). A plan clause that would give a drug of a recorded class is removed in A2/S2/A3, with a review item
+  naming the drug and the allergy. A clause that already handles the allergy (过敏, 改用, 避免, 皮试…) is left
+  alone, and the plan is never emptied. Denied allergies and relatives' allergies don't count.
+- **Bleeding** (`bleeding_risk`, medium, shown to clinicians): the plan includes anticoagulant, antiplatelet or
+  thrombolytic therapy, and the records state bleeding, an aortic dissection or intramural haematoma, or low
+  platelets as present. Flag only, because some cases need anticoagulation despite bleeding. Wording such as
+  评估出血风险, 暂缓 or 权衡 suppresses it.
+- Allergy extraction survey on 2,100+ public cases (synthetic 100, CMB-Clin, TypicalCase-DC): 11 drug allergies
+  found, all correct on reading, after excluding a relative's allergy (the first version read "母亲对阿莫西林…过敏"
+  as the patient's).
+- Real notes: on the 18 qwen3:8b notes it raises nothing. Two cases record bleeding risk (P05 intramural haematoma,
+  SYN005 haemoptysis), and neither plan proposes antithrombotics. P07's dual antiplatelet therapy is not flagged,
+  because it records no bleeding. As with F3, this is a guard, not a fix for an observed error.
+
+### 2026-11-23: D1 reasoning step (S2), measured
+
+S2's first call now produces a ranked problem list. Each problem carries verified quotes, a certainty grade, 2–3
+differentials (for, against, discriminating test) and missing items. Same 18 cases, local qwen3:8b:
+
+| | A2 (default) | D1 |
+|---|---|---|
+| Completed | 18/18 | 18/18 |
+| Time per case, median / max | 38.7 s / 53.0 s | 70.9 s / 93.7 s |
+| Calls | 18 | 36 |
+| High / medium findings | 0 / 4 | 0 / 2 |
+| Rubric judge, before caps | 88.1 | 87.2 |
+| Rubric judge, with caps / capped / zero | 47.6 / 2 / 8 | 51.6 / 2 / 7 |
+
+- **Decision (pre-registered rule): D1 is not promoted.** It doubles latency and shows no measurable gain. Most of
+  the judge's zero verdicts are wrong on reading, for example ursodeoxycholic acid for ICP called "harmful".
+- D1's reasoning call returned invalid JSON on 2/18 cases. Those fell back to A2 behaviour.
+- **Test-server caveat:** this Ollama server ignores `chat_template_kwargs`, so thinking was on in every qwen3:8b run
+  so far; `reasoning_effort: "none"` is what disables it there. The `REASON_THINKING` arm was therefore a duplicate.
+  The model context is 8,192 tokens, which the judge prompt likely exceeds on practice cases.
+
+### 2026-11-23: two safety gaps found by reading the D1 notes
+
+- **Aortic syndromes** (`aortic_antithrombotic`, high). When the records document an aortic dissection or
+  intramural haematoma, plan clauses giving anticoagulant, antiplatelet or thrombolytic therapy are removed, with a
+  review item. Only explicit stop or withhold wording (暂停, 停用, 避免…) keeps such a clause. Seen in A2 P05:
+  "继续阿司匹林300mg/日，氯吡格雷300mg/日" with an intramural haematoma. **This is a clinical rule pending clinician
+  sign-off.** Other recorded bleeding stays a medium flag.
+- **Invented allergies** (`allergy_not_in_source`, high, all sections). A drug allergy stated in the note but not in
+  the records is removed: first the parenthetical holding it, then the clause. One review item asks the clinician
+  to confirm the allergy history. Hypothetical wording ("如青霉素过敏…") is left alone. Seen in SYN001, both A2 and
+  D1: "拟予头孢类抗生素（青霉素过敏，需替代方案）" with no allergy in the record.
+- On all saved real notes (four 18-case runs), the rules flag exactly those errors: P05 once, SYN001 three times.
+  They flag nothing else. Verbatim guard: 33,537 record sentences raise 0 allergy findings.
+
+### Aortic antithrombotic rule rebuilt from the clinical spec (2026-11-24)
+
+- The keyword rule above is replaced by the graded screen in `medtrace/aortic.py`, implementing
+  `docs/AORTIC_ANTITHROMBOTIC_RULE.md`: disease state (confirmed / suspected / perioperative / stable / unknown /
+  ruled out), medication intent and source, independent indications, PASS / BLOCK / REVIEW / REVIEW_URGENT, whole-unit
+  rewrites with fixed assessment wording, high-priority visible review items, an audit trail and a final-plan
+  post-check. A separate loading-dose-as-maintenance finding covers P05's 300 mg/day.
+- Tests: `tests/test_aortic_rule.py` covers A01-A36 and P05, including an end-to-end official record.
+- Saved notes (8 runs, 18 cases): only P05 is in an AAS state; no other case is touched.
+- **Clinical review: pending.** Not clinically validated; open questions are listed in the rule doc.

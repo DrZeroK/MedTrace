@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from itertools import groupby
 
 from .textutil import detect_lang, split_sentences, strip_enum
 
@@ -34,7 +35,7 @@ class Statement:
     kind: str = ""
     basis: str = ""             # record | knowledge | inference (optional; discussion/plan)
     knowledge_ids: list = field(default_factory=list)
-    cont: bool = False          # continuation chunk of the previous statement (split_long_statements); rendered on its line
+    split_group: int | None = None  # original position within the section, shared by split chunks
 
 
 @dataclass
@@ -44,7 +45,7 @@ class Note:
     extra_evidence: list = field(default_factory=list)   # model-supplied evidence list (baseline format)
 
     def copy(self) -> "Note":
-        return Note({k: [Statement(s.text, list(s.sources), s.kind, s.basis, list(s.knowledge_ids), s.cont) for s in v] for k, v in self.sections.items()},
+        return Note({k: [Statement(s.text, list(s.sources), s.kind, s.basis, list(s.knowledge_ids), s.split_group) for s in v] for k, v in self.sections.items()},
                     [dict(r) for r in self.review_items], [dict(e) for e in self.extra_evidence])
 
     def text(self, section=None) -> str:
@@ -200,6 +201,24 @@ _GROUPS = {
 _CITE_KINDS = {"assessment"}     # rubric: each working diagnosis points at its record, e.g. "贫血待查（Hb 82 g/L，见S03）"
 
 
+def statement_groups(stmts):
+    # A verifier can remove the first chunk. Keep surviving chunks with their original statement.
+    for _, chunks in groupby(stmts, key=lambda s: s.split_group if s.split_group is not None else object()):
+        yield list(chunks)
+
+
+def _whole_statements(stmts):
+    for group in statement_groups(stmts):
+        first = group[0]
+        if len(group) == 1:
+            yield first
+            continue
+        parts = [s.text.strip() for s in group if s.text.strip()]
+        separator = "" if detect_lang("".join(parts)) == "zh" else " "
+        sources = list(dict.fromkeys(i for s in group for i in s.sources))
+        yield replace(first, text=separator.join(parts), sources=sources)
+
+
 def render_official(stmts: list[Statement], section: str, rid=lambda i: i) -> str:
     groups = _GROUPS[section]
     order = [g[0] for g in groups]
@@ -211,18 +230,16 @@ def render_official(stmts: list[Statement], section: str, rid=lambda i: i) -> st
             continue
         k = (s.kind or "").strip().lower()
         k = k if k in order else (current or None)
-        if s.cont and items:
-            items[-1][1] += text
-            continue
         items.append([k, text, s.sources])
         current = k
     if not items:
         return ""
     for it in items:
         if it[0] in _CITE_KINDS and it[2]:
-            ids = "、".join(dict.fromkeys(rid(i) for i in it[2]))
             body = re.sub(r"[。.]$", "", it[1])
-            it[1] = body + (f"（见{ids}）。" if detect_lang(body) == "zh" else f" (see {ids}).")
+            zh = detect_lang(body) == "zh"
+            ids = ("、" if zh else ", ").join(dict.fromkeys(str(rid(i)) for i in it[2]))
+            it[1] = body + (f"（见{ids}）。" if zh else f" (see {ids}).")
     items = [(k, text) for k, text, _ in items]
     zh = detect_lang(" ".join(t for _, t in items)) == "zh"
     rank = {k: n for n, k in enumerate(order)}
@@ -247,8 +264,11 @@ _REVIEW_PREFIX = {"zh": {"missing": "【缺失】", "conflict": "【冲突】", 
 
 def _review_text(r: dict) -> str:
     text = (r.get("clinician") or r["description"]).strip()
-    if text.startswith(("【", "[")):
-        return text
+    for prefixes in _REVIEW_PREFIX.values():
+        for prefix in prefixes.values():
+            if text.startswith(prefix.rstrip()):
+                text = text[len(prefix.rstrip()):].lstrip()
+                break
     lang = "zh" if detect_lang(text) == "zh" else "en"
     typ = r.get("type", "verify")
     # a model "conflict" needs two disagreeing records; one source is a borderline value or a guess, not a conflict
@@ -305,7 +325,8 @@ def to_official_record(note: Note, case, meta: dict | None = None, status: str =
             "error": {"code": str((error or {}).get("code", "GENERATION_ERROR")),
                       "message": str((error or {}).get("message", "generation failed"))},
         }
-    sections = {sec: render_official(note.sections[sec], sec, rid) for sec in SECTIONS}
+    whole = {sec: list(_whole_statements(note.sections[sec])) for sec in SECTIONS}
+    sections = {sec: render_official(whole[sec], sec, rid) for sec in SECTIONS}
 
     def _kind(sec: str, basis: str) -> str:
         """Official 'fact' = content stated in the records; 'inference' = reasoning over them.
@@ -317,8 +338,8 @@ def to_official_record(note: Note, case, meta: dict | None = None, status: str =
     # evidence: derive from statements carrying source ids, map section + basis -> kind, cap to 3-5.
     candidates = []
     for sec in SECTIONS:
-        for s in note.sections[sec]:
-            if not s.sources or s.cont:       # a split continuation is a sentence fragment, not a checkable claim
+        for s in whole[sec]:
+            if not s.sources:
                 continue
             candidates.append({"statement": s.text, "source_ids": [rid(i) for i in s.sources],
                                "kind": _kind(sec, s.basis), "_k": (s.kind or "").lower()})
@@ -364,7 +385,7 @@ def _select_evidence(candidates: list[dict], low: int = 3, high: int = 5) -> lis
     facts = sorted(facts, key=lambda e: (e.get("_k") in ("summary", "missing"), len(e["source_ids"]) > 3,
                                          not re.search(r"\d", e["statement"])))
     facts_d, infers_d = distinct(facts), distinct(infers)
-    by_kind = lambda k: [e for e in infers_d if e.get("_k") == k]
+    by_kind = lambda k: [e for e in infers if e.get("_k") == k]
     main = (by_kind("assessment") or infers_d)[:1]                       # the working diagnosis and its basis
     boundary = [e for e in (by_kind("uncertainty") + by_kind("differential"))[:1] if e not in main]   # inference boundary
     picked: list[dict] = list(main)

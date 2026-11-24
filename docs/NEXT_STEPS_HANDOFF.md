@@ -91,7 +91,7 @@ document URL or version). Later official specifications override it.
 - Per-request timeout, total runtime per case, token budget, model-call limit, retry limit (Q5).
 - Final result filename (`output.json` vs `results.json`) and result data structure (Q9).
 - Algorithm package size limit, dependency compatibility rules, resource registration template (Q2, Q3).
-- Qwen model name, endpoint configuration method, default Thinking mode, supported parameters, API examples.
+- Endpoint configuration method, supported parameters, API examples. (Model name `qwen3.8-27b` and "Thinking on by default" are now settled: COMPETITION_QA Q17-Q18.)
 - `response_format`/`json_schema` parameter list, supported Schema feature subset, and examples.
 - Embedding endpoint, authentication, call examples, quota, and final BGE-M3 version/precision.
 - Complete input and output schemas, exit-code rules, platform-fault handling.
@@ -162,7 +162,7 @@ bearer-token auth, environment variable names (`LLM_API_BASE` and aliases).
 Rules for every package: keep `python main.py` working with no arguments; keep the output record fields and
 `OUTPUT_FIELD_MAP` / `OUTPUT_FIELDS` behaviour; do not change defaults that affect generated text unless the
 package says so; add or update tests; all existing tests must still pass; never commit `.env`, `data/raw/`,
-or anything from Tianchi downloads; never send competition cases to any endpoint other than the designated service.
+or anything from Tianchi downloads.
 
 Legend: **[ORG]** needs organizer clarification · **[MODEL]** needs designated-model access · **[CLIN]** needs clinical review.
 
@@ -218,7 +218,7 @@ Legend: **[ORG]** needs organizer clarification · **[MODEL]** needs designated-
 
 #### WP-8 Verifier precision on unseen prose
 **Done (see `docs/REPORT.md` §2.7).** Tuned on a 20-case tier-A dev sample (22 high findings, all false alarms, six recurring patterns fixed); held-out disjoint 40-case A2 sample raised 0 high-severity findings. CHIP-CDEE dev F1 0.9818 and CMB-Clin verbatim 0 false alarms held. MedCT regression not re-run (raw data not on this machine). Medium findings still unlabelled; the lexical verifier cannot catch true clinical errors.
-*Depends on: a model endpoint permitted for the data used (owner's commercial endpoint is acceptable for public datasets only).*
+*Depends on: a model endpoint (the owner's cloud endpoint or the designated service).*
 - Files: `medtrace/verify.py`, `medtrace/textutil.py`, tests, `docs/REPORT.md`.
 - Steps: generate notes for a 40-case TypicalCase-DC tier-A dev sample (`--tier A --limit 40`); hand-label every high-severity finding as true or false; fix only patterns seen at least twice; replay with `python -m eval.reverify`; then measure once on a *different* 40-case sample and report precision without further tuning. Re-run the CHIP-CDEE and MedCT regression scripts after each rule change.
 - Acceptance: reported high-severity precision on the second, untouched sample; no regression on CHIP-CDEE dev F1 (0.982) or the verbatim zero-false-alarm checks.
@@ -260,7 +260,7 @@ WP-4 ──► WP-11        WP-10 (independent)        WP-12 needs WP-4 + licenc
 | Who | What |
 |---|---|
 | Organizer | Limits (timeout, runtime, tokens, calls, retries); result filename and schema; exit codes; package size; registration template; model name, endpoint, default Thinking mode, supported parameters; whether practice cases may be used for prompt development |
-| Project owner | Designated-service credentials when available; decision on merging to `master`; confirmation that the commercial endpoint in the local `.env` is used for public data only; what the CMF-NERD confidentiality undertaking permits |
+| Project owner | Designated-service credentials when available; decision on merging to `master`; what the CMF-NERD confidentiality undertaking permits |
 | Clinician | Review of generated notes (blinded), rubric sign-off, held cases, reference first-progress notes |
 
 ## 7. Ready-to-copy prompt for the first work package (WP-1)

@@ -3,7 +3,7 @@
 A0  direct structured prompt (baseline)                                  1 call
 A1  + fact ledger, evidence constraints, statement-level attribution     1 call
 A2  + deterministic verification, safe repair, targeted repair call      1-2 calls   (strategy S1, default)
-S2  model problem extraction (quotes verified) -> A2                     2-3 calls
+S2  reasoning call: problems, quotes (verified), differentials -> A2    2-3 calls
 A3  A2 with a semantic review call producing guarded, targeted patches   2 calls     (strategy S3)
 
 A case can never raise out of run_case: on any failure a conservative, extract-only
@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from functools import lru_cache
 from pathlib import Path
 
+from . import aortic as AORTIC
 from . import verify as V
 from . import textutil as T
 from .knowledge import KnowledgeBase, knowledge_block
@@ -55,6 +56,14 @@ _I18N = {
         "overconfident": "The note states the working diagnosis more definitively than the records support; review the working diagnosis.",
         "c_negation_flip": "'{term}' is stated with the opposite polarity to the source records; check the original record.",
         "c_number_not_in_source": "The value {term} in the case features does not appear in the source records; check it.",
+        "allergy_fabricated": "The draft stated an allergy to {term} that the records do not document; it was removed. Confirm the allergy history.",
+        "c_allergy_not_in_source": "The note states an allergy to {term} that the records do not document; check it.",
+        "c_aortic_antithrombotic": "The records document {term}, and the plan includes antithrombotic therapy; check it.",
+        "c_loading_dose_as_maintenance": "The plan gives {term} at a loading-size dose every day; check the loading and maintenance doses.",
+        "c_dose_above_daily_max": "The daily dose of {term} in the plan is above the labelled adult maximum; check the dose.",
+        "allergy_removed": "A plan item giving {drug} was removed because the records document an allergy to {allergen}; choose an alternative.",
+        "c_allergy_conflict": "The plan gives {term} although the records document an allergy to this drug class; check it.",
+        "c_bleeding_risk": "The records document {term}, and the plan includes anticoagulant, antiplatelet or thrombolytic therapy; assess the bleeding risk before acting.",
         "retensed": "The plan described an intervention the records do not document as already done; it is now worded as planned. Confirm whether it was performed.",
         "severity": "Disease severity was stated without the criteria it was checked against; it is now 'severity to be assessed'. Assess against a standard severity score.",
         "number_removed": "{n} value(s) in the draft case features could not be matched to the source records and were removed; check the original records for them.",
@@ -84,8 +93,16 @@ _I18N = {
         "conflict_numeric": "“{term}”在{sources}中的数值不一致（{values}），且未注明不同测量时间，请核实。",
         "c_negation_flip": "“{term}”的有无表述与原始资料相反，请核对原始资料。",
         "c_number_not_in_source": "病例特点中的数值{term}未见于原始资料，请核对。",
+        "allergy_fabricated": "草稿写有资料未记载的{term}过敏，已删除，请核实患者过敏史。",
+        "c_allergy_not_in_source": "记录中写有资料未记载的{term}过敏，请核对。",
+        "c_aortic_antithrombotic": "资料记录有{term}，诊疗计划含抗栓治疗，请核对。",
+        "c_loading_dose_as_maintenance": "诊疗计划中{term}的每日剂量与常规负荷量相当，请核对负荷量与维持量。",
+        "c_dose_above_daily_max": "诊疗计划中{term}的每日剂量超过说明书成人每日最大量，请核对剂量。",
+        "allergy_removed": "资料记录有{allergen}过敏，诊疗计划中含{drug}的条目已删除，请另选方案。",
+        "c_allergy_conflict": "诊疗计划中的{term}与资料记录的药物过敏史属同类药物，请核对。",
+        "c_bleeding_risk": "资料记录有{term}，诊疗计划包含抗凝、抗血小板或溶栓治疗，请评估出血风险后再执行。",
         "retensed": "诊疗计划中有资料未记录的处置被写为已完成，已改为拟行，请核实是否已执行。",
-        "severity": "疾病严重程度（重症）未按标准逐项评估，已改为“严重程度待评估”，请按CURB-65或重症肺炎主次要标准等评估。",
+        "severity": "疾病严重程度（重症）未按标准逐项评估，已改为“严重程度待评估”，请按该病适用的严重程度标准复核。",
         "number_removed": "草稿病例特点中有{n}处数值未能与原始资料对应，已删除，请查阅原始资料补充。",
         "c_unit_mismatch": "{term}的单位与原始资料不一致，请核对。",
         "c_value_label_mismatch": "病例特点中有数值与原始资料中的检查项目不对应，请核对。",
@@ -100,9 +117,11 @@ _I18N = {
 # value errors, plus overconfident wording. They use the clean `c_<code>` phrase above instead of quoting the draft;
 # every other finding stays in the run log (findings_final_detail).
 # omitted_critical stays in the run log: on the practice run it fired mostly on "接种史不详" / "未查" lines.
-OFFICIAL_VERIFIER_CODES = {"overconfident"}
+OFFICIAL_VERIFIER_CODES = {"overconfident", "bleeding_risk"}
 CLINICIAN_HIGH_CODES = {"negation_flip", "trend_direction", "number_not_in_source", "unit_mismatch", "value_label_mismatch", "post_cutoff",
-                        "unsupported_completed", "false_missing", "qualifier_not_in_source"}
+                        "unsupported_completed", "false_missing", "qualifier_not_in_source", "allergy_conflict",
+                        "allergy_not_in_source", "aortic_antithrombotic", "loading_dose_as_maintenance",
+                        "dose_above_daily_max"}
 MAX_REVIEW_ITEMS = 6
 # Lower ranks survive the cap: pipeline notices (fallback, cutoff), then record contradictions and high findings,
 # undocumented core items, the model's own items, and last numeric discrepancies and certainty wording.
@@ -126,6 +145,10 @@ _MSG_ZH = {
     "overconfident": "诊断表述过于肯定", "trend_direction": "变化方向描述与数值不符", "weak_attribution": "所引来源支持不足", "missing_ref": "缺少来源引用",
     "empty_section": "该部分为空", "value_label_mismatch": "数值与检查项目不对应",
     "qualifier_not_in_source": "数值的限定词（如空腹、持续）未见于资料",
+    "allergy_conflict": "计划药物与记录的过敏史冲突", "allergy_not_in_source": "过敏史未见于资料",
+    "aortic_antithrombotic": "主动脉夹层/壁内血肿而计划含抗栓治疗", "bleeding_risk": "资料记录出血风险而计划含抗栓治疗",
+    "loading_dose_as_maintenance": "计划中抗血小板药物的每日剂量与负荷量相当",
+    "dose_above_daily_max": "计划中抗栓药物的每日剂量超过说明书最大量",
     "omitted_critical": "资料中的过敏信息或待回报/未做项目未在记录中体现",
     "false_missing": "资料中已有记录，却被表述为未记录",
     "knowledge_record_value": "知识性陈述含病人记录中的特定数值",
@@ -312,6 +335,9 @@ class Pipeline:
         ranked = sorted((r for r in note.review_items if visible(r) and r.get("description")), key=_review_rank)
         log["review_items_dropped"] = [r["description"] for r in ranked[MAX_REVIEW_ITEMS:]]
         note.review_items = ranked[:MAX_REVIEW_ITEMS]
+        # the final plan must pass the aortic screen unchanged: nothing later re-introduced a blocked suggestion
+        log["aortic_postcheck_changes"] = sum(
+            AORTIC.screen_text(st.text, case, lang)[0] != st.text for st in note.sections["treatment_plan"])
         meta = {"status": status, "pipeline": variant, "prompt": prompt_fingerprint(self.cfg.prompt_version), "calls": stats.calls}
         if self.cfg.official:
             if status == "ok":
@@ -384,6 +410,14 @@ class Pipeline:
         log["numbers_rejoined"], removed = V.repair_numbers(note, case, L)
         log["number_clauses_removed"] = removed
         log["qualifiers_removed"] = V.strip_unsupported_qualifiers(note, case)
+        log["allergies_unsupported_removed"] = V.strip_unsupported_allergies(note, case)
+        for term in dict.fromkeys(log["allergies_unsupported_removed"]):
+            note.review_items.append({"type": "verify", "description": tr["allergy_fabricated"].format(term=term),
+                                      "source_ids": [], "origin": "verifier", "official_visible": True})
+        log["allergy_conflicts_removed"] = V.remove_allergy_conflicts(note, case)
+        for drug, allergen in log["allergy_conflicts_removed"]:
+            note.review_items.append({"type": "verify", "description": tr["allergy_removed"].format(drug=drug, allergen=allergen),
+                                      "source_ids": [], "origin": "verifier", "official_visible": True})
         log["completed_retensed"] = V.retense_completed(note, L)
         log["severity_downgraded"] = V.downgrade_unsupported_severity(note)
         if log["severity_downgraded"]:
@@ -392,6 +426,17 @@ class Pipeline:
         if log["completed_retensed"]:
             note.review_items.append({"type": "verify", "description": tr["retensed"], "source_ids": [],
                                       "origin": "verifier", "official_visible": True})
+        # acute aortic syndrome antithrombotic screen (medtrace/aortic.py), last of the plan rewrites so no later
+        # step can re-introduce a blocked suggestion; events are the internal audit trail
+        events = AORTIC.screen_plan(note, case, lang)
+        log["aortic_rule_events"] = [e.as_dict() for e in events]
+        log["aortic_antithrombotics_removed"] = [[",".join(e.drug_classes), e.entity] for e in events
+                                                 if e.replacement != e.original_candidate]
+        seen = {r["description"] for r in note.review_items}
+        for msg in AORTIC.review_messages(events, lang):
+            if msg not in seen:              # idempotent: a second pass adds no duplicate item
+                note.review_items.append({"type": "verify", "description": msg, "source_ids": [], "origin": "verifier",
+                                          "severity": "high", "official_visible": True})
         if removed:
             note.review_items.append({"type": "verify", "description": tr["number_removed"].format(n=len(removed)),
                                       "source_ids": [], "origin": "verifier", "official_visible": True})
@@ -425,7 +470,8 @@ class Pipeline:
     def _extract(self, case, system, common, lang, stats, deadline, log) -> str:
         """S2: model-extracted problem list; every quote must be found verbatim in its cited source."""
         try:
-            obj = parse_json_object(self.client.chat(system, fill(load_prompt("extract", lang, self.cfg.prompt_version), **common), stats, deadline))
+            obj = parse_json_object(self.client.chat(system, fill(load_prompt("extract", lang, self.cfg.prompt_version), **common), stats, deadline,
+                                                     self.cfg.reason_thinking))
         except (LLMError, ParseError) as e:
             log["extract_error"] = f"{type(e).__name__}: {e}"
             return ""
@@ -443,12 +489,25 @@ class Pipeline:
                 else:
                     rejected += 1
             if ev:
-                lines.append(f'{i}. [{p.get("urgency", "routine")}] {p["problem"]}')
+                certainty = f' ({p["certainty"]})' if isinstance(p.get("certainty"), str) and p["certainty"].strip() else ""
+                lines.append(f'{i}. [{p.get("urgency", "routine")}] {p["problem"]}{certainty}')
                 lines += ev
+                for d in (p.get("differentials") or [])[:3]:
+                    if isinstance(d, dict) and str(d.get("name") or "").strip():
+                        lines.append("   * " + " | ".join(f"{k}: {str(d[k]).strip()[:120]}" for k in ("name", "for", "against", "test")
+                                                         if str(d.get(k) or "").strip()))
+                miss = [str(m).strip()[:80] for m in (p.get("missing") or [])[:3] if str(m).strip()]
+                if miss:
+                    lines.append("   ? " + "; ".join(miss))
         log["extract_quotes"] = {"kept": kept, "rejected": rejected}
         if not lines:
             return ""
-        head = "模型提取的问题清单（引文已逐字核对）" if lang == "zh" else "Model-extracted problem list (quotes verified verbatim against the records)"
+        # quotes are checked against the records; differentials (*) and missing items (?) are the model's reasoning,
+        # so the writing step must still ground every statement in the records
+        head = ("模型的问题清单与鉴别思路：引文已逐字核对；“*”鉴别方向与“?”缺失信息为推理，写入记录时仍须以资料为据"
+                if lang == "zh" else
+                "Model problem list and differential reasoning: quotes verified verbatim; '*' differentials and '?' missing "
+                "items are reasoning, so every statement written from them must still rest on the records")
         return "\n<problem_list>\n" + head + "\n" + "\n".join(lines) + "\n</problem_list>\n"
 
     def _finalise(self, note, case, L: Ledger, findings, tr, lang):

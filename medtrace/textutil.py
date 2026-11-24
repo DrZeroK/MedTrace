@@ -41,7 +41,7 @@ def squash(text: str) -> str:
 # Abbreviations seen in generated notes for terms the records spell out. Explicit pairs only: a fuzzy match could
 # hide a genuine contradiction. Extend only with pairs observed on real output.
 _SYNONYMS = [("支扩", "支气管扩张"), ("rf", "类风湿因子"), ("aso", "抗链球菌溶血素o"), ("家族中", "家族"),
-             ("吸烟", "嗜烟"), ("饮酒", "嗜酒")]
+             ("吸烟", "嗜烟"), ("饮酒", "嗜酒"), ("烟酒", "嗜烟嗜酒")]
 
 
 def term_variants(term_norm: str) -> set[str]:
@@ -63,6 +63,20 @@ def concat_of(term_norm: str, parts: set[str]) -> bool:
     for i in range(1, len(term_norm) + 1):
         ok[i] = any(ok[j] and term_norm[j:i] in parts and term_norm[j:i] != term_norm for j in range(i))
     return ok[-1] and term_norm not in parts
+
+
+def covered_by(term_norm: str, parts: set[str], max_gap: int = 6) -> bool:
+    """True if a record negation in `parts` covers `term_norm`: a broader term it ends with ("过敏" covers
+    "药物过敏"), or the same term with up to `max_gap` inserted characters ("结核患者密切接触" covers
+    "结核密切接触", "内分泌系统等重要脏器疾病" covers "内分泌系统疾病"). Both seen on the vLLM practice run."""
+    n = len(term_norm)
+    for p in parts:
+        if 2 <= len(p) < n and term_norm.endswith(p):
+            return True
+        if n < len(p) <= n + max_gap and any(p.startswith(term_norm[:i]) and p.endswith(term_norm[i:])
+                                             for i in range(2, n - 1)):
+            return True
+    return False
 
 
 # ---------------------------------------------------------------- sentences
@@ -263,7 +277,7 @@ _NEG_PRE = re.compile(
     # Chinese cues, tuned on CHIP-CDEE train (real EMR sentences with polarity labels):
     #  - "无明显诱因出现咳嗽" is a fixed phrase (no obvious precipitant); it does not negate what follows
     #  - "无尿" alone is anuria (a positive finding) but "无尿频、尿急、尿痛" is a negated list
-    r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触)|不伴|不会|没有"
+    r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触|携带)|不伴|不会|没有"
     r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
 _NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及|否认)(?=[\s，,。；;]|$)"
                        r"|未引出|(?:均|暂|尚)?无特殊|暂无|无殊|(?<=[\u4e00-\u9fff])史无(?=[。；;，,、]|$)"

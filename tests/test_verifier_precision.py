@@ -67,6 +67,34 @@ class NegationScope(unittest.TestCase):
         c = case("无濒死感，否认恶心、呕吐、晕厥、抽搐。")
         self.assertNotIn("undocumented_negative", codes(c, "无濒死感、恶心呕吐、晕厥抽搐。"))
 
+    def test_reworded_documented_negative(self):
+        # vLLM practice run (P01): the note shortens or narrows the records' own negations
+        c = case("否认结核患者密切接触史。", "否认心脑血管、肺、肾、内分泌系统等重要脏器疾病史及传染病史。", "过敏史：无。",
+                 "嗜烟：无。嗜酒：无。")
+        got = codes(c, "否认结核密切接触史。否认内分泌系统疾病史，无药物过敏史，无烟酒史。")
+        self.assertNotIn("undocumented_negative", got)
+        # a narrower record negation does not cover a broader note term; long insertions are not a rewording
+        self.assertFalse(T.covered_by("过敏", {"药物过敏"}))
+        self.assertFalse(T.covered_by("结核接触", {"结核患者及其家属曾有密切接触"}))
+        c = case("否认结核患者密切接触史。")
+        self.assertIn(("undocumented_negative", "咯血"), coded(c, "否认结核密切接触史，无咯血。"))
+        # a positive record mention still wins over a broader record negation
+        c = case("过敏史：无。", "既往青霉素过敏，表现为皮疹。")
+        self.assertIn("negation_flip", codes(c, "无青霉素过敏史。"))
+
+    def test_cloud_practice_false_alarms(self):
+        # P07: "未携带报告原件" is a negation, so "未见原件" does not contradict the records
+        self.assertEqual(T.negated_terms("未携带报告原件。"), ["报告原件"])
+        c = case("患者自诉报告提示右肺有阴影，未携带报告原件。")
+        self.assertNotIn("negation_flip", codes(c, "院外胸片自述提示右肺阴影，未见原件。"))
+        # P01: a shortened "…等重要脏器疾病" list is covered by the records' own negated list
+        c = case("否认心脑血管、肺、肾、内分泌系统等重要脏器疾病史及传染病史。")
+        self.assertNotIn("undocumented_negative", codes(c, "否认心脑血管、肺、肾等重要脏器疾病史。"))
+        # but an item outside that list, or a positive record mention, still counts
+        self.assertIn("undocumented_negative", codes(c, "否认肝等重要脏器疾病史。"))
+        c = case("报告原件已携带，示右肺阴影。")
+        self.assertIn("negation_flip", codes(c, "未见原件。"))
+
     def test_undocumented_negative_still_flagged(self):
         c = case("无濒死感，否认恶心、呕吐。")
         self.assertIn(("undocumented_negative", "咯血"), coded(c, "无濒死感、恶心呕吐、咯血。"))
