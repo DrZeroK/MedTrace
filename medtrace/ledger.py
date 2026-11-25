@@ -176,10 +176,13 @@ def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
 
 def _documents(facts, rx) -> bool:
     """A core item is documented only by a clause that names it without saying it is unknown or missing:
-    "药物食物及其他过敏史：未知" mentions allergy but documents nothing about it. A parenthetical remark about a
-    detail ("服用蒙脱石散（具体剂量不详）") does not cancel the mention, so parentheses are ignored."""
+    "药物食物及其他过敏史：未知" mentions allergy but documents nothing about it. A parenthetical remark that an
+    unknown is a detail ("服用蒙脱石散（具体剂量不详）") does not cancel the mention, so only parentheticals that
+    themselves carry a missing cue are set aside; others may hold the item itself ("既往史（青霉素过敏，出现皮疹）")."""
+    unknown_detail = lambda m: "" if T.has_missing_cue(m.group()) else m.group()
     return any(re.search(rx, c) and not T.has_missing_cue(c)
-               for f in facts for c in re.split(r"[，,；;]", re.sub(r"[（(][^）)]*[）)]", "", f.text)))
+               for f in facts
+               for c in re.split(r"[，,；;]", re.sub(r"[（(][^）()]*[）)]", unknown_detail, f.text)))
 
 
 # A denied history is only contradicted by a statement that asserts the condition. Seen on 2,578 real case reports:

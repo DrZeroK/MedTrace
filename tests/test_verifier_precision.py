@@ -422,6 +422,26 @@ class OfficialInputTraps(unittest.TestCase):
         c = case("否认肺结核病史。", "既往患肺结核，已规律治疗。")           # the patient's own disease: still a conflict
         self.assertIn(("polarity", "肺结核"), self.conflicts(c))
 
+    # -- PR #20 review follow-ups: the exemptions above must not hide the patient's own facts
+    def test_patient_clause_inside_family_scope_stays_the_patients(self):
+        c = case("既往史：否认糖尿病。", "家族史：母亲有高血压，患者有糖尿病。")
+        self.assertIn(("polarity", "糖尿病"), self.conflicts(c))
+        c = case("既往史：否认糖尿病。", "体温38.5℃。")                         # note side: same resolution
+        self.assertIn("negation_flip", codes(c, "家族史：母亲有高血压，患者有糖尿病。"))
+        self.assertNotIn("negation_flip", codes(c, "家族史：母亲有糖尿病。"))
+        c = case("既往史：否认高血压。", "家族史：母亲有高血压，患者有糖尿病。")      # the mother's stays exempt
+        self.assertFalse(self.conflicts(c))
+
+    def test_core_item_inside_parentheses_is_documented(self):
+        c = case("既往史（青霉素过敏，出现皮疹）。", "体温38.5℃。")
+        self.assertNotIn("allergy", {u["key"] for u in build_ledger(c).undocumented})
+        self.assertIn("false_missing", codes(c, "过敏史未记录。"))
+
+    def test_exposure_mention_does_not_shield_a_later_assertion(self):
+        c = case("既往史：否认肺结核病史。", "体温38.5℃。")
+        self.assertIn("negation_flip", codes(c, "有肺结核接触史，目前确诊肺结核。"))
+        self.assertNotIn("negation_flip", codes(c, "有肺结核患者密切接触史。"))
+
     # -- all together, laid out like the official input
     def test_official_layout_faithful_note_has_no_rule_items(self):
         c = case("现病史：10天前（孕30+5周）当地查ALT 86U/L，AST 72U/L，总胆汁酸14.2μmol/L。",

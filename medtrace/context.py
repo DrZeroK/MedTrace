@@ -162,10 +162,14 @@ def without_family(text: str, view: str) -> str:
     if T.detect_lang(text) != "zh":
         return view
     chars = list(view)
-    for s in analyze(text):
+    scopes = analyze(text)
+    # Resolve each character's experiencer, as positive_text does: an explicit patient clause inside a family scope
+    # ("家族史：母亲有高血压，患者有糖尿病") stays the patient's. Only characters under some family scope are checked.
+    for s in scopes:
         if s.dimension == "experiencer" and s.value == "family":
             for i in range(s.start, min(s.end, len(chars))):
-                chars[i] = " "
+                if attributes(text, i, i + 1, scopes)["experiencer"] == "family":
+                    chars[i] = " "
     return "".join(chars)
 
 

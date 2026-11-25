@@ -254,10 +254,12 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         for term in sorted(L.neg_only):      # sorted: set order varies per process (PYTHONHASHSEED)
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS or len(term) < 2:
                 continue
-            i = pos.find(term)
-            # "否认肝炎病史" is not contradicted by "肝炎病毒标志物" (a test name) or "非手术患者" (a risk group)
-            after = pos[i + len(term):]
-            if i >= 0 and not _TEST_NAME.match(after) and not T.EXPOSURE_SUFFIX.match(after) and not pos[:i].endswith("非"):
+            # "否认肝炎病史" is not contradicted by "肝炎病毒标志物" (a test name), "非手术患者" (a risk group) or
+            # "肺结核接触史" (an exposure). Every occurrence is checked, so an exempt mention cannot shield a later
+            # assertion ("有肺结核接触史，目前确诊肺结核").
+            asserted = any(not _TEST_NAME.match(pos[m.end():]) and not T.EXPOSURE_SUFFIX.match(pos[m.end():])
+                           and not pos[:m.start()].endswith("非") for m in re.finditer(re.escape(term), pos))
+            if asserted:
                 add("negation_flip", HIGH if sec == "features" else LOW,
                     f"records document {term!r} only as absent/denied, but it is stated here without negation", term)
     # What a missing-information statement must not do is claim a core item is undocumented when the records
