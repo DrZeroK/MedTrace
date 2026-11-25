@@ -352,5 +352,92 @@ class OmittedCritical(unittest.TestCase):
         self.assertEqual(V.drop_copied_diagnosis(n, build_ledger(c)), 3)
 
 
+class OfficialInputTraps(unittest.TestCase):
+    """False review items seen on the 2026-11-25 local run of the official practice cases (official JSON input, one
+    source per record field). Each class is tested on its own, with a true positive, and then all together."""
+
+    def conflicts(self, c):
+        return {(x["kind"], x["term"]) for x in build_ledger(c).conflicts}
+
+    # -- 1. dates written with Unicode dashes
+    def test_every_unicode_dash_and_space_is_normalised(self):
+        import unicodedata
+        for cp in range(0x10000):
+            cat = unicodedata.category(chr(cp))
+            if cat == "Pd":
+                self.assertEqual(T.fw(chr(cp)), "-", hex(cp))
+            elif cat == "Zs":
+                self.assertEqual(T.fw(chr(cp)), " ", hex(cp))
+        for cp in T._MINUS_LIKE:                                 # minus-like signs outside category Pd
+            self.assertEqual(T.fw(chr(cp)), "-", hex(cp))
+
+    def test_dates_with_dash_variants(self):
+        for dash in ("‑", "–", "−", "﹣", "－"):
+            got = T.find_dates(f"肝功能（外院2026{dash}05{dash}23）：ALT 86U/L")
+            self.assertEqual([d[0].strftime("%Y-%m-%d") for d in got], ["2026-05-23"], repr(dash))
+
+    def test_serial_labs_with_u2011_dates_are_a_trend(self):
+        c = case("现病史：10天前当地产检发现ALT 86U/L，AST 72U/L。",
+                 "辅助检查·肝功能（外院2026‑05‑23）：ALT 86U/L，AST 72U/L\n辅助检查·肝功能（本院2026‑05‑28）：ALT 65U/L，AST 54U/L")
+        self.assertFalse({k for k in self.conflicts(c) if k[0] == "numeric"})
+        c = case("血钾3.1mmol/L。", "血钾5.8mmol/L。")                       # undated: still a conflict
+        self.assertIn(("numeric", "血钾"), self.conflicts(c))
+
+    # -- 2. a relative's condition is not the patient's
+    def test_family_history_is_not_a_patient_assertion(self):
+        c = case("既往史：否认高血压、糖尿病（孕前）。", "家族史：母亲有\"2型糖尿病\"病史；父亲体健。")
+        self.assertFalse(self.conflicts(c))
+        c = case("既往史：否认糖尿病。", "家族史：父亲患高血压。母亲有糖尿病。")
+        self.assertFalse(self.conflicts(c))
+        self.assertNotIn("negation_flip", codes(c, "否认糖尿病，母亲有糖尿病。"))
+        self.assertNotIn("negation_flip", codes(c, "家族史：母亲有糖尿病。"))
+        c = case("既往史：否认糖尿病。", "患者糖尿病5年，口服二甲双胍。")       # the patient's own: still a conflict
+        self.assertIn(("polarity", "糖尿病"), self.conflicts(c))
+
+    # -- 3. "未知" / "不详" document nothing
+    def test_unknown_allergy_is_undocumented(self):
+        c = case("既往史：一般健康状况良好。药物食物及其他过敏史：未知。", "体温38.5℃。")
+        self.assertIn("allergy", {u["key"] for u in build_ledger(c).undocumented})
+        self.assertNotIn("false_missing", codes(c, "药物食物过敏史不详。"))
+        c = case("过敏史：青霉素过敏（皮疹）。", "体温38.5℃。")                  # documented: claiming otherwise is flagged
+        self.assertIn("false_missing", codes(c, "过敏史未记录。"))
+        # an unknown detail in parentheses does not make the item itself undocumented
+        c = case("病初自行服用\"蒙脱石散\"及\"益生菌\"（具体剂量不详）。用药史：不详。")
+        self.assertNotIn("medication", {u["key"] for u in build_ledger(c).undocumented})
+        c = case("用药史：不详。过敏史：无。")
+        self.assertIn("medication", {u["key"] for u in build_ledger(c).undocumented})
+
+    def test_missing_vocabulary_matches_context_module(self):
+        from medtrace import context as C
+        for word in C._POST_MISSING.pattern.split("|"):
+            self.assertTrue(T.has_missing_cue(word), word)
+
+    # -- 4. a disease term naming an exposure, and other negative label values
+    def test_exposure_and_label_value_negation(self):
+        c = case("曾患疾病和传染病史：否认重要脏器疾病史及传染病史。", "地方病或传染病流行地区情况：未到过。")
+        self.assertFalse(self.conflicts(c))
+        self.assertIn("肺结核", T.denied_terms("否认肺结核病史"))
+        c = case("否认肺结核病史。", "同楼层邻居曾住院，患者与肺结核患者密切接触。")
+        self.assertFalse(self.conflicts(c))
+        c = case("否认肺结核病史。", "既往患肺结核，已规律治疗。")           # the patient's own disease: still a conflict
+        self.assertIn(("polarity", "肺结核"), self.conflicts(c))
+
+    # -- all together, laid out like the official input
+    def test_official_layout_faithful_note_has_no_rule_items(self):
+        c = case("现病史：10天前（孕30+5周）当地查ALT 86U/L，AST 72U/L，总胆汁酸14.2μmol/L。",
+                 "既往史：否认高血压、糖尿病（孕前）。药物食物及其他过敏史：未知。",
+                 "个人史：地方病或传染病流行地区情况：未到过。",
+                 "家族史：母亲有\"2型糖尿病\"病史；父亲体健。",
+                 "辅助检查·肝功能（外院2026‑05‑23）：ALT 86U/L，AST 72U/L，总胆汁酸14.2μmol/L\n"
+                 "辅助检查·肝功能（本院2026‑05‑28）：ALT 65U/L，AST 54U/L，总胆汁酸11.8μmol/L")
+        n = _note(["孕前否认糖尿病，母亲有2型糖尿病。", "ALT 86U/L（2026-05-23）降至65U/L（2026-05-28）。",
+                   "药物食物过敏史不详。"],
+                  discussion="妊娠期肝内胆汁淤积症可能性大。", plan="复查肝功能及总胆汁酸。")
+        _finalise(c, n)
+        rule_items = [r["description"] for r in n.review_items
+                      if r.get("origin") in ("ledger", "verifier") and r.get("type") != "missing"]
+        self.assertEqual(rule_items, [])
+
+
 if __name__ == "__main__":
     unittest.main()

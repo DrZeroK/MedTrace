@@ -155,6 +155,20 @@ def positive_text(text: str) -> str:
     return "".join(chars).lower()
 
 
+def without_family(text: str, view: str) -> str:
+    """`view` (a same-offset view of `text`, possibly truncated, e.g. a positive view) with family-member scopes
+    blanked ("家族史：母亲有2型糖尿病"). A relative's condition is not the patient's, so it must not count as a
+    positive mention on either side of a comparison. Used in every context mode, not only zh_context_v1."""
+    if T.detect_lang(text) != "zh":
+        return view
+    chars = list(view)
+    for s in analyze(text):
+        if s.dimension == "experiencer" and s.value == "family":
+            for i in range(s.start, min(s.end, len(chars))):
+                chars[i] = " "
+    return "".join(chars)
+
+
 def negated_terms(text: str) -> list[str]:
     if T.detect_lang(text) != "zh":
         return T.negated_terms(text)
