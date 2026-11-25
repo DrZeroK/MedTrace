@@ -1431,14 +1431,15 @@ class OfficialProtocol(EndToEnd):
         # PR #15 review: 重症肌无力 is a disease name; negated severity is a finding, not a claim; criteria in a
         # continuation chunk (split_long_statements) still support the first chunk.
         kept = ["重症肌无力（已确诊）：既往病历已明确诊断，现有眼睑下垂。", "肺炎（可能性大）：目前无重症表现。",
+                "子痫前期（可能性大）：伴头痛、视觉障碍等严重症状，近3天加重症状。",
                 "肺炎（可能性大）：目前不符合重症肺炎，未达重症标准。"]
         n = Note()
         n.sections["diagnostic_discussion"] = [Statement(t, ["S1"], "assessment") for t in kept] + [
             Statement("重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。", ["S1"], "assessment", split_group=1),
             Statement("符合重症肺炎次要标准3项。", ["S1"], "assessment", split_group=1)]
         self.assertEqual(V.downgrade_unsupported_severity(n), 0)
-        self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]][:3], kept)
-        self.assertEqual(n.sections["diagnostic_discussion"][3].text, "重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。")
+        self.assertEqual([s.text for s in n.sections["diagnostic_discussion"]][:len(kept)], kept)
+        self.assertEqual(n.sections["diagnostic_discussion"][len(kept)].text, "重症肺炎（可能性大）：依据发热、咳嗽及意识障碍。")
         n.sections["diagnostic_discussion"] = [Statement("重症肺炎（可能性大）：依据发热。", ["S1"], "assessment", split_group=1),
                                                Statement("伴意识障碍，符合重症表现。", ["S1"], "assessment", split_group=1)]
         self.assertEqual(V.downgrade_unsupported_severity(n), 1)

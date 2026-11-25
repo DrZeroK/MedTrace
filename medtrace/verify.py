@@ -708,11 +708,13 @@ def retense_completed(note: Note, L: Ledger) -> int:
     return n
 
 
-# Not severity modifiers: ward names (转入重症监护室) and disease names that contain the word (重症肌无力).
-_NOT_MODIFIER = r"(?!肌无力|监护|医学|病房)"
-_SEVERE = re.compile(r"(?:重症|危重)" + _NOT_MODIFIER)
+# Not severity modifiers: ward names (转入重症监护室), disease names that contain the word (重症肌无力), and words that
+# merely contain the two characters (严重症状, 加重症状).
+_NOT_MODIFIER = r"(?!肌无力|监护|医学|病房|状)"
+_SEVERE_WORD = r"(?<![严加])(?:重症|危重)" + _NOT_MODIFIER
+_SEVERE = re.compile(_SEVERE_WORD)
 _SEVERITY_CRITERIA = re.compile(r"(?i)CURB|PSI|q?SOFA|APACHE|主要标准|次要标准|诊断标准|分级标准|\d+\s*项")
-_SEVERE_CLAIM = re.compile(r"(?:符合|提示|考虑|属于|达到|为)?(?:重症|危重)" + _NOT_MODIFIER
+_SEVERE_CLAIM = re.compile(r"(?:符合|提示|考虑|属于|达到|为)?" + _SEVERE_WORD
                            + r"(?:肺炎)?(?:的)?(?:临床特征|临床表现|特征|表现|标准)?")
 _NEGATED = re.compile(r"(?:无|未|不|非|否认|没有|排除)[^，,。；;：:]{0,4}$")   # cue earlier in the same clause
 
@@ -720,6 +722,43 @@ _NEGATED = re.compile(r"(?:无|未|不|非|否认|没有|排除)[^，,。；;：
 def _asserted(m: re.Match) -> bool:
     """The severity mention is claimed, not negated ("无重症表现", "不符合重症肺炎", "未达重症标准")."""
     return not _NEGATED.search(re.split(r"[，,。；;：:]", m.string[:m.start()])[-1])
+
+
+_PENDING_RESULT = re.compile(r"(?:缺少?|未提供|尚无|暂无|尚未提供|待)([一-鿿A-Za-z0-9-]{2,10}?)"
+                             r"(?:检查|检测|化验|培养|穿刺)?(?:结果|报告)")
+
+
+def drop_planned_result_items(note: Note, case: Case) -> list[str]:
+    """Drop a model review item asking for the result of a test the plan itself has just ordered ("缺脑脊液检查结果"
+    while the plan says "拟行腰椎穿刺送脑脊液…"): the plan already handles it, and the rubric wants review items for
+    missing or conflicting record content. A test the records mention (sent, pending) stays a valid item."""
+    plan = note.text("treatment_plan")
+    records = "\n".join(s.content for s in case.sources)
+    kept, dropped = [], []
+    for r in note.review_items:
+        m = _PENDING_RESULT.search(r.get("description", ""))
+        # records name tests more briefly or differently ("未提供血气分析" vs "动脉血气分析", "甲状腺及肝功能"): the test
+        # counts as named in the records if any two-character piece of its core name is there. Conservative on purpose:
+        # a wrongly kept item is harmless, a wrongly dropped one loses a real missing-information item.
+        core = re.sub(r"(?:分析|功能|常规|检查|测定|水平|全套)$", "", m.group(1)) if m else ""
+        in_records = any(core[i:i + 2] in records for i in range(len(core) - 1))
+        if r.get("origin", "model") == "model" and m and len(core) >= 2 and core in plan and not in_records:
+            dropped.append(r["description"])
+        else:
+            kept.append(r)
+    note.review_items = kept
+    return dropped
+
+
+# one clause, no condition between: "收入ICU或普通病房" is a hedge, "收入普通病房，若…或…转ICU" is an escalation rule
+_GAP = r"[^。；，,\n若如转]"
+_DISPOSITION_HEDGE = re.compile(rf"(?:ICU|重症监护){_GAP}{{0,8}}或{_GAP}{{0,8}}(?:普通病房|病房)|"
+                                rf"(?:普通病房|病房){_GAP}{{0,8}}或{_GAP}{{0,8}}(?:ICU|重症监护)")
+
+
+def hedged_disposition(note: Note) -> bool:
+    """The plan leaves the admission setting open ("ICU监护或普通病房"); logged for evaluation, not rewritten."""
+    return bool(_DISPOSITION_HEDGE.search(note.text("treatment_plan")))
 
 
 def downgrade_unsupported_severity(note: Note) -> int:
