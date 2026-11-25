@@ -11,6 +11,7 @@ import copy
 from dataclasses import dataclass, asdict
 
 from . import aortic as A
+from . import context as C
 from . import dosing as D
 from . import textutil as T
 from .knowledge import approved_quote
@@ -102,7 +103,7 @@ def _assertive_text(text: str) -> tuple[str, str]:
         kept = sent if len(kept) == len([c for c in clauses if c.strip()]) else "，".join(kept)
         if kept.strip():
             asserted.append(kept)
-            positive.append(T.clearly_positive_text(kept))
+            positive.append(C.without_family(kept, T.clearly_positive_text(kept)))
     return "\n".join(asserted), "\n".join(positive)
 
 
@@ -245,18 +246,20 @@ def check_statement(section: str, index: int, st: Statement, case: Case, L: Ledg
         checked, pos = _assertive_text(text)
     else:
         checked = text
-        pos = "\n".join(T.clearly_positive_text(s) for s in T.split_sentences(text))
+        pos = "\n".join(C.without_family(s, T.clearly_positive_text(s)) for s in T.split_sentences(text))
     enhanced = L.context_mode == "zh_context_v1" and T.detect_lang(checked) == "zh"
     if enhanced:
-        from . import context as C
         pos = C.positive_text(checked)
     if sec in ("features", "discussion") and checked.strip():
         for term in sorted(L.neg_only):      # sorted: set order varies per process (PYTHONHASHSEED)
             if term in _SITE_DEPENDENT or term in _SECTION_TERMS or len(term) < 2:
                 continue
-            i = pos.find(term)
-            # "否认肝炎病史" is not contradicted by "肝炎病毒标志物" (a test name) or "非手术患者" (a risk group)
-            if i >= 0 and not _TEST_NAME.match(pos[i + len(term):]) and not pos[:i].endswith("非"):
+            # "否认肝炎病史" is not contradicted by "肝炎病毒标志物" (a test name), "非手术患者" (a risk group) or
+            # "肺结核接触史" (an exposure). Every occurrence is checked, so an exempt mention cannot shield a later
+            # assertion ("有肺结核接触史，目前确诊肺结核").
+            asserted = any(not _TEST_NAME.match(pos[m.end():]) and not T.EXPOSURE_SUFFIX.match(pos[m.end():])
+                           and not pos[:m.start()].endswith("非") for m in re.finditer(re.escape(term), pos))
+            if asserted:
                 add("negation_flip", HIGH if sec == "features" else LOW,
                     f"records document {term!r} only as absent/denied, but it is stated here without negation", term)
     # What a missing-information statement must not do is claim a core item is undocumented when the records

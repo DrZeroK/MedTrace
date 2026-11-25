@@ -139,9 +139,9 @@ def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
             enhanced = context_mode == C.VERSION and T.detect_lang(sent) == "zh"
             f.contexts = [s.as_dict() for s in C.analyze(sent)] if enhanced else []
             f.neg_terms = C.negated_terms(sent) if enhanced else T.negated_terms(sent)
-            pos = C.positive_text(sent) if enhanced else T.positive_text(sent)
+            pos = C.positive_text(sent) if enhanced else C.without_family(sent, T.positive_text(sent))
             pos_parts.append(pos)
-            clear_parts.append(pos if enhanced else T.clearly_positive_text(sent))
+            clear_parts.append(pos if enhanced else C.without_family(sent, T.clearly_positive_text(sent)))
             if T.has_missing_cue(sent):
                 f.polarity = "missing"
             elif f.neg_terms:
@@ -169,9 +169,20 @@ def build_ledger(case: Case, *, context_mode: str = "legacy") -> Ledger:
     internal = {c["term"] for c in L.conflicts if c["kind"] == "internal"}
     L.neg_only = {t for t in L.neg_terms if t not in L.pos_text and t not in internal}
     for key, rx, en, zh in _CORE:
-        if not re.search(rx, case.text):
+        if not _documents(L.facts, rx):
             L.undocumented.append({"key": key, "en": en, "zh": zh})
     return L
+
+
+def _documents(facts, rx) -> bool:
+    """A core item is documented only by a clause that names it without saying it is unknown or missing:
+    "药物食物及其他过敏史：未知" mentions allergy but documents nothing about it. A parenthetical remark that an
+    unknown is a detail ("服用蒙脱石散（具体剂量不详）") does not cancel the mention, so only parentheticals that
+    themselves carry a missing cue are set aside; others may hold the item itself ("既往史（青霉素过敏，出现皮疹）")."""
+    unknown_detail = lambda m: "" if T.has_missing_cue(m.group()) else m.group()
+    return any(re.search(rx, c) and not T.has_missing_cue(c)
+               for f in facts
+               for c in re.split(r"[，,；;]", re.sub(r"[（(][^）()]*[）)]", unknown_detail, f.text)))
 
 
 # A denied history is only contradicted by a statement that asserts the condition. Seen on 2,578 real case reports:
@@ -206,11 +217,12 @@ def _diagnosis_items(text: str) -> list[str]:
 
 
 def _asserts(term: str, text: str, pre_pregnancy: bool = False) -> bool:
-    pos = T.positive_text(text)
+    from . import context as C
+    pos = C.without_family(text, T.positive_text(text))    # "母亲有2型糖尿病" is not the patient's diabetes
     i = pos.find(term)
     while i >= 0:
         after, before = pos[i + len(term):], pos[:i]
-        if (not _TEST_SUFFIX.match(after) and not _NEG_RESULT.search(after[:60])
+        if (not _TEST_SUFFIX.match(after) and not T.EXPOSURE_SUFFIX.match(after) and not _NEG_RESULT.search(after[:60])
                 and not before.endswith("非")                      # "非手术患者Padua评分" names a risk group
                 and not (pre_pregnancy and _PREG_PREFIX.search(before))):
             return True
@@ -256,6 +268,8 @@ def _find_conflicts(L: Ledger) -> None:
             if L.context_mode != "legacy" and not any(s["assertion"] == "negated" and s["experiencer"] == "patient"
                                                       for s in C.term_attributes(f.text, term)):
                 continue
+            if not _patient_mention(f.text, term):
+                continue                  # "否认家族中肝病" is a denial about relatives, not about the patient
             pre = bool(_PRE_PREG.search(f.text))
             pos = [g for g in L.facts if g.sid != f.sid and _asserts(term, g.text, pre)
                    and (L.context_mode == "legacy" or any(s["assertion"] == "affirmed" and s["experiencer"] == "patient"

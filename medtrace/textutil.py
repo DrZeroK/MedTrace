@@ -6,6 +6,7 @@ These are heuristics: they are used to *flag* statements, never to rewrite them.
 from __future__ import annotations
 
 import re
+import unicodedata
 from datetime import datetime, timezone
 
 _CJK = re.compile(r"[一-鿿]")
@@ -23,6 +24,13 @@ _FW = {0xFF05: "%", 0xFF0F: "/", 0xFF0E: ".", 0xFF0B: "+", 0xFF0D: "-", 0xFF1C: 
 _FW.update({0xFF10 + i: str(i) for i in range(10)})
 _FW.update({0xFF21 + i: chr(65 + i) for i in range(26)})
 _FW.update({0xFF41 + i: chr(97 + i) for i in range(26)})
+# Every Unicode dash (category Pd: ‑ U+2011, – U+2013, — U+2014, ﹣ …) and space separator (category Zs: U+00A0,
+# U+2009 …) is mapped by category, not by listing code points: the 2026-11-25 official practice input wrote dates as
+# "2026‑05‑23" with U+2011, no date was recognised, and serial lab results were reported as conflicts.
+_FW.update({cp: "-" for cp in range(0x10000) if unicodedata.category(chr(cp)) == "Pd" and cp != 0x2D})
+_FW.update({cp: " " for cp in range(0x10000) if unicodedata.category(chr(cp)) == "Zs" and cp != 0x20})
+_MINUS_LIKE = (0x2212, 0x2043, 0x02D7, 0x2796)    # minus sign, hyphen bullet, modifier minus, heavy minus: not category Pd
+_FW.update({cp: "-" for cp in _MINUS_LIKE})
 
 
 def fw(text: str) -> str:
@@ -279,7 +287,7 @@ _NEG_PRE = re.compile(
     #  - "无尿" alone is anuria (a positive finding) but "无尿频、尿急、尿痛" is a negated list
     r"|否认|未(?:再)?(?:见|[\u4e00-\u9fff]?及|发现|引出|诉|述|出现|查见|发生|检出|检验出|闻|触|携带)|不伴|不会|没有"
     r"|无(?!力|菌|创|法|效|关|名|需|论|痛性|(?:明显|任何|特殊)?(?:诱因|原因)|意中|意间|尿(?:[，,。；;、\s\d]|$|约|[一二三四五六七八九十半数]))")
-_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及|否认)(?=[\s，,。；;]|$)"
+_NEG_POST = re.compile(r"(?i)\b(?:negative(?!\s+for)|absent|denied|not present)\b|阴性(?!表现|体征|结果|症状|发现|记录|信息|所见|资料|病史)|[（(]\s*[-－—]\s*[）)]|[:：]\s*(?:无|未见|未及|否认|没有|从未|未(?:曾|到|去)过?|均无)(?=[\s，,。；;]|$)"
                        r"|未引出|(?:均|暂|尚)?无特殊|暂无|无殊|(?<=[\u4e00-\u9fff])史无(?=[。；;，,、]|$)"
                        r"|(?<=[一-鿿A-Za-z])(?:均|亦|也)?否认(?=[。；;，,]|$)")   # postfix absence predicates negate the preceding subject ("病理征未引出", "家族史均无特殊")
 _END_EN = re.compile(r"(?i)[;!?]|\.(?!\d)|—|\b(?:but|however|although|though|except|whereas|while|reports?|"
@@ -294,6 +302,11 @@ _TERM_CUT = re.compile(r"(?i)\s+(?:on|at|in|since|for|during|prior|before|after|
 _TERM_LEAD = re.compile(r"(?i)^(?:any|a|an|the|known|prior|previous|recent|history of|明显|既往|其他|其它)\s*")
 _TERM_TAIL = re.compile(r"(?i)(?:\s+history|史|等|均)$")   # "Brudzinski征均阴性": 均 is a quantifier, not the term
 _TERM_BING = re.compile(r"(?<=[^尿心肝肾肺胃脑肠胆疾脏])病$")   # "高血压病(史)" -> "高血压", but keep 糖尿病 / 冠心病 / 疾病
+
+
+# A disease term followed by one of these names an exposure, not the patient's condition: "传染病流行地区",
+# "结核患者密切接触", "疫区". Shared by the ledger's conflict check and the verifier's negation check.
+EXPOSURE_SUFFIX = re.compile(r"(?:患者|病人|病患)?(?:密切)?(?:接触|流行|疫区|疫水|暴露)")
 
 
 def neg_spans(sentence: str) -> list[tuple[int, int]]:
@@ -417,7 +430,7 @@ _DONE = re.compile(r"(?i)\b(?:was|were|has been|have been|had been)\s+(?:\w+ly\s
 _CERTAIN = re.compile(r"(?i)\b(?:confirmed|definite(?:ly)?|definitive|diagnostic of|certainly)\b|确诊|明确诊断|诊断(?:已)?明确|诊断成立|确定诊断|可确诊")
 _MISSING = re.compile(r"(?i)\b(?:pending|not (?:yet )?(?:available|done|performed|obtained|documented|resulted|known|recorded)|"
                       r"unknown|unavailable|awaiting|unable to (?:obtain|recall)|not on file|to be (?:obtained|confirmed))\b"
-                      r"|未查|未做|未提供|不详|未测|待查|结果未回|未回报|待回报|未记录|未记载|未提及|未说明|未描述|未载|未问及"
+                      r"|未查|未做|未提供|不详|未知|未测|待查|结果未回|未回报|待回报|未记录|未记载|未提及|未说明|未描述|未载|未问及"
                       r"|无法提供|待完善|缺少|缺失|尚缺|暂缺"
                       r"|(?:无|未见|未获得|没有)[^，,。；;]{0,30}(?:记录|资料|结果|报告|信息|描述)")
 _UNCERTAIN = re.compile(r"(?i)\b(?:possibl[ey]|probabl[ey]|suspected|suspicious|likely|cannot (?:be )?exclude[d]?|"
