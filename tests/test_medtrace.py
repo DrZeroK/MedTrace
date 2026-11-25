@@ -614,6 +614,24 @@ class Parsing(unittest.TestCase):
         for bad in ("", "no json", '{"a": ', "[1,2]"):
             self.assertRaises(ParseError, parse_json_object, bad)
 
+    def test_unescaped_record_quotes_are_repaired(self):
+        # 2026-11-25 local practice run: records quote phrases with ASCII quotes and the model copies them unescaped
+        raw = ('{"case_features": [{"text": "自行服用"健胃消食片"等药物，因"腰腿痛"服止痛药", "sources": ["S01"]}],\n'
+               ' "review_items": [{"type": "verify", "text": "家属称"从手指一直串到肩膀"", "sources": ["S01"]}],\n'
+               ' "mixed": "使用“药物甲10mg"后缓解。"}')
+        obj = parse_json_object(raw)
+        self.assertEqual(obj["case_features"][0]["text"], '自行服用"健胃消食片"等药物，因"腰腿痛"服止痛药')
+        self.assertEqual(obj["case_features"][0]["sources"], ["S01"])
+        self.assertEqual(obj["review_items"][0]["text"], '家属称"从手指一直串到肩膀"')
+        self.assertEqual(obj["mixed"], '使用“药物甲10mg"后缓解。')
+        self.assertEqual(parse_json_object('```json\n{"a": "x"y"z", "b": [1, 2,],}\n```'), {"a": 'x"y"z', "b": [1, 2]})
+
+    def test_quote_repair_leaves_valid_json_and_real_errors_alone(self):
+        valid = json.dumps({"a": 'x"y', "b": [1, {"c": "d\\e"}], "d": ""}, ensure_ascii=False)
+        self.assertEqual(parse_json_object(valid), json.loads(valid))
+        for bad in ('{"a": "x" "b": 1}', '{"a": "unterminated}', '{"a": "x"y", "b": }'):
+            self.assertRaises(ParseError, parse_json_object, bad)
+
     def test_note_shapes(self):
         n = note_from_model({"case_features": "1. Fever. [[S1]]\n2. Cough.", "discussion": ["x"], "诊疗计划": [{"statement": "y", "source_ids": "S1, S2"}],
                              "review_items": ["check allergy", {"type": "bogus", "text": "t"}]})
